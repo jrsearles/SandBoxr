@@ -1,0 +1,31 @@
+var handlers = {};
+
+handlers.ArrayExpression = require("./array-expression");
+handlers.AssignmentExpression = require("./assignment-expression");
+handlers.BinaryExpression = require("./binary-expression");
+handlers.BreakStatement = handlers.ContinueStatement = require("./interrupt-statement");
+handlers.CallExpression = handlers.NewExpression = require("./call-expression");
+handlers.ConditionalExpression = handlers.IfStatement = require("./if-statement");
+handlers.EmptyStatement = require("./empty-statement");
+handlers.ExpressionStatement = require("./expression-statement");
+handlers.ForStatement = require("./for-statement");
+handlers.ForInStatement = require("./for-in-statement");
+handlers.FunctionDeclaration = require("./function-declaration");
+handlers.FunctionExpression = require("./function-expression");
+handlers.Identifier = require("./identifier");
+handlers.LabeledStatement = require("./labeled-statement");
+handlers.Literal = require("./literal");
+handlers.LogicalExpression = require("./logical-expression");
+handlers.MemberExpression = require("./member-expression");
+handlers.ObjectExpression = require("./object-expression");
+handlers.Program = handlers.BlockStatement = require("./block-statement");
+handlers.ReturnStatement = require("./return-statement");
+handlers.SequenceExpression = require("./sequence-expression");
+handlers.SwitchStatement = require("./switch-statement");
+handlers.ThisExpression = require("./this-expression");
+handlers.UnaryExpression = require("./unary-expression");
+handlers.UpdateExpression = require("./update-expression");
+handlers.VariableDeclaration = require("./variable-declaration");
+handlers.VariableDeclarator = require("./variable-declarator");
+
+module.exports = handlers;

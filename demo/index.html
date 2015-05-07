@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>SandBoxer demo</title>
+	<script type="text/javascript" src="../node_modules/acorn/dist/acorn.js"></script>
+	<script type="text/javascript" src="js-interpreter.js"></script>
+	<script type="text/javascript" src="../build/sandboxer.js"></script>
+</head>
+<body>
+<textarea id="codeArea">
+"Hello World. How are you doing?".split(/\s/g);
+</textarea>
+<button id="execButton">Exec</button>
+<button id="interpretButton">Interpret</button>
+<pre id="results"></pre>
+
+<script type="text/javascript">
+	document.getElementById("execButton").onclick = function () {
+		var code = document.getElementById("codeArea").value;
+		var ast = acorn.parse(code);
+
+		document.getElementById("results").innerHTML = JSON.stringify(ast, null, 2);
+
+		debugger;
+		var runner = new SandBoxer(ast);
+		var value = runner.execute();
+	};
+
+	document.getElementById("interpretButton").onclick = function () {
+		var code = document.getElementById("codeArea").value;
+		var runner = new Interpreter(code);
+
+		runner.run();
+	};
+</script>
+</body>
+</html>
