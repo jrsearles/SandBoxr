@@ -12,10 +12,13 @@
     "acorn": "^1.0.3",
     "browserify": "^9.0.8",
     "chai": "^2.3.0",
+    "colors": "^1.1.0",
+    "glob": "^5.0.6",
     "gulp": "^3.8.11",
     "gulp-eslint": "^0.9.0",
     "mocha": "^2.2.4",
     "strictify": "^0.2.0",
+    "test262-harness": "^1.5.3",
     "vinyl-source-stream": "^1.1.0"
   }
 }

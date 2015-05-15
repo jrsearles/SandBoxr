@@ -1,4 +1,4 @@
-module.exports = function (context) {
+module.exports = function SequenceExpression (context) {
 	var value;
 
 	context.node.expressions.forEach(function (expr) {

@@ -1,4 +1,4 @@
-module.exports = function (context) {
+module.exports = function BlockStatement (context) {
 	var i = 0;
 	var ln = context.node.body.length;
 	var result;

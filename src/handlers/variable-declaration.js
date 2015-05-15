@@ -1,4 +1,4 @@
-module.exports = function (context) {
+module.exports = function VariableDeclaration (context) {
 	var value;
 
 	context.node.declarations.forEach(function (decl) {

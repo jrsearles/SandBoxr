@@ -24,5 +24,10 @@ describe("Scope", function () {
 			var scope = runner.getScope("var x;");
 			expect(scope.getProperty("window")).to.be.ok;
 		});
+
+		it("`this` should refer to global object", function () {
+			var result = runner.runBlock("this.String === String");
+			expect(result.value).to.be.true;
+		});
 	});
 });

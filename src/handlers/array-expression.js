@@ -1,6 +1,6 @@
 var objectFactory = require("../types/object-factory");
 
-module.exports = function (context) {
+module.exports = function ArrayExpression (context) {
 	var arr = objectFactory.create("ARRAY");
 
 	if (context.node.elements) {

@@ -10,7 +10,6 @@ StringType.prototype.constructor = StringType;
 
 StringType.prototype.getProperty = function (name) {
 	if (name === "length") {
-		//return new PrimitiveType(this.value.length);
 		var length = new PrimitiveType(this.value.length);
 		typeRegistry.setParent(length, "NUMBER");
 		return length;

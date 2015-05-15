@@ -3,7 +3,7 @@ var objectFactory = require("../types/object-factory");
 
 function Scope (parent, thisNode) {
 	ObjectType.call(this, parent);
-	this.thisNode = thisNode || parent.thisNode;
+	this.thisNode = thisNode || (parent && parent.thisNode) || this;
 }
 
 Scope.prototype = Object.create(ObjectType.prototype);

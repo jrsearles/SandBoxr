@@ -1,5 +1,4 @@
 var ObjectType = require("./object-type");
-var PrimitiveType = require("./primitive-type");
 
 function RegexType (value, parent) {
 	ObjectType.call(this, parent);

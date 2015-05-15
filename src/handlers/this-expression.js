@@ -1,3 +1,3 @@
-module.exports = function (context) {
+module.exports = function ThisExpression (context) {
 	return context.result(context.scope.thisNode);
 };

@@ -1,0 +1,92 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files (x86)\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   'node-glob',
+1 verbose cli   '--save-dev' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.35
+4 verbose node symlink C:\Program Files (x86)\nodejs\\node.exe
+5 warn package.json interpreter@1.0.0 No description
+6 warn package.json interpreter@1.0.0 No repository field.
+7 warn package.json interpreter@1.0.0 No README data
+8 verbose readDependencies using package.json deps
+9 verbose cache add [ 'node-glob', null ]
+10 verbose cache add name=undefined spec="node-glob" args=["node-glob",null]
+11 verbose parsed url { protocol: null,
+11 verbose parsed url   slashes: null,
+11 verbose parsed url   auth: null,
+11 verbose parsed url   host: null,
+11 verbose parsed url   port: null,
+11 verbose parsed url   hostname: null,
+11 verbose parsed url   hash: null,
+11 verbose parsed url   search: null,
+11 verbose parsed url   query: null,
+11 verbose parsed url   pathname: 'node-glob',
+11 verbose parsed url   path: 'node-glob',
+11 verbose parsed url   href: 'node-glob' }
+12 silly lockFile a7460643-node-glob node-glob
+13 verbose lock node-glob C:\Users\Joshua\AppData\Roaming\npm-cache\a7460643-node-glob.lock
+14 silly lockFile a7460643-node-glob node-glob
+15 silly lockFile a7460643-node-glob node-glob
+16 verbose addNamed [ 'node-glob', '' ]
+17 verbose addNamed [ null, '*' ]
+18 silly lockFile c4bf8a63-node-glob node-glob@
+19 verbose lock node-glob@ C:\Users\Joshua\AppData\Roaming\npm-cache\c4bf8a63-node-glob.lock
+20 silly addNameRange { name: 'node-glob', range: '*', hasData: false }
+21 verbose request where is /node-glob
+22 verbose request registry https://registry.npmjs.org/
+23 verbose request id e64d7b9c17ddff15
+24 verbose url raw /node-glob
+25 verbose url resolving [ 'https://registry.npmjs.org/', './node-glob' ]
+26 verbose url resolved https://registry.npmjs.org/node-glob
+27 verbose request where is https://registry.npmjs.org/node-glob
+28 info trying registry request attempt 1 at 13:52:25
+29 http GET https://registry.npmjs.org/node-glob
+30 http 404 https://registry.npmjs.org/node-glob
+31 verbose headers { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+31 verbose headers   'content-type': 'application/json',
+31 verbose headers   'cache-control': 'max-age=0',
+31 verbose headers   'content-length': '51',
+31 verbose headers   'accept-ranges': 'bytes',
+31 verbose headers   date: 'Thu, 14 May 2015 17:52:18 GMT',
+31 verbose headers   via: '1.1 varnish',
+31 verbose headers   age: '0',
+31 verbose headers   connection: 'keep-alive',
+31 verbose headers   'x-served-by': 'cache-ord1721-ORD',
+31 verbose headers   'x-cache': 'MISS',
+31 verbose headers   'x-cache-hits': '0',
+31 verbose headers   'x-timer': 'S1431625938.797287,VS0,VE69' }
+32 silly registry.get cb [ 404,
+32 silly registry.get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+32 silly registry.get     'content-type': 'application/json',
+32 silly registry.get     'cache-control': 'max-age=0',
+32 silly registry.get     'content-length': '51',
+32 silly registry.get     'accept-ranges': 'bytes',
+32 silly registry.get     date: 'Thu, 14 May 2015 17:52:18 GMT',
+32 silly registry.get     via: '1.1 varnish',
+32 silly registry.get     age: '0',
+32 silly registry.get     connection: 'keep-alive',
+32 silly registry.get     'x-served-by': 'cache-ord1721-ORD',
+32 silly registry.get     'x-cache': 'MISS',
+32 silly registry.get     'x-cache-hits': '0',
+32 silly registry.get     'x-timer': 'S1431625938.797287,VS0,VE69' } ]
+33 silly lockFile c4bf8a63-node-glob node-glob@
+34 silly lockFile c4bf8a63-node-glob node-glob@
+35 error 404 404 Not Found: node-glob
+35 error 404
+35 error 404 'node-glob' is not in the npm registry.
+35 error 404 You should bug the author to publish it
+35 error 404 It was specified as a dependency of 'interpreter'
+35 error 404
+35 error 404 Maybe try 'npm search glob'
+35 error 404
+35 error 404 Note that you can also install from a
+35 error 404 tarball, folder, or http url, or git url.
+36 error System Windows_NT 6.2.9200
+37 error command "C:\\Program Files (x86)\\nodejs\\\\node.exe" "C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "node-glob" "--save-dev"
+38 error cwd C:\users\joshua\documents\github\sandboxer
+39 error node -v v0.10.35
+40 error npm -v 1.4.28
+41 error code E404
+42 verbose exit [ 1, true ]

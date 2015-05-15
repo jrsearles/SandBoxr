@@ -1,18 +1,25 @@
 var ExecutionResult = require("./execution-result");
 
-function ExecutionContext (runner, node, scope, label) {
+function ExecutionContext (runner, node, callee, scope) {
 	this.runner = runner;
 	this.node = node;
+	this.callee = callee;
 	this.scope = scope;
-	this.label = label;
+	this.label = null;
 }
 
 ExecutionContext.prototype.execute = function () {
 	return this.runner.execute(this);
 };
 
-ExecutionContext.prototype.create = function (node, scope, label) {
-	return new ExecutionContext(this.runner, node, scope || this.scope, label);
+ExecutionContext.prototype.create = function (node, callee, scope) {
+	return new ExecutionContext(this.runner, node, callee, scope || this.scope);
+};
+
+ExecutionContext.prototype.createLabel = function (node, label) {
+	var context = new ExecutionContext(this.runner, node, null, this.scope);
+	context.label = label;
+	return context;
 };
 
 ExecutionContext.prototype.cancel = function (label) {
@@ -35,6 +42,6 @@ ExecutionContext.prototype.exit = function (value) {
 
 ExecutionContext.prototype.result = function (value, name, obj) {
 	return new ExecutionResult(value, name, obj);
-}
+};
 
 module.exports = ExecutionContext;

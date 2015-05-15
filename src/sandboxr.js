@@ -8,7 +8,7 @@ function SandBoxr (ast) {
 }
 
 SandBoxr.prototype.execute = function (context) {
-	context = context || new ExecutionContext(this, this.ast, this.scope || (this.scope = globalScope()));
+	context = context || new ExecutionContext(this, this.ast, null, this.scope || (this.scope = globalScope()));
 
 	if (!(context.node.type in handlers)) {
 		throw new TypeError("No handler defined for: " + context.node.type);

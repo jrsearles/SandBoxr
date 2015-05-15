@@ -1,22 +1,27 @@
 var ObjectType = require("./object-type");
 
-function FunctionType (node) {
+function FunctionType (node, parentScope) {
 	ObjectType.call(this);
 	this.type = "function";
 	this.native = false;
 	this.node = node;
+	this.parentScope = parentScope;
 }
 
 FunctionType.prototype = Object.create(ObjectType.prototype);
 FunctionType.prototype.constructor = FunctionType;
 
 FunctionType.prototype.init = function (objectFactory) {
-	// set length property
+	// set length property from the number of parameters
 	this.setProperty("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, writable: false });
 
-	// save prototype to `proto` for quick access
-	this.proto = new ObjectType();
-	this.setProperty("prototype", this.proto);
+	// functions have a prototype
+	this.setProto(objectFactory.createObject());
+};
+
+FunctionType.prototype.createScope = function (currentScope, thisArg) {
+	// if a parent scope is defined we need to limit the scope to that scope
+	return (this.parentScope || currentScope).createScope(thisArg);
 };
 
 module.exports = FunctionType;

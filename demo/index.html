@@ -5,26 +5,47 @@
 	<title>SandBoxer demo</title>
 	<script type="text/javascript" src="../node_modules/acorn/dist/acorn.js"></script>
 	<script type="text/javascript" src="js-interpreter.js"></script>
-	<script type="text/javascript" src="../build/sandboxer.js"></script>
+	<script type="text/javascript" src="../build/sandboxr.js"></script>
 </head>
 <body>
-<textarea id="codeArea">
-"Hello World. How are you doing?".split(/\s/g);
+<textarea id="codeArea" cols="40" rows="8">
+function $ERROR (message) {
+	throw new Error(message);
+}
+
+function runTestCase (testcase) {
+	if (!testcase()) {
+		$ERROR("Test case returned non-true value!");
+	}
+}
+
+function testcase() {   
+    function foo() {};
+    Object.defineProperty(foo.prototype, "bar", {value: "unwritable"}); 
+    
+    var o = new foo(); 
+    o.bar = "overridden"; 
+    return o.hasOwnProperty("bar")===false && o.bar==="unwritable";
+}
+runTestCase(testcase);
 </textarea>
 <button id="execButton">Exec</button>
 <button id="interpretButton">Interpret</button>
-<pre id="results"></pre>
+<fieldset><legend>Result</legend><pre id="result"></pre></fieldset>
+<fieldset><legend>Tree</legend><pre id="tree"></pre></fieldset>
 
 <script type="text/javascript">
 	document.getElementById("execButton").onclick = function () {
 		var code = document.getElementById("codeArea").value;
 		var ast = acorn.parse(code);
 
-		document.getElementById("results").innerHTML = JSON.stringify(ast, null, 2);
+		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
 
 		debugger;
-		var runner = new SandBoxer(ast);
+		var runner = new SandBoxr(ast);
 		var value = runner.execute();
+
+		document.getElementById("result").innerHTML = JSON.stringify(value && value.result.value);
 	};
 
 	document.getElementById("interpretButton").onclick = function () {

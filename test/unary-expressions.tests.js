@@ -18,5 +18,15 @@ describe("Expressions", function () {
 			var result = runner.runBlock("+2;");
 			expect(result.value).to.equal(2);
 		});
+
+		it("should convert a '!' to a boolean", function () {
+			var result = runner.runBlock("!{}");
+			expect(result.value).to.be.a("boolean");
+		});
+
+		it("should negate a boolean value", function () {
+			var result = runner.runBlock("!false");
+			expect(result.value).to.be.true;
+		});
 	});
 });

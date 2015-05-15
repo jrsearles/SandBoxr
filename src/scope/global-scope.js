@@ -1,5 +1,4 @@
 var Scope = require("./scope");
-var ObjectType = require("../types/object-type");
 var PrimitiveType = require("../types/primitive-type");
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -12,10 +11,12 @@ var dateAPI = require("./date-api");
 var arrayAPI = require("./array-api");
 var mathAPI = require("./math-api");
 var regexAPI = require("./regex-api");
+var errorAPI = require("./error-api");
 
 module.exports = function () {
-	var globalObject = new ObjectType();
-	var scope = new Scope(null, globalObject);
+	// var globalObject = new ObjectType();
+	var scope = new Scope();
+	// scope.thisNode = scope;
 
 	var undefinedClass = new PrimitiveType(undefined);
 	scope.setProperty("undefined", undefinedClass);
@@ -42,6 +43,7 @@ module.exports = function () {
 	dateAPI(scope);
 	regexAPI(scope);
 	mathAPI(scope);
+	errorAPI(scope);
 
 	return scope;
 };

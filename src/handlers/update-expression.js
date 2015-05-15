@@ -1,6 +1,6 @@
 var objectFactory = require("../types/object-factory");
 
-module.exports = function (context) {
+module.exports = function UpdateExpression (context) {
 	var obj = context.create(context.node.argument).execute().result;
 	var originalValue = obj.value;
 	var newValue = obj.value;

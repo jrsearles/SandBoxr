@@ -43,5 +43,22 @@ describe("Expression", function () {
 			// 	expect(result.value).to.be.true;
 			// });
 		});
+
+		describe("Do while loops", function () {
+			it("should execute until false", function () {
+				var scope = runner.getScope("var counter=0;while (counter < 5) { counter++; }");
+				expect(scope.getProperty("counter").value).to.equal(5);
+			});
+
+			it("should never execute if the test is never true", function () {
+				var scope = runner.getScope("var counter=10;while (counter < 5) { counter = 20; }");
+				expect(scope.getProperty("counter").value).to.equal(10);
+			});
+
+			it("should keep executing until first time it because false for do-while", function () {
+				var scope = runner.getScope("var counter=10;do { counter = 20; } while (counter < 5)");
+				expect(scope.getProperty("counter").value).to.equal(20);
+			});
+		});
 	});
 });

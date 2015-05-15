@@ -8,11 +8,12 @@ var slice = Array.prototype.slice;
 
 module.exports = function (globalScope) {
 	var stringClass = objectFactory.createFunction(utils.wrapNative(String));
+	var proto = stringClass.getProperty("prototype");
 
 	protoMethods.forEach(function (name) {
 		var fn = String.prototype[name];
 		if (fn) {
-			stringClass.proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
+			proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
 		}
 	});
 
@@ -23,7 +24,7 @@ module.exports = function (globalScope) {
 		}
 	});
 
-	stringClass.proto.setProperty("split", objectFactory.createFunction(function (separator, limit) {
+	proto.setProperty("split", objectFactory.createFunction(function (separator, limit) {
 		separator = separator && separator.value;
 		limit = limit && limit.toNumber();
 
@@ -37,7 +38,7 @@ module.exports = function (globalScope) {
 		return arr;
 	}));
 
-	stringClass.proto.setProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
+	proto.setProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
 		var match = regexOrSubstr && regexOrSubstr.value;
 		if (substrOrFn && substrOrFn.type === "function") {
 			var executionContext = this;
@@ -46,7 +47,7 @@ module.exports = function (globalScope) {
 				var args = slice.call(arguments).map(function (arg) { return objectFactory.createPrimitive(arg); });
 
 				utils.loadArguments(substrOrFn.node.params, args, scope);
-				var result = executionContext.create(substrOrFn.node.body, scope).execute().result;
+				var result = executionContext.create(substrOrFn.node.body, substrOrFn.node, scope).execute().result;
 				return result && result.value;
 			};
 
@@ -56,7 +57,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value.replace(match, substrOrFn && substrOrFn.value));
 	}));
 
-	stringClass.proto.setProperty("match", objectFactory.createFunction(function (regex) {
+	proto.setProperty("match", objectFactory.createFunction(function (regex) {
 		var results = this.node.value.match(regex && regex.value);
 		if (results) {
 			var matches = objectFactory.create("ARRAY");
@@ -70,6 +71,6 @@ module.exports = function (globalScope) {
 		return typeRegistry.get("NULL");
 	}));
 
-	typeRegistry.set("STRING", stringClass);
+	typeRegistry.set("String", stringClass);
 	globalScope.setProperty("String", stringClass);
 };

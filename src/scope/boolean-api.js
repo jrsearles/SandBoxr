@@ -4,6 +4,6 @@ var utils = require("../utils");
 
 module.exports = function (globalScope) {
 	var booleanClass = objectFactory.createFunction(utils.wrapNative(Boolean));
-	typeRegistry.set("BOOLEAN", booleanClass);
+	typeRegistry.set("Boolean", booleanClass);
 	globalScope.setProperty("Boolean", booleanClass);
 };

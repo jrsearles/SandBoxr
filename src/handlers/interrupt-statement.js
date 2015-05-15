@@ -1,4 +1,4 @@
-module.exports = function (context) {
+module.exports = function InterruptStatement (context) {
 	var label;
 	if (context.node.label) {
 		label = context.node.label.name;

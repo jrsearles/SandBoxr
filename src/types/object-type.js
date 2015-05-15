@@ -25,8 +25,32 @@ ObjectType.prototype = {
 
 	init: function () { },
 
+	setProto: function (proto) {
+		this.proto = this.properties.prototype = proto;
+	},
+
+	getPropertyDescriptor: function (name) {
+		name = String(name);
+		var current = this;
+
+		while (current) {
+			if (name in current.properties) {
+				return {
+					configurable: !!current.configurable[name],
+					enumerable: !!current.enumerable[name],
+					writable: !!current.writable[name],
+					value: current.properties[name]
+				};
+			}
+
+			current = current.parent && current.parent.proto;
+		}
+
+		return undefined;
+	},
+
 	hasProperty: function (name) {
-		return name in this.properties;
+		return String(name) in this.properties;
 	},
 
 	setProperty: function (name, value, options) {
@@ -34,7 +58,19 @@ ObjectType.prototype = {
 			return;
 		}
 
-		if (!(name in this.properties)) {
+		name = String(name);
+
+		var descriptor = this.getPropertyDescriptor(name);
+		if (descriptor && !descriptor.writable) {
+			return;
+		}
+
+		if (name === "prototype") {
+			this.setProto(value);
+			return;
+		}
+
+		if (!descriptor) {
 			if (!this.extensible) {
 				return;
 			}
@@ -53,18 +89,12 @@ ObjectType.prototype = {
 	},
 
 	getProperty: function (name) {
-		if (name in this.properties) {
-			return this.properties[name];
-		}
-
-		if (this.parent && this.parent.proto) {
-			return this.parent.proto.getProperty(name);
-		}
-
-		return undefined;
+		var descriptor = this.getPropertyDescriptor(name);
+		return descriptor && descriptor.value;
 	},
 
 	deleteProperty: function (name) {
+		name = String(name);
 		if (this.isPrimitive || this.frozen || !(name in this.configurable)) {
 			return false;
 		}

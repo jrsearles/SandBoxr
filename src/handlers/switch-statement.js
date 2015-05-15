@@ -1,16 +1,16 @@
 function executeStatements (context, statements) {
-	var value;
+	var result;
 	for (var i = 0, ln = statements.length; i < ln; i++) {
-		value = context.create(statements[i]).execute();
-		if (value && value.cancel) {
-			return value;
+		result = context.create(statements[i]).execute();
+		if (result && result.isCancelled()) {
+			return result;
 		}
 	}
 
-	return value;
+	return result;
 }
 
-module.exports = function (context) {
+module.exports = function SwitchStatement (context) {
 	var testValue = context.create(context.node.discriminant).execute().result;
 	var passed = false;
 	var caseValue, value;
@@ -25,7 +25,7 @@ module.exports = function (context) {
 
 		passed = true;
 		value = executeStatements(context, context.node.cases[i].consequent);
-		if (value.cancel) {
+		if (value && value.isCancelled()) {
 			value.cancel = false;
 			return value;
 		}

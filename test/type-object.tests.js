@@ -119,5 +119,17 @@ describe("Types", function () {
 				expect(result.getProperty(2).value).to.equal("c");
 			});
 		});
+
+		describe("Object.defineProperty", function () {
+			it("should add the property to the object", function () {
+				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo'); 'foo' in a;");
+				expect(result.value).to.be.true;
+			});
+
+			it("should set the value if provided", function () {
+				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo', { value: 42 }); a.foo;");
+				expect(result.value).to.equal(42);
+			});
+		});
 	});
 });

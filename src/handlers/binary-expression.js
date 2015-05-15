@@ -9,8 +9,8 @@ var binaryOperators = {
 	"*": function (a, b) { return a.value * b.value; },
 	"==": function (a, b) { return a.value == b.value; },
 	"!=": function (a, b) { return a.value != b.value; },
-	"===": function (a, b) { return a.value === b.value; },
-	"!==": function (a, b) { return a.value !== b.value; },
+	"===": function (a, b) { return a.equals(b); },
+	"!==": function (a, b) { return !a.equals(b); },
 	"<": function (a, b) { return a.value < b.value; },
 	"<=": function (a, b) { return a.value <= b.value; },
 	">": function (a, b) { return a.value > b.value; },
@@ -22,10 +22,10 @@ var binaryOperators = {
 	"|": function (a, b) { return a.value | b.value; },
 	"^": function (a, b) { return a.value ^ b.value; },
 	"&": function (a, b) { return a.value & b.value; },
-	"in": function (a, b) { return b.hasProperty(a.value); }
+	"in": function (a, b) { return b.hasProperty(a.toString()); }
 };
 
-module.exports = function (context) {
+module.exports = function BinaryExpression (context) {
 	var left = context.create(context.node.left).execute().result;
 	var right = context.create(context.node.right).execute().result;
 	var newValue = binaryOperators[context.node.operator](left, right);

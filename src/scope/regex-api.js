@@ -4,10 +4,11 @@ var utils = require("../utils");
 
 module.exports = function (globalScope) {
 	var regexClass = objectFactory.createFunction(utils.wrapNative(RegExp));
+	var proto = regexClass.getProperty("prototype");
 
-	regexClass.proto.setProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)));
+	proto.setProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)));
 
-	regexClass.proto.setProperty("exec", objectFactory.createFunction(function (str) {
+	proto.setProperty("exec", objectFactory.createFunction(function (str) {
 		var match = this.node.value.exec(str.toString());
 
 		// update the last index from the underlying regex

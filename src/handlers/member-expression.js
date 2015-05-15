@@ -1,6 +1,6 @@
 var typeRegistry = require("../types/type-registry");
 
-module.exports = function (context) {
+module.exports = function MemberExpression (context) {
 	var obj = context.create(context.node.object).execute().result;
 	var name, value;
 
@@ -9,7 +9,7 @@ module.exports = function (context) {
 		value = obj.getProperty(name);
 	} else {
 		name = context.node.property.name;
-		value = context.create(context.node.property, obj).execute().result;
+		value = context.create(context.node.property, context.node, obj).execute().result;
 	}
 
 	return context.result(value || typeRegistry.get("UNDEFINED"), name, obj);

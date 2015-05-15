@@ -50,6 +50,8 @@ module.exports = {
 				throw new Error("Not a primitive: " + value);
 		}
 
+		instance.init(this);
+
 		// during initialization it is possible for objects to be created
 		// before the types have been registered - add a registry of items
 		// and these can be filled in when the type is registered
@@ -57,30 +59,32 @@ module.exports = {
 			typeRegistry.setParent(instance, typeName);
 		}
 
-		instance.init(this);
 		return instance;
 	},
 
 	createObject: function (parent) {
-		var instance = new ObjectType(parent);
-		if (arguments.length === 0) {
-			typeRegistry.setParent(instance, "OBJECT");
+		if (parent !== null) {
+			parent = parent || typeRegistry.get("Object");
+			// instance.setProto(parent);
 		}
 
+		var instance = new ObjectType(parent);
 		instance.init(this);
+
 		return instance;
 	},
 
-	createFunction: function (fnOrNode) {
+	createFunction: function (fnOrNode, parentScope) {
 		var instance;
 
 		if (typeof fnOrNode === "function") {
-			instance = new NativeFunctionType(fnOrNode);
+			instance = new NativeFunctionType(fnOrNode, parentScope);
 		} else {
-			instance = new FunctionType(fnOrNode);
+			instance = new FunctionType(fnOrNode, parentScope);
 		}
 
 		instance.init(this);
+		typeRegistry.setParent(instance, "Function");
 		return instance;
 	}
 };

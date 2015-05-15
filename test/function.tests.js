@@ -21,4 +21,48 @@ describe("Functions", function () {
 		var result = runner.runBlock("var a = 50;\nfunction b() { return a; }\nb();");
 		expect(result.value).to.equal(50);
 	});
+
+	it("should be able to `call` a function", function () {
+		var result = runner.runBlock("function a(x, y) { return x + y; }\na.call(null, 10, 40);");
+		expect(result.value).to.equal(50);
+	});
+
+	it("should be able to control `this` with `call`", function () {
+		var result = runner.runBlock("var a = {};function b() { return this === a; }\nb.call(a);");
+		expect(result.value).to.be.true;
+	});
+
+	it("should be able to `apply` a function", function () {
+		var result = runner.runBlock("function a(x, y) { return x + y; }\na.apply(null, [10, 40]);");
+		expect(result.value).to.equal(50);
+	});
+
+	describe("Function.prototype.bind", function () {
+		it("should return a function", function () {
+			var result = runner.runBlock("var a = function () {};typeof a.bind({}) === 'function';");
+			expect(result.value).to.be.true;
+		});
+
+		it("should return a new function", function () {
+			var result = runner.runBlock("var a = function () {};var b = a.bind({});a !== b;");
+			expect(result.value).to.be.true;
+		});
+
+		it("should set the scope of the new function", function () {
+			var result = runner.runBlock("var a = {};var b = function () { return this === a; };b.bind(a)();");
+			expect(result.value).to.be.true;
+		});
+
+		it("should use the arguments assigned, along with those provided at call time", function () {
+			var result = runner.runBlock("var a = function (a,b,c) { return a + b + c; };a.bind(null,2,3)(-5);");
+			expect(result.value).to.equal(0);
+		});
+	});
+
+	describe("scope", function () {
+		it("should be able to read value from parent scope", function () {
+			var result = runner.runBlock("var a = (function(global) { return function (value) { return global.String(value); }; })(this);\na('foo');");
+			expect(result.value).to.equal("foo");
+		});
+	});
 });

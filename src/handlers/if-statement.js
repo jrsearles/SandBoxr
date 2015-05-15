@@ -1,4 +1,4 @@
-module.exports = function (context) {
+module.exports = function IfStatement (context) {
 	var testValue = context.create(context.node.test).execute().result;
 	if (testValue.toBoolean()) {
 		return context.create(context.node.consequent).execute();

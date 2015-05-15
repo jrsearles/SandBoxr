@@ -4,10 +4,10 @@ var source = require("vinyl-source-stream");
 var eslint = require("gulp-eslint");
 
 gulp.task("browserify", ["lint"], function () {
-	return browserify("./src/sandboxer.js", { standalone: "SandBoxer" })
+	return browserify("./src/sandboxr.js", { standalone: "SandBoxr" })
 		.transform("strictify")
 		.bundle()
-		.pipe(source("sandboxer.js"))
+		.pipe(source("sandboxr.js"))
 		.pipe(gulp.dest("./build/"));
 });
 

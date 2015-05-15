@@ -13,6 +13,7 @@ module.exports = {
 		if (typeName in parentsToSet) {
 			parentsToSet[typeName].forEach(function (obj) {
 				obj.parent = type;
+				// obj.setProto(type);
 			});
 
 			delete parentsToSet[typeName];
@@ -27,6 +28,7 @@ module.exports = {
 			parentsToSet[typeName] = parentsToSet[typeName] || [];
 			parentsToSet[typeName].push(obj);
 		} else {
+			// obj.setProto(types[typeName]);
 			obj.parent = types[typeName];
 		}
 	}

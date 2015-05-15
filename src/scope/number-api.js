@@ -21,6 +21,7 @@ var polyfills = {
 
 module.exports = function (globalScope) {
 	var numberClass = objectFactory.createFunction(utils.wrapNative(Number));
+	var proto = numberClass.getProperty("prototype");
 
 	constants.forEach(function (name) {
 		numberClass.setProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
@@ -29,7 +30,7 @@ module.exports = function (globalScope) {
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			numberClass.proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
+			proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
 		}
 	});
 

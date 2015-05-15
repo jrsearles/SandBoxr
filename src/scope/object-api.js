@@ -1,18 +1,40 @@
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
-var utils = require("../utils");
 
 module.exports = function (globalScope) {
-	var objectClass = objectFactory.createFunction(utils.wrapNative(Object), null);
-	typeRegistry.set("OBJECT", objectClass);
+	var objectClass = objectFactory.createFunction(function () {
+		return objectFactory.createObject();
+	});
 
-	objectClass.proto.setProperty("hasOwnProperty", objectFactory.createFunction(function (name) {
+	var proto = objectClass.getProperty("prototype");
+	proto.setProperty("hasOwnProperty", objectFactory.createFunction(function (name) {
 		name = name.toString();
+		// var hasOwn = name in this.node.properties || (this.node.parent && this.node.parent.proto && name in this.node.parent.proto.properties);
 		return objectFactory.createPrimitive(name in this.node.properties);
 	}), { enumerable: false });
 
+	objectClass.setProperty("create", objectFactory.createFunction(function (parent, properties) {
+		var obj = objectFactory.createObject();
+
+		if (parent) {
+			obj.setProperty("prototype", parent);
+		}
+
+		return obj;
+	}));
+
+	objectClass.setProperty("defineProperty", objectFactory.createFunction(function (obj, prop, descriptor) {
+		var value = typeRegistry.get("undefined");
+		var options = { writable: false, enumerable: false, configurable: false };
+		if (descriptor) {
+			value = descriptor.getProperty("value") || value;
+		}
+
+		obj.setProperty(prop.toString(), value, options);
+	}));
+
 	objectClass.setProperty("keys", objectFactory.createFunction(function (obj) {
-		var arr = objectFactory.create("ARRAY");
+		var arr = objectFactory.create("Array");
 		Object.keys(obj.enumerable).forEach(function (name, index) {
 			arr.setProperty(index, objectFactory.createPrimitive(name));
 		});
@@ -38,5 +60,6 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(obj.extensible !== false);
 	}));
 
+	typeRegistry.set("Object", objectClass);
 	globalScope.setProperty("Object", objectClass);
 };
