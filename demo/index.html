@@ -9,25 +9,13 @@
 </head>
 <body>
 <textarea id="codeArea" cols="40" rows="8">
-function $ERROR (message) {
-	throw new Error(message);
-}
-
-function runTestCase (testcase) {
-	if (!testcase()) {
-		$ERROR("Test case returned non-true value!");
-	}
-}
-
-function testcase() {   
-    function foo() {};
-    Object.defineProperty(foo.prototype, "bar", {value: "unwritable"}); 
-    
-    var o = new foo(); 
-    o.bar = "overridden"; 
-    return o.hasOwnProperty("bar")===false && o.bar==="unwritable";
-}
-runTestCase(testcase);
+var a = {}, realValue = 1;
+Object.defineProperty(a, 'foo', { 
+  get: function () { return realValue; }, 
+  set: function (value) { realValue = value * 2; } 
+});
+a.foo = 21;
+a.foo;
 </textarea>
 <button id="execButton">Exec</button>
 <button id="interpretButton">Interpret</button>

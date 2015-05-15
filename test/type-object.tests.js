@@ -130,6 +130,16 @@ describe("Types", function () {
 				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo', { value: 42 }); a.foo;");
 				expect(result.value).to.equal(42);
 			});
+
+			it("should allow getter to be defined", function () {
+				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo', { get: function () { return 42; } });a.foo;");
+				expect(result.value).to.equal(42);
+			});
+
+			it("should allow a setter to be defined", function () {
+				var result = runner.runBlock("var a = {}, realValue = 1; Object.defineProperty(a, 'foo', { get: function () { return realValue; }, set: function (value) { realValue = value * 2; } });a.foo = 21;a.foo");
+				expect(result.value).to.equal(42);
+			});
 		});
 	});
 });

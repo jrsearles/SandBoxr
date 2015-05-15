@@ -25,6 +25,7 @@ handlers.SequenceExpression = require("./sequence-expression");
 handlers.SwitchStatement = require("./switch-statement");
 handlers.ThisExpression = require("./this-expression");
 handlers.ThrowStatement = require("./throw-statement");
+handlers.TryStatement = require("./try-statement");
 handlers.UnaryExpression = require("./unary-expression");
 handlers.UpdateExpression = require("./update-expression");
 handlers.VariableDeclaration = require("./variable-declaration");

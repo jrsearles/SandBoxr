@@ -12,5 +12,5 @@ module.exports = function MemberExpression (context) {
 		value = context.create(context.node.property, context.node, obj).execute().result;
 	}
 
-	return context.result(value || typeRegistry.get("UNDEFINED"), name, obj);
+	return context.result(value || typeRegistry.get("undefined"), name, obj);
 };

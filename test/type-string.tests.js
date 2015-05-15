@@ -119,4 +119,17 @@ describe("String", function () {
 			expect(result.value).to.equal("foo");
 		});
 	});
+
+	describe("When creating a string", function () {
+		it("should use overridden `toString` if set.", function () {
+			var result = runner.runBlock("var a = {toString:function() { return 'foo'; } };String(a);");
+			expect(result.value).to.equal("foo");
+		});
+
+		it("should throw a type error if overridden `toString` returns an object", function () {
+			expect(function () {
+				runner.runBlock("var a = {toString:function() { return {}; } };String(a);");
+			}).to.throw(TypeError);
+		});
+	});
 });

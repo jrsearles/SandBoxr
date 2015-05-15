@@ -15,6 +15,7 @@ function ObjectType (parent) {
 	this.enumerable = Object.create(null);
 	this.configurable = Object.create(null);
 	this.properties = Object.create(null);
+	this.accessors = Object.create(null);
 
 	this.frozen = false;
 	this.extensible = true;
@@ -36,10 +37,12 @@ ObjectType.prototype = {
 		while (current) {
 			if (name in current.properties) {
 				return {
-					configurable: !!current.configurable[name],
-					enumerable: !!current.enumerable[name],
-					writable: !!current.writable[name],
-					value: current.properties[name]
+					configurable: name in current.configurable,
+					enumerable: name in current.enumerable,
+					writable: name in current.writable,
+					value: current.properties[name],
+					get: current.accessors[name] && current.accessors[name].get,
+					set: current.accessors[name] && current.accessors[name].set
 				};
 			}
 
@@ -50,7 +53,7 @@ ObjectType.prototype = {
 	},
 
 	hasProperty: function (name) {
-		return String(name) in this.properties;
+		return !!this.getPropertyDescriptor(name);
 	},
 
 	setProperty: function (name, value, options) {
@@ -59,14 +62,13 @@ ObjectType.prototype = {
 		}
 
 		name = String(name);
-
-		var descriptor = this.getPropertyDescriptor(name);
-		if (descriptor && !descriptor.writable) {
+		if (name === "prototype") {
+			this.setProto(value);
 			return;
 		}
 
-		if (name === "prototype") {
-			this.setProto(value);
+		var descriptor = this.getPropertyDescriptor(name);
+		if (descriptor && !descriptor.writable) {
 			return;
 		}
 
@@ -83,6 +85,23 @@ ObjectType.prototype = {
 					self[prop][name] = true;
 				}
 			});
+
+			if (options.getter || options.setter) {
+				Object.defineProperty(this.properties, name, {
+					enumerable: true,
+					configurable: true,
+					get: options.getter,
+					set: options.setter
+				});
+
+				// keep original around for `getOwnPropertyDescriptor`
+				this.accessors[name] = {
+					get: options.get,
+					set: options.set
+				};
+
+				return;
+			}
 		}
 
 		this.properties[name] = value;
@@ -95,7 +114,11 @@ ObjectType.prototype = {
 
 	deleteProperty: function (name) {
 		name = String(name);
-		if (this.isPrimitive || this.frozen || !(name in this.configurable)) {
+		if (this.isPrimitive || this.frozen) {
+			return false;
+		}
+
+		if (name in this.properties && !(name in this.configurable)) {
 			return false;
 		}
 

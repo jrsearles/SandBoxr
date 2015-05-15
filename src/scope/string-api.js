@@ -1,5 +1,6 @@
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
+var FunctionType = require("../types/function-type");
 var utils = require("../utils");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
@@ -7,7 +8,27 @@ var staticMethods = ["fromCharCode"];
 var slice = Array.prototype.slice;
 
 module.exports = function (globalScope) {
-	var stringClass = objectFactory.createFunction(utils.wrapNative(String));
+	var stringClass = objectFactory.createFunction(function (value) {
+		if (!value) {
+			return objectFactory.createPrimitive("");
+		}
+
+		// see if `toString` has been overridden
+		var toString = value.getProperty("toString");
+		if (toString && toString instanceof FunctionType && !(toString.native)) {
+			var scope = this.scope.createScope(value);
+
+			utils.loadArguments(toString.node.params, [], scope);
+			value = this.create(toString.node.body, toString.node, scope).execute().result;
+
+			if (!(value.isPrimitive)) {
+				throw new TypeError("Cannot convert object to primitive value.");
+			}
+		}
+
+		return objectFactory.createPrimitive(value.toString());
+	});
+
 	var proto = stringClass.getProperty("prototype");
 
 	protoMethods.forEach(function (name) {

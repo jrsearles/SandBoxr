@@ -1,7 +1,6 @@
 var objectFactory = require("../types/object-factory");
 
 /* eslint eqeqeq:0 */
-// todo: implement instanceof, in
 var binaryOperators = {
 	"+": function (a, b) { return a.value + b.value; },
 	"-": function (a, b) { return a.value - b.value; },
@@ -22,7 +21,8 @@ var binaryOperators = {
 	"|": function (a, b) { return a.value | b.value; },
 	"^": function (a, b) { return a.value ^ b.value; },
 	"&": function (a, b) { return a.value & b.value; },
-	"in": function (a, b) { return b.hasProperty(a.toString()); }
+	"in": function (a, b) { return b.hasProperty(a.toString()); },
+	"instanceof": function (a, b) { return true; }
 };
 
 module.exports = function BinaryExpression (context) {

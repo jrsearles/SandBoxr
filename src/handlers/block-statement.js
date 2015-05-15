@@ -4,7 +4,13 @@ module.exports = function BlockStatement (context) {
 	var result;
 
 	for (; i < ln; i++) {
-		result = context.create(context.node.body[i]).execute();
+		try {
+			result = context.create(context.node.body[i]).execute();
+		} catch (err) {
+			context.handleError(err);
+			break;
+		}
+
 		if (result && (result.cancel || result.skip || result.exit)) {
 			break;
 		}

@@ -25,7 +25,7 @@ SandBoxr.prototype.createScope = function () {
 
 module.exports = SandBoxr;
 
-},{"./execution-context":2,"./handlers":18,"./scope/global-scope":39}],2:[function(require,module,exports){
+},{"./execution-context":2,"./handlers":18,"./scope/global-scope":40}],2:[function(require,module,exports){
 "use strict";
 var ExecutionResult = require("./execution-result");
 
@@ -35,6 +35,9 @@ function ExecutionContext (runner, node, callee, scope) {
 	this.callee = callee;
 	this.scope = scope;
 	this.label = null;
+
+	this.trying = false;
+	this.errorHandler = null;
 }
 
 ExecutionContext.prototype.execute = function () {
@@ -42,13 +45,36 @@ ExecutionContext.prototype.execute = function () {
 };
 
 ExecutionContext.prototype.create = function (node, callee, scope) {
-	return new ExecutionContext(this.runner, node, callee, scope || this.scope);
+	var context = new ExecutionContext(this.runner, node, callee, scope || this.scope);
+	context.trying = this.trying;
+	context.errorHandler = this.errorHandler;
+	return context;
 };
 
 ExecutionContext.prototype.createLabel = function (node, label) {
 	var context = new ExecutionContext(this.runner, node, null, this.scope);
 	context.label = label;
+	context.trying = this.trying;
+	context.errorHandler = this.errorHandler;
 	return context;
+};
+
+ExecutionContext.prototype.beginTry = function (errorHandler) {
+	this.trying = true;
+	this.errorHandler = errorHandler;
+};
+
+ExecutionContext.prototype.endTry = function () {
+	this.trying = false;
+	this.errorHandler = null;
+};
+
+ExecutionContext.prototype.handleError = function (err) {
+	if (!this.errorHandler) {
+		throw err;
+	}
+
+	this.errorHandler(err);
 };
 
 ExecutionContext.prototype.cancel = function (label) {
@@ -109,12 +135,11 @@ module.exports = function ArrayExpression (context) {
 	return context.result(arr);
 };
 
-},{"../types/object-factory":49}],5:[function(require,module,exports){
+},{"../types/object-factory":50}],5:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 
 var assignOperators = {
-	"=": function (a, b) { return b.value; },
 	"+=": function (a, b) { return a.value + b.value; },
 	"-=": function (a, b) { return a.value - b.value; },
 	"*=": function (a, b) { return a.value * b.value; },
@@ -131,7 +156,13 @@ var assignOperators = {
 module.exports = function AssignmentExpression (context) {
 	var left = context.create(context.node.left).execute();
 	var right = context.create(context.node.right).execute();
-	var newValue = objectFactory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
+	var newValue;
+
+	if (context.node.operator === "=") {
+		newValue = right.result;
+	} else {
+		newValue = objectFactory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
+	}
 
 	var obj = left.object || context.scope;
 	var name = left.name;
@@ -140,7 +171,7 @@ module.exports = function AssignmentExpression (context) {
 	return context.result(newValue, name);
 };
 
-},{"../types/object-factory":49}],6:[function(require,module,exports){
+},{"../types/object-factory":50}],6:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 
@@ -177,7 +208,7 @@ module.exports = function BinaryExpression (context) {
 	return context.result(objectFactory.createPrimitive(newValue));
 };
 
-},{"../types/object-factory":49}],7:[function(require,module,exports){
+},{"../types/object-factory":50}],7:[function(require,module,exports){
 "use strict";
 module.exports = function BlockStatement (context) {
 	var i = 0;
@@ -185,7 +216,13 @@ module.exports = function BlockStatement (context) {
 	var result;
 
 	for (; i < ln; i++) {
-		result = context.create(context.node.body[i]).execute();
+		try {
+			result = context.create(context.node.body[i]).execute();
+		} catch (err) {
+			context.handleError(err);
+			break;
+		}
+
 		if (result && (result.cancel || result.skip || result.exit)) {
 			break;
 		}
@@ -229,7 +266,7 @@ module.exports = function CallExpression (context) {
 	return context.result(newObj || executionResult || typeRegistry.get("undefined"));
 };
 
-},{"../types/function-type":47,"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],9:[function(require,module,exports){
+},{"../types/function-type":48,"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],9:[function(require,module,exports){
 "use strict";
 module.exports = function DoWhileStatement (context) {
 	var result;
@@ -272,13 +309,13 @@ module.exports = function ForInStatement (context) {
 			value = context.create(context.node.body).execute();
 		}
 
-		obj = obj.parent && obj.parent.getProperty("prototype");
+		obj = obj.parent && obj.parent.proto;
 	}
 
 	return value;
 };
 
-},{"../types/object-factory":49}],13:[function(require,module,exports){
+},{"../types/object-factory":50}],13:[function(require,module,exports){
 "use strict";
 module.exports = function ForStatement (context) {
 	if (context.node.init) {
@@ -323,7 +360,7 @@ module.exports = function FunctionDeclaration (context) {
 	return context.result(fn);
 };
 
-},{"../types/object-factory":49}],15:[function(require,module,exports){
+},{"../types/object-factory":50}],15:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 
@@ -331,7 +368,7 @@ module.exports = function FunctionExpression (context) {
 	return context.result(objectFactory.createFunction(context.node, context.scope));
 };
 
-},{"../types/object-factory":49}],16:[function(require,module,exports){
+},{"../types/object-factory":50}],16:[function(require,module,exports){
 "use strict";
 module.exports = function Identifier (context) {
 	var name = context.node.name;
@@ -381,6 +418,7 @@ handlers.SequenceExpression = require("./sequence-expression");
 handlers.SwitchStatement = require("./switch-statement");
 handlers.ThisExpression = require("./this-expression");
 handlers.ThrowStatement = require("./throw-statement");
+handlers.TryStatement = require("./try-statement");
 handlers.UnaryExpression = require("./unary-expression");
 handlers.UpdateExpression = require("./update-expression");
 handlers.VariableDeclaration = require("./variable-declaration");
@@ -388,7 +426,7 @@ handlers.VariableDeclarator = require("./variable-declarator");
 
 module.exports = handlers;
 
-},{"./array-expression":4,"./assignment-expression":5,"./binary-expression":6,"./block-statement":7,"./call-expression":8,"./do-while-statement.js":9,"./empty-statement":10,"./expression-statement":11,"./for-in-statement":12,"./for-statement":13,"./function-declaration":14,"./function-expression":15,"./identifier":16,"./if-statement":17,"./interrupt-statement":19,"./labeled-statement":20,"./literal":21,"./logical-expression":22,"./member-expression":23,"./object-expression":24,"./return-statement":25,"./sequence-expression":26,"./switch-statement":27,"./this-expression":28,"./throw-statement":29,"./unary-expression":30,"./update-expression":31,"./variable-declaration":32,"./variable-declarator":33}],19:[function(require,module,exports){
+},{"./array-expression":4,"./assignment-expression":5,"./binary-expression":6,"./block-statement":7,"./call-expression":8,"./do-while-statement.js":9,"./empty-statement":10,"./expression-statement":11,"./for-in-statement":12,"./for-statement":13,"./function-declaration":14,"./function-expression":15,"./identifier":16,"./if-statement":17,"./interrupt-statement":19,"./labeled-statement":20,"./literal":21,"./logical-expression":22,"./member-expression":23,"./object-expression":24,"./return-statement":25,"./sequence-expression":26,"./switch-statement":27,"./this-expression":28,"./throw-statement":29,"./try-statement":30,"./unary-expression":31,"./update-expression":32,"./variable-declaration":33,"./variable-declarator":34}],19:[function(require,module,exports){
 "use strict";
 module.exports = function InterruptStatement (context) {
 	var label;
@@ -425,7 +463,7 @@ module.exports = function Literal (context) {
 	return context.result(objectFactory.createPrimitive(context.node.value));
 };
 
-},{"../types/object-factory":49}],22:[function(require,module,exports){
+},{"../types/object-factory":50}],22:[function(require,module,exports){
 "use strict";
 module.exports = function LogicalExpression (context) {
 	var left = context.create(context.node.left).execute();
@@ -457,10 +495,10 @@ module.exports = function MemberExpression (context) {
 		value = context.create(context.node.property, context.node, obj).execute().result;
 	}
 
-	return context.result(value || typeRegistry.get("UNDEFINED"), name, obj);
+	return context.result(value || typeRegistry.get("undefined"), name, obj);
 };
 
-},{"../types/type-registry":54}],24:[function(require,module,exports){
+},{"../types/type-registry":55}],24:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 
@@ -475,7 +513,7 @@ module.exports = function ObjectExpression (context) {
 	return context.result(obj);
 };
 
-},{"../types/object-factory":49}],25:[function(require,module,exports){
+},{"../types/object-factory":50}],25:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 
@@ -484,7 +522,7 @@ module.exports = function ReturnStatement (context) {
 	return context.exit(returnValue);
 };
 
-},{"../types/object-factory":49}],26:[function(require,module,exports){
+},{"../types/object-factory":50}],26:[function(require,module,exports){
 "use strict";
 module.exports = function SequenceExpression (context) {
 	var value;
@@ -550,6 +588,35 @@ module.exports = function ThrowStatement (context) {
 
 },{}],30:[function(require,module,exports){
 "use strict";
+module.exports = function (context) {
+	var result;
+
+	function errorHandler (err) {
+		if (err && context.node.handler) {
+			var scope = context.scope.createScope();
+			scope.setProperty(context.node.handler.param.id, err);
+
+			result = context.create(context.node.handler.body).execute();
+		}
+
+		context.endTry();
+
+		if (context.node.finalizer) {
+			context.create(context.node.finalizer).execute();
+		}
+
+		return result;
+	}
+
+	context.beginTry(errorHandler);
+	result = context.create(context.node.block).execute();
+
+	errorHandler();
+	return result;
+};
+
+},{}],31:[function(require,module,exports){
+"use strict";
 var objectFactory = require("../types/object-factory");
 
 module.exports = function UnaryExpression (context) {
@@ -593,7 +660,7 @@ module.exports = function UnaryExpression (context) {
 	return context.result(newValue);
 };
 
-},{"../types/object-factory":49}],31:[function(require,module,exports){
+},{"../types/object-factory":50}],32:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 
@@ -621,7 +688,7 @@ module.exports = function UpdateExpression (context) {
 	return context.result(returnValue, null, obj);
 };
 
-},{"../types/object-factory":49}],32:[function(require,module,exports){
+},{"../types/object-factory":50}],33:[function(require,module,exports){
 "use strict";
 module.exports = function VariableDeclaration (context) {
 	var value;
@@ -633,7 +700,7 @@ module.exports = function VariableDeclaration (context) {
 	return value;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 var typeRegistry = require("../types/type-registry");
 
@@ -651,7 +718,7 @@ module.exports = function VariableDeclarator (context) {
 	return context.result(value, id);
 };
 
-},{"../types/type-registry":54}],34:[function(require,module,exports){
+},{"../types/type-registry":55}],35:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
@@ -1033,7 +1100,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Array", arrayClass);
 };
 
-},{"../types/array-type":46,"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],35:[function(require,module,exports){
+},{"../types/array-type":47,"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],36:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -1045,7 +1112,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Boolean", booleanClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],36:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],37:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -1057,7 +1124,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Date", dateClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],37:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],38:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -1073,7 +1140,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Error", errorClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54}],38:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55}],39:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -1119,7 +1186,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Function", functionClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],39:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],40:[function(require,module,exports){
 "use strict";
 var Scope = require("./scope");
 var PrimitiveType = require("../types/primitive-type");
@@ -1171,7 +1238,7 @@ module.exports = function () {
 	return scope;
 };
 
-},{"../types/object-factory":49,"../types/primitive-type":51,"../types/type-registry":54,"./array-api":34,"./boolean-api":35,"./date-api":36,"./error-api":37,"./function-api":38,"./math-api":40,"./number-api":41,"./object-api":42,"./regex-api":43,"./scope":44,"./string-api":45}],40:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/primitive-type":52,"../types/type-registry":55,"./array-api":35,"./boolean-api":36,"./date-api":37,"./error-api":38,"./function-api":39,"./math-api":41,"./number-api":42,"./object-api":43,"./regex-api":44,"./scope":45,"./string-api":46}],41:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
@@ -1183,7 +1250,7 @@ module.exports = function (globalScope) {
 	var mathClass = objectFactory.createObject();
 
 	constants.forEach(function (name) {
-		mathClass.setProperty(name, Math[name], { configurable: false, enumerable: false, writable: false });
+		mathClass.setProperty(name, objectFactory.createPrimitive(Math[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
 	methods.forEach(function (name) {
@@ -1193,7 +1260,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Math", mathClass);
 };
 
-},{"../types/object-factory":49,"../utils":55}],41:[function(require,module,exports){
+},{"../types/object-factory":50,"../utils":56}],42:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -1242,10 +1309,11 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Number", numberClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],42:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],43:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
+var utils = require("../utils");
 
 module.exports = function (globalScope) {
 	var objectClass = objectFactory.createFunction(function () {
@@ -1255,9 +1323,13 @@ module.exports = function (globalScope) {
 	var proto = objectClass.getProperty("prototype");
 	proto.setProperty("hasOwnProperty", objectFactory.createFunction(function (name) {
 		name = name.toString();
-		var hasOwn = name in this.node.properties || (this.node.parent && this.node.parent.proto && name in this.node.parent.proto.properties);
-		return objectFactory.createPrimitive(!!hasOwn);
+		// var hasOwn = name in this.node.properties || (this.node.parent && this.node.parent.proto && name in this.node.parent.proto.properties);
+		return objectFactory.createPrimitive(name in this.node.properties);
 	}), { enumerable: false });
+
+	proto.setProperty("valueOf", objectFactory.createFunction(function () {
+		return this.node;
+	}));
 
 	objectClass.setProperty("create", objectFactory.createFunction(function (parent, properties) {
 		var obj = objectFactory.createObject();
@@ -1272,11 +1344,57 @@ module.exports = function (globalScope) {
 	objectClass.setProperty("defineProperty", objectFactory.createFunction(function (obj, prop, descriptor) {
 		var value = typeRegistry.get("undefined");
 		var options = { writable: false, enumerable: false, configurable: false };
+		var executionContext = this;
+		var getter, setter;
+
 		if (descriptor) {
-			value = descriptor.getProperty("value") || value;
+			value = descriptor.getProperty("value");
+			getter = descriptor.getProperty("get");
+			setter = descriptor.getProperty("set");
+
+			// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
+			if (getter) {
+				options.get = getter;
+				options.getter = function () {
+					var scope = executionContext.scope.createScope(obj);
+
+					utils.loadArguments(getter.node.params, [], scope);
+					return executionContext.create(getter.node.body, getter.node, scope).execute().result;
+				};
+			}
+
+			if (setter) {
+				options.writable = true;
+				options.set = setter;
+				options.setter = function () {
+					var scope = executionContext.scope.createScope(obj);
+
+					utils.loadArguments(setter.node.params, arguments, scope);
+					var executionResult = executionContext.create(setter.node.body, setter.node, scope).execute();
+					return executionResult ? executionResult.result : typeRegistry.get("undefined");
+				};
+			}
 		}
 
 		obj.setProperty(prop.toString(), value, options);
+	}));
+
+	objectClass.setProperty("getOwnPropertyDescriptor", objectFactory.createFunction(function (obj, prop) {
+		prop = prop.toString();
+		if (prop in obj.properties) {
+			var descriptor = obj.getPropertyDescriptor(prop);
+
+			var result = objectFactory.createObject();
+			result.setProperty("configurable", objectFactory.createPrimitive(descriptor.configurable));
+			result.setProperty("enumerable", objectFactory.createPrimitive(descriptor.enumerable));
+			result.setProperty("writable", objectFactory.createPrimitive(descriptor.writable));
+			result.setProperty("value", descriptor.value);
+			result.setProperty("get", descriptor.get);
+			result.setProperty("set", descriptor.set);
+			return result;
+		}
+
+		return typeRegistry.get("undefined");
 	}));
 
 	objectClass.setProperty("keys", objectFactory.createFunction(function (obj) {
@@ -1310,7 +1428,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("Object", objectClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54}],43:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],44:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
@@ -1347,7 +1465,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("RegExp", regexClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],44:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],45:[function(require,module,exports){
 "use strict";
 var ObjectType = require("../types/object-type");
 var objectFactory = require("../types/object-factory");
@@ -1425,10 +1543,11 @@ Scope.prototype.createFunction = function (fnOrNode) {
 
 module.exports = Scope;
 
-},{"../types/object-factory":49,"../types/object-type":50}],45:[function(require,module,exports){
+},{"../types/object-factory":50,"../types/object-type":51}],46:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
+var FunctionType = require("../types/function-type");
 var utils = require("../utils");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
@@ -1436,7 +1555,27 @@ var staticMethods = ["fromCharCode"];
 var slice = Array.prototype.slice;
 
 module.exports = function (globalScope) {
-	var stringClass = objectFactory.createFunction(utils.wrapNative(String));
+	var stringClass = objectFactory.createFunction(function (value) {
+		if (!value) {
+			return objectFactory.createPrimitive("");
+		}
+
+		// see if `toString` has been overridden
+		var toString = value.getProperty("toString");
+		if (toString && toString instanceof FunctionType && !(toString.native)) {
+			var scope = this.scope.createScope(value);
+
+			utils.loadArguments(toString.node.params, [], scope);
+			value = this.create(toString.node.body, toString.node, scope).execute().result;
+
+			if (!(value.isPrimitive)) {
+				throw new TypeError("Cannot convert object to primitive value.");
+			}
+		}
+
+		return objectFactory.createPrimitive(value.toString());
+	});
+
 	var proto = stringClass.getProperty("prototype");
 
 	protoMethods.forEach(function (name) {
@@ -1504,7 +1643,7 @@ module.exports = function (globalScope) {
 	globalScope.setProperty("String", stringClass);
 };
 
-},{"../types/object-factory":49,"../types/type-registry":54,"../utils":55}],46:[function(require,module,exports){
+},{"../types/function-type":48,"../types/object-factory":50,"../types/type-registry":55,"../utils":56}],47:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -1538,7 +1677,7 @@ ArrayType.prototype.init = function (objectFactory) {
 ArrayType.prototype.constructor = ArrayType;
 module.exports = ArrayType;
 
-},{"./object-type":50}],47:[function(require,module,exports){
+},{"./object-type":51}],48:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -1568,7 +1707,7 @@ FunctionType.prototype.createScope = function (currentScope, thisArg) {
 
 module.exports = FunctionType;
 
-},{"./object-type":50}],48:[function(require,module,exports){
+},{"./object-type":51}],49:[function(require,module,exports){
 "use strict";
 var FunctionType = require("./function-type");
 var ObjectType = require("./object-type");
@@ -1591,7 +1730,7 @@ NativeFunctionType.prototype.init = function (objectFactory) {
 
 module.exports = NativeFunctionType;
 
-},{"./function-type":47,"./object-type":50}],49:[function(require,module,exports){
+},{"./function-type":48,"./object-type":51}],50:[function(require,module,exports){
 "use strict";
 var PrimitiveType = require("./primitive-type");
 var FunctionType = require("./function-type");
@@ -1684,7 +1823,7 @@ module.exports = {
 	}
 };
 
-},{"./array-type":46,"./function-type":47,"./native-function-type":48,"./object-type":50,"./primitive-type":51,"./regex-type":52,"./string-type":53,"./type-registry":54}],50:[function(require,module,exports){
+},{"./array-type":47,"./function-type":48,"./native-function-type":49,"./object-type":51,"./primitive-type":52,"./regex-type":53,"./string-type":54,"./type-registry":55}],51:[function(require,module,exports){
 "use strict";
 var defaultOptions = {
 	configurable: true,
@@ -1703,6 +1842,7 @@ function ObjectType (parent) {
 	this.enumerable = Object.create(null);
 	this.configurable = Object.create(null);
 	this.properties = Object.create(null);
+	this.accessors = Object.create(null);
 
 	this.frozen = false;
 	this.extensible = true;
@@ -1717,8 +1857,30 @@ ObjectType.prototype = {
 		this.proto = this.properties.prototype = proto;
 	},
 
+	getPropertyDescriptor: function (name) {
+		name = String(name);
+		var current = this;
+
+		while (current) {
+			if (name in current.properties) {
+				return {
+					configurable: name in current.configurable,
+					enumerable: name in current.enumerable,
+					writable: name in current.writable,
+					value: current.properties[name],
+					get: current.accessors[name] && current.accessors[name].get,
+					set: current.accessors[name] && current.accessors[name].set
+				};
+			}
+
+			current = current.parent && current.parent.proto;
+		}
+
+		return undefined;
+	},
+
 	hasProperty: function (name) {
-		return String(name) in this.properties;
+		return !!this.getPropertyDescriptor(name);
 	},
 
 	setProperty: function (name, value, options) {
@@ -1726,13 +1888,18 @@ ObjectType.prototype = {
 			return;
 		}
 
+		name = String(name);
 		if (name === "prototype") {
 			this.setProto(value);
 			return;
 		}
 
-		name = String(name);
-		if (!(name in this.properties)) {
+		var descriptor = this.getPropertyDescriptor(name);
+		if (descriptor && !descriptor.writable) {
+			return;
+		}
+
+		if (!descriptor) {
 			if (!this.extensible) {
 				return;
 			}
@@ -1745,27 +1912,40 @@ ObjectType.prototype = {
 					self[prop][name] = true;
 				}
 			});
+
+			if (options.getter || options.setter) {
+				Object.defineProperty(this.properties, name, {
+					enumerable: true,
+					configurable: true,
+					get: options.getter,
+					set: options.setter
+				});
+
+				// keep original around for `getOwnPropertyDescriptor`
+				this.accessors[name] = {
+					get: options.get,
+					set: options.set
+				};
+
+				return;
+			}
 		}
 
 		this.properties[name] = value;
 	},
 
 	getProperty: function (name) {
-		name = String(name);
-		if (name in this.properties) {
-			return this.properties[name];
-		}
-
-		if (this.parent && this.parent.properties.prototype) {
-			return this.parent.properties.prototype.getProperty(name);
-		}
-
-		return undefined;
+		var descriptor = this.getPropertyDescriptor(name);
+		return descriptor && descriptor.value;
 	},
 
 	deleteProperty: function (name) {
 		name = String(name);
-		if (this.isPrimitive || this.frozen || !(name in this.configurable)) {
+		if (this.isPrimitive || this.frozen) {
+			return false;
+		}
+
+		if (name in this.properties && !(name in this.configurable)) {
 			return false;
 		}
 
@@ -1808,7 +1988,7 @@ ObjectType.prototype = {
 
 module.exports = ObjectType;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -1830,7 +2010,7 @@ PrimitiveType.prototype.valueOf = function () { return this.value; };
 
 module.exports = PrimitiveType;
 
-},{"./object-type":50}],52:[function(require,module,exports){
+},{"./object-type":51}],53:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -1853,7 +2033,7 @@ RegexType.prototype.init = function (objectFactory) {
 
 module.exports = RegexType;
 
-},{"./object-type":50}],53:[function(require,module,exports){
+},{"./object-type":51}],54:[function(require,module,exports){
 "use strict";
 var PrimitiveType = require("./primitive-type");
 var typeRegistry = require("./type-registry");
@@ -1883,7 +2063,7 @@ StringType.prototype.getProperty = function (name) {
 
 module.exports = StringType;
 
-},{"./primitive-type":51,"./type-registry":54}],54:[function(require,module,exports){
+},{"./primitive-type":52,"./type-registry":55}],55:[function(require,module,exports){
 "use strict";
 var types = Object.create(null);
 var parentsToSet = Object.create(null);
@@ -1921,7 +2101,7 @@ module.exports = {
 	}
 };
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 var objectFactory = require("./types/object-factory");
 var typeRegistry = require("./types/type-registry");
@@ -1963,5 +2143,5 @@ module.exports = {
 	}
 };
 
-},{"./types/object-factory":49,"./types/type-registry":54}]},{},[1])(1)
+},{"./types/object-factory":50,"./types/type-registry":55}]},{},[1])(1)
 });

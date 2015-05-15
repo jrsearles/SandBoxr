@@ -11,7 +11,7 @@ module.exports = function ForInStatement (context) {
 			value = context.create(context.node.body).execute();
 		}
 
-		obj = obj.parent && obj.parent.getProperty("prototype");
+		obj = obj.parent && obj.parent.proto;
 	}
 
 	return value;
