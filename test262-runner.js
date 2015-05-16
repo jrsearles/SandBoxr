@@ -11,6 +11,7 @@ var root = "test262/test/";
 var include = fs.readFileSync("test262-harness.js");
 
 var tests = [
+	root + "suite/ch06/**/*.js",
 	//root + "suite/ch07/7.7/**/*.js",
 	root + "suite/ch08/**/*.js",
 	root + "suite/ch12/12.8/**/*.js"

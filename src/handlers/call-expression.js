@@ -13,7 +13,7 @@ module.exports = function CallExpression (context) {
 		throw new TypeError(fn.result.toString() + " not a function");
 	}
 
-	if (isNew && !fn.result.native) {
+	if (isNew) {
 		newObj = objectFactory.createObject(fn.result);
 	}
 
