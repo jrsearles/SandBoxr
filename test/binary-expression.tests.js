@@ -72,5 +72,22 @@ describe("Expressions", function () {
 				expect(result.value).to.equal(-1);
 			});
 		});
+
+		describe("instanceof", function () {
+			it("should return true for an object", function () {
+				var result = runner.runBlock("({} instanceof Object);");
+				expect(result.value).to.be.true;
+			});
+
+			it("should return false for not an object", function () {
+				var result = runner.runBlock("({} instanceof String);");
+				expect(result.value).to.be.false;
+			});
+
+			it("should respect inheritance", function () {
+				var result = runner.runBlock("function C(){}\nfunction D(){}\nD.prototype = new C();\nvar o = new D();(o instanceof C) && (o instanceof D);");
+				expect(result.value).to.be.true;
+			});
+		});
 	});
 });

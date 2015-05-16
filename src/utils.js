@@ -1,5 +1,6 @@
 var objectFactory = require("./types/object-factory");
 var typeRegistry = require("./types/type-registry");
+var FunctionType = require("./types/function-type");
 
 function getValues (args) {
 	var i = 0;
@@ -33,7 +34,19 @@ module.exports = {
 		scope.setProperty("arguments", argumentList);
 
 		params.forEach(function (param, index) {
-			scope.setProperty(param.name, args[index] || typeRegistry.get("UNDEFINED"));
+			scope.setProperty(param.name, args[index] || typeRegistry.get("undefined"));
 		});
+	},
+
+	callMethod: function (obj, name, args, executionContext) {
+		var method = obj.getProperty(name);
+		if (method && method instanceof FunctionType && !(method.native)) {
+			var scope = executionContext.scope.createScope(obj);
+
+			this.loadArguments(method.node.params, args, scope);
+			return executionContext.create(method.node.body, method.node, scope).execute().result;
+		}
+
+		return null;
 	}
 };

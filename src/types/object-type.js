@@ -1,10 +1,21 @@
-var defaultOptions = {
-	configurable: true,
-	enumerable: true,
-	writable: true
-};
-
 var configs = ["configurable", "enumerable", "writable"];
+
+function configureAccessor (obj, name, descriptor) {
+	Object.defineProperty(obj.properties, name, {
+		enumerable: true,
+		configurable: true,
+		get: descriptor.getter,
+		set: descriptor.setter
+	});
+
+	// keep original around for `getOwnPropertyDescriptor`
+	obj.accessors[name] = {
+		get: descriptor.get,
+		getter: descriptor.getter,
+		set: descriptor.set,
+		setter: descriptor.setter
+	};
+}
 
 function ObjectType (parent) {
 	this.isPrimitive = false;
@@ -37,9 +48,9 @@ ObjectType.prototype = {
 		while (current) {
 			if (name in current.properties) {
 				return {
-					configurable: name in current.configurable,
-					enumerable: name in current.enumerable,
-					writable: name in current.writable,
+					configurable: current.configurable[name],
+					enumerable: current.enumerable[name],
+					writable: current.writable[name],
 					value: current.properties[name],
 					get: current.accessors[name] && current.accessors[name].get,
 					set: current.accessors[name] && current.accessors[name].set
@@ -68,43 +79,55 @@ ObjectType.prototype = {
 		}
 
 		var descriptor = this.getPropertyDescriptor(name);
-		if (descriptor && !descriptor.writable) {
+		if (descriptor && options) {
+			this.updateProperty(name, options, descriptor);
 			return;
 		}
 
 		if (!descriptor) {
-			if (!this.extensible) {
-				return;
-			}
-
-			options = options || defaultOptions;
-			var self = this;
-
-			configs.forEach(function (prop) {
-				if (!(prop in options) || options[prop]) {
-					self[prop][name] = true;
-				}
-			});
-
-			if (options.getter || options.setter) {
-				Object.defineProperty(this.properties, name, {
-					enumerable: true,
-					configurable: true,
-					get: options.getter,
-					set: options.setter
-				});
-
-				// keep original around for `getOwnPropertyDescriptor`
-				this.accessors[name] = {
-					get: options.get,
-					set: options.set
-				};
-
-				return;
-			}
+			this.setupProperty(name, value, options);
+			return;
 		}
 
-		this.properties[name] = value;
+		if (descriptor.writable) {
+			this.properties[name] = value;
+		}
+	},
+
+	setupProperty: function (name, value, descriptor) {
+		if (this.isPrimitive || this.frozen || !this.extensible) {
+			return;
+		}
+
+		descriptor = descriptor || {};
+
+		var self = this;
+		configs.forEach(function (prop) {
+			descriptor[prop] = prop in descriptor ? descriptor[prop] : true;
+			self[prop][name] = descriptor[prop];
+		});
+
+		if (descriptor.getter || descriptor.setter) {
+			configureAccessor(this, name, descriptor);
+		} else {
+			this.properties[name] = descriptor.value || value;
+		}
+	},
+
+	updateProperty: function (name, descriptor, priorDescriptor) {
+		priorDescriptor = priorDescriptor || this.getPropertyDescriptor(name);
+
+		if (descriptor.setter || descriptor.getter) {
+			configureAccessor(this, name, descriptor);
+		} else if (descriptor.value) {
+			delete this.accessors[name];
+			this.writable[name] = descriptor.writable;
+			Object.defineProperty(this.properties, name, {
+				configurable: true,
+				enumerable: true,
+				value: descriptor.value
+			});
+		}
 	},
 
 	getProperty: function (name) {
@@ -118,7 +141,7 @@ ObjectType.prototype = {
 			return false;
 		}
 
-		if (name in this.properties && !(name in this.configurable)) {
+		if (name in this.properties && !this.configurable[name]) {
 			return false;
 		}
 

@@ -5,6 +5,7 @@ var RegexType = require("./regex-type");
 var ObjectType = require("./object-type");
 var ArrayType = require("./array-type");
 var StringType = require("./string-type");
+var ErrorType = require("./error-type");
 var typeRegistry = require("./type-registry");
 
 var objectRgx = /\[object (\w+)\]/;
@@ -44,6 +45,11 @@ module.exports = {
 
 			case "ARRAY":
 				instance = new ArrayType();
+				break;
+
+			case "ERROR":
+				typeName = (value.name || typeName).toUpperCase();
+				instance = new ErrorType(value);
 				break;
 
 			default:

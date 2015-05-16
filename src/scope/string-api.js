@@ -1,6 +1,5 @@
 var objectFactory = require("../types/object-factory");
 var typeRegistry = require("../types/type-registry");
-var FunctionType = require("../types/function-type");
 var utils = require("../utils");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
@@ -13,17 +12,17 @@ module.exports = function (globalScope) {
 			return objectFactory.createPrimitive("");
 		}
 
-		// see if `toString` has been overridden
-		var toString = value.getProperty("toString");
-		if (toString && toString instanceof FunctionType && !(toString.native)) {
-			var scope = this.scope.createScope(value);
+		if (!value.isPrimitive) {
+			var primitiveValue = utils.callMethod(value, "toString", [], this);
+			if (!primitiveValue || !primitiveValue.isPrimitive) {
+				primitiveValue = utils.callMethod(value, "valueOf", [], this) || primitiveValue;
+			}
 
-			utils.loadArguments(toString.node.params, [], scope);
-			value = this.create(toString.node.body, toString.node, scope).execute().result;
-
-			if (!(value.isPrimitive)) {
+			if (primitiveValue && !primitiveValue.isPrimitive) {
 				throw new TypeError("Cannot convert object to primitive value.");
 			}
+
+			value = primitiveValue;
 		}
 
 		return objectFactory.createPrimitive(value.toString());

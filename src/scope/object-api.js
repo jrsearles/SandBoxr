@@ -35,12 +35,20 @@ module.exports = function (globalScope) {
 		var getter, setter;
 
 		if (descriptor) {
+			["writable", "enumerable", "configurable"].forEach(function (name) {
+				var propValue = descriptor.getProperty(name);
+				if (propValue) {
+					options[name] = propValue.value || options[name];
+				}
+			});
+
 			value = descriptor.getProperty("value");
 			getter = descriptor.getProperty("get");
 			setter = descriptor.getProperty("set");
 
 			// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 			if (getter) {
+				options.writable = true;
 				options.get = getter;
 				options.getter = function () {
 					var scope = executionContext.scope.createScope(obj);
@@ -61,6 +69,10 @@ module.exports = function (globalScope) {
 					return executionResult ? executionResult.result : typeRegistry.get("undefined");
 				};
 			}
+
+			if (value) {
+				options.value = value;
+			}
 		}
 
 		obj.setProperty(prop.toString(), value, options);
@@ -70,14 +82,24 @@ module.exports = function (globalScope) {
 		prop = prop.toString();
 		if (prop in obj.properties) {
 			var descriptor = obj.getPropertyDescriptor(prop);
+			var undef = typeRegistry.get("undefined");
 
 			var result = objectFactory.createObject();
 			result.setProperty("configurable", objectFactory.createPrimitive(descriptor.configurable));
 			result.setProperty("enumerable", objectFactory.createPrimitive(descriptor.enumerable));
-			result.setProperty("writable", objectFactory.createPrimitive(descriptor.writable));
-			result.setProperty("value", descriptor.value);
-			result.setProperty("get", descriptor.get);
-			result.setProperty("set", descriptor.set);
+
+			if (descriptor.get || descriptor.set) {
+				result.setProperty("value", undef);
+				result.setProperty("writable", undef);
+				result.setProperty("get", descriptor.get || undef);
+				result.setProperty("set", descriptor.set || undef);
+			} else {
+				result.setProperty("value", descriptor.value);
+				result.setProperty("writable", objectFactory.createPrimitive(descriptor.writable));
+				result.setProperty("get", undef);
+				result.setProperty("set", undef);
+			}
+
 			return result;
 		}
 

@@ -9,13 +9,16 @@
 </head>
 <body>
 <textarea id="codeArea" cols="40" rows="8">
-var a = {}, realValue = 1;
-Object.defineProperty(a, 'foo', { 
-  get: function () { return realValue; }, 
-  set: function (value) { realValue = value * 2; } 
-});
-a.foo = 21;
-a.foo;
+    var o = {};
+    Object.defineProperty(o, "foo", 
+                          { value: "hello", 
+                            configurable: true});
+    Object.preventExtensions(o);
+    Object.defineProperty(o, "foo", { get: function() { return 5;} });
+
+    var fooDescrip = Object.getOwnPropertyDescriptor(o, "foo");
+    
+    var passed = o.foo===5 && fooDescrip.get!==undefined && fooDescrip.set===undefined && fooDescrip.value===undefined && fooDescrip.configurable===true && fooDescrip.enumerable===false && fooDescrip.writable===undefined;
 </textarea>
 <button id="execButton">Exec</button>
 <button id="interpretButton">Interpret</button>

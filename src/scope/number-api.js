@@ -20,7 +20,27 @@ var polyfills = {
 };
 
 module.exports = function (globalScope) {
-	var numberClass = objectFactory.createFunction(utils.wrapNative(Number));
+	var numberClass = objectFactory.createFunction(function (value) {
+		if (!value) {
+			return objectFactory.createPrimitive(0);
+		}
+
+		if (!value.isPrimitive) {
+			var primitiveValue = utils.callMethod(value, "valueOf", [], this);
+			if (!primitiveValue || !primitiveValue.isPrimitive) {
+				primitiveValue = utils.callMethod(value, "toString", [], this) || primitiveValue;
+			}
+
+			if (primitiveValue && !primitiveValue.isPrimitive) {
+				throw new TypeError("Cannot convert object to primitive");
+			}
+
+			value = primitiveValue;
+		}
+
+		return objectFactory.createPrimitive(value.toNumber());
+	});
+
 	var proto = numberClass.getProperty("prototype");
 
 	constants.forEach(function (name) {
