@@ -1,13 +1,35 @@
 var objectFactory = require("../types/object-factory");
 
+function implicitEquals (a, b) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value == b.value;
+	}
+
+	if ((a.type === "number" || b.type === "number") || (a.type === "boolean" || b.type === "boolean")) {
+		return a.toNumber() === b.toNumber();
+	}
+
+	if (a.type === "string" || b.type === "string") {
+		return a.toString() === b.toString();
+	}
+
+	return a.value == b.value;
+}
+
+function not (fn) {
+	return function (a, b) {
+		return !fn(a, b);
+	};
+}
+
 /* eslint eqeqeq:0 */
 var binaryOperators = {
 	"+": function (a, b) { return a.value + b.value; },
 	"-": function (a, b) { return a.value - b.value; },
 	"/": function (a, b) { return a.value / b.value; },
 	"*": function (a, b) { return a.value * b.value; },
-	"==": function (a, b) { return a.value == b.value; },
-	"!=": function (a, b) { return a.value != b.value; },
+	"==": implicitEquals,
+	"!=": not(implicitEquals),
 	"===": function (a, b) { return a.equals(b); },
 	"!==": function (a, b) { return !a.equals(b); },
 	"<": function (a, b) { return a.value < b.value; },

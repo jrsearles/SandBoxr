@@ -5,28 +5,41 @@ var utils = require("../utils");
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
 var staticMethods = ["fromCharCode"];
 var slice = Array.prototype.slice;
+var propertyConfig = { configurable: true, enumerable: false, writable: true };
+
+function getString (value, executionContext) {
+	if (!value) {
+		return "";
+	}
+
+	if (value.isPrimitive) {
+		return value.toString();
+	}
+
+	var primitiveValue = utils.callMethod(value, "toString", [], executionContext);
+	if (primitiveValue && primitiveValue.isPrimitive) {
+		return primitiveValue.toString();
+	}
+
+	primitiveValue = utils.callMethod(value, "valueOf", [], executionContext);
+	if (primitiveValue && primitiveValue.isPrimitive) {
+		return primitiveValue.toString();
+	}
+
+	throw new TypeError("Cannot convert object to primitive value.");
+}
 
 module.exports = function (globalScope) {
 	var stringClass = objectFactory.createFunction(function (value) {
-		if (!value) {
-			return objectFactory.createPrimitive("");
+		value = getString(value, this);
+
+		// called as new
+		if (this.scope.thisNode !== globalScope) {
+			return utils.createWrappedPrimitive(this.node, value);
 		}
 
-		if (!value.isPrimitive) {
-			var primitiveValue = utils.callMethod(value, "toString", [], this);
-			if (!primitiveValue || !primitiveValue.isPrimitive) {
-				primitiveValue = utils.callMethod(value, "valueOf", [], this) || primitiveValue;
-			}
-
-			if (primitiveValue && !primitiveValue.isPrimitive) {
-				throw new TypeError("Cannot convert object to primitive value.");
-			}
-
-			value = primitiveValue;
-		}
-
-		return objectFactory.createPrimitive(value.toString());
-	});
+		return objectFactory.createPrimitive(value);
+	}, globalScope);
 
 	var proto = stringClass.getProperty("prototype");
 
@@ -35,14 +48,14 @@ module.exports = function (globalScope) {
 		if (fn) {
 			proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
 		}
-	});
+	}, propertyConfig);
 
 	staticMethods.forEach(function (name) {
 		var fn = String[name];
 		if (fn) {
 			stringClass.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
 		}
-	});
+	}, propertyConfig);
 
 	proto.setProperty("split", objectFactory.createFunction(function (separator, limit) {
 		separator = separator && separator.value;
@@ -56,7 +69,7 @@ module.exports = function (globalScope) {
 		});
 
 		return arr;
-	}));
+	}), propertyConfig);
 
 	proto.setProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
 		var match = regexOrSubstr && regexOrSubstr.value;
@@ -75,7 +88,7 @@ module.exports = function (globalScope) {
 		}
 
 		return objectFactory.createPrimitive(this.node.value.replace(match, substrOrFn && substrOrFn.value));
-	}));
+	}), propertyConfig);
 
 	proto.setProperty("match", objectFactory.createFunction(function (regex) {
 		var results = this.node.value.match(regex && regex.value);
@@ -88,8 +101,8 @@ module.exports = function (globalScope) {
 			return matches;
 		}
 
-		return typeRegistry.get("NULL");
-	}));
+		return typeRegistry.get("null");
+	}), propertyConfig);
 
 	typeRegistry.set("String", stringClass);
 	globalScope.setProperty("String", stringClass);

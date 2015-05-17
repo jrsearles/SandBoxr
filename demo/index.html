@@ -11,19 +11,9 @@
 <textarea id="codeArea" cols="40" rows="8">
 var passed = true;
 
-if (x !== undefined) {
-    passed = false
-}   
-
-var x = true;
-var y = false;
-
-if (x !== true) {
-    passed = false;
-} 
-
-if (y !== false) {
-    passed = false;
+var __obj = {toString: function() {return "1"}, valueOf: function() {return new Object();}}
+if (Number(__obj) !== 1) {
+	passed = false;
 }
 
 passed;

@@ -104,7 +104,7 @@ ObjectType.prototype = {
 		var self = this;
 		configs.forEach(function (prop) {
 			descriptor[prop] = prop in descriptor ? descriptor[prop] : true;
-			self[prop][name] = descriptor[prop];
+			self[prop][name] = !!descriptor[prop];
 		});
 
 		if (descriptor.getter || descriptor.setter) {

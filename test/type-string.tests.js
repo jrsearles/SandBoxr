@@ -131,5 +131,20 @@ describe("String", function () {
 				runner.runBlock("var a = {toString:function() { return {}; } };String(a);");
 			}).to.throw(TypeError);
 		});
+
+		it("should show typeof `object` when creating use `new`", function () {
+			var result = runner.runBlock("typeof new String('foo');");
+			expect(result.value).to.equal("object");
+		});
+
+		it("should not strictly equal a primitive string", function () {
+			var result = runner.runBlock("new String('foo') === 'foo';");
+			expect(result.value).to.be.false;
+		});
+
+		it("should implicitly equal a primitive string", function () {
+			var result = runner.runBlock("new String('foo') == 'foo';");
+			expect(result.value).to.be.true;
+		});
 	});
 });

@@ -48,5 +48,14 @@ module.exports = {
 		}
 
 		return null;
+	},
+
+	createWrappedPrimitive: function (source, value) {
+		source.value = value;
+		source.toString = function () { return String(value); };
+		source.toNumber = function () { return Number(value); };
+		source.toBoolean = function () { return Boolean(value); };
+		source.valueOf = function () { return value; };
+		return source;
 	}
 };

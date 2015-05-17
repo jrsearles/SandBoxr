@@ -26,5 +26,22 @@ describe("Types", function () {
 				expect(result.value).to.equal(Number[name]);
 			});
 		});
+
+		describe("when creating", function () {
+			it("should return as object if called with `new`", function () {
+				var result = runner.runBlock("typeof new Number(1)");
+				expect(result.value).to.equal("object");
+			});
+
+			it("should not strictly equal a number primitive", function () {
+				var result = runner.runBlock("1 === new Number(1);");
+				expect(result.value).to.be.false;
+			});
+
+			it("should implicitly equal a number primitive", function () {
+				var result = runner.runBlock("1 == new Number(1);");
+				expect(result.value).to.be.true;
+			});
+		});
 	});
 });
