@@ -4,6 +4,7 @@ var objectFactory = require("../types/object-factory");
 function Scope (parent, thisNode) {
 	ObjectType.call(this, parent);
 	this.thisNode = thisNode || (parent && parent.thisNode) || this;
+	this.global = parent ? parent.global : this;
 }
 
 Scope.prototype = Object.create(ObjectType.prototype);
@@ -23,15 +24,12 @@ Scope.prototype.getProperty = function (name) {
 	throw new ReferenceError(name + " is not defined");
 };
 
-Scope.prototype.setProperty = function (name, value, fixed, nonenumerable) {
+Scope.prototype.setProperty = function (name, value) {
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
 		if (name in current.properties) {
-			if (current.writable[name]) {
-				ObjectType.prototype.setProperty.apply(current, arguments);
-			}
-
+			ObjectType.prototype.setProperty.apply(current, arguments);
 			return;
 		}
 

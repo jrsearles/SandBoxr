@@ -1,5 +1,5 @@
 var objectFactory = require("./types/object-factory");
-var typeRegistry = require("./types/type-registry");
+// var typeRegistry = require("./types/type-registry");
 var FunctionType = require("./types/function-type");
 
 function getValues (args) {
@@ -34,7 +34,7 @@ module.exports = {
 		scope.setProperty("arguments", argumentList);
 
 		params.forEach(function (param, index) {
-			scope.setProperty(param.name, args[index] || typeRegistry.get("undefined"));
+			scope.setProperty(param.name, args[index] || scope.global.getProperty("undefined"));
 		});
 	},
 

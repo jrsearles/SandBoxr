@@ -1,4 +1,4 @@
-var typeRegistry = require("../types/type-registry");
+// var typeRegistry = require("../types/type-registry");
 
 module.exports = function VariableDeclarator (context) {
 	var id = context.node.id.name;
@@ -8,7 +8,7 @@ module.exports = function VariableDeclarator (context) {
 		value = context.create(context.node.init).execute().result;
 	}
 
-	value = value || typeRegistry.get("undefined");
+	value = value || context.scope.global.getProperty("undefined");
 	context.scope.setProperty(id, value);
 
 	return context.result(value, id);

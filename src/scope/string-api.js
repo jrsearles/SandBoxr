@@ -1,5 +1,4 @@
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
 var utils = require("../utils");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
@@ -41,7 +40,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(value);
 	}, globalScope);
 
-	var proto = stringClass.getProperty("prototype");
+	var proto = stringClass.properties.prototype;
 
 	protoMethods.forEach(function (name) {
 		var fn = String.prototype[name];
@@ -63,7 +62,7 @@ module.exports = function (globalScope) {
 
 		var result = this.node.value.split(separator, limit);
 
-		var arr = objectFactory.create("ARRAY");
+		var arr = objectFactory.create("Array");
 		result.forEach(function (value, index) {
 			arr.setProperty(index, objectFactory.createPrimitive(value));
 		});
@@ -93,7 +92,7 @@ module.exports = function (globalScope) {
 	proto.setProperty("match", objectFactory.createFunction(function (regex) {
 		var results = this.node.value.match(regex && regex.value);
 		if (results) {
-			var matches = objectFactory.create("ARRAY");
+			var matches = objectFactory.create("Array");
 			results.forEach(function (value, index) {
 				matches.setProperty(index, objectFactory.createPrimitive(value));
 			});
@@ -101,9 +100,8 @@ module.exports = function (globalScope) {
 			return matches;
 		}
 
-		return typeRegistry.get("null");
+		return globalScope.getProperty("null");
 	}), propertyConfig);
 
-	typeRegistry.set("String", stringClass);
 	globalScope.setProperty("String", stringClass);
 };

@@ -1,4 +1,4 @@
-var typeRegistry = require("../types/type-registry");
+// var typeRegistry = require("../types/type-registry");
 var scopedBlock = { "CallExpression": true, "NewExpression": true, "FunctionExpression": true };
 
 function populateHoistedVariables (node, declarators) {
@@ -40,7 +40,7 @@ function populateHoistedVariables (node, declarators) {
 }
 
 function hoistVariables (nodes, scope) {
-	var undef = typeRegistry.get("undefined");
+	var undef = scope.global.getProperty("undefined");
 	var variables = [];
 	populateHoistedVariables(nodes, variables);
 

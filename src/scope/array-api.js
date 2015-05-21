@@ -1,7 +1,6 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
 var ArrayType = require("../types/array-type");
-var typeRegistry = require("../types/type-registry");
 
 var slice = Array.prototype.slice;
 
@@ -14,10 +13,6 @@ function getStartIndex (index, length) {
 }
 
 function executeCallback (callback, thisArg, executionContext, index) {
-	// if (callback.type !== "function") {
-	// 	throw new TypeError();
-	// }
-
 	var scope = executionContext.scope.createScope(thisArg);
 	var args = [executionContext.node.properties[index], objectFactory.createPrimitive(index), executionContext.node];
 
@@ -35,7 +30,7 @@ function executeAccumulator (callback, priorValue, executionContext, index) {
 
 module.exports = function (globalScope) {
 	var arrayClass = objectFactory.createFunction(utils.wrapNative(Array));
-	var proto = arrayClass.getProperty("prototype");
+	var proto = arrayClass.properties.prototype;
 
 	arrayClass.setProperty("isArray", objectFactory.createFunction(function (obj) {
 		return globalScope.createPrimitive(obj instanceof ArrayType);
@@ -97,7 +92,7 @@ module.exports = function (globalScope) {
 		begin = begin ? begin.toNumber() : 0;
 		end = end ? end.toNumber() : this.node.properties.length.value;
 
-		var arr = objectFactory.create("ARRAY");
+		var arr = objectFactory.create("Array");
 
 		// since slice is generic we can just call it against our properties object which is array-like enough
 		slice.call(this.node.properties, begin, end).forEach(function (element, index) {
@@ -111,7 +106,7 @@ module.exports = function (globalScope) {
 		start = start.toNumber();
 		deleteCount = deleteCount.toNumber();
 
-		var removed = objectFactory.create("ARRAY");
+		var removed = objectFactory.create("Array");
 		var length = this.node.properties.length.value;
 		var newCount = arguments.length - 2;
 		var i, j = 0;
@@ -142,7 +137,7 @@ module.exports = function (globalScope) {
 	}));
 
 	proto.setProperty("concat", objectFactory.createFunction(function () {
-		var newArray = objectFactory.create("ARRAY");
+		var newArray = objectFactory.create("Array");
 		var arrays = slice.call(arguments);
 
 		// add "this" array to bunch
@@ -221,7 +216,7 @@ module.exports = function (globalScope) {
 	}));
 
 	proto.setProperty("map", objectFactory.createFunction(function (callback, thisArg) {
-		var newArray = objectFactory.create("ARRAY");
+		var newArray = objectFactory.create("Array");
 
 		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
 			if (i in this.node.properties) {
@@ -233,7 +228,7 @@ module.exports = function (globalScope) {
 	}));
 
 	proto.setProperty("filter", objectFactory.createFunction(function (callback, thisArg) {
-		var newArray = objectFactory.create("ARRAY");
+		var newArray = objectFactory.create("Array");
 		var index = 0;
 
 		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
@@ -374,6 +369,6 @@ module.exports = function (globalScope) {
 	// but will call Object..toString if not
 	proto.setProperty("toString", proto.properties.join);
 
-	typeRegistry.set("ARRAY", arrayClass);
+	// typeRegistry.set("ARRAY", arrayClass);
 	globalScope.setProperty("Array", arrayClass);
 };

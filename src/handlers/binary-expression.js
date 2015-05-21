@@ -51,7 +51,7 @@ var binaryOperators = {
 				return true;
 			}
 
-			current = current.parent && current.parent.proto;
+			current = current.proto;
 		}
 
 		return false;

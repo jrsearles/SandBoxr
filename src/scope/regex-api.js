@@ -1,10 +1,9 @@
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
 var utils = require("../utils");
 
 module.exports = function (globalScope) {
 	var regexClass = objectFactory.createFunction(utils.wrapNative(RegExp));
-	var proto = regexClass.getProperty("prototype");
+	var proto = regexClass.properties.prototype;
 
 	proto.setProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)));
 
@@ -15,7 +14,7 @@ module.exports = function (globalScope) {
 		this.node.setProperty("lastIndex", objectFactory.createPrimitive(this.node.value.lastIndex));
 
 		if (match) {
-			var arr = objectFactory.create("ARRAY");
+			var arr = objectFactory.create("Array");
 			for (var i = 0, ln = match.length; i < ln; i++) {
 				arr.setProperty(i, objectFactory.createPrimitive(match[i]));
 			}
@@ -26,9 +25,8 @@ module.exports = function (globalScope) {
 			return arr;
 		}
 
-		return typeRegistry.get("null");
+		return this.scope.global.getProperty("null");
 	}));
 
-	typeRegistry.set("RegExp", regexClass);
 	globalScope.setProperty("RegExp", regexClass);
 };

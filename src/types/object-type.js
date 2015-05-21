@@ -38,6 +38,7 @@ ObjectType.prototype = {
 	init: function () { },
 
 	setProto: function (proto) {
+		// this.parent = this.properties.prototype = proto;
 		this.proto = this.properties.prototype = proto;
 	},
 
@@ -57,7 +58,7 @@ ObjectType.prototype = {
 				};
 			}
 
-			current = current.parent && current.parent.proto;
+			current = current.proto;
 		}
 
 		return undefined;

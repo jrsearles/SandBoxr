@@ -1,16 +1,16 @@
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
 var utils = require("../utils");
 
 module.exports = function (globalScope) {
+	var undef = globalScope.getProperty("undefined");
+
 	var objectClass = objectFactory.createFunction(function () {
 		return objectFactory.createObject();
 	});
 
-	var proto = objectClass.getProperty("prototype");
+	var proto = objectClass.properties.prototype;
 	proto.setProperty("hasOwnProperty", objectFactory.createFunction(function (name) {
 		name = name.toString();
-		// var hasOwn = name in this.node.properties || (this.node.parent && this.node.parent.proto && name in this.node.parent.proto.properties);
 		return objectFactory.createPrimitive(name in this.node.properties);
 	}), { enumerable: false });
 
@@ -18,18 +18,31 @@ module.exports = function (globalScope) {
 		return this.node;
 	}));
 
+	proto.setProperty("isPrototypeOf", objectFactory.createFunction(function (obj) {
+		var current = obj;
+		while (current) {
+			if (current === this.scope.thisNode) {
+				return objectFactory.createPrimitive(true);
+			}
+
+			current = current.proto;
+		}
+
+		return objectFactory.createPrimitive(false);
+	}));
+
 	objectClass.setProperty("create", objectFactory.createFunction(function (parent, properties) {
 		var obj = objectFactory.createObject();
 
 		if (parent) {
-			obj.setProperty("prototype", parent);
+			obj.setProto(parent.proto);
 		}
 
 		return obj;
 	}));
 
 	objectClass.setProperty("defineProperty", objectFactory.createFunction(function (obj, prop, descriptor) {
-		var value = typeRegistry.get("undefined");
+		var value = undef;
 		var options = { writable: false, enumerable: false, configurable: false };
 		var executionContext = this;
 		var getter, setter;
@@ -66,7 +79,7 @@ module.exports = function (globalScope) {
 
 					utils.loadArguments(setter.node.params, arguments, scope);
 					var executionResult = executionContext.create(setter.node.body, setter.node, scope).execute();
-					return executionResult ? executionResult.result : typeRegistry.get("undefined");
+					return executionResult ? executionResult.result : undef;
 				};
 			}
 
@@ -82,7 +95,6 @@ module.exports = function (globalScope) {
 		prop = prop.toString();
 		if (prop in obj.properties) {
 			var descriptor = obj.getPropertyDescriptor(prop);
-			var undef = typeRegistry.get("undefined");
 
 			var result = objectFactory.createObject();
 			result.setProperty("configurable", objectFactory.createPrimitive(descriptor.configurable));
@@ -103,7 +115,7 @@ module.exports = function (globalScope) {
 			return result;
 		}
 
-		return typeRegistry.get("undefined");
+		return undef;
 	}));
 
 	objectClass.setProperty("keys", objectFactory.createFunction(function (obj) {
@@ -133,6 +145,5 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(obj.extensible !== false);
 	}));
 
-	typeRegistry.set("Object", objectClass);
 	globalScope.setProperty("Object", objectClass);
 };

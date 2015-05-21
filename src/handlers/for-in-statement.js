@@ -13,7 +13,7 @@ module.exports = function ForInStatement (context) {
 			}
 		}
 
-		obj = obj.parent && obj.parent.proto;
+		obj = obj.parent;
 	}
 
 	return value;

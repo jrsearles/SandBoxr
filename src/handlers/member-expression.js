@@ -1,4 +1,4 @@
-var typeRegistry = require("../types/type-registry");
+// var typeRegistry = require("../types/type-registry");
 
 module.exports = function MemberExpression (context) {
 	var obj = context.create(context.node.object).execute().result;
@@ -12,5 +12,5 @@ module.exports = function MemberExpression (context) {
 		value = context.create(context.node.property, context.node, obj).execute().result;
 	}
 
-	return context.result(value || typeRegistry.get("undefined"), name, obj);
+	return context.result(value || context.scope.global.getProperty("undefined"), name, obj);
 };

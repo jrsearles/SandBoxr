@@ -1,5 +1,4 @@
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
 var utils = require("../utils");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
@@ -53,7 +52,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(value);
 	}, globalScope);
 
-	var proto = numberClass.getProperty("prototype");
+	var proto = numberClass.properties.prototype;
 
 	constants.forEach(function (name) {
 		numberClass.setProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
@@ -73,6 +72,5 @@ module.exports = function (globalScope) {
 		}
 	});
 
-	typeRegistry.set("NUMBER", numberClass);
 	globalScope.setProperty("Number", numberClass);
 };

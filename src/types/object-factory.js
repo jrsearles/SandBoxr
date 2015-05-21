@@ -6,49 +6,90 @@ var ObjectType = require("./object-type");
 var ArrayType = require("./array-type");
 var StringType = require("./string-type");
 var ErrorType = require("./error-type");
-var typeRegistry = require("./type-registry");
 
 var objectRgx = /\[object (\w+)\]/;
 
 var parentless = {
-	"UNDEFINED": true,
-	"NULL": true,
-	"FUNCTION": true
+	"Undefined": true,
+	"Null": true,
+	"Function": true
 };
 
+var orphans = Object.create(null);
+
+function setOrphans (scope) {
+	var parent;
+
+	for (var typeName in orphans) {
+		parent = scope.getProperty(typeName);
+		if (parent) {
+			orphans[typeName].forEach(function (child) {
+				child.setProto(parent.properties.prototype);
+			});
+
+			delete orphans[typeName];
+		}
+	}
+}
+
+function setParent (typeName, instance, scope) {
+	if (typeName in parentless) {
+		return;
+	}
+
+	var parent = scope.properties[typeName];
+	if (parent) {
+		instance.setProto(parent.properties.prototype);
+		return;
+	}
+
+	// during initialization it is possible for objects to be created
+	// before the types have been registered - add a registry of items
+	// and these can be filled in when the type is registered
+	orphans[typeName] = orphans[typeName] || [];
+	orphans[typeName].push(instance);
+}
+
 module.exports = {
+	startScope: function (scope) {
+		this.scope = scope;
+	},
+
+	endScope: function () {
+		setOrphans(this.scope);
+	},
+
 	createPrimitive: function (value) {
 		var typeName = objectRgx.exec(Object.prototype.toString.call(value))[1];
 		return this.create(typeName, value);
 	},
 
 	create: function (typeName, value) {
-		typeName = typeName.toUpperCase();
 		var instance;
 
 		switch (typeName) {
-			case "STRING":
+			case "String":
 				instance = new StringType(value);
 				break;
 
-			case "NUMBER":
-			case "BOOLEAN":
-			case "DATE":
-			case "NULL":
-			case "UNDEFINED":
+			case "Number":
+			case "Boolean":
+			case "Date":
+			case "Null":
+			case "Undefined":
 				instance = new PrimitiveType(value);
 				break;
 
-			case "REGEXP":
+			case "RegExp":
 				instance = new RegexType(value);
 				break;
 
-			case "ARRAY":
+			case "Array":
 				instance = new ArrayType();
 				break;
 
-			case "ERROR":
-				typeName = (value.name || typeName).toUpperCase();
+			case "Error":
+				typeName = value.name || typeName;
 				instance = new ErrorType(value);
 				break;
 
@@ -57,26 +98,21 @@ module.exports = {
 		}
 
 		instance.init(this);
-
-		// during initialization it is possible for objects to be created
-		// before the types have been registered - add a registry of items
-		// and these can be filled in when the type is registered
-		if (!(typeName in parentless)) {
-			typeRegistry.setParent(instance, typeName);
-		}
-
+		setParent(typeName, instance, this.scope);
 		return instance;
 	},
 
 	createObject: function (parent) {
 		if (parent !== null) {
-			parent = parent || typeRegistry.get("Object");
-			// instance.setProto(parent);
+			parent = parent || this.scope.getProperty("Object");
 		}
 
-		var instance = new ObjectType(parent);
-		instance.init(this);
+		var instance = new ObjectType();
+		if (parent && parent.properties && parent.properties.prototype) {
+			instance.setProto(parent.properties.prototype);
+		}
 
+		instance.init(this);
 		return instance;
 	},
 
@@ -90,7 +126,16 @@ module.exports = {
 		}
 
 		instance.init(this);
-		typeRegistry.setParent(instance, "Function");
+
+		var functionClass = this.scope.properties.Function;
+		if (functionClass) {
+			for (var prop in functionClass.properties) {
+				instance.setProperty(prop, functionClass.properties[prop], { configurable: false, enumerable: false, writable: true });
+			}
+		} else {
+			delete instance.properties.prototype;
+		}
+
 		return instance;
 	}
 };

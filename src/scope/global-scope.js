@@ -1,7 +1,6 @@
 var Scope = require("./scope");
 var PrimitiveType = require("../types/primitive-type");
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
 var numberAPI = require("./number-api");
 var stringAPI = require("./string-api");
 var functionAPI = require("./function-api");
@@ -14,17 +13,14 @@ var regexAPI = require("./regex-api");
 var errorAPI = require("./error-api");
 
 module.exports = function () {
-	// var globalObject = new ObjectType();
 	var scope = new Scope();
-	// scope.thisNode = scope;
+	objectFactory.startScope(scope);
 
 	var undefinedClass = new PrimitiveType(undefined);
 	scope.setProperty("undefined", undefinedClass);
-	typeRegistry.set("UNDEFINED", undefinedClass);
 
 	var nullClass = new PrimitiveType(null);
 	scope.setProperty("null", nullClass, { configurable: false, writable: false });
-	typeRegistry.set("NULL", nullClass);
 
 	// set globals
 	scope.setProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false });
@@ -45,5 +41,6 @@ module.exports = function () {
 	mathAPI(scope);
 	errorAPI(scope);
 
+	objectFactory.endScope();
 	return scope;
 };

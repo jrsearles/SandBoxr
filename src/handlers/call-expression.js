@@ -1,6 +1,6 @@
 var FunctionType = require("../types/function-type");
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
+// var typeRegistry = require("../types/type-registry");
 var utils = require("../utils");
 
 module.exports = function CallExpression (context) {
@@ -28,5 +28,5 @@ module.exports = function CallExpression (context) {
 		executionResult = executionResult && executionResult.result;
 	}
 
-	return context.result(newObj || executionResult || typeRegistry.get("undefined"));
+	return context.result(newObj || executionResult || context.scope.global.getProperty("undefined"));
 };

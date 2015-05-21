@@ -1,5 +1,4 @@
 var objectFactory = require("../types/object-factory");
-var typeRegistry = require("../types/type-registry");
 
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError"];
 
@@ -10,7 +9,6 @@ module.exports = function (globalScope) {
 		return obj;
 	});
 
-	typeRegistry.set("Error", errorClass);
 	globalScope.setProperty("Error", errorClass);
 
 	errorTypes.forEach(function (type) {
@@ -20,7 +18,6 @@ module.exports = function (globalScope) {
 			return err;
 		});
 
-		typeRegistry.set(type, errClass);
 		globalScope.setProperty(type, errClass);
 	});
 };
