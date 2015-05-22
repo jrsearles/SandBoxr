@@ -5,6 +5,7 @@ function PrimitiveType (value, parent) {
 	this.isPrimitive = true;
 	this.value = value;
 	this.type = typeof value;
+	this.objectType = Object.prototype.toString.call(value);
 }
 
 PrimitiveType.prototype = Object.create(ObjectType.prototype);

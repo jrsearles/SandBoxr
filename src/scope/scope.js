@@ -21,7 +21,7 @@ Scope.prototype.getProperty = function (name) {
 		current = current.parent;
 	}
 
-	throw new ReferenceError(name + " is not defined");
+	return undefined;
 };
 
 Scope.prototype.setProperty = function (name, value) {

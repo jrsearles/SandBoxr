@@ -6,8 +6,6 @@ function ExecutionContext (runner, node, callee, scope) {
 	this.callee = callee;
 	this.scope = scope;
 	this.label = null;
-
-	this.trying = false;
 	this.errorHandler = null;
 }
 
@@ -17,7 +15,6 @@ ExecutionContext.prototype.execute = function () {
 
 ExecutionContext.prototype.create = function (node, callee, scope) {
 	var context = new ExecutionContext(this.runner, node, callee, scope || this.scope);
-	context.trying = this.trying;
 	context.errorHandler = this.errorHandler;
 	return context;
 };
@@ -25,18 +22,15 @@ ExecutionContext.prototype.create = function (node, callee, scope) {
 ExecutionContext.prototype.createLabel = function (node, label) {
 	var context = new ExecutionContext(this.runner, node, null, this.scope);
 	context.label = label;
-	context.trying = this.trying;
 	context.errorHandler = this.errorHandler;
 	return context;
 };
 
 ExecutionContext.prototype.beginTry = function (errorHandler) {
-	this.trying = true;
 	this.errorHandler = errorHandler;
 };
 
 ExecutionContext.prototype.endTry = function () {
-	this.trying = false;
 	this.errorHandler = null;
 };
 

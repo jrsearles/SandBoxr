@@ -141,5 +141,12 @@ describe("Types", function () {
 				expect(result.value).to.equal(42);
 			});
 		});
+
+		describe("Object.prototype.toString", function () {
+			it("should return expected value", function () {
+				var result = runner.runBlock("({}).toString();");
+				expect(result.value).to.equal("[object Object]");
+			})
+		})
 	});
 });

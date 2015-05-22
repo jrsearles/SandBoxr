@@ -13,4 +13,9 @@ describe("Variables", function () {
 		var a = scope.getProperty("a");
 		expect(a.value).to.be.undefined;
 	});
+
+	it("Should not add a property to an object during a check", function () {
+		var result = runner.runBlock("var a = {};if (a.notexist !== undefined) {}\n!('notexist' in a);");
+		expect(result.value).to.be.true;
+	});
 });

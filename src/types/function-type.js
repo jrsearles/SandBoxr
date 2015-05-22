@@ -3,6 +3,7 @@ var ObjectType = require("./object-type");
 function FunctionType (node, parentScope) {
 	ObjectType.call(this);
 	this.type = "function";
+	this.objectType = "[object Function]";
 	this.native = false;
 	this.node = node;
 	this.parentScope = parentScope;

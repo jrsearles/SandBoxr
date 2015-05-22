@@ -18,6 +18,10 @@ module.exports = function (globalScope) {
 		return this.node;
 	}));
 
+	proto.setProperty("toString", objectFactory.createFunction(function () {
+		return objectFactory.createPrimitive(this.scope.thisNode.objectType);
+	}));
+
 	proto.setProperty("isPrototypeOf", objectFactory.createFunction(function (obj) {
 		var current = obj;
 		while (current) {

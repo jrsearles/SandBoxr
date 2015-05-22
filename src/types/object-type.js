@@ -20,6 +20,7 @@ function configureAccessor (obj, name, descriptor) {
 function ObjectType (parent) {
 	this.isPrimitive = false;
 	this.type = "object";
+	this.objectType = "[object Object]";
 	this.parent = parent;
 
 	this.writable = Object.create(null);

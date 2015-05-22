@@ -2,6 +2,7 @@ var ObjectType = require("./object-type");
 
 function ArrayType (parent) {
 	ObjectType.call(this, parent);
+	this.objectType = "[object Array]";
 }
 
 ArrayType.prototype = Object.create(ObjectType.prototype);
