@@ -43,5 +43,12 @@ describe("Types", function () {
 				expect(result.value).to.be.true;
 			});
 		});
+
+		describe("when converting", function () {
+			it("should use toString if valueOf does not return number", function () {
+				var result = runner.runBlock("var __obj = {toString: function() {return '1'}, valueOf: function() {return new Object();}};Number(__obj);");
+				expect(result.value).to.equal(1);
+			});
+		});
 	});
 });

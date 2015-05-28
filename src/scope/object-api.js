@@ -131,6 +131,10 @@ module.exports = function (globalScope) {
 		return arr;
 	}));
 
+	objectClass.setProperty("getPrototypeOf", objectFactory.createFunction(function (obj) {
+		return obj.proto;
+	}));
+
 	objectClass.setProperty("freeze", objectFactory.createFunction(function (obj) {
 		obj.freeze();
 		return obj;

@@ -1,4 +1,5 @@
 var objectFactory = require("../types/object-factory");
+var typeUtils = require("../types/type-utils");
 
 function implicitEquals (a, b) {
 	if (a.isPrimitive && b.isPrimitive) {
@@ -13,7 +14,7 @@ function implicitEquals (a, b) {
 		return a.toString() === b.toString();
 	}
 
-	return a.value == b.value;
+	return a.valueOf() == b.valueOf();
 }
 
 function not (fn) {
@@ -22,9 +23,24 @@ function not (fn) {
 	};
 }
 
+function add (a, b, executionContext) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value + b.value;
+	}
+
+	a = typeUtils.toPrimitive(executionContext, a);
+	b = typeUtils.toPrimitive(executionContext, b);
+
+	if (a.type === "string" || b.type === "string") {
+		return String(a) + String(b);
+	}
+
+	return a + b;
+}
+
 /* eslint eqeqeq:0 */
 var binaryOperators = {
-	"+": function (a, b) { return a.value + b.value; },
+	"+": add,
 	"-": function (a, b) { return a.value - b.value; },
 	"/": function (a, b) { return a.value / b.value; },
 	"*": function (a, b) { return a.value * b.value; },
@@ -61,7 +77,7 @@ var binaryOperators = {
 module.exports = function BinaryExpression (context) {
 	var left = context.create(context.node.left).execute().result;
 	var right = context.create(context.node.right).execute().result;
-	var newValue = binaryOperators[context.node.operator](left, right);
+	var newValue = binaryOperators[context.node.operator](left, right, context);
 
 	return context.result(objectFactory.createPrimitive(newValue));
 };

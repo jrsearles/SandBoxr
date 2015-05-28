@@ -146,7 +146,14 @@ describe("Types", function () {
 			it("should return expected value", function () {
 				var result = runner.runBlock("({}).toString();");
 				expect(result.value).to.equal("[object Object]");
-			})
-		})
+			});
+		});
+
+		describe("Object.getPrototypeOf", function () {
+			it("should return the expected prototype", function () {
+				var result = runner.runBlock("Object.getPrototypeOf({}) === Object.prototype;");
+				expect(result.value).to.be.true;
+			});
+		});
 	});
 });

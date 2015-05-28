@@ -1,5 +1,4 @@
 var objectFactory = require("./types/object-factory");
-// var typeRegistry = require("./types/type-registry");
 var FunctionType = require("./types/function-type");
 
 function getValues (args) {
@@ -40,11 +39,16 @@ module.exports = {
 
 	callMethod: function (obj, name, args, executionContext) {
 		var method = obj.getProperty(name);
-		if (method && method instanceof FunctionType && !(method.native)) {
+
+		if (method && method instanceof FunctionType) {
 			var scope = executionContext.scope.createScope(obj);
 
-			this.loadArguments(method.node.params, args, scope);
-			return executionContext.create(method.node.body, method.node, scope).execute().result;
+			if (method.native) {
+				return method.nativeFunction.apply(executionContext.create(obj, obj, scope), args);
+			} else {
+				this.loadArguments(method.node.params, args, scope);
+				return executionContext.create(method.node.body, method.node, scope).execute().result;
+			}
 		}
 
 		return null;

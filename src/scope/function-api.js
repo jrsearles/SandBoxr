@@ -5,7 +5,9 @@ var slice = Array.prototype.slice;
 var propertyConfig = { configurable: false, enumerable: false, writable: false };
 
 module.exports = function (globalScope) {
-	var functionClass = objectFactory.createFunction(utils.wrapNative(Function));
+	var functionClass = objectFactory.createFunction(function () {
+		return objectFactory.createObject();
+	});
 
 	functionClass.setProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
 	functionClass.setProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);

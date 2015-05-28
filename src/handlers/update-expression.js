@@ -1,10 +1,9 @@
 var objectFactory = require("../types/object-factory");
 
 module.exports = function UpdateExpression (context) {
-	var obj = context.create(context.node.argument).execute().result;
-	var originalValue = obj.value;
-	var newValue = obj.value;
-	var returnValue;
+	var executionResult = context.create(context.node.argument).execute();
+	var originalValue = executionResult.result;
+	var newValue = originalValue.toNumber();
 
 	switch (context.node.operator) {
 		case "++":
@@ -19,7 +18,10 @@ module.exports = function UpdateExpression (context) {
 			throw new Error("Unexpected update operator: " + context.node.operator);
 	}
 
-	obj.value = newValue;
-	returnValue = objectFactory.createPrimitive(context.node.prefix ? newValue : originalValue);
-	return context.result(returnValue, null, obj);
+	newValue = objectFactory.createPrimitive(newValue);
+	var obj = executionResult.object || context.scope;
+	var name = executionResult.name;
+
+	obj.setProperty(name, newValue);
+	return context.result(context.node.prefix ? newValue : originalValue, name, obj);
 };

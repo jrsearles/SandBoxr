@@ -14,6 +14,7 @@ var tests = [
 	root + "suite/ch06/**/*.js",
 	//root + "suite/ch07/7.7/**/*.js",
 	root + "suite/ch08/**/*.js",
+	root + "suite/ch09/**/*.js",
 	root + "suite/ch12/12.8/**/*.js"
 ];
 
@@ -45,7 +46,7 @@ for (var i = 0; running && i < tests.length; i++) {
 
 		try {	
 			var ast = acorn.parse(include + contents);
-			var runner = new SandBoxr(ast);
+			var runner = new SandBoxr(ast, { parser: acorn.parse });
 
 			runner.execute();
 		} catch (err) {

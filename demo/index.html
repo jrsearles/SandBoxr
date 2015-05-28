@@ -9,14 +9,14 @@
 </head>
 <body>
 <textarea id="codeArea" cols="40" rows="8">
-var passed = true;
+var result = "";
 
-var __obj = {toString: function() {return "1"}, valueOf: function() {return new Object();}}
-if (Number(__obj) !== 1) {
-	passed = false;
+function $ERROR(msg) {
+  result += "\n" + msg;
 }
 
-passed;
+
+result;
 </textarea>
 <button id="execButton">Exec</button>
 <button id="interpretButton">Interpret</button>
@@ -31,7 +31,7 @@ passed;
 		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
 
 		debugger;
-		var runner = new SandBoxr(ast);
+		var runner = new SandBoxr(ast, { parser: acorn.parse });
 		var value = runner.execute();
 
 		document.getElementById("result").innerHTML = JSON.stringify(value && value.result.value);

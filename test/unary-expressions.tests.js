@@ -24,6 +24,11 @@ describe("Expressions", function () {
 			expect(result.value).to.be.a("boolean");
 		});
 
+		it("should convert a primitive wrapper object to appropriate boolean", function () {
+			var result = runner.runBlock("!(new String())");
+			expect(result.value).to.be.false;
+		});
+
 		it("should negate a boolean value", function () {
 			var result = runner.runBlock("!false");
 			expect(result.value).to.be.true;

@@ -1,33 +1,62 @@
 var objectFactory = require("../types/object-factory");
+var typeUtils = require("../types/type-utils");
+
+var safeOperators = {
+	"typeof": true,
+	"delete": true
+};
+
+function getArgument (context) {
+	if (safeOperators[context.node.operator]) {
+		// when checking typeof the argument might not exist
+		// todo: this is ugly - need to come up with better strategy
+		try {
+			return context.create(context.node.argument).execute();
+		} catch (ex) {
+			if (ex instanceof ReferenceError) {
+				return undefined;
+			}
+
+			throw ex;
+		}
+	}
+
+	return context.create(context.node.argument).execute();
+}
 
 module.exports = function UnaryExpression (context) {
-	var result = context.create(context.node.argument).execute();
-	var value = result.result;
+	var result = getArgument(context);
+	var value = result && result.result;
 	var newValue;
 
 	switch (context.node.operator) {
 		case "typeof":
-			newValue = objectFactory.createPrimitive(value.type);
+			newValue = result ? objectFactory.createPrimitive(value.type) : objectFactory.createPrimitive("undefined");
 			break;
 
 		case "-":
-			newValue = objectFactory.createPrimitive(-value.toNumber());
+			newValue = objectFactory.createPrimitive(-(typeUtils.toPrimitive(context, value)));
 			break;
 
 		case "+":
-			newValue = objectFactory.createPrimitive(value.toNumber());
+			newValue = objectFactory.createPrimitive(+(typeUtils.toPrimitive(context, value)));
 			break;
 
 		case "!":
-			newValue = objectFactory.createPrimitive(!value.toBoolean());
+			newValue = objectFactory.createPrimitive(!(value.isPrimitive ? value.toBoolean() : true));
 			break;
 
 		case "~":
-			newValue = objectFactory.createPrimitive(~value.toNumber());
+			newValue = objectFactory.createPrimitive(~(typeUtils.toPrimitive(context, value)));
 			break;
 
 		case "delete":
-			newValue = objectFactory.createPrimitive(result.object.deleteProperty(result.name));
+			if (result) {
+				newValue = objectFactory.createPrimitive((result.object || context.scope).deleteProperty(result.name));
+			} else {
+				newValue = objectFactory.createPrimitive(false);
+			}
+
 			break;
 
 		case "void":

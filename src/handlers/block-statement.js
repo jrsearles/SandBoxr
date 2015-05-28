@@ -25,16 +25,21 @@ function populateHoistedVariables (node, declarators) {
 			return;
 		}
 
+		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
+			declarators.push(node.left);
+			// keep analyzing
+		}
+
 		if (scopedBlock[node.type]) {
 			return;
 		}
 	}
 
 	// todo: we could be smarter about this by being more descerning about what nodes we traverse
-	var prop, current;
+	var prop;
 	for (prop in node) {
-		if (node.hasOwnProperty(prop) && node[prop] && typeof prop[node] === "object") {
-			populateHoistedVariables(current, declarators);
+		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
+			populateHoistedVariables(node[prop], declarators);
 		}
 	}
 }
@@ -42,11 +47,15 @@ function populateHoistedVariables (node, declarators) {
 function hoistVariables (nodes, scope) {
 	var undef = scope.global.getProperty("undefined");
 	var variables = [];
+	var name;
+
 	populateHoistedVariables(nodes, variables);
 
 	variables.forEach(function (decl) {
-		if (!scope.hasProperty(decl.id.name)) {
-			scope.setProperty(decl.id.name, undef);
+		name = decl.name || decl.id.name;
+
+		if (!scope.hasProperty(name)) {
+			scope.setProperty(name, undef);
 		}
 	});
 }

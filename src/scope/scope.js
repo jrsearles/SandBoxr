@@ -24,12 +24,12 @@ Scope.prototype.getProperty = function (name) {
 	return undefined;
 };
 
-Scope.prototype.setProperty = function (name, value) {
+Scope.prototype.setProperty = function (name, value, descriptor) {
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
 		if (name in current.properties) {
-			ObjectType.prototype.setProperty.apply(current, arguments);
+			ObjectType.prototype.setProperty.call(current, name, value);
 			return;
 		}
 
@@ -37,7 +37,7 @@ Scope.prototype.setProperty = function (name, value) {
 	}
 
 	// add to current scope if not found
-	ObjectType.prototype.setProperty.apply(this, arguments);
+	ObjectType.prototype.setProperty.call(this, name, value, descriptor || { configurable: false });
 };
 
 Scope.prototype.hasProperty = function (name) {

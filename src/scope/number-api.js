@@ -1,5 +1,6 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
+var typeUtils = require("../types/type-utils");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toFixed", "toPrecision", "toString"];
@@ -18,31 +19,9 @@ var polyfills = {
 	"parseInt": parseInt
 };
 
-function getNumber (value, executionContext) {
-	if (!value) {
-		return 0;
-	}
-
-	if (value.isPrimitive) {
-		return value.toNumber();
-	}
-
-	var primitiveValue = utils.callMethod(value, "valueOf", [], executionContext);
-	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.toNumber();
-	}
-
-	primitiveValue = utils.callMethod(value, "toString", [], executionContext);
-	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.toNumber();
-	}
-
-	throw new TypeError("Cannot convert object to primitive");
-}
-
 module.exports = function (globalScope) {
 	var numberClass = objectFactory.createFunction(function (value) {
-		value = getNumber(value, this);
+		value = Number(typeUtils.toPrimitive(this, value, "number"));
 
 		// called with `new`
 		if (this.scope.thisNode !== globalScope) {

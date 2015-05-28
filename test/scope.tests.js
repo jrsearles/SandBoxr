@@ -40,5 +40,10 @@ describe("Scope", function () {
 				runner.runBlock("foo;");
 			}).to.throw(ReferenceError);
 		});
+
+		it("should assign undeclared variable to global", function () {
+			var scope = runner.getScope("var obj = {};__ref = obj;");
+			expect(scope.global.getProperty("__ref")).not.to.be.undefined;
+		});
 	});
 });

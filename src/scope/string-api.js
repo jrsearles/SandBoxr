@@ -1,36 +1,15 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
+var typeUtils = require("../types/type-utils");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
 var staticMethods = ["fromCharCode"];
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
-function getString (value, executionContext) {
-	if (!value) {
-		return "";
-	}
-
-	if (value.isPrimitive) {
-		return value.toString();
-	}
-
-	var primitiveValue = utils.callMethod(value, "toString", [], executionContext);
-	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.toString();
-	}
-
-	primitiveValue = utils.callMethod(value, "valueOf", [], executionContext);
-	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.toString();
-	}
-
-	throw new TypeError("Cannot convert object to primitive value.");
-}
-
 module.exports = function (globalScope) {
 	var stringClass = objectFactory.createFunction(function (value) {
-		value = getString(value, this);
+		value = String(typeUtils.toPrimitive(this, value, "string"));
 
 		// called as new
 		if (this.scope.thisNode !== globalScope) {
@@ -72,6 +51,7 @@ module.exports = function (globalScope) {
 
 	proto.setProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
 		var match = regexOrSubstr && regexOrSubstr.value;
+
 		if (substrOrFn && substrOrFn.type === "function") {
 			var executionContext = this;
 			var wrappedReplacer = function () {

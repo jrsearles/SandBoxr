@@ -11,8 +11,9 @@ var arrayAPI = require("./array-api");
 var mathAPI = require("./math-api");
 var regexAPI = require("./regex-api");
 var errorAPI = require("./error-api");
+var utils = require("../utils");
 
-module.exports = function () {
+module.exports = function (options) {
 	var scope = new Scope();
 	objectFactory.startScope(scope);
 
@@ -40,6 +41,17 @@ module.exports = function () {
 	regexAPI(scope);
 	mathAPI(scope);
 	errorAPI(scope);
+
+	scope.setProperty("isNaN", objectFactory.createFunction(utils.wrapNative(isNaN)));
+
+	if (options.parser) {
+		scope.setProperty("eval", objectFactory.createFunction(function (code) {
+			var undef = this.scope.global.getProperty("undefined");
+			var ast = options.parser(code.toString());
+			var executionResult = this.create(ast).execute();
+			return executionResult ? executionResult.result : undef;
+		}));
+	}
 
 	objectFactory.endScope();
 	return scope;

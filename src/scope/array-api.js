@@ -29,7 +29,36 @@ function executeAccumulator (callback, priorValue, executionContext, index) {
 }
 
 module.exports = function (globalScope) {
-	var arrayClass = objectFactory.createFunction(utils.wrapNative(Array));
+	var arrayClass = objectFactory.createFunction(function () {
+		var newArray;
+		if (this.scope.thisNode === globalScope) {
+			newArray = objectFactory.create("Array");
+		} else {
+			newArray = this.scope.thisNode;
+
+			// this will be a regular object - we need to trick it into becoming an array
+			newArray.setProto(globalScope.getProperty("Array").proto);
+			newArray.setProperty = ArrayType.prototype.setProperty.bind(newArray);
+			ArrayType.prototype.init.call(newArray, objectFactory);
+		}
+
+		if (arguments.length > 0) {
+			if (arguments.length === 1 && arguments[0].type === "number") {
+				if (arguments[0].toNumber() < 0) {
+					throw new RangeError("Invalid array length");
+				}
+
+				newArray.setProperty("length", arguments[0]);
+			} else {
+				for (var i = 0, ln = arguments.length; i < ln; i++) {
+					newArray.setProperty(i, arguments[i]);
+				}
+			}
+		}
+
+		return newArray;
+	}, globalScope);
+
 	var proto = arrayClass.properties.prototype;
 
 	arrayClass.setProperty("isArray", objectFactory.createFunction(function (obj) {
