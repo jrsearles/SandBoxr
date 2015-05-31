@@ -1,4 +1,4 @@
-// var typeRegistry = require("../types/type-registry");
+var objectFactory = require("../types/object-factory");
 var scopedBlock = { "CallExpression": true, "NewExpression": true, "FunctionExpression": true };
 
 function populateHoistedVariables (node, declarators) {
@@ -54,8 +54,13 @@ function hoistVariables (nodes, scope) {
 	variables.forEach(function (decl) {
 		name = decl.name || decl.id.name;
 
-		if (!scope.hasProperty(name)) {
-			scope.setProperty(name, undef);
+		if (decl.type === "FunctionDeclaration") {
+			// functions can be used before they are defined
+			scope.setProperty(name, objectFactory.createFunction(decl, scope));
+		} else {
+			if (!scope.hasProperty(name)) {
+				scope.setProperty(name, undef);
+			}
 		}
 	});
 }
@@ -68,14 +73,8 @@ module.exports = function BlockStatement (context) {
 	hoistVariables(context.node.body, context.scope);
 
 	for (; i < ln; i++) {
-		try {
-			result = context.create(context.node.body[i]).execute();
-		} catch (err) {
-			context.handleError(err);
-			break;
-		}
-
-		if (result && (result.cancel || result.skip || result.exit)) {
+		result = context.create(context.node.body[i]).execute();
+		if (result && result.shouldBreak(context)) {
 			break;
 		}
 	}

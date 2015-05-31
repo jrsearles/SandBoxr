@@ -1,5 +1,5 @@
 var objectFactory = require("../types/object-factory");
-var typeUtils = require("../types/type-utils");
+var utils = require("../utils");
 
 function implicitEquals (a, b) {
 	if (a.isPrimitive && b.isPrimitive) {
@@ -28,8 +28,8 @@ function add (a, b, executionContext) {
 		return a.value + b.value;
 	}
 
-	a = typeUtils.toPrimitive(executionContext, a);
-	b = typeUtils.toPrimitive(executionContext, b);
+	a = utils.toPrimitive(executionContext, a);
+	b = utils.toPrimitive(executionContext, b);
 
 	if (a.type === "string" || b.type === "string") {
 		return String(a) + String(b);
@@ -54,7 +54,7 @@ var binaryOperators = {
 	">=": function (a, b) { return a.value >= b.value; },
 	"<<": function (a, b) { return a.value << b.value; },
 	">>": function (a, b) { return a.value >> b.value; },
-	">>>": function (a, b) { return a.value >>> b.value; },
+	">>>": function (a, b, context) { return utils.toPrimitive(context, a) >>> utils.toPrimitive(context, b); },
 	"%": function (a, b) { return a.value % b.value; },
 	"|": function (a, b) { return a.value | b.value; },
 	"^": function (a, b) { return a.value ^ b.value; },

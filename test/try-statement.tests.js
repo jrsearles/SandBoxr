@@ -33,13 +33,14 @@ describe("Try-Catch-Finally", function () {
 		expect(result.value).to.be.true;
 	});
 
-	it("should stop executing code within the try block.", function () {
-		var result = runner.runBlock("var passed = true;try { a(); passed = false; } catch (err) {;}\npassed;");
+	it("should continue executing code outside of the try block.", function () {
+		var result = runner.runBlock("var passed = false;try { a(); } catch (err) {;}\npassed = true;passed;");
 		expect(result.value).to.be.true;
 	});
 
-	it("should continue executing code outside of the try block.", function () {
-		var result = runner.runBlock("var passed = false;try { a(); } catch (err) {;}\npassed = true;passed;");
+	it("should stop executing code within the try block.", function () {
+		var code = "var passed=true;try {\nvar object = {valueOf: function() {throw 'error'}, toString: function() {return 1}};\n~object;passed=false;}\ncatch (e) {;}\npassed;";
+		var result = runner.runBlock(code);
 		expect(result.value).to.be.true;
 	});
 });

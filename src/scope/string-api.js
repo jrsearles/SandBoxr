@@ -1,6 +1,5 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
-var typeUtils = require("../types/type-utils");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "substring", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
 var staticMethods = ["fromCharCode"];
@@ -9,7 +8,7 @@ var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (globalScope) {
 	var stringClass = objectFactory.createFunction(function (value) {
-		value = String(typeUtils.toPrimitive(this, value, "string"));
+		value = String(utils.toPrimitive(this, value, "string"));
 
 		// called as new
 		if (this.scope.thisNode !== globalScope) {

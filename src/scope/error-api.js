@@ -1,6 +1,6 @@
 var objectFactory = require("../types/object-factory");
 
-var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError"];
+var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
 module.exports = function (globalScope) {
 	var errorClass = objectFactory.createFunction(function (message) {

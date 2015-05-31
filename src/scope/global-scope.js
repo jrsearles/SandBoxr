@@ -11,11 +11,14 @@ var arrayAPI = require("./array-api");
 var mathAPI = require("./math-api");
 var regexAPI = require("./regex-api");
 var errorAPI = require("./error-api");
+var consoleAPI = require("./console-api");
 var utils = require("../utils");
+
+var globalFunctions = ["isNaN", "parseInt", "parseFloat", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent"];
 
 module.exports = function (options) {
 	var scope = new Scope();
-	objectFactory.startScope(scope);
+	scope.start();
 
 	var undefinedClass = new PrimitiveType(undefined);
 	scope.setProperty("undefined", undefinedClass);
@@ -41,18 +44,26 @@ module.exports = function (options) {
 	regexAPI(scope);
 	mathAPI(scope);
 	errorAPI(scope);
+	consoleAPI(scope);
 
-	scope.setProperty("isNaN", objectFactory.createFunction(utils.wrapNative(isNaN)));
+	globalFunctions.forEach(function (name) {
+		scope.setProperty(name, objectFactory.createFunction(utils.wrapNative(global[name])));
+	});
+
+	// scope.setProperty("isNaN", objectFactory.createFunction(utils.wrapNative(isNaN)));
+	// scope.setProperty("parseInt", objectFactory.createFunction(utils.wrapNative(parseInt)));
+	// scope.setProperty("parseFloat", objectFactory.createFunction(utils.wrapNative(parseFloat)));
+	// scope.setProperty("isFinite", objectFactory.createFunction(utils.wrapNative(isFinite)));
 
 	if (options.parser) {
 		scope.setProperty("eval", objectFactory.createFunction(function (code) {
 			var undef = this.scope.global.getProperty("undefined");
 			var ast = options.parser(code.toString());
-			var executionResult = this.create(ast).execute();
+			var executionResult = this.create(ast, null, this.scope.parent).execute();
 			return executionResult ? executionResult.result : undef;
 		}));
 	}
 
-	objectFactory.endScope();
+	scope.end();
 	return scope;
 };

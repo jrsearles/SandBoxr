@@ -83,7 +83,6 @@ ObjectType.prototype = {
 		var descriptor = this.getPropertyDescriptor(name);
 		if (descriptor && options) {
 			this.updateProperty(name, options, descriptor);
-			return;
 		}
 
 		if (!descriptor) {

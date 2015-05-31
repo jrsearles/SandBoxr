@@ -8,6 +8,11 @@ module.exports = function DoWhileStatement (context) {
 
 	while (passed) {
 		result = context.create(context.node.body).execute();
+
+		if (result && result.shouldBreak(context, true)) {
+			break;
+		}
+
 		passed = context.create(context.node.test).execute().result.toBoolean();
 	}
 

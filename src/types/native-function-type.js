@@ -1,5 +1,4 @@
 var FunctionType = require("./function-type");
-var ObjectType = require("./object-type");
 
 function NativeFunctionType (fn, parentScope) {
 	FunctionType.call(this, null, parentScope);
@@ -15,8 +14,9 @@ NativeFunctionType.prototype.init = function (objectFactory) {
 	// set length property
 	this.setProperty("length", objectFactory.createPrimitive(this.nativeFunction.length), { configurable: false, enumerable: false, writable: false });
 
-	var proto = new ObjectType();
-	proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: false });
+	// var proto = new ObjectType();
+	var proto = objectFactory.createObject();
+	proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: true });
 	this.setProto(proto);
 };
 

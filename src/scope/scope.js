@@ -1,14 +1,38 @@
 var ObjectType = require("../types/object-type");
 var objectFactory = require("../types/object-factory");
+var keywords = require("../keywords");
+
+var loading = false;
 
 function Scope (parent, thisNode) {
 	ObjectType.call(this, parent);
-	this.thisNode = thisNode || (parent && parent.thisNode) || this;
-	this.global = parent ? parent.global : this;
+
+	this.thisNode = thisNode;
+	if (parent) {
+		this.thisNode = this.thisNode || parent.thisNode;
+		this.global = parent.global;
+		this.version = parent.version;
+		this.strict = parent.strict;
+	} else {
+		this.thisNode = this.thisNode || this;
+		this.global = this;
+		this.version = "es5";
+		this.strict = false;
+	}
 }
 
 Scope.prototype = Object.create(ObjectType.prototype);
 Scope.prototype.constructor = Scope;
+
+Scope.prototype.start = function () {
+	loading = true;
+	objectFactory.startScope(this);
+};
+
+Scope.prototype.end = function () {
+	loading = false;
+	objectFactory.endScope();
+};
 
 Scope.prototype.getProperty = function (name) {
 	var current = this;
@@ -25,6 +49,12 @@ Scope.prototype.getProperty = function (name) {
 };
 
 Scope.prototype.setProperty = function (name, value, descriptor) {
+	if (!loading) {
+		if (keywords.isReserved(name, this)) {
+			throw new SyntaxError("Unexpected token " + name);
+		}
+	}
+
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
@@ -69,5 +99,8 @@ Scope.prototype.createFunction = function (fnOrNode) {
 	return objectFactory.createFunction(fnOrNode);
 };
 
+Scope.prototype.setStrict = function (strict) {
+	this.strict = strict;
+};
 
 module.exports = Scope;

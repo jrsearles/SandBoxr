@@ -11,6 +11,14 @@ function PrimitiveType (value, parent) {
 PrimitiveType.prototype = Object.create(ObjectType.prototype);
 PrimitiveType.prototype.constructor = PrimitiveType;
 
+PrimitiveType.prototype.getProperty = function (name) {
+	if (this.value == null) {
+		throw new TypeError("Cannot read property '" + name + "' of " + this.type);
+	}
+
+	return ObjectType.prototype.getProperty.apply(this, arguments);
+};
+
 // overwrite object methods
 PrimitiveType.prototype.toBoolean = function () { return Boolean(this.value); };
 PrimitiveType.prototype.toNumber = function () { return Number(this.value); };

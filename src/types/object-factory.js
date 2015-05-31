@@ -6,8 +6,7 @@ var ObjectType = require("./object-type");
 var ArrayType = require("./array-type");
 var StringType = require("./string-type");
 var ErrorType = require("./error-type");
-
-var objectRgx = /\[object (\w+)\]/;
+var util = require("../util");
 
 var parentless = {
 	"Undefined": true,
@@ -30,9 +29,11 @@ function setOrphans (scope) {
 			delete orphans[typeName];
 		}
 	}
+
+	orphans = Object.create(null);
 }
 
-function setParent (typeName, instance, scope) {
+function setProto (typeName, instance, scope) {
 	if (typeName in parentless) {
 		return;
 	}
@@ -60,8 +61,7 @@ module.exports = {
 	},
 
 	createPrimitive: function (value) {
-		var typeName = objectRgx.exec(Object.prototype.toString.call(value))[1];
-		return this.create(typeName, value);
+		return this.create(util.getType(value), value);
 	},
 
 	create: function (typeName, value) {
@@ -98,11 +98,22 @@ module.exports = {
 		}
 
 		instance.init(this);
-		setParent(typeName, instance, this.scope);
+		setProto(typeName, instance, this.scope);
 		return instance;
 	},
 
 	createObject: function (parent) {
+		if (parent) {
+			// special cases
+			if (parent === this.scope.getProperty("Date")) {
+				return this.create("Date");
+			}
+
+			if (parent === this.scope.getProperty("Array")) {
+				return this.create("Array");
+			}
+		}
+
 		if (parent !== null) {
 			parent = parent || this.scope.getProperty("Object");
 		}

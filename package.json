@@ -19,6 +19,7 @@
     "mocha": "^2.2.4",
     "strictify": "^0.2.0",
     "test262-harness": "^1.5.3",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "yargs": "^3.10.0"
   }
 }

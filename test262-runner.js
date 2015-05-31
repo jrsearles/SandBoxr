@@ -2,10 +2,12 @@ var fs = require("fs");
 var glob = require("glob");
 var colors = require("colors");
 var acorn = require("acorn");
+var args = require("yargs").argv;
+
 var SandBoxr = require("./src/sandboxr");
-var verbose = false;
+var verbose = args.v || args.verbose;
 var stopOnFail = true;
-var strictMode = false;
+var strictMode = args.strict;
 
 var root = "test262/test/";
 var include = fs.readFileSync("test262-harness.js");
@@ -15,12 +17,13 @@ var tests = [
 	//root + "suite/ch07/7.7/**/*.js",
 	root + "suite/ch08/**/*.js",
 	root + "suite/ch09/**/*.js",
+	root + "suite/ch10/**/*.js",
 	root + "suite/ch12/12.8/**/*.js"
 ];
 
 var descriptionRgx = /\*.*@description\s+(.*)\s*\n/i;
 var negativeRgx = /\*.*@negative\b/i;
-var onlyStrictRgx = /\*.*@onlyStrict\b/i;
+var strictRgx = /\*.*@(?:no|only)Strict\b/i;
 
 var running = true;
 var files, file, contents, description;
@@ -37,14 +40,16 @@ for (var i = 0; running && i < tests.length; i++) {
 			continue;
 		}
 
-		if (!strictMode && onlyStrictRgx.test(contents)) {
+		if (!strictMode && strictRgx.test(contents)) {
 			testSkipped(file, "Strict mode");
 			continue;
 		}
 
 		description = descriptionRgx.exec(contents)[1];
 
-		try {	
+		try {
+			testStarting(file, description);
+
 			var ast = acorn.parse(include + contents);
 			var runner = new SandBoxr(ast, { parser: acorn.parse });
 
@@ -61,6 +66,12 @@ for (var i = 0; running && i < tests.length; i++) {
 		}
 
 		testPassed(file, description);
+	}
+}
+
+function testStarting (name, desc) {
+	if (verbose) {
+		console.log(colors.blue("starting: ") + name + " (" + desc + ")");
 	}
 }
 

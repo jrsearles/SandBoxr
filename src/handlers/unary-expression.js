@@ -1,5 +1,5 @@
 var objectFactory = require("../types/object-factory");
-var typeUtils = require("../types/type-utils");
+var utils = require("../utils");
 
 var safeOperators = {
 	"typeof": true,
@@ -35,11 +35,11 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "-":
-			newValue = objectFactory.createPrimitive(-(typeUtils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(-(utils.toPrimitive(context, value)));
 			break;
 
 		case "+":
-			newValue = objectFactory.createPrimitive(+(typeUtils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(+(utils.toPrimitive(context, value)));
 			break;
 
 		case "!":
@@ -47,7 +47,7 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "~":
-			newValue = objectFactory.createPrimitive(~(typeUtils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(~(utils.toPrimitive(context, value)));
 			break;
 
 		case "delete":

@@ -1,30 +1,27 @@
+function shouldContinue (context) {
+	if (!context.node.test) {
+		return true;
+	}
+
+	return context.create(context.node.test).execute().result.toBoolean();
+}
+
 module.exports = function ForStatement (context) {
 	if (context.node.init) {
 		context.create(context.node.init).execute();
 	}
 
-	var passed = !context.node.test || context.create(context.node.test).execute().result.toBoolean();
-	var bodyValue;
-
-	while (passed) {
-		bodyValue = context.create(context.node.body).execute();
-		if (bodyValue && (bodyValue.cancel || bodyValue.skip)) {
-			if (bodyValue.name && bodyValue.name !== context.label) {
-				break;
-			}
-
-			if (bodyValue.cancel) {
-				bodyValue.cancel = false;
-				return bodyValue;
-			}
+	var result;
+	while (shouldContinue(context)) {
+		result = context.create(context.node.body).execute();
+		if (result && result.shouldBreak(context, true)) {
+			break;
 		}
 
 		if (context.node.update) {
 			context.create(context.node.update).execute();
 		}
-
-		passed = !context.node.test || context.create(context.node.test).execute().result.toBoolean();
 	}
 
-	return bodyValue;
+	return result;
 };

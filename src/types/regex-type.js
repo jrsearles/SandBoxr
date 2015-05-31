@@ -3,6 +3,7 @@ var ObjectType = require("./object-type");
 function RegexType (value, parent) {
 	ObjectType.call(this, parent);
 	this.value = value;
+	this.objectType = "[object RegExp]";
 }
 
 RegexType.prototype = Object.create(ObjectType.prototype);

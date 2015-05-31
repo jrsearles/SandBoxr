@@ -4,7 +4,17 @@ var utils = require("../utils");
 module.exports = function (globalScope) {
 	var undef = globalScope.getProperty("undefined");
 
-	var objectClass = objectFactory.createFunction(function () {
+	var objectClass = objectFactory.createFunction(function (value) {
+		if (value) {
+			if (!value.isPrimitive) {
+				// if an object is passed in just return
+				return value;
+			}
+
+			var obj = objectFactory.createObject();
+			return utils.createWrappedPrimitive(obj, value.value);
+		}
+
 		return objectFactory.createObject();
 	});
 
@@ -15,11 +25,21 @@ module.exports = function (globalScope) {
 	}), { enumerable: false });
 
 	proto.setProperty("valueOf", objectFactory.createFunction(function () {
+		if ("value" in this.node) {
+			return objectFactory.createPrimitive(this.node.value);
+		}
+
 		return this.node;
 	}));
 
 	proto.setProperty("toString", objectFactory.createFunction(function () {
-		return objectFactory.createPrimitive(this.scope.thisNode.objectType);
+		var obj = this.scope.thisNode;
+		var value = obj.objectType;
+		if (obj.isPrimitive || obj.value !== undefined) {
+			value = String(obj.value);
+		}
+
+		return objectFactory.createPrimitive(value);
 	}));
 
 	proto.setProperty("isPrototypeOf", objectFactory.createFunction(function (obj) {

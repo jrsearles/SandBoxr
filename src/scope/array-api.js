@@ -37,9 +37,9 @@ module.exports = function (globalScope) {
 			newArray = this.scope.thisNode;
 
 			// this will be a regular object - we need to trick it into becoming an array
-			newArray.setProto(globalScope.getProperty("Array").proto);
-			newArray.setProperty = ArrayType.prototype.setProperty.bind(newArray);
-			ArrayType.prototype.init.call(newArray, objectFactory);
+			// newArray.setProto(globalScope.getProperty("Array").proto);
+			// newArray.setProperty = ArrayType.prototype.setProperty.bind(newArray);
+			// ArrayType.prototype.init.call(newArray, objectFactory);
 		}
 
 		if (arguments.length > 0) {

@@ -1,6 +1,5 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
-var typeUtils = require("../types/type-utils");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toFixed", "toPrecision", "toString"];
@@ -21,7 +20,7 @@ var polyfills = {
 
 module.exports = function (globalScope) {
 	var numberClass = objectFactory.createFunction(function (value) {
-		value = Number(typeUtils.toPrimitive(this, value, "number"));
+		value = Number(utils.toPrimitive(this, value, "number"));
 
 		// called with `new`
 		if (this.scope.thisNode !== globalScope) {

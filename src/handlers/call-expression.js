@@ -1,6 +1,5 @@
 var FunctionType = require("../types/function-type");
 var objectFactory = require("../types/object-factory");
-// var typeRegistry = require("../types/type-registry");
 var utils = require("../utils");
 
 module.exports = function CallExpression (context) {
