@@ -15,9 +15,9 @@ module.exports = function (globalScope) {
 
 	var proto = dateClass.proto;
 
-	proto.setProperty("valueOf", objectFactory.createFunction(function () {
+	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
 		return objectFactory.createPrimitive(this.node.value.valueOf());
 	}));
 
-	globalScope.setProperty("Date", dateClass);
+	globalScope.defineProperty("Date", dateClass, { enumerable: false });
 };

@@ -7,7 +7,7 @@ module.exports = function ForInStatement (context) {
 
 	while (obj) {
 		for (var prop in obj.properties) {
-			if (obj.enumerable[prop]) {
+			if (obj.properties[prop].enumerable) {
 				context.scope.setProperty(left.name, objectFactory.createPrimitive(prop));
 				result = context.create(context.node.body).execute();
 

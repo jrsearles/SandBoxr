@@ -9,15 +9,16 @@ module.exports = function (globalScope) {
 		return obj;
 	});
 
-	globalScope.setProperty("Error", errorClass);
+	globalScope.defineProperty("Error", errorClass, { enumerable: false });
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
 			var err = objectFactory.createObject(errorClass);
 			err.setProperty("message", message);
+			err.setProperty("type", objectFactory.createPrimitive(type));
 			return err;
 		});
 
-		globalScope.setProperty(type, errClass);
+		globalScope.defineProperty(type, errClass, { enumerable: false });
 	});
 };

@@ -1,4 +1,5 @@
 var FunctionType = require("./function-type");
+var PropertyDescriptor = require("./property-descriptor");
 
 function NativeFunctionType (fn, parentScope) {
 	FunctionType.call(this, null, parentScope);
@@ -16,7 +17,8 @@ NativeFunctionType.prototype.init = function (objectFactory) {
 
 	// var proto = new ObjectType();
 	var proto = objectFactory.createObject();
-	proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: true });
+	// proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: true });
+	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: this })
 	this.setProto(proto);
 };
 

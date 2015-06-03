@@ -287,25 +287,21 @@ describe("Types", function() {
 		describe("forEach", function () {
 			it("should iterate over the array", function () {
 				var result = runner.runBlock("var counter=0;[1,2,3].forEach(function() { counter++; });counter;");
-
 				expect(result.value).to.equal(3);
 			});
 
 			it("should pass in expected arguments", function () {
 				var result = runner.runBlock("var a = [1,2,3], passed = true;a.forEach(function(value, index, arr) { passed = passed && value == a[index] && arr === a; });passed;");
-
 				expect(result.value).to.be.ok;
 			});
 
 			it("should use expected scope", function () {
 				var result = runner.runBlock("var a = [1,2,3], passed = true, scope = {};a.forEach(function(value, index, arr) { passed = passed && this === scope; }, scope);passed;");
-
 				expect(result.value).to.be.ok;
 			});
 
 			it("should skip missing values in sparse array", function () {
 				var result = runner.runBlock("var counter=0;var a = [1,2]; a[10] = 10;a.forEach(function() { counter++; });counter;");
-
 				expect(result.value).to.equal(3);
 			});
 		});

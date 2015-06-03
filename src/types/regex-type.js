@@ -1,7 +1,7 @@
 var ObjectType = require("./object-type");
 
-function RegexType (value, parent) {
-	ObjectType.call(this, parent);
+function RegexType (value) {
+	ObjectType.call(this);
 	this.value = value;
 	this.objectType = "[object RegExp]";
 }

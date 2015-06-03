@@ -2,12 +2,12 @@ var ObjectType = require("../types/object-type");
 var objectFactory = require("../types/object-factory");
 var keywords = require("../keywords");
 
-var loading = false;
-
 function Scope (parent, thisNode) {
-	ObjectType.call(this, parent);
+	ObjectType.call(this);
 
+	this.parent = parent;
 	this.thisNode = thisNode;
+
 	if (parent) {
 		this.thisNode = this.thisNode || parent.thisNode;
 		this.global = parent.global;
@@ -25,12 +25,10 @@ Scope.prototype = Object.create(ObjectType.prototype);
 Scope.prototype.constructor = Scope;
 
 Scope.prototype.start = function () {
-	loading = true;
 	objectFactory.startScope(this);
 };
 
 Scope.prototype.end = function () {
-	loading = false;
 	objectFactory.endScope();
 };
 
@@ -39,7 +37,7 @@ Scope.prototype.getProperty = function (name) {
 
 	while (current) {
 		if (name in current.properties) {
-			return current.properties[name];
+			return current.properties[name].getValue(current);
 		}
 
 		current = current.parent;
@@ -48,13 +46,18 @@ Scope.prototype.getProperty = function (name) {
 	return undefined;
 };
 
-Scope.prototype.setProperty = function (name, value, descriptor) {
-	if (!loading) {
+Scope.prototype.defineProperty = function (name, value, descriptor, throwOnError) {
+	if (throwOnError) {
 		if (keywords.isReserved(name, this)) {
 			throw new SyntaxError("Unexpected token " + name);
 		}
 	}
 
+	// add to current scope
+	ObjectType.prototype.defineProperty.call(this, name, value, descriptor || { configurable: false });
+};
+
+Scope.prototype.setProperty = function (name, value, descriptor) {
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
@@ -66,8 +69,7 @@ Scope.prototype.setProperty = function (name, value, descriptor) {
 		current = current.parent;
 	}
 
-	// add to current scope if not found
-	ObjectType.prototype.setProperty.call(this, name, value, descriptor || { configurable: false });
+	this.defineProperty(name, value, descriptor);
 };
 
 Scope.prototype.hasProperty = function (name) {
@@ -85,6 +87,12 @@ Scope.prototype.hasProperty = function (name) {
 
 Scope.prototype.createScope = function (thisNode) {
 	return new Scope(this, thisNode);
+};
+
+Scope.prototype.withObject = function (obj) {
+	var scope = new Scope(this);
+	scope.properties = obj.properties;
+	return scope;
 };
 
 Scope.prototype.createPrimitive = function (value) {

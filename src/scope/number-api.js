@@ -30,25 +30,25 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(value);
 	}, globalScope);
 
-	var proto = numberClass.properties.prototype;
+	var proto = numberClass.proto;
 
 	constants.forEach(function (name) {
-		numberClass.setProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
+		numberClass.defineProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
 	staticMethods.forEach(function (name) {
 		var fn = Number[name] || polyfills[name];
 		if (fn) {
-			numberClass.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			numberClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
-	globalScope.setProperty("Number", numberClass);
+	globalScope.defineProperty("Number", numberClass, { enumerable: false });
 };

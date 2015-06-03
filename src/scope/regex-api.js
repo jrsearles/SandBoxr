@@ -3,11 +3,11 @@ var utils = require("../utils");
 
 module.exports = function (globalScope) {
 	var regexClass = objectFactory.createFunction(utils.wrapNative(RegExp));
-	var proto = regexClass.properties.prototype;
+	var proto = regexClass.proto;
 
-	proto.setProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)));
+	proto.defineProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)));
 
-	proto.setProperty("exec", objectFactory.createFunction(function (str) {
+	proto.defineProperty("exec", objectFactory.createFunction(function (str) {
 		var match = this.node.value.exec(str.toString());
 
 		// update the last index from the underlying regex
@@ -28,5 +28,5 @@ module.exports = function (globalScope) {
 		return this.scope.global.getProperty("null");
 	}));
 
-	globalScope.setProperty("RegExp", regexClass);
+	globalScope.defineProperty("RegExp", regexClass, { enumerable: false });
 };

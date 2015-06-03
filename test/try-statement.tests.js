@@ -43,4 +43,9 @@ describe("Try-Catch-Finally", function () {
 		var result = runner.runBlock(code);
 		expect(result.value).to.be.true;
 	});
+
+	it("should prefer return from finalizer", function () {
+		var result = runner.runBlock("function f() { try { return false; } finally { return true; }\n}\nf();");
+		expect(result.value).to.be.true;
+	});
 });

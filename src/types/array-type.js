@@ -1,15 +1,19 @@
 var ObjectType = require("./object-type");
+var PropertyDescriptor = require("./property-descriptor");
 
-function ArrayType (parent) {
-	ObjectType.call(this, parent);
+function ArrayType () {
+	ObjectType.call(this);
 	this.objectType = "[object Array]";
 }
 
 ArrayType.prototype = Object.create(ObjectType.prototype);
+ArrayType.prototype.constructor = ArrayType;
+
 ArrayType.prototype.setProperty = function (name, value) {
 	if (typeof name === "number") {
 		// todo: should be a better way to set length, but we can't reference object factory here
-		this.properties.length.value = Math.max(name + 1, this.properties.length.value);
+		var currentLength = this.properties.length.value;
+		currentLength.value = Math.max(name + 1, currentLength.value);
 	} else if (name === "length") {
 		var ln = this.getProperty("length");
 		var i = value.toNumber();
@@ -28,5 +32,4 @@ ArrayType.prototype.init = function (objectFactory) {
 	this.setProperty("length", objectFactory.createPrimitive(0));
 };
 
-ArrayType.prototype.constructor = ArrayType;
 module.exports = ArrayType;

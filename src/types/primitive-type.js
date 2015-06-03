@@ -1,7 +1,7 @@
 var ObjectType = require("./object-type");
 
-function PrimitiveType (value, parent) {
-	ObjectType.call(this, parent);
+function PrimitiveType (value) {
+	ObjectType.call(this);
 	this.isPrimitive = true;
 	this.value = value;
 	this.type = typeof value;
@@ -12,6 +12,7 @@ PrimitiveType.prototype = Object.create(ObjectType.prototype);
 PrimitiveType.prototype.constructor = PrimitiveType;
 
 PrimitiveType.prototype.getProperty = function (name) {
+	// can't read properties off null/undefined
 	if (this.value == null) {
 		throw new TypeError("Cannot read property '" + name + "' of " + this.type);
 	}

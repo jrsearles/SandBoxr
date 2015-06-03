@@ -5,7 +5,7 @@ var utils = require("../utils");
 module.exports = function CallExpression (context) {
 	var node = context.node;
 	var isNew = context.node.type === "NewExpression";
-	var newObj, executionResult;
+	var returnResult;
 
 	var fn = context.create(node.callee).execute();
 	if (!fn.result || !(fn.result instanceof FunctionType)) {
@@ -13,19 +13,24 @@ module.exports = function CallExpression (context) {
 	}
 
 	if (isNew) {
-		newObj = objectFactory.createObject(fn.result);
+		returnResult = objectFactory.createObject(fn.result);
 	}
 
-	var newScope = fn.result.createScope(context.scope, newObj || fn.object);
+	var newScope = fn.result.createScope(context.scope, returnResult || fn.object);
 	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result; });
 	utils.loadArguments(fn.result.native ? [] : fn.result.node.params, args, newScope);
 
 	if (fn.result.native) {
-		executionResult = fn.result.nativeFunction.apply(context.create(newScope.thisNode, newScope.thisNode, newScope), args);
+		returnResult = fn.result.nativeFunction.apply(context.create(newScope.thisNode, fn, newScope), args);
 	} else {
-		executionResult = context.create(fn.result.node.body, fn.result.node, newScope).execute();
-		executionResult = executionResult && executionResult.result;
+		var executionResult = context.create(fn.result.node.body, fn.result.node, newScope).execute();
+
+		if (isNew && executionResult && executionResult.exit) {
+			returnResult = executionResult.result;
+		} else {
+			returnResult = returnResult || (executionResult && executionResult.result);
+		}
 	}
 
-	return context.result(newObj || executionResult || context.scope.global.getProperty("undefined"));
+	return context.result(returnResult || context.scope.global.getProperty("undefined"));
 };

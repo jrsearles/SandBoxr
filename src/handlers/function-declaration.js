@@ -1,5 +1,3 @@
-var objectFactory = require("../types/object-factory");
-
 module.exports = function FunctionDeclaration (context) {
 	// var id = context.node.id.name;
 	// var fn = objectFactory.createFunction(context.node, context.scope);

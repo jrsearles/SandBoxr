@@ -78,7 +78,9 @@ utils = {
 		}
 
 		argumentList.setProperty("length", objectFactory.createPrimitive(ln));
-		scope.setProperty("arguments", argumentList);
+		// argumentList.freeze();
+
+		scope.defineProperty("arguments", argumentList);
 
 		params.forEach(function (param, index) {
 			scope.setProperty(param.name, args[index] || scope.global.getProperty("undefined"));
@@ -106,7 +108,8 @@ utils = {
 
 	createWrappedPrimitive: function (source, value) {
 		var ctor = objectFactory.scope.getProperty(util.getType(value));
-		source.properties.constructor = ctor;
+		// source.properties.constructor = ctor;
+		source.setProperty("constructor", ctor);
 
 		source.value = value;
 		source.toString = function () { return String(value); };

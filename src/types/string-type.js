@@ -1,5 +1,5 @@
 var PrimitiveType = require("./primitive-type");
-// var typeRegistry = require("./type-registry");
+var PropertyDescriptor = require("./property-descriptor");
 
 function StringType (value, parent) {
 	PrimitiveType.call(this, value);
@@ -10,14 +10,19 @@ StringType.prototype.constructor = StringType;
 
 StringType.prototype.init = function (objectFactory) {
 	var self = this;
-
-	Object.defineProperty(this.properties, "length", {
-		configurable: true,
-		enumerable: true,
-		get: function () {
+	this.properties.length = new PropertyDescriptor({
+		getter: function () {
 			return objectFactory.createPrimitive(self.value.length);
 		}
 	});
+
+	// Object.defineProperty(this.properties, "length", {
+	// 	configurable: true,
+	// 	enumerable: true,
+	// 	get: function () {
+	// 		return objectFactory.createPrimitive(self.value.length);
+	// 	}
+	// });
 };
 
 StringType.prototype.hasProperty = function (name) {

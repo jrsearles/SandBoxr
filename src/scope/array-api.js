@@ -1,8 +1,7 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
+var util = require("../util");
 var ArrayType = require("../types/array-type");
-
-var slice = Array.prototype.slice;
 
 function getStartIndex (index, length) {
 	if (index < 0) {
@@ -12,9 +11,17 @@ function getStartIndex (index, length) {
 	return Math.min(index || 0, length);
 }
 
+function getEndIndex (index, length) {
+	if (index < 0) {
+		return Math.max(length + index, 0);
+	}
+
+	return Math.min(index, length);
+}
+
 function executeCallback (callback, thisArg, executionContext, index) {
 	var scope = executionContext.scope.createScope(thisArg);
-	var args = [executionContext.node.properties[index], objectFactory.createPrimitive(index), executionContext.node];
+	var args = [executionContext.node.getProperty(index), objectFactory.createPrimitive(index), executionContext.node];
 
 	utils.loadArguments(callback.node.params, args, scope);
 	return executionContext.create(callback.node.body, callback.node, scope).execute().result;
@@ -22,7 +29,7 @@ function executeCallback (callback, thisArg, executionContext, index) {
 
 function executeAccumulator (callback, priorValue, executionContext, index) {
 	var scope = executionContext.scope.createScope();
-	var args = [priorValue, executionContext.node.properties[index], objectFactory.createPrimitive(index), executionContext.node];
+	var args = [priorValue, executionContext.node.getProperty(index), objectFactory.createPrimitive(index), executionContext.node];
 
 	utils.loadArguments(callback.node.params, args, scope);
 	return executionContext.create(callback.node.body, callback.node, scope).execute().result;
@@ -35,11 +42,6 @@ module.exports = function (globalScope) {
 			newArray = objectFactory.create("Array");
 		} else {
 			newArray = this.scope.thisNode;
-
-			// this will be a regular object - we need to trick it into becoming an array
-			// newArray.setProto(globalScope.getProperty("Array").proto);
-			// newArray.setProperty = ArrayType.prototype.setProperty.bind(newArray);
-			// ArrayType.prototype.init.call(newArray, objectFactory);
 		}
 
 		if (arguments.length > 0) {
@@ -59,13 +61,13 @@ module.exports = function (globalScope) {
 		return newArray;
 	}, globalScope);
 
-	var proto = arrayClass.properties.prototype;
+	var proto = arrayClass.proto;
 
-	arrayClass.setProperty("isArray", objectFactory.createFunction(function (obj) {
+	arrayClass.defineProperty("isArray", objectFactory.createFunction(function (obj) {
 		return globalScope.createPrimitive(obj instanceof ArrayType);
 	}));
 
-	proto.setProperty("push", objectFactory.createFunction(function () {
+	proto.defineProperty("push", objectFactory.createFunction(function () {
 		var start = this.node.getProperty("length").value || 0;
 
 		var i = 0;
@@ -77,7 +79,7 @@ module.exports = function (globalScope) {
 		return this.node.getProperty("length");
 	}));
 
-	proto.setProperty("pop", objectFactory.createFunction(function () {
+	proto.defineProperty("pop", objectFactory.createFunction(function () {
 		var index = this.node.getProperty("length").value;
 		var obj = this.node.getProperty(--index) || objectFactory.createPrimitive(undefined);
 
@@ -89,7 +91,7 @@ module.exports = function (globalScope) {
 		return obj;
 	}));
 
-	proto.setProperty("shift", objectFactory.createFunction(function () {
+	proto.defineProperty("shift", objectFactory.createFunction(function () {
 		var obj = this.node.getProperty(0);
 
 		var i = 1;
@@ -102,12 +104,12 @@ module.exports = function (globalScope) {
 		return obj;
 	}));
 
-	proto.setProperty("unshift", objectFactory.createFunction(function () {
+	proto.defineProperty("unshift", objectFactory.createFunction(function () {
 		var i = this.node.getProperty("length").value;
 		var length = arguments.length;
 
 		while (i--) {
-			this.node.setProperty(i + length, this.node.properties[i]);
+			this.node.setProperty(i + length, this.node.getProperty(i));
 		}
 
 		for (; i < length; i++) {
@@ -117,43 +119,59 @@ module.exports = function (globalScope) {
 		return this.node.getProperty("length");
 	}));
 
-	proto.setProperty("slice", objectFactory.createFunction(function (begin, end) {
+	proto.defineProperty("slice", objectFactory.createFunction(function (begin, end) {
+		var length = this.node.getProperty("length").value;
 		begin = begin ? begin.toNumber() : 0;
-		end = end ? end.toNumber() : this.node.properties.length.value;
+		end = end ? end.toNumber() : length;
 
 		var arr = objectFactory.create("Array");
+		var index = 0;
+
+		begin = getStartIndex(begin, length);
+		end = getEndIndex(end, length);
 
 		// since slice is generic we can just call it against our properties object which is array-like enough
-		slice.call(this.node.properties, begin, end).forEach(function (element, index) {
-			arr.setProperty(index, element);
-		});
+		for (var i = begin; i < end; i++) {
+			arr.setProperty(index++, this.node.getProperty(i));
+		}
+
+		// slice.call(this.node.properties, begin, end).forEach(function (element, index) {
+		// 	arr.setProperty(index, element);
+		// });
 
 		return arr;
 	}));
 
-	proto.setProperty("splice", objectFactory.createFunction(function (start, deleteCount) {
+	proto.defineProperty("splice", objectFactory.createFunction(function (start, deleteCount) {
 		start = start.toNumber();
 		deleteCount = deleteCount.toNumber();
 
 		var removed = objectFactory.create("Array");
-		var length = this.node.properties.length.value;
+		var length = this.node.getProperty("length").value;
 		var newCount = arguments.length - 2;
-		var i, j = 0;
+		var i, removedIndex = 0;
 
 		start = getStartIndex(start, length);
 		deleteCount = Math.min(deleteCount, length - start);
 
 		for (i = start; i < start + deleteCount; i++) {
-			removed.setProperty(j++, this.node.properties[i]);
-			this.node.properties[i] = this.node.properties[i + deleteCount];
+			removed.setProperty(removedIndex++, this.node.getProperty(i));
+			// this.node.properties[i] = this.node.properties[i + deleteCount];
 		}
 
-		this.node.setProperty("length", objectFactory.createPrimitive(length - deleteCount));
+		if (deleteCount > 0) {
+			for (i = start + deleteCount; i < length; i++) {
+				this.node.properties[i - deleteCount] = this.node.properties[i];
+			}
+		}
+
+		length -= deleteCount;
+		this.node.setProperty("length", objectFactory.createPrimitive(length));
 
 		if (newCount > 0) {
-			i = this.node.properties.length.value + newCount;
+			i = length + newCount;
 			while (i-- > start) {
-				this.node.setProperty(i, this.node.properties[i - newCount]);
+				this.node.setProperty(i, this.node.getProperty([i - newCount]));
 			}
 
 			i = 0;
@@ -165,9 +183,9 @@ module.exports = function (globalScope) {
 		return removed;
 	}));
 
-	proto.setProperty("concat", objectFactory.createFunction(function () {
+	proto.defineProperty("concat", objectFactory.createFunction(function () {
 		var newArray = objectFactory.create("Array");
-		var arrays = slice.call(arguments);
+		var arrays = Array.prototype.slice.call(arguments);
 
 		// add "this" array to bunch
 		arrays.unshift(this.node);
@@ -177,8 +195,8 @@ module.exports = function (globalScope) {
 			current = arrays.shift();
 
 			if (current instanceof ArrayType) {
-				for (i = 0, length = current.properties.length.value; i < length; i++) {
-					newArray.setProperty(index++, current.properties[i]);
+				for (i = 0, length = current.getProperty("length").value; i < length; i++) {
+					newArray.setProperty(index++, current.getProperty(i));
 				}
 			} else {
 				newArray.setProperty(index++, current);
@@ -188,20 +206,20 @@ module.exports = function (globalScope) {
 		return newArray;
 	}));
 
-	proto.setProperty("join", objectFactory.createFunction(function (separator) {
+	proto.defineProperty("join", objectFactory.createFunction(function (separator) {
 		separator = arguments.length === 0 ? "," : separator.toString();
 		var stringValues = [];
 
-		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
-			stringValues.push(this.node.properties[i].toString());
+		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
+			stringValues.push(this.node.getProperty(i).toString());
 		}
 
 		return objectFactory.createPrimitive(stringValues.join(separator));
 	}));
 
-	proto.setProperty("indexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
+	proto.defineProperty("indexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
 		var index = arguments.length === 1 ? 0 : fromIndex.toNumber();
-		var length = this.node.properties.length.value;
+		var length = this.node.getProperty("length").value;
 		var notFound = objectFactory.createPrimitive(-1);
 
 		if (length === 0 || index >= length) {
@@ -211,7 +229,7 @@ module.exports = function (globalScope) {
 		index = getStartIndex(index, length);
 
 		for (; index < length; index++) {
-			if (index in this.node.properties && searchElement.equals(this.node.properties[index])) {
+			if (index in this.node.properties && searchElement.equals(this.node.getProperty(index))) {
 				return objectFactory.createPrimitive(index);
 			}
 		}
@@ -219,8 +237,8 @@ module.exports = function (globalScope) {
 		return notFound;
 	}));
 
-	proto.setProperty("lastIndexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
-		var length = this.node.properties.length.value;
+	proto.defineProperty("lastIndexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
+		var length = this.node.getProperty("length").value;
 		var index = arguments.length === 1 ? length : fromIndex.toNumber();
 
 		if (index < 0) {
@@ -228,7 +246,7 @@ module.exports = function (globalScope) {
 		}
 
 		while (index-- > 0) {
-			if (index in this.node.properties && searchElement.equals(this.node.properties[index])) {
+			if (index in this.node.properties && searchElement.equals(this.node.getProperty(index))) {
 				return objectFactory.createPrimitive(index);
 			}
 		}
@@ -236,18 +254,18 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(-1);
 	}));
 
-	proto.setProperty("forEach", objectFactory.createFunction(function (callback, thisArg) {
-		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
+	proto.defineProperty("forEach", objectFactory.createFunction(function (callback, thisArg) {
+		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
 			if (i in this.node.properties) {
 				executeCallback(callback, thisArg, this, i);
 			}
 		}
 	}));
 
-	proto.setProperty("map", objectFactory.createFunction(function (callback, thisArg) {
+	proto.defineProperty("map", objectFactory.createFunction(function (callback, thisArg) {
 		var newArray = objectFactory.create("Array");
 
-		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
+		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
 			if (i in this.node.properties) {
 				newArray.setProperty(i, executeCallback(callback, thisArg, this, i));
 			}
@@ -256,21 +274,21 @@ module.exports = function (globalScope) {
 		return newArray;
 	}));
 
-	proto.setProperty("filter", objectFactory.createFunction(function (callback, thisArg) {
+	proto.defineProperty("filter", objectFactory.createFunction(function (callback, thisArg) {
 		var newArray = objectFactory.create("Array");
 		var index = 0;
 
-		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
+		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
 			if (i in this.node.properties && executeCallback(callback, thisArg, this, i).toBoolean()) {
-				newArray.setProperty(index++, this.node.properties[i]);
+				newArray.setProperty(index++, this.node.getProperty(i));
 			}
 		}
 
 		return newArray;
 	}));
 
-	proto.setProperty("every", objectFactory.createFunction(function (callback, thisArg) {
-		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
+	proto.defineProperty("every", objectFactory.createFunction(function (callback, thisArg) {
+		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
 			if (i in this.node.properties && !executeCallback(callback, thisArg, this, i).toBoolean()) {
 				return objectFactory.createPrimitive(false);
 			}
@@ -279,8 +297,8 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(true);
 	}));
 
-	proto.setProperty("some", objectFactory.createFunction(function (callback, thisArg) {
-		for (var i = 0, length = this.node.properties.length.value; i < length; i++) {
+	proto.defineProperty("some", objectFactory.createFunction(function (callback, thisArg) {
+		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
 			if (i in this.node.properties && executeCallback(callback, thisArg, this, i).toBoolean()) {
 				return objectFactory.createPrimitive(true);
 			}
@@ -289,12 +307,12 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(false);
 	}));
 
-	proto.setProperty("reduce", objectFactory.createFunction(function (callback, initialValue) {
+	proto.defineProperty("reduce", objectFactory.createFunction(function (callback, initialValue) {
 		if (callback.type !== "function") {
 			throw new TypeError();
 		}
 
-		var length = this.node.properties.length.value;
+		var length = this.node.getProperty("length").value;
 		var index = 0;
 		var value;
 
@@ -322,8 +340,8 @@ module.exports = function (globalScope) {
 		return value;
 	}));
 
-	proto.setProperty("reduceRight", objectFactory.createFunction(function (callback, initialValue) {
-		var index = this.node.properties.length.value - 1;
+	proto.defineProperty("reduceRight", objectFactory.createFunction(function (callback, initialValue) {
+		var index = this.node.getProperty("length").value - 1;
 		var value;
 
 		if (arguments.length >= 2) {
@@ -346,8 +364,8 @@ module.exports = function (globalScope) {
 		return value;
 	}));
 
-	proto.setProperty("reverse", objectFactory.createFunction(function () {
-		var length = this.node.properties.length.value;
+	proto.defineProperty("reverse", objectFactory.createFunction(function () {
+		var length = this.node.getProperty("length").value;
 		var temp;
 		for (var i = 0, ln = length / 2; i < ln; i++) {
 			temp = this.node.properties[length - i - 1];
@@ -373,7 +391,7 @@ module.exports = function (globalScope) {
 		return 0;
 	}
 
-	proto.setProperty("sort", objectFactory.createFunction(function (compareFunction) {
+	proto.defineProperty("sort", objectFactory.createFunction(function (compareFunction) {
 		var executionContext = this;
 		var arr = this.node;
 
@@ -385,10 +403,10 @@ module.exports = function (globalScope) {
 		};
 
 		// convert to array, run the wrapped comparer, then re-assign indexes
-		slice.call(arr.properties)
+		util.toArray(arr)
 			.sort(wrappedComparer || defaultComparer)
 			.forEach(function (element, index) {
-				arr.properties[index] = element;
+				arr.setProperty(index, element);
 			});
 
 		return arr;
@@ -396,8 +414,8 @@ module.exports = function (globalScope) {
 
 	// todo: this is a bit hacky - toString will call join if available per spec,
 	// but will call Object..toString if not
-	proto.setProperty("toString", proto.properties.join);
+	proto.defineProperty("toString", proto.properties.join.value);
 
 	// typeRegistry.set("ARRAY", arrayClass);
-	globalScope.setProperty("Array", arrayClass);
+	globalScope.defineProperty("Array", arrayClass, { enumerable: false});
 };

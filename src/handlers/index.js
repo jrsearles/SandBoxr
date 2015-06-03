@@ -30,5 +30,6 @@ handlers.UnaryExpression = require("./unary-expression");
 handlers.UpdateExpression = require("./update-expression");
 handlers.VariableDeclaration = require("./variable-declaration");
 handlers.VariableDeclarator = require("./variable-declarator");
+handlers.WithStatement = require("./with-statement");
 
 module.exports = handlers;

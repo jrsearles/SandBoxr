@@ -14,7 +14,11 @@ module.exports = function (context) {
 		}
 	} finally {
 		if (context.node.finalizer) {
-			result = context.create(context.node.finalizer).execute();
+			var finalResult = context.create(context.node.finalizer).execute();
+
+			if (finalResult && finalResult.shouldBreak(context)) {
+				return finalResult;
+			}
 		}
 	}
 

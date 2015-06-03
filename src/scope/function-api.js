@@ -1,5 +1,6 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
+var util = require("../util");
 
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: false, enumerable: false, writable: false };
@@ -9,28 +10,28 @@ module.exports = function (globalScope) {
 		return objectFactory.createObject();
 	});
 
-	functionClass.setProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
-	functionClass.setProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);
+	functionClass.defineProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
+	functionClass.defineProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);
 
-	functionClass.setProperty("call", objectFactory.createFunction(function (thisArg) {
+	functionClass.defineProperty("call", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var scope = this.scope.createScope(thisArg);
 
-		utils.loadArguments(this.callee.node.params, args, scope);
-		return this.create(this.callee.node.body, this.callee, scope).execute().result;
+		utils.loadArguments(this.node.node.params, args, scope);
+		return this.create(this.node.node.body, this.node, scope).execute().result;
 	}), propertyConfig);
 
-	functionClass.setProperty("apply", objectFactory.createFunction(function (thisArg, argsArray) {
-		var args = argsArray ? slice.call(argsArray.properties) : [];
+	functionClass.defineProperty("apply", objectFactory.createFunction(function (thisArg, argsArray) {
+		var args = util.toArray(argsArray);
 		var scope = this.scope.createScope(thisArg);
 
-		utils.loadArguments(this.callee.node.params, args, scope);
-		return this.create(this.callee.node.body, this.callee, scope).execute().result;
+		utils.loadArguments(this.node.node.params, args, scope);
+		return this.create(this.node.node.body, this.node, scope).execute().result;
 	}), propertyConfig);
 
-	functionClass.setProperty("bind", objectFactory.createFunction(function (thisArg) {
+	functionClass.defineProperty("bind", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
-		var callee = this.callee;
+		var callee = this.node;
 
 		return objectFactory.createFunction(function () {
 			var scope = this.scope.createScope(thisArg);
@@ -39,5 +40,5 @@ module.exports = function (globalScope) {
 		});
 	}), propertyConfig);
 
-	globalScope.setProperty("Function", functionClass);
+	globalScope.defineProperty("Function", functionClass, { enumerable: false });
 };

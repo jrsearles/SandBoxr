@@ -8,7 +8,7 @@ rules:
     comma-style: [2, "last"]
     default-case: 2
     func-style: [2, "declaration"]
-    guard-for-in: 1
+    guard-for-in: 0
     no-floating-decimal: 2
     no-loop-func: 0
     no-nested-ternary: 2

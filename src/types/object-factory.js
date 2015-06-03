@@ -23,7 +23,7 @@ function setOrphans (scope) {
 		parent = scope.getProperty(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
-				child.setProto(parent.properties.prototype);
+				child.setProto(parent.proto);
 			});
 
 			delete orphans[typeName];
@@ -38,9 +38,9 @@ function setProto (typeName, instance, scope) {
 		return;
 	}
 
-	var parent = scope.properties[typeName];
+	var parent = scope.getProperty(typeName);
 	if (parent) {
-		instance.setProto(parent.properties.prototype);
+		instance.setProto(parent.proto);
 		return;
 	}
 
@@ -119,8 +119,8 @@ module.exports = {
 		}
 
 		var instance = new ObjectType();
-		if (parent && parent.properties && parent.properties.prototype) {
-			instance.setProto(parent.properties.prototype);
+		if (parent && parent.proto) {
+			instance.setProto(parent.proto);
 		}
 
 		instance.init(this);
@@ -138,13 +138,16 @@ module.exports = {
 
 		instance.init(this);
 
-		var functionClass = this.scope.properties.Function;
+		var functionClass = this.scope.getProperty("Function");
 		if (functionClass) {
-			for (var prop in functionClass.properties) {
-				instance.setProperty(prop, functionClass.properties[prop], { configurable: false, enumerable: false, writable: true });
-			}
+			instance.parent = functionClass;
+			// for (var prop in functionClass.properties) {
+			// 	instance.properties[prop] = functionClass.properties[prop];
+			// 	// instance.setProperty(prop, functionClass.properties[prop], value, { configurable: false, enumerable: false, writable: true });
+			// }
 		} else {
 			delete instance.properties.prototype;
+			delete instance.proto;
 		}
 
 		return instance;

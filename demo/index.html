@@ -9,14 +9,9 @@
 </head>
 <body>
 <textarea id="codeArea" cols="40" rows="8">
-var result = "";
-
-function $ERROR(msg) {
-  result += "\n" + msg;
-}
-
-
-result;
+var a = {foo:true};
+Object.defineProperty(a, 'bar', { get: function () { return this.foo; } });
+a.bar;
 </textarea>
 <button id="execButton">Exec</button>
 <button id="interpretButton">Interpret</button>

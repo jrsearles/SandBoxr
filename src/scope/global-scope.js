@@ -17,53 +17,50 @@ var utils = require("../utils");
 var globalFunctions = ["isNaN", "parseInt", "parseFloat", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent"];
 
 module.exports = function (options) {
-	var scope = new Scope();
-	scope.start();
+	var globalScope = new Scope();
+	globalScope.start();
 
 	var undefinedClass = new PrimitiveType(undefined);
-	scope.setProperty("undefined", undefinedClass);
+	globalScope.defineProperty("undefined", undefinedClass, { enumerable: false });
 
 	var nullClass = new PrimitiveType(null);
-	scope.setProperty("null", nullClass, { configurable: false, writable: false });
+	globalScope.defineProperty("null", nullClass, { configurable: false, writable: false });
 
 	// set globals
-	scope.setProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false });
-	scope.setProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false });
+	globalScope.defineProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
+	globalScope.defineProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
 
 	// todo: node vs browser - do we care?
-	scope.setProperty("window", scope, { configurable: false, writable: false });
+	globalScope.defineProperty("window", globalScope, { configurable: false, writable: false });
 
 	// create function
-	functionAPI(scope);
-	objectAPI(scope);
-	arrayAPI(scope);
-	booleanAPI(scope);
-	numberAPI(scope);
-	stringAPI(scope);
-	dateAPI(scope);
-	regexAPI(scope);
-	mathAPI(scope);
-	errorAPI(scope);
-	consoleAPI(scope);
+	functionAPI(globalScope);
+	objectAPI(globalScope);
+	arrayAPI(globalScope);
+	booleanAPI(globalScope);
+	numberAPI(globalScope);
+	stringAPI(globalScope);
+	dateAPI(globalScope);
+	regexAPI(globalScope);
+	mathAPI(globalScope);
+	errorAPI(globalScope);
+	consoleAPI(globalScope);
 
 	globalFunctions.forEach(function (name) {
-		scope.setProperty(name, objectFactory.createFunction(utils.wrapNative(global[name])));
+		globalScope.defineProperty(name, objectFactory.createFunction(utils.wrapNative(global[name])), { enumerable: false });
 	});
 
-	// scope.setProperty("isNaN", objectFactory.createFunction(utils.wrapNative(isNaN)));
-	// scope.setProperty("parseInt", objectFactory.createFunction(utils.wrapNative(parseInt)));
-	// scope.setProperty("parseFloat", objectFactory.createFunction(utils.wrapNative(parseFloat)));
-	// scope.setProperty("isFinite", objectFactory.createFunction(utils.wrapNative(isFinite)));
-
 	if (options.parser) {
-		scope.setProperty("eval", objectFactory.createFunction(function (code) {
+		globalScope.defineProperty("eval", objectFactory.createFunction(function (code) {
+			var indirect = this.callee.name !== "eval";
 			var undef = this.scope.global.getProperty("undefined");
 			var ast = options.parser(code.toString());
-			var executionResult = this.create(ast, null, this.scope.parent).execute();
+
+			var executionResult = this.create(ast, null, indirect ? globalScope : this.scope.parent).execute();
 			return executionResult ? executionResult.result : undef;
-		}));
+		}), { enumerable: false });
 	}
 
-	scope.end();
-	return scope;
+	globalScope.end();
+	return globalScope;
 };

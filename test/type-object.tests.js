@@ -48,10 +48,6 @@ describe("Types", function () {
 			expect(result.value).to.be.undefined;
 		});
 
-		// it("should allow properties to be added through dot notation", function () {
-
-		// });
-
 		describe("Object.freeze", function () {
 			it("should show isFrozen as false if not frozen", function () {
 				var result = runner.runBlock("Object.isFrozen({});");
@@ -111,6 +107,38 @@ describe("Types", function () {
 			});
 		});
 
+		describe("Object.seal", function () {
+			it("should return the object being modified", function () {
+				var result = runner.runBlock("var obj1={};var obj2=Object.seal(obj1);obj1===obj2;");
+				expect(result.value).to.be.true;
+			});
+
+			it("should show isSealed when object is sealed", function () {
+				var result = runner.runBlock("var obj = {};Object.seal(obj);Object.isSealed(obj);");
+				expect(result.value).to.be.true;
+			});
+
+			it("should not show isSealed for unsealed object", function () {
+				var result = runner.runBlock("Object.isSealed({});");
+				expect(result.value).to.be.false;
+			});
+
+			it("should not add new properties to object", function () {
+				var result = runner.runBlock("var obj={};Object.seal(obj);obj.foo='bar';'foo' in obj;");
+				expect(result.value).to.be.false;
+			});
+
+			it("should allow values to be changed on existing properties", function () {
+				var result = runner.runBlock("var obj={foo:'bar'};Object.seal(obj);obj.foo='baz';obj.foo;");
+				expect(result.value).to.equal("baz");
+			});
+
+			it("should not allow properties to be deleted", function () {
+				var result = runner.runBlock("var obj={foo:'bar'};Object.seal(obj);delete obj.foo;obj.hasOwnProperty('foo');");
+				expect(result.value).to.be.true;
+			});
+		});
+
 		describe("Object.keys", function () {
 			it("should return an array of the objects enumerable properties", function () {
 				var result = runner.runBlock("Object.keys({a:1,b:2,c:3});");
@@ -139,6 +167,11 @@ describe("Types", function () {
 			it("should allow a setter to be defined", function () {
 				var result = runner.runBlock("var a = {}, realValue = 1; Object.defineProperty(a, 'foo', { get: function () { return realValue; }, set: function (value) { realValue = value * 2; } });a.foo = 21;a.foo");
 				expect(result.value).to.equal(42);
+			});
+
+			it("should use the correct context for the getter/setter", function () {
+				var result = runner.runBlock("var a = {foo:true};Object.defineProperty(a, 'bar', { get: function () { return this.foo; } });a.bar;");
+				expect(result.value).to.be.true;
 			});
 		});
 

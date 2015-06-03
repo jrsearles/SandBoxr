@@ -1,5 +1,6 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
+var Scope = require("../scope/scope");
 
 var safeOperators = {
 	"typeof": true,
@@ -51,10 +52,17 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "delete":
-			if (result) {
+			if (result && result.name) {
 				newValue = objectFactory.createPrimitive((result.object || context.scope).deleteProperty(result.name));
 			} else {
-				newValue = objectFactory.createPrimitive(false);
+				var deleted = false;
+				if (result && result.result instanceof Scope) {
+					// todo: this is hacky - deleting scope fails but returns true
+					// this is here to account for that case
+					deleted = true;
+				}
+
+				newValue = objectFactory.createPrimitive(deleted);
 			}
 
 			break;

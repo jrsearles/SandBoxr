@@ -1,4 +1,5 @@
 var ObjectType = require("./object-type");
+var PropertyDescriptor = require("./property-descriptor");
 
 function FunctionType (node, parentScope) {
 	ObjectType.call(this);
@@ -18,7 +19,8 @@ FunctionType.prototype.init = function (objectFactory) {
 
 	// functions have a prototype
 	var proto = objectFactory.createObject();
-	proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: true });
+	// proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: true });
+	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: this })
 	this.setProto(proto);
 };
 

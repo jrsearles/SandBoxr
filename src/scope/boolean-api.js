@@ -13,5 +13,5 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(value);
 	}, globalScope);
 
-	globalScope.setProperty("Boolean", booleanClass);
+	globalScope.defineProperty("Boolean", booleanClass, { enumerable: false });
 };

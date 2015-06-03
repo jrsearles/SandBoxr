@@ -18,23 +18,23 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(value);
 	}, globalScope);
 
-	var proto = stringClass.properties.prototype;
+	var proto = stringClass.proto;
 
 	protoMethods.forEach(function (name) {
 		var fn = String.prototype[name];
 		if (fn) {
-			proto.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
+			proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
 		}
 	}, propertyConfig);
 
 	staticMethods.forEach(function (name) {
 		var fn = String[name];
 		if (fn) {
-			stringClass.setProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
+			stringClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)));
 		}
 	}, propertyConfig);
 
-	proto.setProperty("split", objectFactory.createFunction(function (separator, limit) {
+	proto.defineProperty("split", objectFactory.createFunction(function (separator, limit) {
 		separator = separator && separator.value;
 		limit = limit && limit.toNumber();
 
@@ -48,7 +48,7 @@ module.exports = function (globalScope) {
 		return arr;
 	}), propertyConfig);
 
-	proto.setProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
+	proto.defineProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
 		var match = regexOrSubstr && regexOrSubstr.value;
 
 		if (substrOrFn && substrOrFn.type === "function") {
@@ -68,7 +68,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value.replace(match, substrOrFn && substrOrFn.value));
 	}), propertyConfig);
 
-	proto.setProperty("match", objectFactory.createFunction(function (regex) {
+	proto.defineProperty("match", objectFactory.createFunction(function (regex) {
 		var results = this.node.value.match(regex && regex.value);
 		if (results) {
 			var matches = objectFactory.create("Array");
@@ -82,5 +82,5 @@ module.exports = function (globalScope) {
 		return globalScope.getProperty("null");
 	}), propertyConfig);
 
-	globalScope.setProperty("String", stringClass);
+	globalScope.defineProperty("String", stringClass, { enumerable: false });
 };
