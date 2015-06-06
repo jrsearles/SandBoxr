@@ -3,7 +3,7 @@ var PropertyDescriptor = require("./property-descriptor");
 
 function ArrayType () {
 	ObjectType.call(this);
-	this.objectType = "[object Array]";
+	this.className = "Array";
 }
 
 ArrayType.prototype = Object.create(ObjectType.prototype);
@@ -14,7 +14,14 @@ ArrayType.prototype.setProperty = function (name, value) {
 		// todo: should be a better way to set length, but we can't reference object factory here
 		var currentLength = this.properties.length.value;
 		currentLength.value = Math.max(name + 1, currentLength.value);
-	} else if (name === "length") {
+
+		name = String(name);
+		this.properties[name] = this.properties[name] || new PropertyDescriptor(null, value);
+		this.properties[name].setValue(this, value);
+		return;
+	}
+
+	if (name === "length") {
 		var ln = this.getProperty("length");
 		var i = value.toNumber();
 

@@ -34,7 +34,8 @@ module.exports = function (globalScope) {
 
 	proto.defineProperty("toString", objectFactory.createFunction(function () {
 		var obj = this.scope.thisNode;
-		var value = obj.objectType;
+		var value = "[object " + obj.className + "]";
+
 		if (obj.isPrimitive || obj.value !== undefined) {
 			value = String(obj.value);
 		}
@@ -88,10 +89,7 @@ module.exports = function (globalScope) {
 				options.writable = true;
 				options.get = getter;
 				options.getter = function () {
-					var scope = executionContext.scope.createScope(this);
-
-					utils.loadArguments(getter.node.params, [], scope);
-					return executionContext.create(getter.node.body, getter.node, scope).execute().result;
+					return utils.executeFunction(executionContext, getter, getter.node.params, [], this, getter.node);
 				};
 			}
 
@@ -99,11 +97,7 @@ module.exports = function (globalScope) {
 				options.writable = true;
 				options.set = setter;
 				options.setter = function () {
-					var scope = executionContext.scope.createScope(this);
-
-					utils.loadArguments(setter.node.params, arguments, scope);
-					var executionResult = executionContext.create(setter.node.body, setter.node, scope).execute();
-					return executionResult ? executionResult.result : undef;
+					return utils.executeFunction(executionContext, setter, setter.node.params, arguments, this, setter.node);
 				};
 			}
 
@@ -125,15 +119,11 @@ module.exports = function (globalScope) {
 			result.setProperty("enumerable", objectFactory.createPrimitive(descriptor.enumerable));
 
 			if (descriptor.get || descriptor.set) {
-				result.setProperty("value", undef);
-				result.setProperty("writable", undef);
 				result.setProperty("get", descriptor.get || undef);
 				result.setProperty("set", descriptor.set || undef);
 			} else {
 				result.setProperty("value", descriptor.value);
 				result.setProperty("writable", objectFactory.createPrimitive(descriptor.writable));
-				result.setProperty("get", undef);
-				result.setProperty("set", undef);
 			}
 
 			return result;

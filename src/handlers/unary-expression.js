@@ -52,7 +52,7 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "delete":
-			if (result && result.name) {
+			if (result && result.name != null) {
 				newValue = objectFactory.createPrimitive((result.object || context.scope).deleteProperty(result.name));
 			} else {
 				var deleted = false;

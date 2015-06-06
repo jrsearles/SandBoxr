@@ -15,10 +15,8 @@ NativeFunctionType.prototype.init = function (objectFactory) {
 	// set length property
 	this.setProperty("length", objectFactory.createPrimitive(this.nativeFunction.length), { configurable: false, enumerable: false, writable: false });
 
-	// var proto = new ObjectType();
 	var proto = objectFactory.createObject();
-	// proto.setProperty("constructor", this, { configurable: false, enumerable: false, writable: true });
-	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: this })
+	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: this });
 	this.setProto(proto);
 };
 

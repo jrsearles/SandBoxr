@@ -26,14 +26,12 @@ module.exports = function (options) {
 	var nullClass = new PrimitiveType(null);
 	globalScope.defineProperty("null", nullClass, { configurable: false, writable: false });
 
-	// set globals
 	globalScope.defineProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
 	globalScope.defineProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
 
 	// todo: node vs browser - do we care?
 	globalScope.defineProperty("window", globalScope, { configurable: false, writable: false });
 
-	// create function
 	functionAPI(globalScope);
 	objectAPI(globalScope);
 	arrayAPI(globalScope);

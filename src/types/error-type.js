@@ -3,7 +3,7 @@ var ObjectType = require("./object-type");
 function ErrorType (source) {
 	ObjectType.call(this);
 	this.source = source;
-	this.objectType = "[object Error]";
+	this.className = "Error";
 }
 
 ErrorType.prototype = new ObjectType();

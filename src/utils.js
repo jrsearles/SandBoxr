@@ -60,7 +60,50 @@ function getValues (executionContext, args) {
 	return values;
 }
 
+function defineThis (scope, thisArg) {
+	if (!thisArg) {
+		return scope.global;
+	}
+
+	if (thisArg.isPrimitive) {
+		if (thisArg.value == null) {
+			return scope.global;
+		}
+
+		// call toObject on primitive 10.4.3
+		var obj = objectFactory.createObject();
+		return utils.createWrappedPrimitive(obj, thisArg.value);
+	}
+
+	return thisArg;
+}
+
 utils = {
+	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
+		thisArg = defineThis(context.scope, thisArg);
+		var newScope = fn.createScope(context.scope, thisArg);
+		var returnResult;
+
+		if (isNew) {
+			returnResult = thisArg;
+		}
+
+		this.loadArguments(params, args, newScope, fn);
+
+		if (fn.native) {
+			returnResult = fn.nativeFunction.apply(context.create(newScope.thisNode, callee, newScope), args);
+		} else {
+			var executionResult = context.create(fn.node.body, callee, newScope).execute();
+			if (isNew && executionResult && executionResult.exit) {
+				returnResult = executionResult.result;
+			} else {
+				returnResult = returnResult || (executionResult && executionResult.result);
+			}
+		}
+
+		return returnResult || context.scope.global.getProperty("undefined");
+	},
+
 	wrapNative: function (fn) {
 		return function () {
 			var scope = this && this.node && this.node.value;
@@ -71,19 +114,14 @@ utils = {
 		};
 	},
 
-	loadArguments: function (params, args, scope) {
-		var argumentList = objectFactory.createObject();
-		for (var i = 0, ln = args.length; i < ln; i++) {
-			argumentList.setProperty(i, args[i]);
-		}
-
-		argumentList.setProperty("length", objectFactory.createPrimitive(ln));
-		// argumentList.freeze();
-
+	loadArguments: function (params, args, scope, callee) {
+		var undef = scope.global.getProperty("undefined");
+		var argumentList = objectFactory.createArguments(args);
 		scope.defineProperty("arguments", argumentList);
 
 		params.forEach(function (param, index) {
-			scope.setProperty(param.name, args[index] || scope.global.getProperty("undefined"));
+			var ref = argumentList.createReference(index);
+			scope.defineProperty(param.name, ref || undef);
 		});
 	},
 

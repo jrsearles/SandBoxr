@@ -6,6 +6,7 @@ var ObjectType = require("./object-type");
 var ArrayType = require("./array-type");
 var StringType = require("./string-type");
 var ErrorType = require("./error-type");
+var ArgumentType = require("./argument-type");
 var util = require("../util");
 
 var parentless = {
@@ -124,6 +125,23 @@ module.exports = {
 		}
 
 		instance.init(this);
+		return instance;
+	},
+
+	createArguments: function (args, callee) {
+		var instance = new ArgumentType();
+		var proto = this.scope.getProperty("Object").proto;
+		var i, ln;
+
+		instance.setProto(proto);
+		instance.init(this);
+
+		for (i = 0, ln = args.length; i < ln; i++) {
+			instance.defineProperty(i, args[i]);
+		}
+
+		instance.defineProperty("length", this.createPrimitive(ln));
+		instance.defineProperty("callee", callee, { enumerable: false });
 		return instance;
 	},
 

@@ -416,6 +416,5 @@ module.exports = function (globalScope) {
 	// but will call Object..toString if not
 	proto.defineProperty("toString", proto.properties.join.value);
 
-	// typeRegistry.set("ARRAY", arrayClass);
 	globalScope.defineProperty("Array", arrayClass, { enumerable: false});
 };

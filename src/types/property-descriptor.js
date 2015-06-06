@@ -15,12 +15,14 @@ function PropertyDescriptor (config, value) {
 	});
 
 	if (config.getter || config.setter) {
+		this.dataProperty = false;
 		this.get = config.get;
 		this.getter = config.getter;
 		this.set = config.set;
 		this.setter = config.setter;
 	} else {
-		this.value = config.value || value;
+		this.dataProperty = true;
+		this.value = value || config.value;
 	}
 }
 
@@ -31,11 +33,13 @@ PropertyDescriptor.prototype.update = function (descriptor) {
 		this.set = descriptor.set;
 		this.setter = descriptor.setter;
 
+		this.dataProperty = false;
 		this.value = undefined;
 	} else if (descriptor.value) {
 		this.get = this.getter = this.set = this.setter = undefined;
 
 		this.writable = descriptor.writable;
+		this.dataProperty = true;
 		this.value = descriptor.value;
 	}
 };
@@ -51,7 +55,7 @@ PropertyDescriptor.prototype.getValue = function (obj) {
 };
 
 PropertyDescriptor.prototype.setValue = function (obj, value) {
-	if (!this.writable) {
+	if (!this.canSetValue()) {
 		return;
 	}
 
@@ -62,6 +66,10 @@ PropertyDescriptor.prototype.setValue = function (obj, value) {
 	} else {
 		this.value = value;
 	}
+};
+
+PropertyDescriptor.prototype.canSetValue = function () {
+	return this.writable;
 };
 
 module.exports = PropertyDescriptor;

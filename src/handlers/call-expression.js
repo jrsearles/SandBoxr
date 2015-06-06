@@ -16,21 +16,11 @@ module.exports = function CallExpression (context) {
 		returnResult = objectFactory.createObject(fn.result);
 	}
 
-	var newScope = fn.result.createScope(context.scope, returnResult || fn.object);
+	var native = fn.result.native;
+	var params = native ? [] : fn.result.node.params;
 	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result; });
-	utils.loadArguments(fn.result.native ? [] : fn.result.node.params, args, newScope);
+	var thisArg = returnResult || fn.object;
+	var callee = native ? fn : fn.result.node;
 
-	if (fn.result.native) {
-		returnResult = fn.result.nativeFunction.apply(context.create(newScope.thisNode, fn, newScope), args);
-	} else {
-		var executionResult = context.create(fn.result.node.body, fn.result.node, newScope).execute();
-
-		if (isNew && executionResult && executionResult.exit) {
-			returnResult = executionResult.result;
-		} else {
-			returnResult = returnResult || (executionResult && executionResult.result);
-		}
-	}
-
-	return context.result(returnResult || context.scope.global.getProperty("undefined"));
+	return context.result(utils.executeFunction(context, fn.result, params, args, thisArg, callee, isNew));
 };
