@@ -16,8 +16,8 @@ var tests = [
 	// root + "suite/ch06/**/*.js", // passed!
 	// root + "suite/ch07/**/*.js",	// passed!
 	// root + "suite/ch08/**/*.js",	// passed!
-	root + "suite/ch09/**/*.js",
-	// root + "suite/ch10/**/*.js",
+	// root + "suite/ch09/**/*.js",	// passed!
+	root + "suite/ch10/**/*.js",
 	// root + "suite/ch12/12.8/**/*.js"
 ];
 

@@ -107,7 +107,7 @@ module.exports = {
 		if (parent) {
 			// special cases
 			if (parent === this.scope.getProperty("Date")) {
-				return this.create("Date");
+				return this.create("Date", new Date());
 			}
 
 			if (parent === this.scope.getProperty("Array")) {

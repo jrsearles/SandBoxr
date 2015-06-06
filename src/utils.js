@@ -60,9 +60,13 @@ function getValues (executionContext, args) {
 	return values;
 }
 
-function defineThis (scope, thisArg) {
+function defineThis (scope, thisArg, isNew) {
 	if (!thisArg) {
 		return scope.global;
+	}
+
+	if (isNew) {
+		return thisArg;
 	}
 
 	if (thisArg.isPrimitive) {
@@ -80,7 +84,7 @@ function defineThis (scope, thisArg) {
 
 utils = {
 	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
-		thisArg = defineThis(context.scope, thisArg);
+		thisArg = defineThis(context.scope, thisArg, isNew);
 		var newScope = fn.createScope(context.scope, thisArg);
 		var returnResult;
 
