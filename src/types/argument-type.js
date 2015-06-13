@@ -2,7 +2,7 @@ var ObjectType = require("./object-type");
 
 function ArgumentType () {
 	ObjectType.call(this);
-	this.className = "Argument";
+	this.className = "Arguments";
 }
 
 ArgumentType.prototype = Object.create(ObjectType.prototype);

@@ -1,15 +1,22 @@
 var objectFactory = require("./types/object-factory");
 var FunctionType = require("./types/function-type");
-var util = require("./util");
 
+var util = require("./util");
 var utils;
+
+var floor = Math.floor;
+var abs = Math.abs;
+
+function sign (value) {
+	return value < 0 ? -1 : 1;
+}
 
 function getString (executionContext, value) {
 	if (!value) {
 		return "";
 	}
 
-	if (value.isPrimitive || value.value !== undefined) {
+	if (value.isPrimitive || "value" in value) {
 		return value.toString();
 	}
 
@@ -31,7 +38,7 @@ function getPrimitive (executionContext, value) {
 		return 0;
 	}
 
-	if (value.isPrimitive || value.value !== undefined) {
+	if (value.isPrimitive || "value" in value) {
 		return value.value;
 	}
 
@@ -69,11 +76,7 @@ function defineThis (scope, thisArg, isNew) {
 		return thisArg;
 	}
 
-	if (thisArg.isPrimitive) {
-		if (thisArg.value == null) {
-			return scope.global;
-		}
-
+	if (thisArg.isPrimitive && thisArg.value != null) {
 		// call toObject on primitive 10.4.3
 		var obj = objectFactory.createObject();
 		return utils.createWrappedPrimitive(obj, thisArg.value);
@@ -95,9 +98,9 @@ utils = {
 		this.loadArguments(params, args, newScope, fn);
 
 		if (fn.native) {
-			returnResult = fn.nativeFunction.apply(context.create(newScope.thisNode, callee, newScope), args);
+			returnResult = fn.nativeFunction.apply(context.create(newScope.thisNode, callee, newScope, isNew), args) || returnResult;
 		} else {
-			var executionResult = context.create(fn.node.body, callee, newScope).execute();
+			var executionResult = context.create(fn.node.body, callee, newScope, isNew).execute();
 			if (isNew && executionResult && executionResult.exit) {
 				returnResult = executionResult.result;
 			} else {
@@ -109,13 +112,20 @@ utils = {
 	},
 
 	wrapNative: function (fn) {
-		return function () {
+		var nativeFunction = function () {
+			if (this.isNew) {
+				throw new TypeError(fn.name + " is not a constructor.");
+			}
+
 			var scope = this && this.node && this.node.value;
 			var args = getValues(this, arguments);
 
 			var value = fn.apply(scope, args);
 			return objectFactory.createPrimitive(value);
 		};
+
+		nativeFunction.nativeLength = fn.length;
+		return nativeFunction;
 	},
 
 	loadArguments: function (params, args, scope, callee) {
@@ -141,7 +151,7 @@ utils = {
 				this.loadArguments(method.node.params, args, scope);
 
 				var executionResult = executionContext.create(method.node.body, method.node, scope).execute();
-				return executionResult && executionResult.result;
+				return executionResult ? executionResult.result : scope.global.getProperty("undefined");
 			}
 		}
 
@@ -149,11 +159,13 @@ utils = {
 	},
 
 	createWrappedPrimitive: function (source, value) {
-		var ctor = objectFactory.scope.getProperty(util.getType(value));
-		// source.properties.constructor = ctor;
-		source.setProperty("constructor", ctor);
+		var type = util.getType(value);
+		var ctor = objectFactory.scope.properties[type];
+		source.properties.constructor = ctor;
+		// source.setProperty("constructor", ctor);
 
 		source.value = value;
+		source.className = type;
 		source.toString = function () { return String(value); };
 		source.toNumber = function () { return Number(value); };
 		source.toBoolean = function () { return Boolean(value); };
@@ -165,27 +177,42 @@ utils = {
 		preferredType = preferredType && preferredType.toLowerCase();
 
 		if (preferredType === "string") {
-			if (!obj) {
-				return "";
-			}
-
-			if (obj.isPrimitive) {
-				return obj.toString();
-			}
-
 			return getString(executionContext, obj);
 		}
 
-		// default case - number
-		if (!obj) {
+		// default case/number
+		return getPrimitive(executionContext, obj);
+	},
+
+	toNumber: function (executionContext, obj) {
+		return Number(this.toPrimitive(executionContext, obj, "number"));
+	},
+
+	toInteger: function (executionContext, obj) {
+		var value = this.toNumber(executionContext, obj);
+		if (isNaN(value)) {
 			return 0;
 		}
 
-		if (obj.isPrimitive) {
-			return obj.value;
+		if (value === 0 || !isFinite(value)) {
+			return value;
 		}
 
-		return getPrimitive(executionContext, obj);
+		return sign(value) * floor(abs(value));
+	},
+
+	toInt32: function (executionContext, obj) {
+		var value = this.toNumber(executionContext, obj);
+		if (value === 0 || isNaN(value) || !isFinite(value)) {
+			return 0;
+		}
+
+		return sign(value) * floor(abs(value));
+	},
+
+	toUInt32: function (executionContext, obj) {
+		var value = this.toInt32(executionContext, obj);
+		return value >>> 0;
 	}
 };
 

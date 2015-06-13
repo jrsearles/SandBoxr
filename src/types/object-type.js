@@ -18,9 +18,13 @@ ObjectType.prototype = {
 
 	init: function () { },
 
-	setProto: function (proto) {
+	setProto: function (proto, descriptor) {
+		if ("prototype" in this.properties && !this.properties.prototype.canSetValue()) {
+			return;
+		}
+
 		this.proto = proto;
-		this.properties.prototype = new PropertyDescriptor({ enumerable: false }, proto);
+		this.properties.prototype = new PropertyDescriptor(descriptor || { enumerable: false }, proto);
 	},
 
 	getPropertyDescriptor: function (name) {
@@ -36,7 +40,7 @@ ObjectType.prototype = {
 		}
 
 		// check parent
-		if (this.parent) {
+		if (this.parent && this.parent.proto) {
 			return this.parent.getPropertyDescriptor(name);
 		}
 
@@ -44,7 +48,7 @@ ObjectType.prototype = {
 	},
 
 	hasProperty: function (name) {
-		return !!this.getPropertyDescriptor(name);
+		return this.hasOwnProperty(name) || !!this.getPropertyDescriptor(name);
 	},
 
 	hasOwnProperty: function (name) {

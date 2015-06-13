@@ -1,5 +1,9 @@
 var objectFactory = require("../types/object-factory");
 
 module.exports = function FunctionExpression (context) {
-	return context.result(objectFactory.createFunction(context.node, context.scope));
+	var ctor = context.scope.global.getProperty("Function");
+	var proto = objectFactory.createObject();
+	var func = objectFactory.createFunction(context.node, context.scope, proto, ctor);
+
+	return context.result(func);
 };

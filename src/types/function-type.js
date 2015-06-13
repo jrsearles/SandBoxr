@@ -13,13 +13,13 @@ function FunctionType (node, parentScope) {
 FunctionType.prototype = Object.create(ObjectType.prototype);
 FunctionType.prototype.constructor = FunctionType;
 
-FunctionType.prototype.init = function (objectFactory) {
+FunctionType.prototype.init = function (objectFactory, proto, ctor) {
 	// set length property from the number of parameters
 	this.setProperty("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
 
 	// functions have a prototype
-	var proto = objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: this });
+	proto = proto || objectFactory.createObject();
+	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: ctor || this });
 	this.setProto(proto);
 };
 

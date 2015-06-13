@@ -2,7 +2,7 @@ var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
-var protoMethods = ["toExponential", "toFixed", "toPrecision", "toString"];
+var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
 var staticMethods = ["isNaN", "isFinite", "parseFloat", "parseInt"];
 
 var polyfills = {
@@ -21,16 +21,52 @@ var polyfills = {
 module.exports = function (globalScope) {
 	var numberClass = objectFactory.createFunction(function (value) {
 		value = Number(utils.toPrimitive(this, value, "number"));
+		var numberValue = objectFactory.create("Number", value);
 
-		// called with `new`
-		if (this.scope.thisNode !== globalScope) {
-			return utils.createWrappedPrimitive(this.node, value);
+		if (this.isNew) {
+			numberValue.type = "object";
+			numberValue.isPrimitive = false;
+			// return utils.createWrappedPrimitive(this.node, value);
 		}
 
-		return objectFactory.createPrimitive(value);
+		return numberValue;
+		// return objectFactory.createPrimitive(value);
 	}, globalScope);
 
 	var proto = numberClass.proto;
+	proto.className = "Number";
+	proto.defineProperty("toString", objectFactory.createFunction(function (radix) {
+		if (this.node.className !== "Number") {
+			throw new TypeError("Number.prototype.toString is not generic");
+		}
+
+		var radixValue = 10;
+		if (radix) {
+			radixValue = utils.toPrimitive(this, radix, "number");
+			if (radixValue < 2 || radixValue > 36) {
+				throw new RangeError("toString() radix argument must be between 2 and 36");
+			}
+		}
+
+		return objectFactory.createPrimitive(this.node.value == null ? "0" : this.node.value.toString(radixValue));
+	}, globalScope), { enumerable: false });
+
+	proto.defineProperty("toFixed", objectFactory.createFunction(function (fractionDigits) {
+		var digits = 0;
+		if (fractionDigits) {
+			digits = utils.toPrimitive(this, fractionDigits, "number");
+		}
+
+		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
+	}, globalScope), { enumerable: false });
+
+	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+		if (this.node.className !== "Number") {
+			throw new TypeError("Number.prototype.valueOf is not generic");
+		}
+
+		return objectFactory.createPrimitive(this.node.value == null ? 0 : this.node.value);
+	}, globalScope), { enumerable: false });
 
 	constants.forEach(function (name) {
 		numberClass.defineProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });

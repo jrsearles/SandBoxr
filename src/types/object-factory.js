@@ -5,6 +5,7 @@ var RegexType = require("./regex-type");
 var ObjectType = require("./object-type");
 var ArrayType = require("./array-type");
 var StringType = require("./string-type");
+var DateType = require("./date-type");
 var ErrorType = require("./error-type");
 var ArgumentType = require("./argument-type");
 var util = require("../util");
@@ -75,10 +76,13 @@ module.exports = {
 
 			case "Number":
 			case "Boolean":
-			case "Date":
 			case "Null":
 			case "Undefined":
 				instance = new PrimitiveType(value);
+				break;
+
+			case "Date":
+				instance = new DateType(value);
 				break;
 
 			case "RegExp":
@@ -90,7 +94,7 @@ module.exports = {
 				break;
 
 			case "Error":
-				typeName = value.name || typeName;
+				typeName = value && value.name || typeName;
 				instance = new ErrorType(value);
 				break;
 
@@ -140,12 +144,13 @@ module.exports = {
 			instance.defineProperty(i, args[i]);
 		}
 
-		instance.defineProperty("length", this.createPrimitive(ln));
+		instance.defineProperty("length", this.createPrimitive(ln), { enumerable: false });
 		instance.defineProperty("callee", callee, { enumerable: false });
 		return instance;
 	},
 
-	createFunction: function (fnOrNode, parentScope) {
+	createFunction: function (fnOrNode, parentScope, proto, ctor) {
+		// todo: need to verify that prototype arg is needed
 		var instance;
 
 		if (typeof fnOrNode === "function") {
@@ -154,18 +159,13 @@ module.exports = {
 			instance = new FunctionType(fnOrNode, parentScope);
 		}
 
-		instance.init(this);
-
+		instance.init(this, proto, ctor);
 		var functionClass = this.scope.getProperty("Function");
 		if (functionClass) {
 			instance.parent = functionClass;
-			// for (var prop in functionClass.properties) {
-			// 	instance.properties[prop] = functionClass.properties[prop];
-			// 	// instance.setProperty(prop, functionClass.properties[prop], value, { configurable: false, enumerable: false, writable: true });
-			// }
 		} else {
-			delete instance.properties.prototype;
-			delete instance.proto;
+			// delete instance.properties.prototype;
+			// delete instance.proto;
 		}
 
 		return instance;

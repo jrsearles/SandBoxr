@@ -18,3 +18,7 @@ gulp.task("lint", function () {
 });
 
 gulp.task("default", ["browserify"]);
+
+gulp.task("watch", function () {
+	gulp.watch("./src/**/*.js", ["default"]);
+});

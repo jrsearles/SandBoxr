@@ -1,7 +1,18 @@
 var objectFactory = require("../types/object-factory");
 
 module.exports = function ForInStatement (context) {
-	var left = context.create(context.node.left).execute();
+	var left;
+	if (context.node.left.type === "VariableDeclaration") {
+		// should only be one, but
+		// need to unwrap the declaration to get it
+		// todo: this is sloppy - need to revisit
+		context.node.left.declarations.forEach(function (decl) {
+			left = context.create(decl).execute();
+		});
+	} else {
+		left = context.create(context.node.left).execute();
+	}
+
 	var obj = context.create(context.node.right).execute().result;
 	var result;
 
@@ -17,7 +28,7 @@ module.exports = function ForInStatement (context) {
 			}
 		}
 
-		obj = obj.parent;
+		obj = obj.proto;
 	}
 
 	return result;

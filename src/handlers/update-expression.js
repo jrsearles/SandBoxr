@@ -1,9 +1,10 @@
 var objectFactory = require("../types/object-factory");
+var utils = require("../utils");
 
 module.exports = function UpdateExpression (context) {
 	var executionResult = context.create(context.node.argument).execute();
-	var originalValue = executionResult.result;
-	var newValue = originalValue.toNumber();
+	var originalValue = utils.toNumber(context, executionResult.result);
+	var newValue = originalValue;
 
 	switch (context.node.operator) {
 		case "++":
@@ -19,9 +20,12 @@ module.exports = function UpdateExpression (context) {
 	}
 
 	newValue = objectFactory.createPrimitive(newValue);
+	originalValue = objectFactory.createPrimitive(originalValue);
+
 	var obj = executionResult.object || context.scope;
 	var name = executionResult.name;
+	var returnValue = context.node.prefix ? newValue : originalValue;
 
 	obj.setProperty(name, newValue);
-	return context.result(context.node.prefix ? newValue : originalValue, name, obj);
+	return context.result(returnValue, name, obj);
 };

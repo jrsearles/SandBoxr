@@ -1,47 +1,52 @@
 var PrimitiveType = require("./primitive-type");
 var PropertyDescriptor = require("./property-descriptor");
+var util = require("../util");
 
-function StringType (value, parent) {
+function StringType (value) {
 	PrimitiveType.call(this, value);
+}
+
+function getCharacter (source, position) {
+	if (position < source.value.length) {
+		// todo: need to set length
+		var character = new StringType(source.value[position]);
+		character.parent = source.parent;
+		character.setProto(source.proto);
+		return character;
+	}
+
+	return new PrimitiveType(undefined);
 }
 
 StringType.prototype = Object.create(PrimitiveType.prototype);
 StringType.prototype.constructor = StringType;
 
 StringType.prototype.init = function (objectFactory) {
-	var self = this;
-	this.properties.length = new PropertyDescriptor({
-		getter: function () {
-			return objectFactory.createPrimitive(self.value.length);
-		}
-	});
-
-	// Object.defineProperty(this.properties, "length", {
-	// 	configurable: true,
-	// 	enumerable: true,
-	// 	get: function () {
-	// 		return objectFactory.createPrimitive(self.value.length);
-	// 	}
-	// });
+	this.properties.length = new PropertyDescriptor({ configurable: false, enumerable: false, writable: false }, objectFactory.createPrimitive(this.value.length));
 };
 
-StringType.prototype.hasProperty = function (name) {
-	if (typeof name === "number") {
-		return true;
+StringType.prototype.getPropertyDescriptor = function (name) {
+	if (util.isInteger(name)) {
+		var position = Number(name);
+		if (position < this.value.length) {
+			return new PropertyDescriptor({ configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
+		}
 	}
 
-	return PrimitiveType.prototype.hasProperty.call(this, name);
+	return PrimitiveType.prototype.getPropertyDescriptor.apply(this, arguments);
+};
+
+StringType.prototype.hasOwnProperty = function (name) {
+	if (util.isInteger(name)) {
+		return name < this.value.length;
+	}
+
+	return PrimitiveType.prototype.hasOwnProperty.apply(this, arguments);
 };
 
 StringType.prototype.getProperty = function (name) {
-	if (typeof name === "number") {
-		if (name >= this.value.length) {
-			return new PrimitiveType(undefined);
-		} else {
-			var character = new StringType(this.value[name]);
-			character.setProto(this.proto);
-			return character;
-		}
+	if (util.isInteger(name)) {
+		return getCharacter(this, Number(name));
 	}
 
 	return PrimitiveType.prototype.getProperty.call(this, name);

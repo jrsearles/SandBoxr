@@ -1,66 +1,100 @@
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
 
-function implicitEquals (a, b) {
+function implicitEquals (a, b, context) {
 	if (a.isPrimitive && b.isPrimitive) {
 		return a.value == b.value;
 	}
 
-	if ((a.type === "number" || b.type === "number") || (a.type === "boolean" || b.type === "boolean")) {
-		return a.toNumber() === b.toNumber();
+	if (a.type === "object" && b.type === "object") {
+		return a === b;
 	}
 
-	if (a.type === "string" || b.type === "string") {
-		return a.toString() === b.toString();
+	var primitiveA = utils.toPrimitive(context, a);
+	var primitiveB = utils.toPrimitive(context, b);
+
+	if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
+		return Number(primitiveA) === Number(primitiveB);
 	}
 
-	return a.valueOf() == b.valueOf();
+	if (typeof primitiveA === "string") {
+		return primitiveA === utils.toPrimitive(context, b, "string");
+	}
+
+	if (typeof primitiveB === "string") {
+		return utils.toPrimitive(context, a, "string") === primitiveB;
+	}
+
+	return primitiveA == primitiveB;
+}
+
+function strictEquals (a, b) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value === b.value;
+	}
+
+	if (a.isPrimitive || b.isPrimitive) {
+		return false;
+	}
+
+	return a === b;
 }
 
 function not (fn) {
-	return function (a, b) {
-		return !fn(a, b);
+	return function (a, b, c) {
+		return !fn(a, b, c);
 	};
 }
 
-function add (a, b, executionContext) {
+function add (a, b, context) {
 	if (a.isPrimitive && b.isPrimitive) {
 		return a.value + b.value;
 	}
 
-	a = utils.toPrimitive(executionContext, a);
-	b = utils.toPrimitive(executionContext, b);
+	a = utils.toPrimitive(context, a);
+	b = utils.toPrimitive(context, b);
+	return a + b;
+}
 
-	if (a.type === "string" || b.type === "string") {
-		return String(a) + String(b);
+function toNumber (context, obj) {
+	if (obj.className === "Number") {
+		return obj.toNumber();
 	}
 
-	return a + b;
+	return utils.toPrimitive(context, obj, "number");
 }
 
 /* eslint eqeqeq:0 */
 var binaryOperators = {
 	"+": add,
-	"-": function (a, b) { return a.value - b.value; },
-	"/": function (a, b) { return a.value / b.value; },
-	"*": function (a, b) { return a.value * b.value; },
+	"-": function (a, b, c) { return toNumber(c, a) - toNumber(c, b); },
+	"/": function (a, b, c) { return toNumber(c, a) / toNumber(c, b); },
+	"*": function (a, b, c) { return toNumber(c, a) * toNumber(c, b); },
 	"==": implicitEquals,
 	"!=": not(implicitEquals),
-	"===": function (a, b) { return a.equals(b); },
-	"!==": function (a, b) { return !a.equals(b); },
-	"<": function (a, b) { return a.value < b.value; },
-	"<=": function (a, b) { return a.value <= b.value; },
-	">": function (a, b) { return a.value > b.value; },
-	">=": function (a, b) { return a.value >= b.value; },
-	"<<": function (a, b) { return a.value << b.value; },
-	">>": function (a, b) { return a.value >> b.value; },
-	">>>": function (a, b, context) { return utils.toPrimitive(context, a) >>> utils.toPrimitive(context, b); },
-	"%": function (a, b) { return a.value % b.value; },
-	"|": function (a, b) { return a.value | b.value; },
-	"^": function (a, b) { return a.value ^ b.value; },
-	"&": function (a, b) { return a.value & b.value; },
-	"in": function (a, b) { return b.hasProperty(a.toString()); },
+	"===": strictEquals,
+	"!==": not(strictEquals),
+	"<": function (a, b, c) { return utils.toPrimitive(c, a) < utils.toPrimitive(c, b); },
+	"<=": function (a, b, c) { return utils.toPrimitive(c, a) <= utils.toPrimitive(c, b); },
+	">": function (a, b, c) { return utils.toPrimitive(c, a) > utils.toPrimitive(c, b); },
+	">=": function (a, b, c) { return utils.toPrimitive(c, a) >= utils.toPrimitive(c, b); },
+	"<<": function (a, b, c) { return utils.toPrimitive(c, a) << utils.toPrimitive(c, b); },
+	">>": function (a, b, c) { return utils.toPrimitive(c, a) >> utils.toPrimitive(c, b); },
+	">>>": function (a, b, c) { return utils.toPrimitive(c, a) >>> utils.toPrimitive(c, b); },
+	"%": function (a, b, c) { return utils.toPrimitive(c, a) % utils.toPrimitive(c, b); },
+	"|": function (a, b, c) { return a.value | b.value; },
+	"^": function (a, b, c) { return utils.toInteger(c, a) ^ utils.toInteger(c, b); },
+	"&": function (a, b, c) { return utils.toPrimitive(c, a) & utils.toPrimitive(c, b); },
+	"in": function (a, b, c) { return b.hasProperty(a.toString()); },
 	"instanceof": function (a, b) {
+		if (b.type !== "function") {
+			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
+		}
+
+		if (a.isPrimitive) {
+			return false;
+		}
+
 		var current = a;
 		while (current) {
 			if (current === b.proto) {

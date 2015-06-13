@@ -59,11 +59,6 @@ describe("Types", function () {
 				expect(result.value).to.be.true;
 			});
 
-			it("should indicate a primitive as being frozen", function () {
-				var result = runner.runBlock("Object.isFrozen(1);");
-				expect(result.value).to.be.true;
-			});
-
 			it("should indicate that the object is not extensible", function () {
 				var result = runner.runBlock("var a = {};Object.freeze(a);Object.isExtensible(a)");
 				expect(result.value).to.be.false;
@@ -148,6 +143,29 @@ describe("Types", function () {
 			});
 		});
 
+		describe("Object.getOwnPropertyNames", function () {
+			it("should return an array", function () {
+				var result = runner.runBlock("Array.isArray(Object.getOwnPropertyNames({}));");
+				expect(result.value).to.be.true;
+			});
+
+			it("should return the properties within an object", function () {
+				var result = runner.runBlock("Object.getOwnPropertyNames({foo:1,bar:2}).sort().join();");
+				expect(result.value).to.equal("bar,foo");
+			});
+
+			it("should return expected properties for an array", function () {
+				var result = runner.runBlock("Object.getOwnPropertyNames([1,2,3]).sort().join();");
+				expect(result.value).to.equal("0,1,2,length");
+			});
+
+			it("should throw a TypeError for primitives", function () {
+				expect(function () {
+					runner.runBlock("Object.getOwnPropertyNames('foo');");
+				}).to.throw(TypeError);
+			});
+		});
+
 		describe("Object.defineProperty", function () {
 			it("should add the property to the object", function () {
 				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo'); 'foo' in a;");
@@ -186,6 +204,23 @@ describe("Types", function () {
 			it("should return the expected prototype", function () {
 				var result = runner.runBlock("Object.getPrototypeOf({}) === Object.prototype;");
 				expect(result.value).to.be.true;
+			});
+		});
+
+		describe("Object.prototype.propertyIsEnumerable", function () {
+			it("should return true if the property is enumerable", function () {
+				var result = runner.runBlock("var a={foo:1};a.propertyIsEnumerable('foo');");
+				expect(result.value).to.be.true;
+			});
+
+			it("should return false if the property is not enumerable", function () {
+				var result = runner.runBlock("var a={};Object.defineProperty(a,'foo',{enumerable:false});a.propertyIsEnumerable('foo');");
+				expect(result.value).to.be.false;
+			});
+
+			it("should be callable on a function", function () {
+				var result = runner.runBlock("Object.propertyIsEnumerable('prototype');");
+				expect(result.value).to.be.false;
 			});
 		});
 	});

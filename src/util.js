@@ -1,4 +1,5 @@
 var objectRgx = /\[object (\w+)\]/;
+var integerRgx = /^\d+$/;
 
 module.exports = {
 	getType: function (obj) {
@@ -22,5 +23,17 @@ module.exports = {
 		}
 
 		return arr;
+	},
+
+	isInteger: function (value) {
+		if (typeof value === "string") {
+			return integerRgx.test(value);
+		}
+
+		if (typeof value === "number") {
+			return isFinite(value) && Math.floor(value) === value;
+		}
+
+		return false;
 	}
 };

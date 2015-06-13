@@ -2,8 +2,8 @@ var ObjectType = require("./object-type");
 
 function RegexType (value) {
 	ObjectType.call(this);
-	this.value = value;
-	this.objectType = "[object RegExp]";
+	this.source = value;
+	this.className = "RegExp";
 }
 
 RegexType.prototype = Object.create(ObjectType.prototype);
@@ -11,11 +11,11 @@ RegexType.prototype.constructor = RegexType;
 
 RegexType.prototype.init = function (objectFactory) {
 	// lastIndex is settable, all others are read-only attributes
-	this.setProperty("lastIndex", objectFactory.createPrimitive(this.value.lastIndex), { enumerable: false, configurable: false });
-	this.setProperty("source", objectFactory.createPrimitive(this.value.source), { writable: false, enumerable: false });
-	this.setProperty("global", objectFactory.createPrimitive(this.value.global), { writable: false, enumerable: false });
-	this.setProperty("ignoreCase", objectFactory.createPrimitive(this.value.ignoreCase), { writable: false, enumerable: false });
-	this.setProperty("multiline", objectFactory.createPrimitive(this.value.multiline), { writable: false, enumerable: false });
+	this.setProperty("lastIndex", objectFactory.createPrimitive(this.source.lastIndex), { enumerable: false, configurable: false });
+	this.setProperty("source", objectFactory.createPrimitive(this.source.source), { writable: false, enumerable: false });
+	this.setProperty("global", objectFactory.createPrimitive(this.source.global), { writable: false, enumerable: false });
+	this.setProperty("ignoreCase", objectFactory.createPrimitive(this.source.ignoreCase), { writable: false, enumerable: false });
+	this.setProperty("multiline", objectFactory.createPrimitive(this.source.multiline), { writable: false, enumerable: false });
 };
 
 module.exports = RegexType;

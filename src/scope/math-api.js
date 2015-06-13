@@ -12,7 +12,7 @@ module.exports = function (globalScope) {
 	});
 
 	methods.forEach(function (name) {
-		mathClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Math[name])));
+		mathClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Math[name])), { enumerable: false });
 	});
 
 	globalScope.defineProperty("Math", mathClass, { enumerable: false });

@@ -13,6 +13,7 @@ function Scope (parent, thisNode) {
 		this.global = parent.global;
 		this.version = parent.version;
 		this.strict = parent.strict;
+		this.setProto(parent.proto);
 	} else {
 		this.thisNode = this.thisNode || this;
 		this.global = this;
@@ -43,7 +44,7 @@ Scope.prototype.getProperty = function (name) {
 		current = current.parent;
 	}
 
-	return undefined;
+	return ObjectType.prototype.getProperty.call(this, name);
 };
 
 Scope.prototype.defineProperty = function (name, value, descriptor, throwOnError) {

@@ -12,11 +12,12 @@ module.exports = function CallExpression (context) {
 		throw new TypeError(fn.result.toString() + " not a function");
 	}
 
-	if (isNew) {
+	var native = fn.result.native;
+
+	if (isNew && !native) {
 		returnResult = objectFactory.createObject(fn.result);
 	}
 
-	var native = fn.result.native;
 	var params = native ? [] : fn.result.node.params;
 	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result; });
 	var thisArg = returnResult || fn.object;
