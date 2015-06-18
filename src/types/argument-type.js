@@ -8,7 +8,7 @@ function ArgumentType () {
 ArgumentType.prototype = Object.create(ObjectType.prototype);
 ArgumentType.prototype.constructor = ArgumentType;
 
-ArgumentType.prototype.setProperty = function (name, value) {
+ArgumentType.prototype.putValue = function (name, value) {
 	name = String(name);
 	if (name in this.properties) {
 		this.properties[name].setValue(this, value);

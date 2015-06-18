@@ -31,7 +31,7 @@ describe("Expressions", function () {
 				var code = "var a = " + left + "; a " + current.op + " " + right + ";";
 				var scope = runner.getScope(code);
 
-				expect(scope.getProperty("a").value).to.equal(current.expected);
+				expect(scope.getValue("a").value).to.equal(current.expected);
 			});
 		});
 	});
@@ -40,14 +40,14 @@ describe("Expressions", function () {
 		var code = "var a = 0; a++;";
 		var scope = runner.getScope(code);
 
-		expect(scope.getProperty("a").value).to.equal(1);
+		expect(scope.getValue("a").value).to.equal(1);
 	});
 
 	it("should decrement value", function () {
 		var code = "var a = 0; a--";
 		var scope = runner.getScope(code);
 
-		expect(scope.getProperty("a").value).to.equal(-1);
+		expect(scope.getValue("a").value).to.equal(-1);
 	});
 
 
@@ -55,6 +55,6 @@ describe("Expressions", function () {
 		var code = "var a = 0; var b = a--";
 		var scope = runner.getScope(code);
 
-		expect(scope.getProperty("b").value).to.equal(0);
+		expect(scope.getValue("b").value).to.equal(0);
 	});
 });

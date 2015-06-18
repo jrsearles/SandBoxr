@@ -7,8 +7,8 @@ module.exports = function (globalScope) {
 	var consoleClass = objectFactory.createObject();
 
 	methods.forEach(function (name) {
-		consoleClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(console[name])));
+		consoleClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(console[name])));
 	});
 
-	globalScope.defineProperty("console", consoleClass);
+	globalScope.defineOwnProperty("console", consoleClass);
 };

@@ -33,5 +33,33 @@ describe("Expressions", function () {
 			var result = runner.runBlock("!false");
 			expect(result.value).to.be.true;
 		});
+
+		describe("delete", function () {
+			it("should be true for non-reference", function () {
+				var result = runner.runBlock("delete 42;");
+				expect(result.value).to.be.true;
+			});
+
+			it("should return true for non-existent variable", function () {
+				var result = runner.runBlock("delete a;");
+				expect(result.value).to.be.true;
+			});
+
+			it("should return false when deleting non-configurable property", function () {
+				var result = runner.runBlock("delete NaN;");
+				expect(result.value).to.be.false;
+			});
+
+			it("should delete a variable", function () {
+				var result = runner.runBlock("var a = [];var d = delete a;d === false && Array.isArray(a);");
+				expect(result.value).to.be.true;
+			});
+
+			it("should throw a reference error if object doesn't exists", function () {
+				expect(function () {
+					runner.runBlock("delete o.a;");
+				}).to.throw(ReferenceError);
+			});
+		});
 	});
 });

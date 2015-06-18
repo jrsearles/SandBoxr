@@ -108,7 +108,7 @@ utils = {
 			}
 		}
 
-		return returnResult || context.scope.global.getProperty("undefined");
+		return returnResult || context.scope.global.getValue("undefined");
 	},
 
 	wrapNative: function (fn) {
@@ -129,18 +129,18 @@ utils = {
 	},
 
 	loadArguments: function (params, args, scope, callee) {
-		var undef = scope.global.getProperty("undefined");
+		var undef = scope.global.getValue("undefined");
 		var argumentList = objectFactory.createArguments(args);
-		scope.defineProperty("arguments", argumentList);
+		scope.defineOwnProperty("arguments", argumentList);
 
 		params.forEach(function (param, index) {
 			var ref = argumentList.createReference(index);
-			scope.defineProperty(param.name, ref || undef);
+			scope.defineOwnProperty(param.name, ref || undef);
 		});
 	},
 
 	callMethod: function (obj, name, args, executionContext) {
-		var method = obj.getProperty(name);
+		var method = obj.getValue(name);
 
 		if (method && method instanceof FunctionType) {
 			var scope = executionContext.scope.createScope(obj);
@@ -151,7 +151,7 @@ utils = {
 				this.loadArguments(method.node.params, args, scope);
 
 				var executionResult = executionContext.create(method.node.body, method.node, scope).execute();
-				return executionResult ? executionResult.result : scope.global.getProperty("undefined");
+				return executionResult ? executionResult.result : scope.global.getValue("undefined");
 			}
 		}
 

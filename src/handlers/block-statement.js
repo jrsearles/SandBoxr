@@ -45,7 +45,7 @@ function populateHoistedVariables (node, declarators) {
 }
 
 function hoistVariables (nodes, scope) {
-	var undef = scope.global.getProperty("undefined");
+	var undef = scope.global.getValue("undefined");
 	var variables = [];
 	var name;
 
@@ -56,9 +56,9 @@ function hoistVariables (nodes, scope) {
 
 		if (decl.type === "FunctionDeclaration") {
 			// functions can be used before they are defined
-			scope.defineProperty(name, objectFactory.createFunction(decl, scope), { enumerable: false }, true);
+			scope.defineOwnProperty(name, objectFactory.createFunction(decl, scope), { configurable: false, enumerable: false }, true);
 		} else {
-			scope.defineProperty(name, undef, { enumerable: false }, true);
+			scope.defineOwnProperty(name, undef, { configurable: false, enumerable: false }, true);
 		}
 	});
 }

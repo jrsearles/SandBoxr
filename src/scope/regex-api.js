@@ -16,55 +16,58 @@ module.exports = function (globalScope) {
 	});
 
 	var proto = regexClass.proto;
-	proto.defineProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)), propertyConfig);
+	proto.defineOwnProperty("test", objectFactory.createFunction(function (str) {
+		var value = utils.toPrimitive(this, str, "string");
+		return objectFactory.createPrimitive(this.node.source.test(value));
+	}), propertyConfig);
 
-	proto.defineProperty("exec", objectFactory.createFunction(function (str) {
+	proto.defineOwnProperty("exec", objectFactory.createFunction(function (str) {
 		var match = this.node.source.exec(str.toString());
 
 		// update the last index from the underlying regex
-		this.node.setProperty("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
+		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
 
 		if (match) {
 			var arr = objectFactory.create("Array");
 			for (var i = 0, ln = match.length; i < ln; i++) {
-				arr.setProperty(i, objectFactory.createPrimitive(match[i]));
+				arr.putValue(i, objectFactory.createPrimitive(match[i]));
 			}
 
 			// extra properties are added to the array
-			arr.setProperty("index", objectFactory.createPrimitive(match.index));
-			arr.setProperty("input", objectFactory.createPrimitive(match.input));
+			arr.putValue("index", objectFactory.createPrimitive(match.index));
+			arr.putValue("input", objectFactory.createPrimitive(match.input));
 			return arr;
 		}
 
-		return this.scope.global.getProperty("null");
+		return this.scope.global.getValue("null");
 	}), propertyConfig);
 
-	proto.defineProperty("toString", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
 		var str = "/";
-		str += this.node.getProperty("source").toString();
+		str += this.node.getValue("source").toString();
 		str += "/";
 
-		if (this.node.getProperty("global").toBoolean()) {
+		if (this.node.getValue("global").toBoolean()) {
 			str += "g";
 		}
 
-		if (this.node.getProperty("ignoreCase").toBoolean()) {
+		if (this.node.getValue("ignoreCase").toBoolean()) {
 			str += "i";
 		}
 
-		if (this.node.getProperty("multiline").toBoolean()) {
+		if (this.node.getValue("multiline").toBoolean()) {
 			return str += "m";
 		}
 
 		return objectFactory.create("String", str);
 	}), propertyConfig);
 
-	proto.defineProperty("compile", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.compile)), propertyConfig);
+	proto.defineOwnProperty("compile", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.compile)), propertyConfig);
 
 	var frozen = { configurable: false, enumerable: false, writable: false };
 	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {
-		proto.defineProperty(name, objectFactory.createPrimitive(RegExp.prototype[name]), frozen);
+		proto.defineOwnProperty(name, objectFactory.createPrimitive(RegExp.prototype[name]), frozen);
 	});
 
-	globalScope.defineProperty("RegExp", regexClass, { enumerable: false });
+	globalScope.defineOwnProperty("RegExp", regexClass, { enumerable: false });
 };

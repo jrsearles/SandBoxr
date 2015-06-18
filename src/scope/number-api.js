@@ -35,7 +35,7 @@ module.exports = function (globalScope) {
 
 	var proto = numberClass.proto;
 	proto.className = "Number";
-	proto.defineProperty("toString", objectFactory.createFunction(function (radix) {
+	proto.defineOwnProperty("toString", objectFactory.createFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
 		}
@@ -51,7 +51,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value == null ? "0" : this.node.value.toString(radixValue));
 	}, globalScope), { enumerable: false });
 
-	proto.defineProperty("toFixed", objectFactory.createFunction(function (fractionDigits) {
+	proto.defineOwnProperty("toFixed", objectFactory.createFunction(function (fractionDigits) {
 		var digits = 0;
 		if (fractionDigits) {
 			digits = utils.toPrimitive(this, fractionDigits, "number");
@@ -60,7 +60,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
 	}, globalScope), { enumerable: false });
 
-	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.valueOf is not generic");
 		}
@@ -69,22 +69,22 @@ module.exports = function (globalScope) {
 	}, globalScope), { enumerable: false });
 
 	constants.forEach(function (name) {
-		numberClass.defineProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
+		numberClass.defineOwnProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
 	staticMethods.forEach(function (name) {
 		var fn = Number[name] || polyfills[name];
 		if (fn) {
-			numberClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			numberClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
-	globalScope.defineProperty("Number", numberClass, { enumerable: false });
+	globalScope.defineOwnProperty("Number", numberClass, { enumerable: false });
 };

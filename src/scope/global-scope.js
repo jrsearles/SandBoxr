@@ -22,16 +22,16 @@ module.exports = function (options) {
 	globalScope.start();
 
 	var undefinedClass = new PrimitiveType(undefined);
-	globalScope.defineProperty("undefined", undefinedClass, { configurable: false, enumerable: false, writable: false });
+	globalScope.defineOwnProperty("undefined", undefinedClass, { configurable: false, enumerable: false, writable: false });
 
 	var nullClass = new PrimitiveType(null);
-	globalScope.defineProperty("null", nullClass, { configurable: false, writable: false });
+	globalScope.defineOwnProperty("null", nullClass, { configurable: false, writable: false });
 
-	globalScope.defineProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
-	globalScope.defineProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
+	globalScope.defineOwnProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
+	globalScope.defineOwnProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
 
 	// todo: node vs browser - do we care?
-	globalScope.defineProperty("window", globalScope, { configurable: false, writable: false });
+	globalScope.defineOwnProperty("window", globalScope, { configurable: false, writable: false });
 
 	functionAPI(globalScope, options);
 	objectAPI(globalScope, options);
@@ -47,10 +47,10 @@ module.exports = function (options) {
 	consoleAPI(globalScope, options);
 
 	globalFunctions.forEach(function (name) {
-		globalScope.defineProperty(name, objectFactory.createFunction(utils.wrapNative(global[name]), globalScope, null), { enumerable: false });
+		globalScope.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(global[name]), globalScope, null), { enumerable: false });
 	});
 
-	globalScope.defineProperty("parseInt", objectFactory.createFunction(function (value, radix) {
+	globalScope.defineOwnProperty("parseInt", objectFactory.createFunction(function (value, radix) {
 		value = utils.toPrimitive(this, value, "string");
 		radix = utils.toPrimitive(this, radix, "number");
 
@@ -72,7 +72,17 @@ module.exports = function (options) {
 			}
 
 			var indirect = this.callee.name !== "eval";
-			var ast = options.parser(code.toString());
+
+			try {
+				var ast = options.parser(code.toString());
+			} catch (err) {
+				if (err instanceof SyntaxError && /assigning to rvalue/i.test(err.message)) {
+					// hack because acorn throws syntax error
+					throw new ReferenceError("Invalid left-hand side in assignment");
+				}
+
+				throw err;
+			}
 
 			var executionResult = this.create(ast, null, indirect ? globalScope : this.scope.parent).execute();
 			if (executionResult && executionResult.result) {
@@ -80,14 +90,14 @@ module.exports = function (options) {
 			}
 
 			return undefinedClass;
-		}, globalScope, null);
+		}, null, null);
 
-		// evalFunc.parent = globalScope.getProperty("Object");
+		// evalFunc.parent = globalScope.getValue("Object");
 		// evalFunc.setProto(null);
-		globalScope.defineProperty("eval", evalFunc, { enumerable: false });
+		globalScope.defineOwnProperty("eval", evalFunc, { enumerable: false });
 	}
 
-	globalScope.setProto(globalScope.getProperty("Object").proto);
+	globalScope.setProto(globalScope.getValue("Object").proto);
 	globalScope.end();
 	return globalScope;
 };

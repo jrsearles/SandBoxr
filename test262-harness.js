@@ -66,3 +66,10 @@ function isEqual(num1, num2)
         return(Math.abs(num1 - num2) <= prec);
         //return(num1 === num2);
 }
+
+function fnExists(/*arguments*/) {
+    for (var i = 0; i < arguments.length; i++) {
+        if (typeof (arguments[i]) !== "function") return false;
+    }
+    return true;
+}

@@ -23,7 +23,7 @@ var tests = [
 	// root + "suite/ch08/**/*.js",	// passed!
 	// root + "suite/ch09/**/*.js",	// passed!
 	// root + "suite/ch10/**/*.js",	// scope
-	// root + "suite/ch11/**/*.js",
+	root + "suite/ch11/11.4/11.4.1/**/*.js",
 	// root + "suite/ch12/12.10/**/*.js"
 	// root + "suite/ch13/**/*.js",	// functions
 	// root + "suite/ch14/**/*.js",	// program
@@ -32,7 +32,7 @@ var tests = [
 	// root + "suite/ch15/15.3/**/*.js",	// function
 	// root + "suite/ch15/15.4/**/*.js",	// array
 	// root + "suite/ch15/15.4/15.4.4/15.4.4.17/**/*.js",
-	root + "suite/ch15/15.5/15.5.4/15.5.4.15/**/*.js",	// string
+	// root + "suite/ch15/15.5/15.5.4/15.5.4.15/**/*.js",	// string
 	// root + "suite/ch15/15.6/**/*.js",	// boolean
 	// root + "suite/ch15/15.7/**/*.js",	// number
 	// root + "suite/ch15/15.8/**/*.js",	// math

@@ -8,21 +8,21 @@ describe("Expression", function () {
 				var code = "var a = 0;\nfor (var i = 0; i < 10; i++) { a++; }";
 				var scope = runner.getScope(code);
 
-				expect(scope.getProperty("a").value).to.equal(10);
+				expect(scope.getValue("a").value).to.equal(10);
 			});
 
 			it("should stop iterating when break", function () {
 				var code = "var a = 0;\nfor (var i = 0; i < 10; i++) { a++; if (a > 1) { break; } }";
 				var scope = runner.getScope(code);
 
-				expect(scope.getProperty("a").value).to.equal(2);
+				expect(scope.getValue("a").value).to.equal(2);
 			});
 
 			it("should use continue to skip statements", function () {
 				var code = "var a = 0;\nfor (var i = 0; i < 10; i++) { if (a > 0) { continue; } a++; }";
 				var scope = runner.getScope(code);
 
-				expect(scope.getProperty("a").value).to.equal(1);
+				expect(scope.getValue("a").value).to.equal(1);
 			});
 		});
 
@@ -47,17 +47,17 @@ describe("Expression", function () {
 		describe("Do while loops", function () {
 			it("should execute until false", function () {
 				var scope = runner.getScope("var counter=0;while (counter < 5) { counter++; }");
-				expect(scope.getProperty("counter").value).to.equal(5);
+				expect(scope.getValue("counter").value).to.equal(5);
 			});
 
 			it("should never execute if the test is never true", function () {
 				var scope = runner.getScope("var counter=10;while (counter < 5) { counter = 20; }");
-				expect(scope.getProperty("counter").value).to.equal(10);
+				expect(scope.getValue("counter").value).to.equal(10);
 			});
 
 			it("should keep executing until first time it because false for do-while", function () {
 				var scope = runner.getScope("var counter=10;do { counter = 20; } while (counter < 5)");
-				expect(scope.getProperty("counter").value).to.equal(20);
+				expect(scope.getValue("counter").value).to.equal(20);
 			});
 		});
 	});

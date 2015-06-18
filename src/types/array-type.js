@@ -9,7 +9,7 @@ function ArrayType () {
 ArrayType.prototype = Object.create(ObjectType.prototype);
 ArrayType.prototype.constructor = ArrayType;
 
-ArrayType.prototype.setProperty = function (name, value) {
+ArrayType.prototype.putValue = function (name, value) {
 	if (typeof name === "number") {
 		// todo: should be a better way to set length, but we can't reference object factory here
 		var currentLength = this.properties.length.value;
@@ -22,7 +22,7 @@ ArrayType.prototype.setProperty = function (name, value) {
 	}
 
 	if (name === "length") {
-		var ln = this.getProperty("length");
+		var ln = this.getValue("length");
 		var i = value.toNumber();
 
 		if (ln && i < ln.value) {
@@ -32,11 +32,11 @@ ArrayType.prototype.setProperty = function (name, value) {
 		}
 	}
 
-	ObjectType.prototype.setProperty.apply(this, arguments);
+	ObjectType.prototype.putValue.apply(this, arguments);
 };
 
 ArrayType.prototype.init = function (objectFactory) {
-	this.setProperty("length", objectFactory.createPrimitive(0));
+	this.defineOwnProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false });
 };
 
 module.exports = ArrayType;

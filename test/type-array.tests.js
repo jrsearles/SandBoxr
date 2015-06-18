@@ -148,42 +148,42 @@ describe("Types", function() {
 				var instance = runner.getRunner("var a = ['angel', 'clown', 'mandarin', 'surgeon']; a.splice(2, 0, 'drum');");
 				var result = instance.execute().result;
 
-				expect(instance.scope.getProperty("a").getProperty(2).value).to.equal("drum");
-				expect(instance.scope.getProperty("a").getProperty("length").value).to.equal(5);
-				expect(result.getProperty("length").value).to.equal(0);
+				expect(instance.scope.getValue("a").getValue(2).value).to.equal("drum");
+				expect(instance.scope.getValue("a").getValue("length").value).to.equal(5);
+				expect(result.getValue("length").value).to.equal(0);
 			});
 
 			it("should remove count specified from array", function () {
 				var instance = runner.getRunner("var a = ['angel', 'clown', 'drum', 'mandarin', 'surgeon']; a.splice(3, 1);");
 				var result = instance.execute().result;
 
-				expect(result.getProperty("length").value).to.equal(1);
-				expect(instance.scope.getProperty("a").getProperty(3).value).to.equal("surgeon");
+				expect(result.getValue("length").value).to.equal(1);
+				expect(instance.scope.getValue("a").getValue(3).value).to.equal("surgeon");
 			});
 
 			it("should insert new item in deleted position", function () {
 				var instance = runner.getRunner("var a = ['angel', 'clown', 'drum', 'surgeon'];a.splice(2, 1, 'trumpet');");
 				var result = instance.execute().result;
 
-				expect(instance.scope.getProperty("a").getProperty(2).value).to.equal("trumpet");
+				expect(instance.scope.getValue("a").getValue(2).value).to.equal("trumpet");
 			});
 
 			it("should insert all items, even if delete count is less", function () {
 				var instance = runner.getRunner("var a = ['angel', 'clown', 'trumpet', 'surgeon'];a.splice(0, 2, 'parrot', 'anemone', 'blue');");
 				var result = instance.execute().result;
 
-				expect(result.getProperty("length").value).to.equal(2);
-				expect(instance.scope.getProperty("a").getProperty("length").value).to.equal(5);
-				expect(instance.scope.getProperty("a").getProperty(0).value).to.equal("parrot");
-				expect(instance.scope.getProperty("a").getProperty(2).value).to.equal("blue");
+				expect(result.getValue("length").value).to.equal(2);
+				expect(instance.scope.getValue("a").getValue("length").value).to.equal(5);
+				expect(instance.scope.getValue("a").getValue(0).value).to.equal("parrot");
+				expect(instance.scope.getValue("a").getValue(2).value).to.equal("blue");
 			});
 
 			it("should remove elements until end if delete count exceeds length", function () {
 				var instance = runner.getRunner("var a = ['parrot', 'anemone', 'blue', 'trumpet', 'surgeon'];a.splice(3, Number.MAX_VALUE);");
 				var result = instance.execute().result;
 
-				expect(result.getProperty("length").value).to.equal(2);
-				expect(instance.scope.getProperty("a").getProperty("length").value).to.equal(3);
+				expect(result.getValue("length").value).to.equal(2);
+				expect(instance.scope.getValue("a").getValue("length").value).to.equal(3);
 			});
 		});
 
@@ -191,24 +191,24 @@ describe("Types", function() {
 			it("should combine 2 arrays", function () {
 				var result = runner.runBlock("var a = ['a', 'b', 'c'];a.concat([1, 2, 3]);");
 
-				expect(result.getProperty("length").value).to.equal(6);
-				expect(result.getProperty(3).value).to.equal(1);
+				expect(result.getValue("length").value).to.equal(6);
+				expect(result.getValue(3).value).to.equal(1);
 			});
 
 			it("should combine multiple arrays", function () {
 				var result = runner.runBlock("var num1 = [1, 2, 3],num2 = [4, 5, 6],num3 = [7, 8, 9];num1.concat(num2,num3);");
 
-				expect(result.getProperty("length").value).to.equal(9);
-				expect(result.getProperty(3).value).to.equal(4);
-				expect(result.getProperty(6).value).to.equal(7);
+				expect(result.getValue("length").value).to.equal(9);
+				expect(result.getValue(3).value).to.equal(4);
+				expect(result.getValue(6).value).to.equal(7);
 			});
 
 			it("should combine flatten arrays/values", function () {
 				var result = runner.runBlock("var a = ['a', 'b', 'c'];a.concat(1, [2, 3]);");
 
-				expect(result.getProperty("length").value).to.equal(6);
-				expect(result.getProperty(3).value).to.equal(1);
-				expect(result.getProperty(4).value).to.equal(2);
+				expect(result.getValue("length").value).to.equal(6);
+				expect(result.getValue(3).value).to.equal(1);
+				expect(result.getValue(4).value).to.equal(2);
 			});
 		});
 
@@ -310,9 +310,9 @@ describe("Types", function() {
 			it("should return the mapped values", function () {
 				var result = runner.runBlock("[1,2,3].map(function (i) { return i * 2; });");
 
-				expect(result.getProperty(0).value).to.equal(2);
-				expect(result.getProperty(2).value).to.equal(6);
-				expect(result.getProperty("length").value).to.equal(3);
+				expect(result.getValue(0).value).to.equal(2);
+				expect(result.getValue(2).value).to.equal(6);
+				expect(result.getValue("length").value).to.equal(3);
 			});
 		});
 
@@ -320,9 +320,9 @@ describe("Types", function() {
 			it("should filter values from the array", function () {
 				var result = runner.runBlock("[12, 5, 8, 130, 44].filter(function (v) { return v >= 10; });");
 
-				expect(result.getProperty(0).value).to.equal(12);
-				expect(result.getProperty(1).value).to.equal(130);
-				expect(result.getProperty("length").value).to.equal(3);
+				expect(result.getValue(0).value).to.equal(12);
+				expect(result.getValue(1).value).to.equal(130);
+				expect(result.getValue("length").value).to.equal(3);
 			});
 		});
 
@@ -384,9 +384,9 @@ describe("Types", function() {
 			it("should execue reduce callback", function () {
 				var result = runner.runBlock("[[0, 1], [2, 3], [4, 5]].reduceRight(function(a, b) { return a.concat(b); }, []);");
 
-				expect(result.getProperty("length").value).to.equal(6);
-				expect(result.getProperty(0).value).to.equal(4);
-				expect(result.getProperty(5).value).to.equal(1);
+				expect(result.getValue("length").value).to.equal(6);
+				expect(result.getValue(0).value).to.equal(4);
+				expect(result.getValue(5).value).to.equal(1);
 			});
 		});
 
@@ -394,8 +394,8 @@ describe("Types", function() {
 			it("should reverse the items in the array", function () {
 				var result = runner.runBlock("['one', 'two', 'three'].reverse();");
 
-				expect(result.getProperty(0).value).to.equal("three");
-				expect(result.getProperty(2).value).to.equal("one");
+				expect(result.getValue(0).value).to.equal("three");
+				expect(result.getValue(2).value).to.equal("one");
 			});
 
 			it("should pass a reference to the same array back", function () {
@@ -413,21 +413,21 @@ describe("Types", function() {
 
 			it("should sort the array without a compare function", function () {
 				var result = runner.runBlock("['cherries', 'apples', 'bananas'].sort();");
-				expect(result.getProperty(0).value).to.equal("apples");
-				expect(result.getProperty(2).value).to.equal("cherries");
+				expect(result.getValue(0).value).to.equal("apples");
+				expect(result.getValue(2).value).to.equal("cherries");
 			});
 
 			it("should sort by default converting to string", function () {
 				var result = runner.runBlock("var scores = [1, 10, 21, 2];scores.sort();");
-				expect(result.getProperty(0).value).to.equal(1);
-				expect(result.getProperty(1).value).to.equal(10);
-				expect(result.getProperty(3).value).to.equal(21);
+				expect(result.getValue(0).value).to.equal(1);
+				expect(result.getValue(1).value).to.equal(10);
+				expect(result.getValue(3).value).to.equal(21);
 			});
 
 			it("should sort using a comparer function if provided", function () {
 				var result = runner.runBlock("[4, 2, 5, 1, 3].sort(function(a, b) { return a - b; });");
-				expect(result.getProperty(0).value).to.equal(1);
-				expect(result.getProperty(4).value).to.equal(5);
+				expect(result.getValue(0).value).to.equal(1);
+				expect(result.getValue(4).value).to.equal(5);
 			});
 		});
 

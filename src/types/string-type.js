@@ -25,7 +25,7 @@ StringType.prototype.init = function (objectFactory) {
 	this.properties.length = new PropertyDescriptor({ configurable: false, enumerable: false, writable: false }, objectFactory.createPrimitive(this.value.length));
 };
 
-StringType.prototype.getPropertyDescriptor = function (name) {
+StringType.prototype.getProperty = function (name) {
 	if (util.isInteger(name)) {
 		var position = Number(name);
 		if (position < this.value.length) {
@@ -33,7 +33,7 @@ StringType.prototype.getPropertyDescriptor = function (name) {
 		}
 	}
 
-	return PrimitiveType.prototype.getPropertyDescriptor.apply(this, arguments);
+	return PrimitiveType.prototype.getProperty.apply(this, arguments);
 };
 
 StringType.prototype.hasOwnProperty = function (name) {
@@ -44,12 +44,12 @@ StringType.prototype.hasOwnProperty = function (name) {
 	return PrimitiveType.prototype.hasOwnProperty.apply(this, arguments);
 };
 
-StringType.prototype.getProperty = function (name) {
+StringType.prototype.getValue = function (name) {
 	if (util.isInteger(name)) {
 		return getCharacter(this, Number(name));
 	}
 
-	return PrimitiveType.prototype.getProperty.call(this, name);
+	return PrimitiveType.prototype.getValue.call(this, name);
 };
 
 module.exports = StringType;

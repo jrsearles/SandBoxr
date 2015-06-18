@@ -11,15 +11,15 @@ function NativeFunctionType (fn, parentScope) {
 NativeFunctionType.prototype = Object.create(FunctionType.prototype);
 NativeFunctionType.prototype.constructor = NativeFunctionType;
 
-NativeFunctionType.prototype.init = function (objectFactory) {
+NativeFunctionType.prototype.init = function (objectFactory, proto) {
 	var length = this.nativeFunction.length;
 	if ("nativeLength" in this.nativeFunction) {
 		length = this.nativeFunction.nativeLength;
 	}
 
-	this.setProperty("length", objectFactory.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
+	this.putValue("length", objectFactory.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
 
-	var proto = objectFactory.createObject();
+	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor({ configurable: true, enumerable: false, writable: true, value: this });
 	this.setProto(proto, { configurable: false, enumerable: false, writable: true });
 };

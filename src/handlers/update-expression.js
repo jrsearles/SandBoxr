@@ -26,6 +26,6 @@ module.exports = function UpdateExpression (context) {
 	var name = executionResult.name;
 	var returnValue = context.node.prefix ? newValue : originalValue;
 
-	obj.setProperty(name, newValue);
+	obj.putValue(name, newValue);
 	return context.result(returnValue, name, obj);
 };

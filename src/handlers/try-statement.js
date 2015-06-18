@@ -8,7 +8,7 @@ module.exports = function (context) {
 	} catch (err) {
 		if (context.node.handler) {
 			var scope = context.scope.createScope();
-			scope.setProperty(context.node.handler.param.name, objectFactory.createPrimitive(err));
+			scope.putValue(context.node.handler.param.name, objectFactory.createPrimitive(err));
 
 			result = context.create(context.node.handler.body, context.node.handler, scope).execute();
 		}

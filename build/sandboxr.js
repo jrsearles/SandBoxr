@@ -75,6 +75,12 @@ ExecutionContext.prototype.result = function (value, name, obj) {
 	return new ExecutionResult(value, name, obj);
 };
 
+ExecutionContext.prototype.reference = function (value, name, obj) {
+	var ref = new ExecutionResult(value, name, obj);
+	ref.reference = true;
+	return ref;
+};
+
 ExecutionContext.prototype.empty = function () {
 	return new ExecutionResult();
 };
@@ -129,12 +135,12 @@ var objectFactory = require("../types/object-factory");
 
 module.exports = function ArrayExpression (context) {
 	var arr = objectFactory.create("Array");
-	var undef = context.scope.global.getProperty("undefined");
+	var undef = context.scope.global.getValue("undefined");
 
 	if (context.node.elements) {
 		context.node.elements.forEach(function (element, index) {
 			var item = element ? context.create(element).execute().result : undef;
-			arr.setProperty(index, item);
+			arr.putValue(index, item);
 		});
 	}
 
@@ -160,17 +166,27 @@ var assignOperators = {
 };
 
 module.exports = function AssignmentExpression (context) {
+	var assignment = context.node.operator === "=";
+
 	// check for undeclared global
 	if (context.node.left.type === "Identifier" && !context.scope.hasProperty(context.node.left.name)) {
+		if (!assignment) {
+			throw new ReferenceError(context.node.left.name + " is not defined");
+		}
+
 		// not found - add as reference
-		context.scope.global.setProperty(context.node.left.name, context.scope.global.getProperty("undefined"), { configurable: true });
+		context.scope.global.putValue(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true });
 	}
 
 	var left = context.create(context.node.left).execute();
+	if (!left.reference) {
+		throw new ReferenceError("Invalid left-hand side in assignment");
+	}
+
 	var right = context.create(context.node.right).execute();
 	var newValue;
 
-	if (context.node.operator === "=") {
+	if (assignment) {
 		newValue = right.result;
 	} else {
 		newValue = objectFactory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
@@ -180,9 +196,9 @@ module.exports = function AssignmentExpression (context) {
 	var name = left.name;
 
 	if (obj.hasProperty(name)) {
-		obj.setProperty(name, newValue);
+		obj.putValue(name, newValue);
 	} else {
-		obj.setProperty(name, newValue, { configurable: true });
+		obj.putValue(name, newValue, { configurable: left.object ? true : false });
 	}
 
 	return context.result(newValue, name);
@@ -274,9 +290,9 @@ var binaryOperators = {
 	">>": function (a, b, c) { return utils.toPrimitive(c, a) >> utils.toPrimitive(c, b); },
 	">>>": function (a, b, c) { return utils.toPrimitive(c, a) >>> utils.toPrimitive(c, b); },
 	"%": function (a, b, c) { return utils.toPrimitive(c, a) % utils.toPrimitive(c, b); },
-	"|": function (a, b, c) { return a.value | b.value; },
-	"^": function (a, b, c) { return utils.toInteger(c, a) ^ utils.toInteger(c, b); },
-	"&": function (a, b, c) { return utils.toPrimitive(c, a) & utils.toPrimitive(c, b); },
+	"|": function (a, b, c) { return utils.toInt32(c, a) | utils.toInt32(c, b); },
+	"^": function (a, b, c) { return utils.toInt32(c, a) ^ utils.toInt32(c, b); },
+	"&": function (a, b, c) { return utils.toInt32(c, a) & utils.toInt32(c, b); },
 	"in": function (a, b, c) { return b.hasProperty(a.toString()); },
 	"instanceof": function (a, b) {
 		if (b.type !== "function") {
@@ -287,8 +303,15 @@ var binaryOperators = {
 			return false;
 		}
 
+		var visited = [];
 		var current = a;
 		while (current) {
+			if (visited.indexOf(current) >= 0) {
+				return false;
+			}
+
+			// keep a stack to avoid circular reference
+			visited.push(current);
 			if (current === b.proto) {
 				return true;
 			}
@@ -357,7 +380,7 @@ function populateHoistedVariables (node, declarators) {
 }
 
 function hoistVariables (nodes, scope) {
-	var undef = scope.global.getProperty("undefined");
+	var undef = scope.global.getValue("undefined");
 	var variables = [];
 	var name;
 
@@ -368,9 +391,9 @@ function hoistVariables (nodes, scope) {
 
 		if (decl.type === "FunctionDeclaration") {
 			// functions can be used before they are defined
-			scope.defineProperty(name, objectFactory.createFunction(decl, scope), { enumerable: false }, true);
+			scope.defineOwnProperty(name, objectFactory.createFunction(decl, scope), { configurable: false, enumerable: false }, true);
 		} else {
-			scope.defineProperty(name, undef, { enumerable: false }, true);
+			scope.defineOwnProperty(name, undef, { configurable: false, enumerable: false }, true);
 		}
 	});
 }
@@ -480,7 +503,7 @@ module.exports = function ForInStatement (context) {
 	while (obj) {
 		for (var prop in obj.properties) {
 			if (obj.properties[prop].enumerable) {
-				context.scope.setProperty(left.name, objectFactory.createPrimitive(prop));
+				context.scope.putValue(left.name, objectFactory.createPrimitive(prop));
 				result = context.create(context.node.body).execute();
 
 				if (result && result.shouldBreak(context, true)) {
@@ -528,12 +551,7 @@ module.exports = function ForStatement (context) {
 },{}],14:[function(require,module,exports){
 "use strict";
 module.exports = function FunctionDeclaration (context) {
-	// var id = context.node.id.name;
-	// var fn = objectFactory.createFunction(context.node, context.scope);
-
-	// context.scope.setProperty(id, fn);
-	// return context.result(fn);
-	return context.result(context.scope.getProperty(context.node.id.name));
+	return context.result(context.scope.getValue(context.node.id.name));
 };
 
 },{}],15:[function(require,module,exports){
@@ -541,7 +559,7 @@ module.exports = function FunctionDeclaration (context) {
 var objectFactory = require("../types/object-factory");
 
 module.exports = function FunctionExpression (context) {
-	var ctor = context.scope.global.getProperty("Function");
+	var ctor = context.scope.global.getValue("Function");
 	var proto = objectFactory.createObject();
 	var func = objectFactory.createFunction(context.node, context.scope, proto, ctor);
 
@@ -552,13 +570,13 @@ module.exports = function FunctionExpression (context) {
 "use strict";
 module.exports = function Identifier (context) {
 	var name = context.node.name;
-	var value = context.scope.getProperty(name);
+	var value = context.scope.getValue(name);
 
 	if (value === undefined) {
 		throw new ReferenceError(name + " is not defined.");
 	}
 
-	return context.result(value, name);
+	return context.reference(value, name);
 };
 
 },{}],17:[function(require,module,exports){
@@ -675,7 +693,7 @@ module.exports = function LogicalExpression (context) {
 
 module.exports = function MemberExpression (context) {
 	var obj = context.create(context.node.object).execute().result;
-	var undef = context.scope.global.getProperty("undefined");
+	var undef = context.scope.global.getValue("undefined");
 	var name, value;
 
 	if (context.node.computed) {
@@ -687,12 +705,12 @@ module.exports = function MemberExpression (context) {
 	}
 
 	// if (obj.hasProperty(name)) {
-	value = obj.getProperty(name);
+	value = obj.getValue(name);
 	// } else {
 	// 	obj.setProperty(name, undef);
 	// }
 
-	return context.result(value || undef, name, obj);
+	return context.reference(value || undef, name, obj);
 };
 
 },{}],24:[function(require,module,exports){
@@ -713,7 +731,7 @@ function setDescriptor (context, obj, name, descriptor) {
 		};
 	}
 
-	obj.defineProperty(name, null, descriptor);
+	obj.defineOwnProperty(name, null, descriptor);
 }
 
 module.exports = function ObjectExpression (context) {
@@ -732,7 +750,7 @@ module.exports = function ObjectExpression (context) {
 				break;
 
 			default:
-				obj.defineProperty(name, value);
+				obj.defineOwnProperty(name, value);
 				break;
 		}
 	});
@@ -747,8 +765,11 @@ module.exports = function ObjectExpression (context) {
 },{"../types/object-factory":57,"../utils":65}],25:[function(require,module,exports){
 "use strict";
 module.exports = function ReturnStatement (context) {
-	var returnValue = context.node.argument ? context.create(context.node.argument).execute().result : context.scope.global.getProperty("undefined");
-	return context.exit(returnValue);
+	if (context.node.argument) {
+		return context.exit(context.create(context.node.argument).execute().result);
+	}
+
+	return context.exit(context.scope.global.getValue("undefined"));
 };
 
 },{}],26:[function(require,module,exports){
@@ -829,7 +850,7 @@ module.exports = function ThrowStatement (context) {
 		throw arg.value;
 	}
 
-	throw new Error(arg.getProperty("message"));
+	throw new Error(arg.getValue("message"));
 };
 
 },{}],30:[function(require,module,exports){
@@ -844,7 +865,7 @@ module.exports = function (context) {
 	} catch (err) {
 		if (context.node.handler) {
 			var scope = context.scope.createScope();
-			scope.setProperty(context.node.handler.param.name, objectFactory.createPrimitive(err));
+			scope.putValue(context.node.handler.param.name, objectFactory.createPrimitive(err));
 
 			result = context.create(context.node.handler.body, context.node.handler, scope).execute();
 		}
@@ -901,11 +922,11 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "-":
-			newValue = objectFactory.createPrimitive(-(utils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(-(utils.toNumber(context, value)));
 			break;
 
 		case "+":
-			newValue = objectFactory.createPrimitive(+(utils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(+(utils.toNumber(context, value)));
 			break;
 
 		case "!":
@@ -917,19 +938,16 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "delete":
-			if (result && result.name != null) {
-				newValue = objectFactory.createPrimitive((result.object || context.scope).deleteProperty(result.name));
-			} else {
-				var deleted = false;
-				if (result && result.result instanceof Scope) {
-					// todo: this is hacky - deleting scope fails but returns true
-					// this is here to account for that case
-					deleted = true;
+			var deleted = true;
+			if (result) {
+				if (result.reference && result.name !== null) {
+					deleted = (result.object || context.scope).deleteProperty(result.name);
 				}
-
-				newValue = objectFactory.createPrimitive(deleted);
+			} else if (context.node.argument.object) {
+				throw new ReferenceError(context.node.argument.object.name + " is not defined");
 			}
 
+			newValue = objectFactory.createPrimitive(deleted);
 			break;
 
 		case "void":
@@ -973,7 +991,7 @@ module.exports = function UpdateExpression (context) {
 	var name = executionResult.name;
 	var returnValue = context.node.prefix ? newValue : originalValue;
 
-	obj.setProperty(name, newValue);
+	obj.putValue(name, newValue);
 	return context.result(returnValue, name, obj);
 };
 
@@ -999,7 +1017,7 @@ module.exports = function VariableDeclarator (context) {
 
 	// variables have already been hoisted so we just need to initialize them if defined
 	if (value) {
-		context.scope.setProperty(id, value);
+		context.scope.putValue(id, value);
 	}
 
 	return context.result(value, id);
@@ -1010,10 +1028,11 @@ module.exports = function VariableDeclarator (context) {
 module.exports = function WithStatement (context) {
 	var obj = context.create(context.node.object).execute().result;
 
-	context.scope.startWith(obj);
-	var result = context.create(context.node.body).execute();
-	context.scope.endWith();
+	// context.scope.startWith(obj);
+	// var result = context.create(context.node.body).execute();
+	// context.scope.endWith();
 
+	var result = context.create(context.node.body, null, context.scope.withObject(obj)).execute();
 	return result;
 };
 
@@ -1116,7 +1135,7 @@ function getEndIndex (index, length) {
 
 function executeCallback (callback, thisArg, executionContext, index) {
 	var scope = executionContext.scope.createScope(thisArg);
-	var args = [executionContext.node.getProperty(index), objectFactory.createPrimitive(index), executionContext.node];
+	var args = [executionContext.node.getValue(index), objectFactory.createPrimitive(index), executionContext.node];
 
 	utils.loadArguments(callback.node.params, args, scope);
 	return executionContext.create(callback.node.body, callback.node, scope).execute().result;
@@ -1124,7 +1143,7 @@ function executeCallback (callback, thisArg, executionContext, index) {
 
 function executeAccumulator (callback, priorValue, executionContext, index) {
 	var scope = executionContext.scope.createScope();
-	var args = [priorValue, executionContext.node.getProperty(index), objectFactory.createPrimitive(index), executionContext.node];
+	var args = [priorValue, executionContext.node.getValue(index), objectFactory.createPrimitive(index), executionContext.node];
 
 	utils.loadArguments(callback.node.params, args, scope);
 	return executionContext.create(callback.node.body, callback.node, scope).execute().result;
@@ -1140,10 +1159,10 @@ module.exports = function (globalScope) {
 					throw new RangeError("Invalid array length");
 				}
 
-				newArray.setProperty("length", length);
+				newArray.putValue("length", length);
 			} else {
 				for (var i = 0, ln = arguments.length; i < ln; i++) {
-					newArray.setProperty(i, arguments[i]);
+					newArray.putValue(i, arguments[i]);
 				}
 			}
 		}
@@ -1152,67 +1171,67 @@ module.exports = function (globalScope) {
 	}, globalScope);
 
 	var proto = arrayClass.proto;
-	proto.defineProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false });
+	proto.defineOwnProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false });
 
-	arrayClass.defineProperty("isArray", objectFactory.createFunction(function (obj) {
+	arrayClass.defineOwnProperty("isArray", objectFactory.createFunction(function (obj) {
 		return globalScope.createPrimitive(obj === proto || obj instanceof ArrayType);
 	}));
 
-	proto.defineProperty("push", objectFactory.createFunction(function () {
-		var start = this.node.getProperty("length").value || 0;
+	proto.defineOwnProperty("push", objectFactory.createFunction(function () {
+		var start = this.node.getValue("length").value || 0;
 
 		var i = 0;
 		var length = arguments.length;
 		for (; i < length; i++) {
-			this.node.setProperty(start + i, arguments[i]);
+			this.node.putValue(start + i, arguments[i]);
 		}
 
-		return this.node.getProperty("length");
+		return this.node.getValue("length");
 	}), propertyConfig);
 
-	proto.defineProperty("pop", objectFactory.createFunction(function () {
-		var index = this.node.getProperty("length").value;
-		var obj = this.node.getProperty(--index) || objectFactory.createPrimitive(undefined);
+	proto.defineOwnProperty("pop", objectFactory.createFunction(function () {
+		var index = this.node.getValue("length").value;
+		var obj = this.node.getValue(--index) || objectFactory.createPrimitive(undefined);
 
 		// need to update length manually - deleting an item does not update length per spec
 		if (index >= 0) {
-			this.node.setProperty("length", objectFactory.createPrimitive(index));
+			this.node.putValue("length", objectFactory.createPrimitive(index));
 		}
 
 		return obj;
 	}), propertyConfig);
 
-	proto.defineProperty("shift", objectFactory.createFunction(function () {
-		var obj = this.node.getProperty(0);
+	proto.defineOwnProperty("shift", objectFactory.createFunction(function () {
+		var obj = this.node.getValue(0);
 
 		var i = 1;
-		var length = this.node.getProperty("length").value;
+		var length = this.node.getValue("length").value;
 		for (; i < length; i++) {
 			this.node.properties[i - 1] = this.node.properties[i];
 		}
 
-		this.node.setProperty("length", objectFactory.createPrimitive(--length));
+		this.node.putValue("length", objectFactory.createPrimitive(--length));
 		return obj;
 	}), propertyConfig);
 
-	proto.defineProperty("unshift", objectFactory.createFunction(function () {
-		var i = this.node.getProperty("length").value;
+	proto.defineOwnProperty("unshift", objectFactory.createFunction(function () {
+		var i = this.node.getValue("length").value;
 		var length = arguments.length;
 
 		while (i--) {
-			this.node.setProperty(i + length, this.node.getProperty(i));
+			this.node.putValue(i + length, this.node.getValue(i));
 		}
 
 		for (; i < length; i++) {
-			this.node.setProperty(i, arguments[i]);
+			this.node.putValue(i, arguments[i]);
 		}
 
-		return this.node.getProperty("length");
+		return this.node.getValue("length");
 	}), propertyConfig);
 
-	proto.defineProperty("slice", objectFactory.createFunction(function (begin, end) {
+	proto.defineOwnProperty("slice", objectFactory.createFunction(function (begin, end) {
 		var source = this.node;
-		var length = source.getProperty("length").value;
+		var length = source.getValue("length").value;
 		begin = begin ? utils.toInteger(this, begin) : 0;
 
 		if (!end || end.type === "undefined") {
@@ -1228,18 +1247,18 @@ module.exports = function (globalScope) {
 		end = getEndIndex(end, length);
 
 		for (var i = begin; i < end; i++) {
-			arr.setProperty(index++, source.getProperty(i));
+			arr.putValue(index++, source.getValue(i));
 		}
 
 		return arr;
 	}), propertyConfig);
 
-	proto.defineProperty("splice", objectFactory.createFunction(function (start, deleteCount) {
+	proto.defineOwnProperty("splice", objectFactory.createFunction(function (start, deleteCount) {
 		start = start.toNumber();
 		deleteCount = deleteCount.toNumber();
 
 		var removed = objectFactory.create("Array");
-		var length = this.node.getProperty("length").value;
+		var length = this.node.getValue("length").value;
 		var newCount = arguments.length - 2;
 		var i, removedIndex = 0;
 
@@ -1247,7 +1266,7 @@ module.exports = function (globalScope) {
 		deleteCount = Math.min(deleteCount, length - start);
 
 		for (i = start; i < start + deleteCount; i++) {
-			removed.setProperty(removedIndex++, this.node.getProperty(i));
+			removed.putValue(removedIndex++, this.node.getValue(i));
 			// this.node.properties[i] = this.node.properties[i + deleteCount];
 		}
 
@@ -1258,24 +1277,24 @@ module.exports = function (globalScope) {
 		}
 
 		length -= deleteCount;
-		this.node.setProperty("length", objectFactory.createPrimitive(length));
+		this.node.putValue("length", objectFactory.createPrimitive(length));
 
 		if (newCount > 0) {
 			i = length + newCount;
 			while (i-- > start) {
-				this.node.setProperty(i, this.node.getProperty([i - newCount]));
+				this.node.putValue(i, this.node.getValue([i - newCount]));
 			}
 
 			i = 0;
 			while (i++ < newCount) {
-				this.node.setProperty(start++, arguments[i + 1]);
+				this.node.putValue(start++, arguments[i + 1]);
 			}
 		}
 
 		return removed;
 	}), propertyConfig);
 
-	proto.defineProperty("concat", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("concat", objectFactory.createFunction(function () {
 		var newArray = objectFactory.create("Array");
 		var arrays = Array.prototype.slice.call(arguments);
 
@@ -1287,31 +1306,31 @@ module.exports = function (globalScope) {
 			current = arrays.shift();
 
 			if (current instanceof ArrayType) {
-				for (i = 0, length = current.getProperty("length").value; i < length; i++) {
-					newArray.setProperty(index++, current.getProperty(i));
+				for (i = 0, length = current.getValue("length").value; i < length; i++) {
+					newArray.putValue(index++, current.getValue(i));
 				}
 			} else {
-				newArray.setProperty(index++, current);
+				newArray.putValue(index++, current);
 			}
 		}
 
 		return newArray;
 	}), propertyConfig);
 
-	proto.defineProperty("join", objectFactory.createFunction(function (separator) {
+	proto.defineOwnProperty("join", objectFactory.createFunction(function (separator) {
 		separator = arguments.length === 0 ? "," : separator.toString();
 		var stringValues = [];
 
-		for (var i = 0, length = this.node.getProperty("length").value; i < length; i++) {
-			stringValues.push(this.node.getProperty(i).toString());
+		for (var i = 0, length = this.node.getValue("length").value; i < length; i++) {
+			stringValues.push(this.node.getValue(i).toString());
 		}
 
 		return objectFactory.createPrimitive(stringValues.join(separator));
 	}), propertyConfig);
 
-	proto.defineProperty("indexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
+	proto.defineOwnProperty("indexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
 		var index = arguments.length === 1 ? 0 : utils.toInteger(this, fromIndex);
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		var notFound = objectFactory.createPrimitive(-1);
 
 		if (length === 0 || index >= length) {
@@ -1321,7 +1340,7 @@ module.exports = function (globalScope) {
 		index = getStartIndex(index, length);
 
 		for (; index < length; index++) {
-			if (index in this.node.properties && searchElement.equals(this.node.getProperty(index))) {
+			if (index in this.node.properties && searchElement.equals(this.node.getValue(index))) {
 				return objectFactory.createPrimitive(index);
 			}
 		}
@@ -1329,8 +1348,8 @@ module.exports = function (globalScope) {
 		return notFound;
 	}), propertyConfig);
 
-	proto.defineProperty("lastIndexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+	proto.defineOwnProperty("lastIndexOf", objectFactory.createFunction(function (searchElement, fromIndex) {
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		var index = arguments.length === 1 ? length : utils.toInteger(this, fromIndex);
 
 		if (index < 0) {
@@ -1338,7 +1357,7 @@ module.exports = function (globalScope) {
 		}
 
 		while (index-- > 0) {
-			if (index in this.node.properties && searchElement.equals(this.node.getProperty(index))) {
+			if (index in this.node.properties && searchElement.equals(this.node.getValue(index))) {
 				return objectFactory.createPrimitive(index);
 			}
 		}
@@ -1346,40 +1365,40 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(-1);
 	}), propertyConfig);
 
-	proto.defineProperty("forEach", objectFactory.createFunction(function (callback, thisArg) {
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+	proto.defineOwnProperty("forEach", objectFactory.createFunction(function (callback, thisArg) {
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		for (var i = 0; i < length; i++) {
-			if (i in this.node.properties) {
+			if (String(i) in this.node.properties) {
 				executeCallback(callback, thisArg, this, i);
 			}
 		}
 	}), propertyConfig);
 
-	proto.defineProperty("map", objectFactory.createFunction(function (callback, thisArg) {
+	proto.defineOwnProperty("map", objectFactory.createFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.map");
 
 		var newArray = objectFactory.create("Array");
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 
 		for (var i = 0; i < length; i++) {
-			if (i in this.node.properties) {
-				newArray.setProperty(i, executeCallback(callback, thisArg, this, i));
+			if (this.node.hasProperty(i)) {
+				newArray.putValue(i, executeCallback(callback, thisArg, this, i));
 			}
 		}
 
 		return newArray;
 	}), propertyConfig);
 
-	proto.defineProperty("filter", objectFactory.createFunction(function (callback, thisArg) {
+	proto.defineOwnProperty("filter", objectFactory.createFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.filter");
 
 		var newArray = objectFactory.create("Array");
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		var index = 0;
 
 		for (var i = 0; i < length; i++) {
-			if (i in this.node.properties && executeCallback(callback, thisArg, this, i).toBoolean()) {
-				newArray.setProperty(index++, this.node.getProperty(i));
+			if (this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i).toBoolean()) {
+				newArray.putValue(index++, this.node.getValue(i));
 			}
 		}
 
@@ -1389,7 +1408,7 @@ module.exports = function (globalScope) {
 	function every (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.every");
 
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -1401,12 +1420,12 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(true);
 	}
 	every.nativeLength = 1;
-	proto.defineProperty("every", objectFactory.createFunction(every), propertyConfig);
+	proto.defineOwnProperty("every", objectFactory.createFunction(every), propertyConfig);
 
 	function some (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.some");
 
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -1418,16 +1437,16 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(false);
 	}
 	some.nativeLength = 1;
-	proto.defineProperty("some", objectFactory.createFunction(some), propertyConfig);
+	proto.defineOwnProperty("some", objectFactory.createFunction(some), propertyConfig);
 
-	proto.defineProperty("reduce", objectFactory.createFunction(function (callback, initialValue) {
+	proto.defineOwnProperty("reduce", objectFactory.createFunction(function (callback, initialValue) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduce");
 
 		if (callback.type !== "function") {
 			throw new TypeError();
 		}
 
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		var index = 0;
 		var value;
 
@@ -1455,10 +1474,10 @@ module.exports = function (globalScope) {
 		return value;
 	}), propertyConfig);
 
-	proto.defineProperty("reduceRight", objectFactory.createFunction(function (callback, initialValue) {
+	proto.defineOwnProperty("reduceRight", objectFactory.createFunction(function (callback, initialValue) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
 
-		var index = this.node.getProperty("length").value - 1;
+		var index = this.node.getValue("length").value - 1;
 		var value;
 
 		if (arguments.length >= 2) {
@@ -1481,8 +1500,8 @@ module.exports = function (globalScope) {
 		return value;
 	}), propertyConfig);
 
-	proto.defineProperty("reverse", objectFactory.createFunction(function () {
-		var length = utils.toUInt32(this, this.node.getProperty("length"));
+	proto.defineOwnProperty("reverse", objectFactory.createFunction(function () {
+		var length = utils.toUInt32(this, this.node.getValue("length"));
 		var temp;
 
 		for (var i = 0, ln = length / 2; i < ln; i++) {
@@ -1509,7 +1528,7 @@ module.exports = function (globalScope) {
 		return 0;
 	}
 
-	proto.defineProperty("sort", objectFactory.createFunction(function (compareFunction) {
+	proto.defineOwnProperty("sort", objectFactory.createFunction(function (compareFunction) {
 		var executionContext = this;
 		var arr = this.node;
 
@@ -1524,13 +1543,13 @@ module.exports = function (globalScope) {
 		util.toArray(arr)
 			.sort(wrappedComparer || defaultComparer)
 			.forEach(function (element, index) {
-				arr.setProperty(index, element);
+				arr.putValue(index, element);
 			});
 
 		return arr;
 	}), propertyConfig);
 
-	proto.defineProperty("toLocaleString", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("toLocaleString", objectFactory.createFunction(function () {
 		// todo: implement for reach
 		var values = util.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
 		return objectFactory.createPrimitive(values.toLocaleString());
@@ -1538,9 +1557,9 @@ module.exports = function (globalScope) {
 
 	// todo: this is a bit hacky - toString will call join if available per spec,
 	// but will call Object..toString if not
-	proto.defineProperty("toString", proto.properties.join.value, propertyConfig);
+	proto.defineOwnProperty("toString", proto.properties.join.value, propertyConfig);
 
-	globalScope.defineProperty("Array", arrayClass, propertyConfig);
+	globalScope.defineOwnProperty("Array", arrayClass, propertyConfig);
 };
 
 },{"../types/array-type":52,"../types/object-factory":57,"../util":64,"../utils":65,"../utils/contracts":66}],38:[function(require,module,exports){
@@ -1567,7 +1586,7 @@ module.exports = function (globalScope) {
 	}, globalScope);
 
 	booleanClass.proto.className = "Boolean";
-	booleanClass.proto.defineProperty("toString", objectFactory.createFunction(function () {
+	booleanClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
 		}
@@ -1575,7 +1594,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value ? this.node.value.toString() : "false");
 	}), propertyConfig);
 
-	booleanClass.proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	booleanClass.proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.valueOf is not generic.");
 		}
@@ -1583,7 +1602,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value || false);
 	}), propertyConfig);
 
-	globalScope.defineProperty("Boolean", booleanClass, propertyConfig);
+	globalScope.defineOwnProperty("Boolean", booleanClass, propertyConfig);
 };
 
 },{"../types/object-factory":57}],39:[function(require,module,exports){
@@ -1597,10 +1616,10 @@ module.exports = function (globalScope) {
 	var consoleClass = objectFactory.createObject();
 
 	methods.forEach(function (name) {
-		consoleClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(console[name])));
+		consoleClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(console[name])));
 	});
 
-	globalScope.defineProperty("console", consoleClass);
+	globalScope.defineOwnProperty("console", consoleClass);
 };
 
 },{"../types/object-factory":57,"../utils":65}],40:[function(require,module,exports){
@@ -1655,13 +1674,13 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(dateValue);
 	}, globalScope);
 
-	dateClass.defineProperty("parse", objectFactory.createFunction(function (value) {
+	dateClass.defineOwnProperty("parse", objectFactory.createFunction(function (value) {
 		var stringValue = utils.toPrimitive(this, value, "string");
 		var dateValue = Date.parse(stringValue);
 		return objectFactory.createPrimitive(dateValue);
 	}, globalScope), propertyConfig);
 
-	dateClass.defineProperty("UTC", objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
+	dateClass.defineOwnProperty("UTC", objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
 		var context = this;
 		var args = slice.call(arguments).map(function (arg) { return utils.toPrimitive(context, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
@@ -1670,11 +1689,11 @@ module.exports = function (globalScope) {
 	var proto = dateClass.proto;
 
 	staticMethods.forEach(function (name) {
-		dateClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Date[name])));
+		dateClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Date[name])));
 	});
 
 	protoMethods.forEach(function (name) {
-		proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Date.prototype[name])), propertyConfig);
+		proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Date.prototype[name])), propertyConfig);
 	});
 
 	setters.forEach(function (name) {
@@ -1684,14 +1703,14 @@ module.exports = function (globalScope) {
 		}
 
 		setter.nativeLength = Date.prototype[name].length;
-		proto.defineProperty(name, objectFactory.createFunction(setter), propertyConfig);
+		proto.defineOwnProperty(name, objectFactory.createFunction(setter), propertyConfig);
 	});
 
-	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		return objectFactory.createPrimitive(this.node.value.valueOf());
 	}), propertyConfig);
 
-	globalScope.defineProperty("Date", dateClass, propertyConfig);
+	globalScope.defineOwnProperty("Date", dateClass, propertyConfig);
 };
 
 },{"../types/object-factory":57,"../utils":65}],41:[function(require,module,exports){
@@ -1703,14 +1722,14 @@ var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "U
 module.exports = function (globalScope) {
 	var errorClass = objectFactory.createFunction(function (message) {
 		var obj = objectFactory.create("Error");
-		obj.setProperty("message", message);
-		obj.setProperty("name", objectFactory.createPrimitive("Error"));
+		obj.putValue("message", message);
+		obj.putValue("name", objectFactory.createPrimitive("Error"));
 		return obj;
 	});
 
-	errorClass.proto.defineProperty("toString", objectFactory.createFunction(function () {
-		var name = this.node.getProperty("name");
-		var msg = this.node.getProperty("message");
+	errorClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
+		var name = this.node.getValue("name");
+		var msg = this.node.getValue("message");
 
 		name = name && name.toString();
 		msg = msg && msg.toString();
@@ -1722,23 +1741,24 @@ module.exports = function (globalScope) {
 		return objectFactory.create("String", name || msg);
 	}), { enumerable: false });
 
-	globalScope.defineProperty("Error", errorClass, { enumerable: false });
+	globalScope.defineOwnProperty("Error", errorClass, { enumerable: false });
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
 			var err = objectFactory.createObject("Error", { name: type });
-			err.setProperty("message", message);
-			err.setProperty("name", objectFactory.createPrimitive(type));
+			err.putValue("message", message);
+			err.putValue("name", objectFactory.createPrimitive(type));
 			return err;
 		});
 
-		globalScope.defineProperty(type, errClass, { enumerable: false });
+		globalScope.defineOwnProperty(type, errClass, { enumerable: false });
 	});
 };
 
 },{"../types/object-factory":57}],42:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
+var ObjectType = require("../types/object-type");
 var utils = require("../utils");
 var util = require("../util");
 
@@ -1746,6 +1766,7 @@ var slice = Array.prototype.slice;
 var propertyConfig = { enumerable: false };
 
 module.exports = function (globalScope, options) {
+	// var proto = new ObjectType();
 	var functionClass = objectFactory.createFunction(function () {
 		var context = this;
 		if (options.parser && arguments.length > 0) {
@@ -1764,12 +1785,12 @@ module.exports = function (globalScope, options) {
 			};
 
 			var fn = objectFactory.createFunction(fnNode, globalScope);
-			fn.setProperty("constructor", functionClass);
+			fn.putValue("constructor", functionClass);
 			return fn;
 		}
 
 		if (this.isNew) {
-			this.node.setProperty("constructor", functionClass);
+			this.node.putValue("constructor", functionClass);
 			return this.node;
 		}
 
@@ -1777,10 +1798,10 @@ module.exports = function (globalScope, options) {
 	}, globalScope);
 
 	var proto = functionClass.proto;
-	proto.defineProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
-	proto.defineProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);
+	proto.defineOwnProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);
 
-	proto.defineProperty("call", objectFactory.createFunction(function (thisArg) {
+	proto.defineOwnProperty("call", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
@@ -1790,7 +1811,7 @@ module.exports = function (globalScope, options) {
 		// return this.create(this.node.node.body, this.node, scope).execute().result;
 	}), propertyConfig);
 
-	proto.defineProperty("apply", objectFactory.createFunction(function (thisArg, argsArray) {
+	proto.defineOwnProperty("apply", objectFactory.createFunction(function (thisArg, argsArray) {
 		var args = util.toArray(argsArray);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
@@ -1798,7 +1819,7 @@ module.exports = function (globalScope, options) {
 		return utils.executeFunction(this, this.node, params, args, thisArg, callee);
 	}), propertyConfig);
 
-	proto.defineProperty("bind", objectFactory.createFunction(function (thisArg) {
+	proto.defineOwnProperty("bind", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var callee = this.node;
 
@@ -1809,10 +1830,10 @@ module.exports = function (globalScope, options) {
 		});
 	}), propertyConfig);
 
-	globalScope.defineProperty("Function", functionClass, { enumerable: false });
+	globalScope.defineOwnProperty("Function", functionClass, { enumerable: false });
 };
 
-},{"../types/object-factory":57,"../util":64,"../utils":65}],43:[function(require,module,exports){
+},{"../types/object-factory":57,"../types/object-type":58,"../util":64,"../utils":65}],43:[function(require,module,exports){
 (function (global){
 "use strict";
 var Scope = require("./scope");
@@ -1839,16 +1860,16 @@ module.exports = function (options) {
 	globalScope.start();
 
 	var undefinedClass = new PrimitiveType(undefined);
-	globalScope.defineProperty("undefined", undefinedClass, { configurable: false, enumerable: false, writable: false });
+	globalScope.defineOwnProperty("undefined", undefinedClass, { configurable: false, enumerable: false, writable: false });
 
 	var nullClass = new PrimitiveType(null);
-	globalScope.defineProperty("null", nullClass, { configurable: false, writable: false });
+	globalScope.defineOwnProperty("null", nullClass, { configurable: false, writable: false });
 
-	globalScope.defineProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
-	globalScope.defineProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
+	globalScope.defineOwnProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
+	globalScope.defineOwnProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
 
 	// todo: node vs browser - do we care?
-	globalScope.defineProperty("window", globalScope, { configurable: false, writable: false });
+	globalScope.defineOwnProperty("window", globalScope, { configurable: false, writable: false });
 
 	functionAPI(globalScope, options);
 	objectAPI(globalScope, options);
@@ -1864,10 +1885,10 @@ module.exports = function (options) {
 	consoleAPI(globalScope, options);
 
 	globalFunctions.forEach(function (name) {
-		globalScope.defineProperty(name, objectFactory.createFunction(utils.wrapNative(global[name]), globalScope, null), { enumerable: false });
+		globalScope.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(global[name]), globalScope, null), { enumerable: false });
 	});
 
-	globalScope.defineProperty("parseInt", objectFactory.createFunction(function (value, radix) {
+	globalScope.defineOwnProperty("parseInt", objectFactory.createFunction(function (value, radix) {
 		value = utils.toPrimitive(this, value, "string");
 		radix = utils.toPrimitive(this, radix, "number");
 
@@ -1889,7 +1910,17 @@ module.exports = function (options) {
 			}
 
 			var indirect = this.callee.name !== "eval";
-			var ast = options.parser(code.toString());
+
+			try {
+				var ast = options.parser(code.toString());
+			} catch (err) {
+				if (err instanceof SyntaxError && /assigning to rvalue/i.test(err.message)) {
+					// hack because acorn throws syntax error
+					throw new ReferenceError("Invalid left-hand side in assignment");
+				}
+
+				throw err;
+			}
 
 			var executionResult = this.create(ast, null, indirect ? globalScope : this.scope.parent).execute();
 			if (executionResult && executionResult.result) {
@@ -1899,12 +1930,12 @@ module.exports = function (options) {
 			return undefinedClass;
 		}, globalScope, null);
 
-		// evalFunc.parent = globalScope.getProperty("Object");
+		// evalFunc.parent = globalScope.getValue("Object");
 		// evalFunc.setProto(null);
-		globalScope.defineProperty("eval", evalFunc, { enumerable: false });
+		globalScope.defineOwnProperty("eval", evalFunc, { enumerable: false });
 	}
 
-	globalScope.setProto(globalScope.getProperty("Object").proto);
+	globalScope.setProto(globalScope.getValue("Object").proto);
 	globalScope.end();
 	return globalScope;
 };
@@ -1921,10 +1952,10 @@ module.exports = function (globalScope) {
 	var jsonClass = objectFactory.createObject();
 
 	methods.forEach(function (name) {
-		jsonClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(JSON[name])), { enumerable: false });
+		jsonClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(JSON[name])), { configurable: true, enumerable: false });
 	});
 
-	globalScope.defineProperty("JSON", jsonClass, { enumerable: false });
+	globalScope.defineOwnProperty("JSON", jsonClass, { enumerable: false });
 };
 
 },{"../types/object-factory":57,"../utils":65}],45:[function(require,module,exports){
@@ -1939,14 +1970,14 @@ module.exports = function (globalScope) {
 	var mathClass = objectFactory.createObject();
 
 	constants.forEach(function (name) {
-		mathClass.defineProperty(name, objectFactory.createPrimitive(Math[name]), { configurable: false, enumerable: false, writable: false });
+		mathClass.defineOwnProperty(name, objectFactory.createPrimitive(Math[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
 	methods.forEach(function (name) {
-		mathClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Math[name])), { enumerable: false });
+		mathClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Math[name])), { enumerable: false });
 	});
 
-	globalScope.defineProperty("Math", mathClass, { enumerable: false });
+	globalScope.defineOwnProperty("Math", mathClass, { enumerable: false });
 };
 
 },{"../types/object-factory":57,"../utils":65}],46:[function(require,module,exports){
@@ -1988,7 +2019,7 @@ module.exports = function (globalScope) {
 
 	var proto = numberClass.proto;
 	proto.className = "Number";
-	proto.defineProperty("toString", objectFactory.createFunction(function (radix) {
+	proto.defineOwnProperty("toString", objectFactory.createFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
 		}
@@ -2004,7 +2035,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value == null ? "0" : this.node.value.toString(radixValue));
 	}, globalScope), { enumerable: false });
 
-	proto.defineProperty("toFixed", objectFactory.createFunction(function (fractionDigits) {
+	proto.defineOwnProperty("toFixed", objectFactory.createFunction(function (fractionDigits) {
 		var digits = 0;
 		if (fractionDigits) {
 			digits = utils.toPrimitive(this, fractionDigits, "number");
@@ -2013,7 +2044,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
 	}, globalScope), { enumerable: false });
 
-	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.valueOf is not generic");
 		}
@@ -2022,29 +2053,30 @@ module.exports = function (globalScope) {
 	}, globalScope), { enumerable: false });
 
 	constants.forEach(function (name) {
-		numberClass.defineProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
+		numberClass.defineOwnProperty(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
 	staticMethods.forEach(function (name) {
 		var fn = Number[name] || polyfills[name];
 		if (fn) {
-			numberClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			numberClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
-	globalScope.defineProperty("Number", numberClass, { enumerable: false });
+	globalScope.defineOwnProperty("Number", numberClass, { enumerable: false });
 };
 
 },{"../types/object-factory":57,"../utils":65}],47:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
+var ObjectType = require("../types/object-type");
 var utils = require("../utils");
 
 var propertyConfig = { enumerable: false };
@@ -2056,21 +2088,21 @@ function verifyObject (obj, source) {
 }
 
 function defineProperty (context, obj, name, descriptor) {
-	var value = objectFactory.scope.getProperty("undefined");
+	var value = objectFactory.scope.getValue("undefined");
 	var options = { writable: false, enumerable: false, configurable: false };
 	var getter, setter;
 
 	if (descriptor) {
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
-			var propValue = descriptor.getProperty(prop);
+			var propValue = descriptor.getValue(prop);
 			if (propValue) {
 				options[prop] = propValue.value || options[prop];
 			}
 		});
 
-		value = descriptor.getProperty("value");
-		getter = descriptor.getProperty("get");
-		setter = descriptor.getProperty("set");
+		value = descriptor.getValue("value");
+		getter = descriptor.getValue("get");
+		setter = descriptor.getValue("set");
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (getter) {
@@ -2094,17 +2126,20 @@ function defineProperty (context, obj, name, descriptor) {
 		}
 	}
 
-	obj.setProperty(name, value, options);
+	obj.putValue(name, value, options);
 }
 
 module.exports = function (globalScope) {
-	var undef = globalScope.getProperty("undefined");
+	var undef = globalScope.getValue("undefined");
 
+	var proto = new ObjectType();
 	var objectClass = objectFactory.createFunction(function (value) {
 		if (value) {
 			if (value.isPrimitive) {
-				value.type = "object";
-				value.isPrimitive = false;
+				var objectWrapper = objectFactory.createPrimitive(value.value);
+				objectWrapper.type = "object";
+				objectWrapper.isPrimitive = false;
+				return objectWrapper;
 				// var obj = this.isNew ? this.node : objectFactory.createObject();
 				// if (value.value == null) {
 				// 	return obj;
@@ -2118,15 +2153,15 @@ module.exports = function (globalScope) {
 		}
 
 		return objectFactory.createObject();
-	});
+	}, globalScope, proto);
 
-	var proto = objectClass.proto;
-	proto.defineProperty("hasOwnProperty", objectFactory.createFunction(function (name) {
+	// var proto = objectClass.proto;
+	proto.defineOwnProperty("hasOwnProperty", objectFactory.createFunction(function (name) {
 		name = name.toString();
 		return objectFactory.createPrimitive(name in this.node.properties);
 	}), propertyConfig);
 
-	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		if ("value" in this.node) {
 			return objectFactory.createPrimitive(this.node.value);
 		}
@@ -2134,34 +2169,34 @@ module.exports = function (globalScope) {
 		return this.node;
 	}), propertyConfig);
 
-	proto.defineProperty("toString", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
 		var obj = this.scope.thisNode;
 		return objectFactory.createPrimitive("[object " + obj.className + "]");
 	}), propertyConfig);
 
-	proto.defineProperty("toLocaleString", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("toLocaleString", objectFactory.createFunction(function () {
 		return objectFactory.createPrimitive(this.node.toString());
 	}), propertyConfig);
 
-	proto.defineProperty("isPrototypeOf", objectFactory.createFunction(function (obj) {
+	proto.defineOwnProperty("isPrototypeOf", objectFactory.createFunction(function (obj) {
 		var current = obj;
 		while (current) {
 			if (current === this.scope.thisNode) {
 				return objectFactory.createPrimitive(true);
 			}
 
-			current = current.proto;
+			current = current.proto; // && current.parent.proto;
 		}
 
 		return objectFactory.createPrimitive(false);
 	}), propertyConfig);
 
-	proto.defineProperty("propertyIsEnumerable", objectFactory.createFunction(function (name) {
-		var descriptor = this.node.getPropertyDescriptor(name.toString());
+	proto.defineOwnProperty("propertyIsEnumerable", objectFactory.createFunction(function (name) {
+		var descriptor = this.node.getProperty(name.toString());
 		return objectFactory.createPrimitive(!!(descriptor && descriptor.enumerable));
 	}), propertyConfig);
 
-	objectClass.defineProperty("create", objectFactory.createFunction(function (parent, properties) {
+	objectClass.defineOwnProperty("create", objectFactory.createFunction(function (parent, properties) {
 		var obj = objectFactory.createObject();
 
 		if (parent) {
@@ -2171,36 +2206,36 @@ module.exports = function (globalScope) {
 		return obj;
 	}), propertyConfig);
 
-	objectClass.defineProperty("defineProperty", objectFactory.createFunction(function (obj, prop, descriptor) {
+	objectClass.defineOwnProperty("defineProperty", objectFactory.createFunction(function (obj, prop, descriptor) {
 		defineProperty(this, obj, prop.toString(), descriptor);
 	}), propertyConfig);
 
-	objectClass.defineProperty("defineProperties", objectFactory.createFunction(function (obj, descriptors) {
+	objectClass.defineOwnProperty("defineProperties", objectFactory.createFunction(function (obj, descriptors) {
 		for (var prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
-				defineProperty(this, obj, prop, descriptors.getProperty(prop));
+				defineProperty(this, obj, prop, descriptors.getValue(prop));
 			}
 		}
 	}), propertyConfig);
 
-	objectClass.defineProperty("getOwnPropertyDescriptor", objectFactory.createFunction(function (obj, prop) {
+	objectClass.defineOwnProperty("getOwnPropertyDescriptor", objectFactory.createFunction(function (obj, prop) {
 		verifyObject(obj, "Object.getOwnPropertyDescriptor");
 
 		prop = utils.toPrimitive(this, prop, "string");
 
 		if (obj.hasOwnProperty(prop)) {
-			var descriptor = obj.getPropertyDescriptor(prop);
+			var descriptor = obj.getProperty(prop);
 
 			var result = objectFactory.createObject();
-			result.setProperty("configurable", objectFactory.createPrimitive(descriptor.configurable));
-			result.setProperty("enumerable", objectFactory.createPrimitive(descriptor.enumerable));
+			result.putValue("configurable", objectFactory.createPrimitive(descriptor.configurable));
+			result.putValue("enumerable", objectFactory.createPrimitive(descriptor.enumerable));
 
 			if (descriptor.get || descriptor.set) {
-				result.setProperty("get", descriptor.get || undef);
-				result.setProperty("set", descriptor.set || undef);
+				result.putValue("get", descriptor.get || undef);
+				result.putValue("set", descriptor.set || undef);
 			} else {
-				result.setProperty("value", descriptor.value);
-				result.setProperty("writable", objectFactory.createPrimitive(descriptor.writable));
+				result.putValue("value", descriptor.value);
+				result.putValue("writable", objectFactory.createPrimitive(descriptor.writable));
 			}
 
 			return result;
@@ -2209,20 +2244,20 @@ module.exports = function (globalScope) {
 		return undef;
 	}), propertyConfig);
 
-	objectClass.defineProperty("keys", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("keys", objectFactory.createFunction(function (obj) {
 		var arr = objectFactory.create("Array");
 		var index = 0;
 
 		Object.keys(obj.properties).forEach(function (name) {
 			if (obj.properties[name].enumerable) {
-				arr.setProperty(index++, objectFactory.createPrimitive(name));
+				arr.putValue(index++, objectFactory.createPrimitive(name));
 			}
 		});
 
 		return arr;
 	}), propertyConfig);
 
-	objectClass.defineProperty("getOwnPropertyNames", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("getOwnPropertyNames", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.getOwnPropertyNames");
 
 		var arr = objectFactory.create("Array");
@@ -2231,55 +2266,55 @@ module.exports = function (globalScope) {
 		for (var prop in obj.properties) {
 			// ignore prototype
 			if (prop !== "prototype") {
-				arr.setProperty(i++, objectFactory.createPrimitive(prop));
+				arr.putValue(i++, objectFactory.createPrimitive(prop));
 			}
 		}
 
 		return arr;
 	}), propertyConfig);
 
-	objectClass.defineProperty("getPrototypeOf", objectFactory.createFunction(function (obj) {
-		return obj.proto;
+	objectClass.defineOwnProperty("getPrototypeOf", objectFactory.createFunction(function (obj) {
+		return obj.parent && obj.parent.proto;
 	}), propertyConfig);
 
-	objectClass.defineProperty("freeze", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("freeze", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.freeze");
 		obj.freeze();
 		return obj;
 	}), propertyConfig);
 
-	objectClass.defineProperty("isFrozen", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("isFrozen", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.isFrozen");
 		return objectFactory.createPrimitive(obj.isPrimitive || obj.frozen);
 	}), propertyConfig);
 
-	objectClass.defineProperty("preventExtensions", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("preventExtensions", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.preventExtensions");
 		obj.preventExtensions();
 		return obj;
 	}), propertyConfig);
 
-	objectClass.defineProperty("isExtensible", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("isExtensible", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.isExtensible");
 		return objectFactory.createPrimitive(obj.extensible !== false);
 	}), propertyConfig);
 
-	objectClass.defineProperty("seal", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("seal", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.seal");
 		obj.seal();
 		return obj;
 	}), propertyConfig);
 
-	objectClass.defineProperty("isSealed", objectFactory.createFunction(function (obj) {
+	objectClass.defineOwnProperty("isSealed", objectFactory.createFunction(function (obj) {
 		verifyObject(obj, "Object.isSealed");
 		return objectFactory.createPrimitive(obj.sealed);
 	}), propertyConfig);
 
-	globalScope.getProperty("Function").parent = objectClass;
-	globalScope.defineProperty("Object", objectClass, propertyConfig);
+	globalScope.getValue("Function").parent = objectClass;
+	globalScope.defineOwnProperty("Object", objectClass, propertyConfig);
 };
 
-},{"../types/object-factory":57,"../utils":65}],48:[function(require,module,exports){
+},{"../types/object-factory":57,"../types/object-type":58,"../utils":65}],48:[function(require,module,exports){
 "use strict";
 var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
@@ -2299,57 +2334,60 @@ module.exports = function (globalScope) {
 	});
 
 	var proto = regexClass.proto;
-	proto.defineProperty("test", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.test)), propertyConfig);
+	proto.defineOwnProperty("test", objectFactory.createFunction(function (str) {
+		var value = utils.toPrimitive(this, str, "string");
+		return objectFactory.createPrimitive(this.node.source.test(value));
+	}), propertyConfig);
 
-	proto.defineProperty("exec", objectFactory.createFunction(function (str) {
+	proto.defineOwnProperty("exec", objectFactory.createFunction(function (str) {
 		var match = this.node.source.exec(str.toString());
 
 		// update the last index from the underlying regex
-		this.node.setProperty("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
+		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
 
 		if (match) {
 			var arr = objectFactory.create("Array");
 			for (var i = 0, ln = match.length; i < ln; i++) {
-				arr.setProperty(i, objectFactory.createPrimitive(match[i]));
+				arr.putValue(i, objectFactory.createPrimitive(match[i]));
 			}
 
 			// extra properties are added to the array
-			arr.setProperty("index", objectFactory.createPrimitive(match.index));
-			arr.setProperty("input", objectFactory.createPrimitive(match.input));
+			arr.putValue("index", objectFactory.createPrimitive(match.index));
+			arr.putValue("input", objectFactory.createPrimitive(match.input));
 			return arr;
 		}
 
-		return this.scope.global.getProperty("null");
+		return this.scope.global.getValue("null");
 	}), propertyConfig);
 
-	proto.defineProperty("toString", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
 		var str = "/";
-		str += this.node.getProperty("source").toString();
+		str += this.node.getValue("source").toString();
 		str += "/";
 
-		if (this.node.getProperty("global").toBoolean()) {
+		if (this.node.getValue("global").toBoolean()) {
 			str += "g";
 		}
 
-		if (this.node.getProperty("ignoreCase").toBoolean()) {
+		if (this.node.getValue("ignoreCase").toBoolean()) {
 			str += "i";
 		}
 
-		if (this.node.getProperty("multiline").toBoolean()) {
+		if (this.node.getValue("multiline").toBoolean()) {
 			return str += "m";
 		}
 
 		return objectFactory.create("String", str);
 	}), propertyConfig);
 
-	proto.defineProperty("compile", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.compile)), propertyConfig);
+	proto.defineOwnProperty("compile", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.compile)), propertyConfig);
 
 	var frozen = { configurable: false, enumerable: false, writable: false };
 	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {
-		proto.defineProperty(name, objectFactory.createPrimitive(RegExp.prototype[name]), frozen);
+		proto.defineOwnProperty(name, objectFactory.createPrimitive(RegExp.prototype[name]), frozen);
 	});
 
-	globalScope.defineProperty("RegExp", regexClass, { enumerable: false });
+	globalScope.defineOwnProperty("RegExp", regexClass, { enumerable: false });
 };
 
 },{"../types/object-factory":57,"../utils":65}],49:[function(require,module,exports){
@@ -2389,7 +2427,7 @@ Scope.prototype.end = function () {
 	objectFactory.endScope();
 };
 
-Scope.prototype.getProperty = function (name) {
+Scope.prototype.getValue = function (name) {
 	var current = this;
 
 	while (current) {
@@ -2400,10 +2438,10 @@ Scope.prototype.getProperty = function (name) {
 		current = current.parent;
 	}
 
-	return ObjectType.prototype.getProperty.call(this, name);
+	return undefined; //ObjectType.prototype.getValue.call(this, name);
 };
 
-Scope.prototype.defineProperty = function (name, value, descriptor, throwOnError) {
+Scope.prototype.defineOwnProperty = function (name, value, descriptor, throwOnError) {
 	if (throwOnError) {
 		if (keywords.isReserved(name, this)) {
 			throw new SyntaxError("Unexpected token " + name);
@@ -2411,22 +2449,36 @@ Scope.prototype.defineProperty = function (name, value, descriptor, throwOnError
 	}
 
 	// add to current scope
-	ObjectType.prototype.defineProperty.call(this, name, value, descriptor || { configurable: false });
+	ObjectType.prototype.defineOwnProperty.call(this, name, value, descriptor || { configurable: false });
 };
 
-Scope.prototype.setProperty = function (name, value, descriptor) {
+Scope.prototype.putValue = function (name, value, descriptor) {
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
 		if (name in current.properties) {
-			ObjectType.prototype.setProperty.call(current, name, value);
+			ObjectType.prototype.putValue.call(current, name, value);
 			return;
 		}
 
 		current = current.parent;
 	}
 
-	this.defineProperty(name, value, descriptor);
+	this.defineOwnProperty(name, value, descriptor);
+};
+
+Scope.prototype.deleteProperty = function (name) {
+	name = String(name);
+
+	if (name in this.properties) {
+		return ObjectType.prototype.deleteProperty.call(this, name);
+	}
+
+	if (this.parent) {
+		return this.parent.deleteProperty(name);
+	}
+
+	return true;
 };
 
 Scope.prototype.hasProperty = function (name) {
@@ -2476,7 +2528,7 @@ var objectFactory = require("../types/object-factory");
 var utils = require("../utils");
 var contracts = require("../utils/contracts");
 
-var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "search", "slice", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
+var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "slice", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
@@ -2499,59 +2551,51 @@ module.exports = function (globalScope) {
 
 	var proto = stringClass.proto;
 
-	proto.defineProperty("substring", objectFactory.createFunction(function (start, end) {
+	proto.defineOwnProperty("search", objectFactory.createFunction(function (regex) {
+		return objectFactory.createPrimitive(this.node.value.search(regex.source));
+	}), propertyConfig);
+
+	proto.defineOwnProperty("substring", objectFactory.createFunction(function (start, end) {
+		contracts.assertIsNotConstructor(this, "substring");
+
 		var value = utils.toPrimitive(this, this.node, "string");
-		// var length = value.length;
+		var length = value.length;
 
 		start = utils.toInteger(this, start);
-		end = end && utils.toInteger(this, end);
+		end = contracts.isNullOrUndefined(end) ? length : utils.toInteger(this, end);
 
 		return objectFactory.createPrimitive(value.substring(start, end));
-		// if (end == null) {
-		// 	end = length;
-		// }
-
-		// start = Math.min(Math.max(start, 0), length);
-		// end = Math.min(Math.max(end, 0), length);
-
-		// if (start > end) {
-		// 	var temp = start;
-		// 	start = end;
-		// 	end = temp;
-		// }
-
-		// return objectFactory.createPrimitive(value.substring(start, end));
 	}), propertyConfig);
 
 	protoMethods.forEach(function (name) {
 		var fn = String.prototype[name];
 		if (fn) {
-			proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), propertyConfig);
+			proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), propertyConfig);
 		}
 	}, propertyConfig);
 
-	stringClass.defineProperty("fromCharCode", objectFactory.createFunction(function (charCode) {
+	stringClass.defineOwnProperty("fromCharCode", objectFactory.createFunction(function (charCode) {
 		var context = this;
 		var args = slice.call(arguments).map(function (arg) { return utils.toPrimitive(context, arg); });
 		return objectFactory.createPrimitive(String.fromCharCode.apply(null, args));
 	}), propertyConfig);
 
-	proto.defineProperty("split", objectFactory.createFunction(function (separator, limit) {
-		separator = separator && separator.value;
+	proto.defineOwnProperty("split", objectFactory.createFunction(function (separator, limit) {
+		separator = separator && (separator.source || separator.value);
 		limit = limit && limit.toNumber();
 
 		var result = this.node.value.split(separator, limit);
 
 		var arr = objectFactory.create("Array");
 		result.forEach(function (value, index) {
-			arr.setProperty(index, objectFactory.createPrimitive(value));
+			arr.putValue(index, objectFactory.createPrimitive(value));
 		});
 
 		return arr;
 	}), propertyConfig);
 
-	proto.defineProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
-		var match = regexOrSubstr && regexOrSubstr.value;
+	proto.defineOwnProperty("replace", objectFactory.createFunction(function (regexOrSubstr, substrOrFn) {
+		var match = regexOrSubstr && (regexOrSubstr.source || regexOrSubstr.value);
 
 		if (substrOrFn && substrOrFn.type === "function") {
 			var executionContext = this;
@@ -2570,28 +2614,28 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value.replace(match, substrOrFn && substrOrFn.value));
 	}), propertyConfig);
 
-	proto.defineProperty("match", objectFactory.createFunction(function (regex) {
-		var results = this.node.toString().match(regex && regex.value);
+	proto.defineOwnProperty("match", objectFactory.createFunction(function (regex) {
+		var results = this.node.toString().match(regex && regex.source);
 		if (results) {
 			var matches = objectFactory.create("Array");
 			results.forEach(function (value, index) {
-				matches.setProperty(index, objectFactory.createPrimitive(value));
+				matches.putValue(index, objectFactory.createPrimitive(value));
 			});
 
 			return matches;
 		}
 
-		return globalScope.getProperty("null");
+		return globalScope.getValue("null");
 	}), propertyConfig);
 
-	proto.defineProperty("trim", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("trim", objectFactory.createFunction(function () {
 		contracts.assertIsNotNullOrUndefined(this.node, "String.prototype.trim");
 
 		var value = utils.toPrimitive(this, this.node, "string");
 		return objectFactory.createPrimitive(value.trim());
 	}), propertyConfig);
 
-	globalScope.defineProperty("String", stringClass, { enumerable: false });
+	globalScope.defineOwnProperty("String", stringClass, { enumerable: false });
 };
 
 },{"../types/object-factory":57,"../utils":65,"../utils/contracts":66}],51:[function(require,module,exports){
@@ -2606,7 +2650,7 @@ function ArgumentType () {
 ArgumentType.prototype = Object.create(ObjectType.prototype);
 ArgumentType.prototype.constructor = ArgumentType;
 
-ArgumentType.prototype.setProperty = function (name, value) {
+ArgumentType.prototype.putValue = function (name, value) {
 	name = String(name);
 	if (name in this.properties) {
 		this.properties[name].setValue(this, value);
@@ -2628,7 +2672,7 @@ function ArrayType () {
 ArrayType.prototype = Object.create(ObjectType.prototype);
 ArrayType.prototype.constructor = ArrayType;
 
-ArrayType.prototype.setProperty = function (name, value) {
+ArrayType.prototype.putValue = function (name, value) {
 	if (typeof name === "number") {
 		// todo: should be a better way to set length, but we can't reference object factory here
 		var currentLength = this.properties.length.value;
@@ -2641,7 +2685,7 @@ ArrayType.prototype.setProperty = function (name, value) {
 	}
 
 	if (name === "length") {
-		var ln = this.getProperty("length");
+		var ln = this.getValue("length");
 		var i = value.toNumber();
 
 		if (ln && i < ln.value) {
@@ -2651,11 +2695,11 @@ ArrayType.prototype.setProperty = function (name, value) {
 		}
 	}
 
-	ObjectType.prototype.setProperty.apply(this, arguments);
+	ObjectType.prototype.putValue.apply(this, arguments);
 };
 
 ArrayType.prototype.init = function (objectFactory) {
-	this.setProperty("length", objectFactory.createPrimitive(0));
+	this.defineOwnProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false });
 };
 
 module.exports = ArrayType;
@@ -2715,13 +2759,26 @@ FunctionType.prototype.constructor = FunctionType;
 
 FunctionType.prototype.init = function (objectFactory, proto, ctor) {
 	// set length property from the number of parameters
-	this.setProperty("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
+	this.putValue("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: ctor || this });
 	this.setProto(proto);
 };
+
+// FunctionType.prototype.getProperty = function (name) {
+// 	name = String(name);
+// 	if (name in this.properties) {
+// 		return this.properties[name];
+// 	}
+
+// 	if (this.parent && this.parent.proto && name in this.parent.proto) {
+// 		return this.parent.proto[name];
+// 	}
+
+// 	return undefined;
+// };
 
 FunctionType.prototype.createScope = function (currentScope, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
@@ -2745,15 +2802,15 @@ function NativeFunctionType (fn, parentScope) {
 NativeFunctionType.prototype = Object.create(FunctionType.prototype);
 NativeFunctionType.prototype.constructor = NativeFunctionType;
 
-NativeFunctionType.prototype.init = function (objectFactory) {
+NativeFunctionType.prototype.init = function (objectFactory, proto) {
 	var length = this.nativeFunction.length;
 	if ("nativeLength" in this.nativeFunction) {
 		length = this.nativeFunction.nativeLength;
 	}
 
-	this.setProperty("length", objectFactory.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
+	this.putValue("length", objectFactory.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
 
-	var proto = objectFactory.createObject();
+	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor({ configurable: true, enumerable: false, writable: true, value: this });
 	this.setProto(proto, { configurable: false, enumerable: false, writable: true });
 };
@@ -2786,9 +2843,10 @@ function setOrphans (scope) {
 	var parent;
 
 	for (var typeName in orphans) {
-		parent = scope.getProperty(typeName);
+		parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
+				child.parent = parent;
 				child.setProto(parent.proto);
 			});
 
@@ -2804,8 +2862,9 @@ function setProto (typeName, instance, scope) {
 		return;
 	}
 
-	var parent = scope.getProperty(typeName);
+	var parent = scope.getValue(typeName);
 	if (parent) {
+		instance.parent = parent;
 		instance.setProto(parent.proto);
 		return;
 	}
@@ -2874,22 +2933,27 @@ module.exports = {
 	createObject: function (parent) {
 		if (parent) {
 			// special cases
-			if (parent === this.scope.getProperty("Date")) {
+			if (parent === this.scope.getValue("Date")) {
 				return this.create("Date", new Date());
 			}
 
-			if (parent === this.scope.getProperty("Array")) {
+			if (parent === this.scope.getValue("Array")) {
 				return this.create("Array");
 			}
 		}
 
-		if (parent !== null) {
-			parent = parent || this.scope.getProperty("Object");
-		}
+		// if (parent !== null) {
+		// 	parent = parent || this.scope.getValue("Object");
+		// }
 
 		var instance = new ObjectType();
-		if (parent && parent.proto) {
-			instance.setProto(parent.proto);
+		if (parent !== null) {
+			if (parent) {
+				instance.parent = parent;
+				instance.setProto(parent && parent.proto);
+			} else {
+				setProto("Object", instance, this.scope);
+			}
 		}
 
 		instance.init(this);
@@ -2898,18 +2962,18 @@ module.exports = {
 
 	createArguments: function (args, callee) {
 		var instance = new ArgumentType();
-		var proto = this.scope.getProperty("Object").proto;
+		var ctor = this.scope.getValue("Object");
 		var i, ln;
 
-		instance.setProto(proto);
-		instance.init(this);
+		// instance.setProto(proto);
+		instance.init(this, ctor, ctor.proto);
 
 		for (i = 0, ln = args.length; i < ln; i++) {
-			instance.defineProperty(i, args[i]);
+			instance.defineOwnProperty(i, args[i], { configurable: true });
 		}
 
-		instance.defineProperty("length", this.createPrimitive(ln), { enumerable: false });
-		instance.defineProperty("callee", callee, { enumerable: false });
+		instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: false, enumerable: false });
+		instance.defineOwnProperty("callee", callee, { enumerable: false });
 		return instance;
 	},
 
@@ -2924,9 +2988,14 @@ module.exports = {
 		}
 
 		instance.init(this, proto, ctor);
-		var functionClass = this.scope.getProperty("Function");
+		var functionClass = this.scope.getValue("Function");
 		if (functionClass) {
 			instance.parent = functionClass;
+			// for (var prop in functionClass.proto) {
+			// 	instance.properties[prop] = functionClass.properties[prop];
+			// }
+			// instance.setProto(functionClass);
+			// instance.parent = functionClass;
 		} else {
 			// delete instance.properties.prototype;
 			// delete instance.proto;
@@ -2967,7 +3036,7 @@ ObjectType.prototype = {
 		this.properties.prototype = new PropertyDescriptor(descriptor || { enumerable: false }, proto);
 	},
 
-	getPropertyDescriptor: function (name) {
+	getProperty: function (name) {
 		name = String(name);
 		var current = this;
 
@@ -2976,26 +3045,31 @@ ObjectType.prototype = {
 				return current.properties[name];
 			}
 
-			current = current.proto;
+			// current = current.proto;
+			current = current.parent && current.parent.proto;  // current.proto;
 		}
 
 		// check parent
-		if (this.parent && this.parent.proto) {
-			return this.parent.getPropertyDescriptor(name);
-		}
+		// if (this.parent && this.parent.proto) {
+		// 	return this.parent.getProperty(name);
+		// }
 
 		return undefined;
 	},
 
+	getOwnProperty: function (name) {
+		return this.properties[name];
+	},
+
 	hasProperty: function (name) {
-		return this.hasOwnProperty(name) || !!this.getPropertyDescriptor(name);
+		return this.hasOwnProperty(name) || !!this.getProperty(name);
 	},
 
 	hasOwnProperty: function (name) {
 		return name in this.properties;
 	},
 
-	setProperty: function (name, value, options) {
+	putValue: function (name, value, options) {
 		if (this.isPrimitive || this.frozen) {
 			return;
 		}
@@ -3006,7 +3080,7 @@ ObjectType.prototype = {
 			return;
 		}
 
-		var descriptor = this.getPropertyDescriptor(name);
+		var descriptor = this.getProperty(name);
 		if (descriptor && options) {
 			descriptor.update(options);
 		}
@@ -3022,11 +3096,11 @@ ObjectType.prototype = {
 				descriptor.setValue(this, value);
 			}
 		} else {
-			this.defineProperty(name, value, options);
+			this.defineOwnProperty(name, value, options);
 		}
 	},
 
-	defineProperty: function (name, value, descriptor) {
+	defineOwnProperty: function (name, value, descriptor) {
 		if (this.isPrimitive || !this.extensible) {
 			return;
 		}
@@ -3038,17 +3112,17 @@ ObjectType.prototype = {
 		}
 	},
 
-	getProperty: function (name) {
-		var descriptor = this.getPropertyDescriptor(name);
+	getValue: function (name) {
+		var descriptor = this.getProperty(name);
 		return descriptor && descriptor.getValue(this);
 	},
 
 	deleteProperty: function (name) {
-		name = String(name);
 		if (this.isPrimitive || this.sealed) {
 			return false;
 		}
 
+		
 		if (this.properties[name] && !this.properties[name].configurable) {
 			return false;
 		}
@@ -3058,7 +3132,7 @@ ObjectType.prototype = {
 
 	createReference: function (name) {
 		name = String(name);
-		var descriptor = this.getPropertyDescriptor(name);
+		var descriptor = this.getProperty(name);
 		if (descriptor) {
 			return new ValueReference(name, this, descriptor);
 		}
@@ -3124,13 +3198,13 @@ function PrimitiveType (value) {
 PrimitiveType.prototype = Object.create(ObjectType.prototype);
 PrimitiveType.prototype.constructor = PrimitiveType;
 
-PrimitiveType.prototype.getProperty = function (name) {
+PrimitiveType.prototype.getValue = function (name) {
 	// can't read properties off null/undefined
 	if (this.value == null) {
 		throw new TypeError("Cannot read property '" + name + "' of " + this.type);
 	}
 
-	return ObjectType.prototype.getProperty.apply(this, arguments);
+	return ObjectType.prototype.getValue.apply(this, arguments);
 };
 
 // overwrite object methods
@@ -3234,11 +3308,11 @@ RegexType.prototype.constructor = RegexType;
 
 RegexType.prototype.init = function (objectFactory) {
 	// lastIndex is settable, all others are read-only attributes
-	this.setProperty("lastIndex", objectFactory.createPrimitive(this.source.lastIndex), { enumerable: false, configurable: false });
-	this.setProperty("source", objectFactory.createPrimitive(this.source.source), { writable: false, enumerable: false });
-	this.setProperty("global", objectFactory.createPrimitive(this.source.global), { writable: false, enumerable: false });
-	this.setProperty("ignoreCase", objectFactory.createPrimitive(this.source.ignoreCase), { writable: false, enumerable: false });
-	this.setProperty("multiline", objectFactory.createPrimitive(this.source.multiline), { writable: false, enumerable: false });
+	this.putValue("lastIndex", objectFactory.createPrimitive(this.source.lastIndex), { enumerable: false, configurable: false });
+	this.putValue("source", objectFactory.createPrimitive(this.source.source), { writable: false, enumerable: false });
+	this.putValue("global", objectFactory.createPrimitive(this.source.global), { writable: false, enumerable: false });
+	this.putValue("ignoreCase", objectFactory.createPrimitive(this.source.ignoreCase), { writable: false, enumerable: false });
+	this.putValue("multiline", objectFactory.createPrimitive(this.source.multiline), { writable: false, enumerable: false });
 };
 
 module.exports = RegexType;
@@ -3272,7 +3346,7 @@ StringType.prototype.init = function (objectFactory) {
 	this.properties.length = new PropertyDescriptor({ configurable: false, enumerable: false, writable: false }, objectFactory.createPrimitive(this.value.length));
 };
 
-StringType.prototype.getPropertyDescriptor = function (name) {
+StringType.prototype.getProperty = function (name) {
 	if (util.isInteger(name)) {
 		var position = Number(name);
 		if (position < this.value.length) {
@@ -3280,7 +3354,7 @@ StringType.prototype.getPropertyDescriptor = function (name) {
 		}
 	}
 
-	return PrimitiveType.prototype.getPropertyDescriptor.apply(this, arguments);
+	return PrimitiveType.prototype.getProperty.apply(this, arguments);
 };
 
 StringType.prototype.hasOwnProperty = function (name) {
@@ -3291,12 +3365,12 @@ StringType.prototype.hasOwnProperty = function (name) {
 	return PrimitiveType.prototype.hasOwnProperty.apply(this, arguments);
 };
 
-StringType.prototype.getProperty = function (name) {
+StringType.prototype.getValue = function (name) {
 	if (util.isInteger(name)) {
 		return getCharacter(this, Number(name));
 	}
 
-	return PrimitiveType.prototype.getProperty.call(this, name);
+	return PrimitiveType.prototype.getValue.call(this, name);
 };
 
 module.exports = StringType;
@@ -3338,12 +3412,12 @@ module.exports = {
 		var arr = [];
 
 		if (obj) {
-			var ln = obj.getProperty("length").value;
+			var ln = obj.getValue("length").value;
 			var i = 0;
 
 			while (i < ln) {
 				if (i in obj.properties) {
-					arr.push(obj.getProperty(i));
+					arr.push(obj.getValue(i));
 				}
 
 				i++;
@@ -3478,7 +3552,7 @@ utils = {
 			}
 		}
 
-		return returnResult || context.scope.global.getProperty("undefined");
+		return returnResult || context.scope.global.getValue("undefined");
 	},
 
 	wrapNative: function (fn) {
@@ -3499,18 +3573,18 @@ utils = {
 	},
 
 	loadArguments: function (params, args, scope, callee) {
-		var undef = scope.global.getProperty("undefined");
+		var undef = scope.global.getValue("undefined");
 		var argumentList = objectFactory.createArguments(args);
-		scope.defineProperty("arguments", argumentList);
+		scope.defineOwnProperty("arguments", argumentList);
 
 		params.forEach(function (param, index) {
 			var ref = argumentList.createReference(index);
-			scope.defineProperty(param.name, ref || undef);
+			scope.defineOwnProperty(param.name, ref || undef);
 		});
 	},
 
 	callMethod: function (obj, name, args, executionContext) {
-		var method = obj.getProperty(name);
+		var method = obj.getValue(name);
 
 		if (method && method instanceof FunctionType) {
 			var scope = executionContext.scope.createScope(obj);
@@ -3521,7 +3595,7 @@ utils = {
 				this.loadArguments(method.node.params, args, scope);
 
 				var executionResult = executionContext.create(method.node.body, method.node, scope).execute();
-				return executionResult && executionResult.result;
+				return executionResult ? executionResult.result : scope.global.getValue("undefined");
 			}
 		}
 
@@ -3591,8 +3665,12 @@ module.exports = utils;
 },{"./types/function-type":55,"./types/object-factory":57,"./util":64}],66:[function(require,module,exports){
 "use strict";
 module.exports = {
+	isNullOrUndefined: function (obj) {
+		return !obj || (obj.isPrimitive && obj.value == null);
+	},
+
 	assertIsNotNullOrUndefined: function (value, methodName) {
-		if (!value || (value.isPrimitive && value == null)) {
+		if (this.isNullOrUndefined(value)) {
 			throw new TypeError(methodName + " called on null or undefined");
 		}
 	},
@@ -3600,6 +3678,12 @@ module.exports = {
 	assertIsFunction: function (obj) {
 		if (!obj || obj.type !== "function") {
 			throw new TypeError((obj ? obj.toString() : "undefined") + " is not a function");
+		}
+	},
+
+	assertIsNotConstructor: function (context, methodName) {
+		if (context.isNew) {
+			throw new TypeError(methodName + " is not a constructor");
 		}
 	}
 };

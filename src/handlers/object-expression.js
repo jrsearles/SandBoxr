@@ -14,7 +14,7 @@ function setDescriptor (context, obj, name, descriptor) {
 		};
 	}
 
-	obj.defineProperty(name, null, descriptor);
+	obj.defineOwnProperty(name, null, descriptor);
 }
 
 module.exports = function ObjectExpression (context) {
@@ -33,7 +33,7 @@ module.exports = function ObjectExpression (context) {
 				break;
 
 			default:
-				obj.defineProperty(name, value);
+				obj.defineOwnProperty(name, value);
 				break;
 		}
 	});

@@ -10,12 +10,12 @@ module.exports = {
 		var arr = [];
 
 		if (obj) {
-			var ln = obj.getProperty("length").value;
+			var ln = obj.getValue("length").value;
 			var i = 0;
 
 			while (i < ln) {
 				if (i in obj.properties) {
-					arr.push(obj.getProperty(i));
+					arr.push(obj.getValue(i));
 				}
 
 				i++;

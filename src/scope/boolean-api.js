@@ -20,7 +20,7 @@ module.exports = function (globalScope) {
 	}, globalScope);
 
 	booleanClass.proto.className = "Boolean";
-	booleanClass.proto.defineProperty("toString", objectFactory.createFunction(function () {
+	booleanClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
 		}
@@ -28,7 +28,7 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value ? this.node.value.toString() : "false");
 	}), propertyConfig);
 
-	booleanClass.proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	booleanClass.proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.valueOf is not generic.");
 		}
@@ -36,5 +36,5 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value || false);
 	}), propertyConfig);
 
-	globalScope.defineProperty("Boolean", booleanClass, propertyConfig);
+	globalScope.defineOwnProperty("Boolean", booleanClass, propertyConfig);
 };

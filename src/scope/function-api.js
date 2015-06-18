@@ -1,4 +1,5 @@
 var objectFactory = require("../types/object-factory");
+var ObjectType = require("../types/object-type");
 var utils = require("../utils");
 var util = require("../util");
 
@@ -6,6 +7,7 @@ var slice = Array.prototype.slice;
 var propertyConfig = { enumerable: false };
 
 module.exports = function (globalScope, options) {
+	// var proto = new ObjectType();
 	var functionClass = objectFactory.createFunction(function () {
 		var context = this;
 		if (options.parser && arguments.length > 0) {
@@ -24,12 +26,12 @@ module.exports = function (globalScope, options) {
 			};
 
 			var fn = objectFactory.createFunction(fnNode, globalScope);
-			fn.setProperty("constructor", functionClass);
+			fn.putValue("constructor", functionClass);
 			return fn;
 		}
 
 		if (this.isNew) {
-			this.node.setProperty("constructor", functionClass);
+			this.node.putValue("constructor", functionClass);
 			return this.node;
 		}
 
@@ -37,10 +39,10 @@ module.exports = function (globalScope, options) {
 	}, globalScope);
 
 	var proto = functionClass.proto;
-	proto.defineProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
-	proto.defineProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);
+	proto.defineOwnProperty("toString", objectFactory.createFunction(utils.wrapNative(Function.prototype.toString)), propertyConfig);
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(utils.wrapNative(Function.prototype.valueOf)), propertyConfig);
 
-	proto.defineProperty("call", objectFactory.createFunction(function (thisArg) {
+	proto.defineOwnProperty("call", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
@@ -50,7 +52,7 @@ module.exports = function (globalScope, options) {
 		// return this.create(this.node.node.body, this.node, scope).execute().result;
 	}), propertyConfig);
 
-	proto.defineProperty("apply", objectFactory.createFunction(function (thisArg, argsArray) {
+	proto.defineOwnProperty("apply", objectFactory.createFunction(function (thisArg, argsArray) {
 		var args = util.toArray(argsArray);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
@@ -58,7 +60,7 @@ module.exports = function (globalScope, options) {
 		return utils.executeFunction(this, this.node, params, args, thisArg, callee);
 	}), propertyConfig);
 
-	proto.defineProperty("bind", objectFactory.createFunction(function (thisArg) {
+	proto.defineOwnProperty("bind", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var callee = this.node;
 
@@ -69,5 +71,5 @@ module.exports = function (globalScope, options) {
 		});
 	}), propertyConfig);
 
-	globalScope.defineProperty("Function", functionClass, { enumerable: false });
+	globalScope.defineOwnProperty("Function", functionClass, { enumerable: false });
 };

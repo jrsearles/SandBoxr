@@ -37,11 +37,11 @@ describe("Regex", function () {
 			var actual = runner.runBlock("(/quick\\s(brown).+?(jumps)/ig).exec('The Quick Brown Fox Jumps Over The Lazy Dog')");
 
 			for (var i = 0, ln = expected.length; i < ln; i++) {
-				expect(actual.getProperty(i).value).to.equal(expected[i]);
+				expect(actual.getValue(i).value).to.equal(expected[i]);
 			}
 
-			expect(actual.getProperty("index").value).to.equal(expected.index);
-			expect(actual.getProperty("input").value).to.equal(expected.input);
+			expect(actual.getValue("index").value).to.equal(expected.index);
+			expect(actual.getValue("input").value).to.equal(expected.input);
 		});
 
 		it("should update the lastIndex when a match is made", function () {
@@ -50,7 +50,7 @@ describe("Regex", function () {
 
 			var scope = runner.getScope("var re = /quick\\s(brown).+?(jumps)/ig;re.exec('The Quick Brown Fox Jumps Over The Lazy Dog');");
 
-			expect(scope.getProperty("re").getProperty("lastIndex").value).to.equal(re.lastIndex);
+			expect(scope.getValue("re").getValue("lastIndex").value).to.equal(re.lastIndex);
 		});
 	});
 });

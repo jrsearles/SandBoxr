@@ -4,17 +4,17 @@ var expect = require("chai").expect;
 describe("If", function () {
 	it("should execute body when passing", function () {
 		var scope = runner.getScope("var a = 10;\nif (1 == 1) { a = 50; }");
-		expect(scope.getProperty("a").value).to.equal(50);
+		expect(scope.getValue("a").value).to.equal(50);
 	});
 
 	it("should not execute body when failing", function () {
 		var scope = runner.getScope("var a = 10;\nif (1 != 1) { a = 50; }");
-		expect(scope.getProperty("a").value).to.equal(10);
+		expect(scope.getValue("a").value).to.equal(10);
 	});
 
 	it("should not execute alternate when failing", function () {
 		var scope = runner.getScope("var a = 10;\nif (1 != 1) { a = 50; } else { a = 20; }");
-		expect(scope.getProperty("a").value).to.equal(20);
+		expect(scope.getValue("a").value).to.equal(20);
 	});
 
 	it("should evaluate true ternary expression", function () {

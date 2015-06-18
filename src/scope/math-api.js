@@ -8,12 +8,12 @@ module.exports = function (globalScope) {
 	var mathClass = objectFactory.createObject();
 
 	constants.forEach(function (name) {
-		mathClass.defineProperty(name, objectFactory.createPrimitive(Math[name]), { configurable: false, enumerable: false, writable: false });
+		mathClass.defineOwnProperty(name, objectFactory.createPrimitive(Math[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
 	methods.forEach(function (name) {
-		mathClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Math[name])), { enumerable: false });
+		mathClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Math[name])), { enumerable: false });
 	});
 
-	globalScope.defineProperty("Math", mathClass, { enumerable: false });
+	globalScope.defineOwnProperty("Math", mathClass, { enumerable: false });
 };

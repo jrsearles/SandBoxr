@@ -3,14 +3,19 @@ var expect = require("chai").expect;
 
 describe("Types", function () {
 	describe("Objects", function () {
+		it("should have a null prototype of prototype", function () {
+			var result = runner.runBlock("Object.prototype.prototype == null");
+			expect(result.value).to.be.true;
+		});
+
 		it("should be able to be created from object literal", function () {
 			var scope = runner.getScope("var a = {};");
-			expect(scope.getProperty("a").type).to.equal("object");
+			expect(scope.getValue("a").type).to.equal("object");
 		});
 
 		it("should have properties assigned in literal", function () {
 			var scope = runner.getScope("var a = { foo: 1 };");
-			expect(scope.getProperty("a").getProperty("foo").value).to.equal(1);
+			expect(scope.getValue("a").getValue("foo").value).to.equal(1);
 		});
 
 		it("should be able to reference property with dot notation", function () {
@@ -71,12 +76,12 @@ describe("Types", function () {
 
 			it("should not allow property to be altered", function () {
 				var scope = runner.getScope("var a = { foo: 'bar' };Object.freeze(a);a.foo = 'baz';");
-				expect(scope.getProperty("a").getProperty("foo").value).to.equal("bar");
+				expect(scope.getValue("a").getValue("foo").value).to.equal("bar");
 			});
 
 			it("should not allow property to be removed", function () {
 				var scope = runner.getScope("var a = { foo: 'bar' };Object.freeze(a);delete a.foo;");
-				expect(scope.getProperty("a").getProperty("foo").value).to.equal("bar");
+				expect(scope.getValue("a").getValue("foo").value).to.equal("bar");
 			});
 		});
 
@@ -98,7 +103,7 @@ describe("Types", function () {
 
 			it("Should not allow new properties to be added after prevent extensions have been applied", function () {
 				var scope = runner.getScope("var obj = {};Object.preventExtensions(obj);obj.foo = 'bar';");
-				expect(scope.getProperty("obj").getProperty("foo")).to.be.undefined;
+				expect(scope.getValue("obj").getValue("foo")).to.be.undefined;
 			});
 		});
 
@@ -137,9 +142,9 @@ describe("Types", function () {
 		describe("Object.keys", function () {
 			it("should return an array of the objects enumerable properties", function () {
 				var result = runner.runBlock("Object.keys({a:1,b:2,c:3});");
-				expect(result.getProperty(0).value).to.equal("a");
-				expect(result.getProperty(1).value).to.equal("b");
-				expect(result.getProperty(2).value).to.equal("c");
+				expect(result.getValue(0).value).to.equal("a");
+				expect(result.getValue(1).value).to.equal("b");
+				expect(result.getValue(2).value).to.equal("c");
 			});
 		});
 

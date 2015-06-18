@@ -15,17 +15,27 @@ var assignOperators = {
 };
 
 module.exports = function AssignmentExpression (context) {
+	var assignment = context.node.operator === "=";
+
 	// check for undeclared global
 	if (context.node.left.type === "Identifier" && !context.scope.hasProperty(context.node.left.name)) {
+		if (!assignment) {
+			throw new ReferenceError(context.node.left.name + " is not defined");
+		}
+
 		// not found - add as reference
-		context.scope.global.setProperty(context.node.left.name, context.scope.global.getProperty("undefined"), { configurable: true });
+		context.scope.global.putValue(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true });
 	}
 
 	var left = context.create(context.node.left).execute();
+	if (!left.reference) {
+		throw new ReferenceError("Invalid left-hand side in assignment");
+	}
+
 	var right = context.create(context.node.right).execute();
 	var newValue;
 
-	if (context.node.operator === "=") {
+	if (assignment) {
 		newValue = right.result;
 	} else {
 		newValue = objectFactory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
@@ -35,9 +45,9 @@ module.exports = function AssignmentExpression (context) {
 	var name = left.name;
 
 	if (obj.hasProperty(name)) {
-		obj.setProperty(name, newValue);
+		obj.putValue(name, newValue);
 	} else {
-		obj.setProperty(name, newValue, { configurable: true });
+		obj.putValue(name, newValue, { configurable: left.object ? true : false });
 	}
 
 	return context.result(newValue, name);

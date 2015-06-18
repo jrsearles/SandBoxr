@@ -22,9 +22,10 @@ function setOrphans (scope) {
 	var parent;
 
 	for (var typeName in orphans) {
-		parent = scope.getProperty(typeName);
+		parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
+				child.parent = parent;
 				child.setProto(parent.proto);
 			});
 
@@ -40,8 +41,9 @@ function setProto (typeName, instance, scope) {
 		return;
 	}
 
-	var parent = scope.getProperty(typeName);
+	var parent = scope.getValue(typeName);
 	if (parent) {
+		instance.parent = parent;
 		instance.setProto(parent.proto);
 		return;
 	}
@@ -110,22 +112,27 @@ module.exports = {
 	createObject: function (parent) {
 		if (parent) {
 			// special cases
-			if (parent === this.scope.getProperty("Date")) {
+			if (parent === this.scope.getValue("Date")) {
 				return this.create("Date", new Date());
 			}
 
-			if (parent === this.scope.getProperty("Array")) {
+			if (parent === this.scope.getValue("Array")) {
 				return this.create("Array");
 			}
 		}
 
-		if (parent !== null) {
-			parent = parent || this.scope.getProperty("Object");
-		}
+		// if (parent !== null) {
+		// 	parent = parent || this.scope.getValue("Object");
+		// }
 
 		var instance = new ObjectType();
-		if (parent && parent.proto) {
-			instance.setProto(parent.proto);
+		if (parent !== null) {
+			if (parent) {
+				instance.parent = parent;
+				instance.setProto(parent && parent.proto);
+			} else {
+				setProto("Object", instance, this.scope);
+			}
 		}
 
 		instance.init(this);
@@ -134,18 +141,18 @@ module.exports = {
 
 	createArguments: function (args, callee) {
 		var instance = new ArgumentType();
-		var proto = this.scope.getProperty("Object").proto;
+		var ctor = this.scope.getValue("Object");
 		var i, ln;
 
-		instance.setProto(proto);
-		instance.init(this);
+		// instance.setProto(proto);
+		instance.init(this, ctor, ctor.proto);
 
 		for (i = 0, ln = args.length; i < ln; i++) {
-			instance.defineProperty(i, args[i]);
+			instance.defineOwnProperty(i, args[i], { configurable: true });
 		}
 
-		instance.defineProperty("length", this.createPrimitive(ln), { enumerable: false });
-		instance.defineProperty("callee", callee, { enumerable: false });
+		instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: false, enumerable: false });
+		instance.defineOwnProperty("callee", callee, { enumerable: false });
 		return instance;
 	},
 
@@ -160,9 +167,14 @@ module.exports = {
 		}
 
 		instance.init(this, proto, ctor);
-		var functionClass = this.scope.getProperty("Function");
+		var functionClass = this.scope.getValue("Function");
 		if (functionClass) {
 			instance.parent = functionClass;
+			// for (var prop in functionClass.proto) {
+			// 	instance.properties[prop] = functionClass.properties[prop];
+			// }
+			// instance.setProto(functionClass);
+			// instance.parent = functionClass;
 		} else {
 			// delete instance.properties.prototype;
 			// delete instance.proto;

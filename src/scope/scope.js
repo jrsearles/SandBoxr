@@ -33,7 +33,7 @@ Scope.prototype.end = function () {
 	objectFactory.endScope();
 };
 
-Scope.prototype.getProperty = function (name) {
+Scope.prototype.getValue = function (name) {
 	var current = this;
 
 	while (current) {
@@ -44,10 +44,10 @@ Scope.prototype.getProperty = function (name) {
 		current = current.parent;
 	}
 
-	return ObjectType.prototype.getProperty.call(this, name);
+	return undefined; //ObjectType.prototype.getValue.call(this, name);
 };
 
-Scope.prototype.defineProperty = function (name, value, descriptor, throwOnError) {
+Scope.prototype.defineOwnProperty = function (name, value, descriptor, throwOnError) {
 	if (throwOnError) {
 		if (keywords.isReserved(name, this)) {
 			throw new SyntaxError("Unexpected token " + name);
@@ -55,22 +55,36 @@ Scope.prototype.defineProperty = function (name, value, descriptor, throwOnError
 	}
 
 	// add to current scope
-	ObjectType.prototype.defineProperty.call(this, name, value, descriptor || { configurable: false });
+	ObjectType.prototype.defineOwnProperty.call(this, name, value, descriptor || { configurable: false });
 };
 
-Scope.prototype.setProperty = function (name, value, descriptor) {
+Scope.prototype.putValue = function (name, value, descriptor) {
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
 		if (name in current.properties) {
-			ObjectType.prototype.setProperty.call(current, name, value);
+			ObjectType.prototype.putValue.call(current, name, value);
 			return;
 		}
 
 		current = current.parent;
 	}
 
-	this.defineProperty(name, value, descriptor);
+	this.defineOwnProperty(name, value, descriptor);
+};
+
+Scope.prototype.deleteProperty = function (name) {
+	name = String(name);
+
+	if (name in this.properties) {
+		return ObjectType.prototype.deleteProperty.call(this, name);
+	}
+
+	if (this.parent) {
+		return this.parent.deleteProperty(name);
+	}
+
+	return true;
 };
 
 Scope.prototype.hasProperty = function (name) {

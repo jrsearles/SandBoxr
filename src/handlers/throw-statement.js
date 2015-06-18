@@ -6,5 +6,5 @@ module.exports = function ThrowStatement (context) {
 		throw arg.value;
 	}
 
-	throw new Error(arg.getProperty("message"));
+	throw new Error(arg.getValue("message"));
 };

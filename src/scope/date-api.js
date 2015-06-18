@@ -48,13 +48,13 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(dateValue);
 	}, globalScope);
 
-	dateClass.defineProperty("parse", objectFactory.createFunction(function (value) {
+	dateClass.defineOwnProperty("parse", objectFactory.createFunction(function (value) {
 		var stringValue = utils.toPrimitive(this, value, "string");
 		var dateValue = Date.parse(stringValue);
 		return objectFactory.createPrimitive(dateValue);
 	}, globalScope), propertyConfig);
 
-	dateClass.defineProperty("UTC", objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
+	dateClass.defineOwnProperty("UTC", objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
 		var context = this;
 		var args = slice.call(arguments).map(function (arg) { return utils.toPrimitive(context, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
@@ -63,11 +63,11 @@ module.exports = function (globalScope) {
 	var proto = dateClass.proto;
 
 	staticMethods.forEach(function (name) {
-		dateClass.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Date[name])));
+		dateClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Date[name])));
 	});
 
 	protoMethods.forEach(function (name) {
-		proto.defineProperty(name, objectFactory.createFunction(utils.wrapNative(Date.prototype[name])), propertyConfig);
+		proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Date.prototype[name])), propertyConfig);
 	});
 
 	setters.forEach(function (name) {
@@ -77,12 +77,12 @@ module.exports = function (globalScope) {
 		}
 
 		setter.nativeLength = Date.prototype[name].length;
-		proto.defineProperty(name, objectFactory.createFunction(setter), propertyConfig);
+		proto.defineOwnProperty(name, objectFactory.createFunction(setter), propertyConfig);
 	});
 
-	proto.defineProperty("valueOf", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
 		return objectFactory.createPrimitive(this.node.value.valueOf());
 	}), propertyConfig);
 
-	globalScope.defineProperty("Date", dateClass, propertyConfig);
+	globalScope.defineOwnProperty("Date", dateClass, propertyConfig);
 };

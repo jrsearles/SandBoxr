@@ -82,9 +82,9 @@ var binaryOperators = {
 	">>": function (a, b, c) { return utils.toPrimitive(c, a) >> utils.toPrimitive(c, b); },
 	">>>": function (a, b, c) { return utils.toPrimitive(c, a) >>> utils.toPrimitive(c, b); },
 	"%": function (a, b, c) { return utils.toPrimitive(c, a) % utils.toPrimitive(c, b); },
-	"|": function (a, b, c) { return a.value | b.value; },
-	"^": function (a, b, c) { return utils.toInteger(c, a) ^ utils.toInteger(c, b); },
-	"&": function (a, b, c) { return utils.toPrimitive(c, a) & utils.toPrimitive(c, b); },
+	"|": function (a, b, c) { return utils.toInt32(c, a) | utils.toInt32(c, b); },
+	"^": function (a, b, c) { return utils.toInt32(c, a) ^ utils.toInt32(c, b); },
+	"&": function (a, b, c) { return utils.toInt32(c, a) & utils.toInt32(c, b); },
 	"in": function (a, b, c) { return b.hasProperty(a.toString()); },
 	"instanceof": function (a, b) {
 		if (b.type !== "function") {
@@ -95,8 +95,15 @@ var binaryOperators = {
 			return false;
 		}
 
+		var visited = [];
 		var current = a;
 		while (current) {
+			if (visited.indexOf(current) >= 0) {
+				return false;
+			}
+
+			// keep a stack to avoid circular reference
+			visited.push(current);
 			if (current === b.proto) {
 				return true;
 			}

@@ -36,11 +36,11 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "-":
-			newValue = objectFactory.createPrimitive(-(utils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(-(utils.toNumber(context, value)));
 			break;
 
 		case "+":
-			newValue = objectFactory.createPrimitive(+(utils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(+(utils.toNumber(context, value)));
 			break;
 
 		case "!":
@@ -52,19 +52,16 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "delete":
-			if (result && result.name != null) {
-				newValue = objectFactory.createPrimitive((result.object || context.scope).deleteProperty(result.name));
-			} else {
-				var deleted = false;
-				if (result && result.result instanceof Scope) {
-					// todo: this is hacky - deleting scope fails but returns true
-					// this is here to account for that case
-					deleted = true;
+			var deleted = true;
+			if (result) {
+				if (result.reference && result.name !== null) {
+					deleted = (result.object || context.scope).deleteProperty(result.name);
 				}
-
-				newValue = objectFactory.createPrimitive(deleted);
+			} else if (context.node.argument.object) {
+				throw new ReferenceError(context.node.argument.object.name + " is not defined");
 			}
 
+			newValue = objectFactory.createPrimitive(deleted);
 			break;
 
 		case "void":

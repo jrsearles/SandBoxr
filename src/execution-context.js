@@ -45,6 +45,12 @@ ExecutionContext.prototype.result = function (value, name, obj) {
 	return new ExecutionResult(value, name, obj);
 };
 
+ExecutionContext.prototype.reference = function (value, name, obj) {
+	var ref = new ExecutionResult(value, name, obj);
+	ref.reference = true;
+	return ref;
+};
+
 ExecutionContext.prototype.empty = function () {
 	return new ExecutionResult();
 };

@@ -74,9 +74,9 @@ describe("String", function () {
 			var result = runner.runBlock(code);
 
 			if (Array.isArray(expected)) {
-				expect(result.getProperty("length").value).to.equal(expected.length);
+				expect(result.getValue("length").value).to.equal(expected.length);
 				expected.forEach(function (value, index) {
-					expect(result.getProperty(index).value).to.equal(value);
+					expect(result.getValue(index).value).to.equal(value);
 				});
 			} else {
 				expect(result.value).to.equal(expected);

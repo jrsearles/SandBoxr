@@ -17,5 +17,11 @@ describe("Expressions", function () {
 			var result = runner.runBlock("var a = {};a.foo++;'foo' in a;");
 			expect(result.value).to.be.true;
 		});
+
+		it("should error if the left side is null", function () {
+			expect(function () {
+				runner.runBlock("var x = (y *= 1);");
+			}).to.throw(ReferenceError);
+		});
 	});
 });

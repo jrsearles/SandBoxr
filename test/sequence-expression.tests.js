@@ -5,7 +5,7 @@ describe("Expressions", function () {
 	describe("Sequence", function () {
 		it("should assign to last value in sequence", function () {
 			var scope = runner.getScope("var a = (7, 5);");
-			expect(scope.getProperty("a").value).to.equal(5);
+			expect(scope.getValue("a").value).to.equal(5);
 		});
 	});
 });

@@ -22,7 +22,7 @@ describe("Scope", function () {
 
 		it("window exists", function () {
 			var scope = runner.getScope("var x;");
-			expect(scope.getProperty("window")).to.be.ok;
+			expect(scope.getValue("window")).to.be.ok;
 		});
 
 		it("`this` should refer to global object", function () {
@@ -43,7 +43,7 @@ describe("Scope", function () {
 
 		it("should assign undeclared variable to global", function () {
 			var scope = runner.getScope("var obj = {};__ref = obj;");
-			expect(scope.global.getProperty("__ref")).not.to.be.undefined;
+			expect(scope.global.getValue("__ref")).not.to.be.undefined;
 		});
 	});
 });

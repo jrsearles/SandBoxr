@@ -2,7 +2,7 @@
 
 module.exports = function MemberExpression (context) {
 	var obj = context.create(context.node.object).execute().result;
-	var undef = context.scope.global.getProperty("undefined");
+	var undef = context.scope.global.getValue("undefined");
 	var name, value;
 
 	if (context.node.computed) {
@@ -14,10 +14,10 @@ module.exports = function MemberExpression (context) {
 	}
 
 	// if (obj.hasProperty(name)) {
-	value = obj.getProperty(name);
+	value = obj.getValue(name);
 	// } else {
 	// 	obj.setProperty(name, undef);
 	// }
 
-	return context.result(value || undef, name, obj);
+	return context.reference(value || undef, name, obj);
 };
