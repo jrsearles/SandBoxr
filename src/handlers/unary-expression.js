@@ -1,6 +1,4 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
-var Scope = require("../scope/scope");
+var convert = require("../utils/convert");
 
 var safeOperators = {
 	"typeof": true,
@@ -27,6 +25,7 @@ function getArgument (context) {
 
 module.exports = function UnaryExpression (context) {
 	var result = getArgument(context);
+	var objectFactory = context.scope.global.factory;
 	var value = result && result.result;
 	var newValue;
 
@@ -36,11 +35,11 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "-":
-			newValue = objectFactory.createPrimitive(-(utils.toNumber(context, value)));
+			newValue = objectFactory.createPrimitive(-(convert.toNumber(context, value)));
 			break;
 
 		case "+":
-			newValue = objectFactory.createPrimitive(+(utils.toNumber(context, value)));
+			newValue = objectFactory.createPrimitive(+(convert.toNumber(context, value)));
 			break;
 
 		case "!":
@@ -48,7 +47,7 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "~":
-			newValue = objectFactory.createPrimitive(~(utils.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(~(convert.toPrimitive(context, value)));
 			break;
 
 		case "delete":

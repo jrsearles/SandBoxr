@@ -1,8 +1,7 @@
-var objectFactory = require("../types/object-factory");
-
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
 module.exports = function (globalScope) {
+	var objectFactory = globalScope.factory;
 	var errorClass = objectFactory.createFunction(function (message) {
 		var obj = objectFactory.create("Error");
 		obj.putValue("message", message);
@@ -28,7 +27,7 @@ module.exports = function (globalScope) {
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
-			var err = objectFactory.createObject("Error", { name: type });
+			var err = objectFactory.create("Error", { name: type });
 			err.putValue("message", message);
 			err.putValue("name", objectFactory.createPrimitive(type));
 			return err;

@@ -8,7 +8,7 @@ var StringType = require("./string-type");
 var DateType = require("./date-type");
 var ErrorType = require("./error-type");
 var ArgumentType = require("./argument-type");
-var util = require("../util");
+var types = require("../utils/types");
 
 var parentless = {
 	"Undefined": true,
@@ -55,17 +55,20 @@ function setProto (typeName, instance, scope) {
 	orphans[typeName].push(instance);
 }
 
-module.exports = {
-	startScope: function (scope) {
-		this.scope = scope;
-	},
+function ObjectFactory (globalScope) {
+	this.scope = globalScope;
+	globalScope.factory = this;
+}
+
+ObjectFactory.prototype = {
+	constructor: ObjectFactory,
 
 	endScope: function () {
 		setOrphans(this.scope);
 	},
 
 	createPrimitive: function (value) {
-		return this.create(util.getType(value), value);
+		return this.create(types.getType(value), value);
 	},
 
 	create: function (typeName, value) {
@@ -141,11 +144,12 @@ module.exports = {
 
 	createArguments: function (args, callee) {
 		var instance = new ArgumentType();
-		var ctor = this.scope.getValue("Object");
+		var objectClass = this.scope.getValue("Object");
 		var i, ln;
 
 		// instance.setProto(proto);
-		instance.init(this, ctor, ctor.proto);
+		instance.init(this, objectClass, objectClass.proto);
+		instance.parent = objectClass;
 
 		for (i = 0, ln = args.length; i < ln; i++) {
 			instance.defineOwnProperty(i, args[i], { configurable: true });
@@ -156,7 +160,7 @@ module.exports = {
 		return instance;
 	},
 
-	createFunction: function (fnOrNode, parentScope, proto, ctor) {
+	createFunction: function (fnOrNode, parentScope, proto, ctor, descriptor) {
 		// todo: need to verify that prototype arg is needed
 		var instance;
 
@@ -166,7 +170,7 @@ module.exports = {
 			instance = new FunctionType(fnOrNode, parentScope);
 		}
 
-		instance.init(this, proto, ctor);
+		instance.init(this, proto, ctor, descriptor);
 		var functionClass = this.scope.getValue("Function");
 		if (functionClass) {
 			instance.parent = functionClass;
@@ -181,5 +185,20 @@ module.exports = {
 		}
 
 		return instance;
+	},
+
+	createBuiltInFunction: function (fn, length, methodName) {
+		var instance = new NativeFunctionType(function () {
+			if (this.isNew) {
+				throw new TypeError(methodName + " is not a constructor");
+			}
+
+			return fn.apply(this, arguments);
+		});
+		instance.parent = this.scope.getValue("Function");
+		instance.defineOwnProperty("length", this.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
+		return instance;
 	}
 };
+
+module.exports = ObjectFactory;

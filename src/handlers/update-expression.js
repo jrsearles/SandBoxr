@@ -1,9 +1,9 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var convert = require("../utils/convert");
 
 module.exports = function UpdateExpression (context) {
+	var objectFactory = context.scope.global.factory;
 	var executionResult = context.create(context.node.argument).execute();
-	var originalValue = utils.toNumber(context, executionResult.result);
+	var originalValue = convert.toNumber(context, executionResult.result);
 	var newValue = originalValue;
 
 	switch (context.node.operator) {

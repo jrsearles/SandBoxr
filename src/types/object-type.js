@@ -29,6 +29,11 @@ ObjectType.prototype = {
 
 	getProperty: function (name) {
 		name = String(name);
+
+		if (name === "prototype") {
+			return this.getOwnProperty(name);
+		}
+
 		var current = this;
 
 		while (current) {
@@ -49,15 +54,16 @@ ObjectType.prototype = {
 	},
 
 	getOwnProperty: function (name) {
-		return this.properties[name];
+		return this.properties[String(name)];
 	},
 
 	hasProperty: function (name) {
+		name = String(name);
 		return this.hasOwnProperty(name) || !!this.getProperty(name);
 	},
 
 	hasOwnProperty: function (name) {
-		return name in this.properties;
+		return String(name) in this.properties;
 	},
 
 	putValue: function (name, value, options) {
@@ -113,7 +119,6 @@ ObjectType.prototype = {
 			return false;
 		}
 
-		
 		if (this.properties[name] && !this.properties[name].configurable) {
 			return false;
 		}

@@ -48,4 +48,9 @@ describe("Try-Catch-Finally", function () {
 		var result = runner.runBlock("function f() { try { return false; } finally { return true; }\n}\nf();");
 		expect(result.value).to.be.true;
 	});
+
+	it("should be able to determine instanceof thrown error", function () {
+		var result = runner.runBlock("var result = false;try { throw new TypeError() } catch (err) { result = err instanceof TypeError; }\nresult;");
+		expect(result.value).to.be.true;
+	});
 });

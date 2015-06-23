@@ -1,12 +1,12 @@
 var ObjectType = require("./object-type");
-var util = require("../util");
+var types = require("../utils/types");
 
 function PrimitiveType (value) {
 	ObjectType.call(this);
 	this.isPrimitive = true;
 	this.value = value;
 	this.type = typeof value;
-	this.className = util.getType(value);
+	this.className = types.getType(value);
 }
 
 PrimitiveType.prototype = Object.create(ObjectType.prototype);

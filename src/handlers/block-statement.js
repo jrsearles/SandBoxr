@@ -1,4 +1,3 @@
-var objectFactory = require("../types/object-factory");
 var scopedBlock = { "CallExpression": true, "NewExpression": true, "FunctionExpression": true };
 
 function populateHoistedVariables (node, declarators) {
@@ -56,7 +55,7 @@ function hoistVariables (nodes, scope) {
 
 		if (decl.type === "FunctionDeclaration") {
 			// functions can be used before they are defined
-			scope.defineOwnProperty(name, objectFactory.createFunction(decl, scope), { configurable: false, enumerable: false }, true);
+			scope.defineOwnProperty(name, scope.global.factory.createFunction(decl, scope), { configurable: false, enumerable: false }, true);
 		} else {
 			scope.defineOwnProperty(name, undef, { configurable: false, enumerable: false }, true);
 		}

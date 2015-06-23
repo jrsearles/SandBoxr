@@ -1,5 +1,3 @@
-var objectFactory = require("../types/object-factory");
-
 var assignOperators = {
 	"+=": function (a, b) { return a.value + b.value; },
 	"-=": function (a, b) { return a.value - b.value; },
@@ -38,7 +36,7 @@ module.exports = function AssignmentExpression (context) {
 	if (assignment) {
 		newValue = right.result;
 	} else {
-		newValue = objectFactory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
+		newValue = context.scope.global.factory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
 	}
 
 	var obj = left.object || context.scope;

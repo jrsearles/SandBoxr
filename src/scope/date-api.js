@@ -1,5 +1,4 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var convert = require("../utils/convert");
 
 var staticMethods = ["now"];
 var protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString", "valueOf"];
@@ -8,6 +7,7 @@ var slice = Array.prototype.slice;
 var propertyConfig = { enumerable: false };
 
 module.exports = function (globalScope) {
+	var objectFactory = globalScope.factory;
 	var dateClass = objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
 		var context = this;
 		var dateValue, args;
@@ -15,9 +15,9 @@ module.exports = function (globalScope) {
 		if (arguments.length === 0) {
 			args = [];
 		} else if (arguments.length === 1) {
-			args = [utils.toPrimitive(this, arguments[0], "string")];
+			args = [convert.toPrimitive(this, arguments[0], "string")];
 		} else {
-			args = slice.call(arguments).map(function (arg) { return utils.toPrimitive(context, arg, "number"); });
+			args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "number"); });
 		}
 
 		if (this.isNew) {
@@ -49,30 +49,30 @@ module.exports = function (globalScope) {
 	}, globalScope);
 
 	dateClass.defineOwnProperty("parse", objectFactory.createFunction(function (value) {
-		var stringValue = utils.toPrimitive(this, value, "string");
+		var stringValue = convert.toPrimitive(this, value, "string");
 		var dateValue = Date.parse(stringValue);
 		return objectFactory.createPrimitive(dateValue);
 	}, globalScope), propertyConfig);
 
 	dateClass.defineOwnProperty("UTC", objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
 		var context = this;
-		var args = slice.call(arguments).map(function (arg) { return utils.toPrimitive(context, arg, "number"); });
+		var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, globalScope), propertyConfig);
 
 	var proto = dateClass.proto;
 
 	staticMethods.forEach(function (name) {
-		dateClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Date[name])));
+		dateClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Date[name])));
 	});
 
 	protoMethods.forEach(function (name) {
-		proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(Date.prototype[name])), propertyConfig);
+		proto.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Date.prototype[name])), propertyConfig);
 	});
 
 	setters.forEach(function (name) {
 		function setter () {
-			var args = slice.call(arguments).map(function (arg) { return utils.toPrimitive(arg); });
+			var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(arg); });
 			Date.prototype[name].apply(this.node.value, args);
 		}
 

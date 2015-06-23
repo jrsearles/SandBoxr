@@ -1,5 +1,4 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var convert = require("../utils/convert");
 
 function implicitEquals (a, b, context) {
 	if (a.isPrimitive && b.isPrimitive) {
@@ -10,19 +9,19 @@ function implicitEquals (a, b, context) {
 		return a === b;
 	}
 
-	var primitiveA = utils.toPrimitive(context, a);
-	var primitiveB = utils.toPrimitive(context, b);
+	var primitiveA = convert.toPrimitive(context, a);
+	var primitiveB = convert.toPrimitive(context, b);
 
 	if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
 		return Number(primitiveA) === Number(primitiveB);
 	}
 
 	if (typeof primitiveA === "string") {
-		return primitiveA === utils.toPrimitive(context, b, "string");
+		return primitiveA === convert.toPrimitive(context, b, "string");
 	}
 
 	if (typeof primitiveB === "string") {
-		return utils.toPrimitive(context, a, "string") === primitiveB;
+		return convert.toPrimitive(context, a, "string") === primitiveB;
 	}
 
 	return primitiveA == primitiveB;
@@ -51,8 +50,8 @@ function add (a, b, context) {
 		return a.value + b.value;
 	}
 
-	a = utils.toPrimitive(context, a);
-	b = utils.toPrimitive(context, b);
+	a = convert.toPrimitive(context, a);
+	b = convert.toPrimitive(context, b);
 	return a + b;
 }
 
@@ -61,7 +60,7 @@ function toNumber (context, obj) {
 		return obj.toNumber();
 	}
 
-	return utils.toPrimitive(context, obj, "number");
+	return convert.toPrimitive(context, obj, "number");
 }
 
 /* eslint eqeqeq:0 */
@@ -74,26 +73,26 @@ var binaryOperators = {
 	"!=": not(implicitEquals),
 	"===": strictEquals,
 	"!==": not(strictEquals),
-	"<": function (a, b, c) { return utils.toPrimitive(c, a) < utils.toPrimitive(c, b); },
-	"<=": function (a, b, c) { return utils.toPrimitive(c, a) <= utils.toPrimitive(c, b); },
-	">": function (a, b, c) { return utils.toPrimitive(c, a) > utils.toPrimitive(c, b); },
-	">=": function (a, b, c) { return utils.toPrimitive(c, a) >= utils.toPrimitive(c, b); },
-	"<<": function (a, b, c) { return utils.toPrimitive(c, a) << utils.toPrimitive(c, b); },
-	">>": function (a, b, c) { return utils.toPrimitive(c, a) >> utils.toPrimitive(c, b); },
-	">>>": function (a, b, c) { return utils.toPrimitive(c, a) >>> utils.toPrimitive(c, b); },
-	"%": function (a, b, c) { return utils.toPrimitive(c, a) % utils.toPrimitive(c, b); },
-	"|": function (a, b, c) { return utils.toInt32(c, a) | utils.toInt32(c, b); },
-	"^": function (a, b, c) { return utils.toInt32(c, a) ^ utils.toInt32(c, b); },
-	"&": function (a, b, c) { return utils.toInt32(c, a) & utils.toInt32(c, b); },
+	"<": function (a, b, c) { return convert.toPrimitive(c, a) < convert.toPrimitive(c, b); },
+	"<=": function (a, b, c) { return convert.toPrimitive(c, a) <= convert.toPrimitive(c, b); },
+	">": function (a, b, c) { return convert.toPrimitive(c, a) > convert.toPrimitive(c, b); },
+	">=": function (a, b, c) { return convert.toPrimitive(c, a) >= convert.toPrimitive(c, b); },
+	"<<": function (a, b, c) { return convert.toPrimitive(c, a) << convert.toPrimitive(c, b); },
+	">>": function (a, b, c) { return convert.toPrimitive(c, a) >> convert.toPrimitive(c, b); },
+	">>>": function (a, b, c) { return convert.toPrimitive(c, a) >>> convert.toPrimitive(c, b); },
+	"%": function (a, b, c) { return convert.toPrimitive(c, a) % convert.toPrimitive(c, b); },
+	"|": function (a, b, c) { return convert.toInt32(c, a) | convert.toInt32(c, b); },
+	"^": function (a, b, c) { return convert.toInt32(c, a) ^ convert.toInt32(c, b); },
+	"&": function (a, b, c) { return convert.toInt32(c, a) & convert.toInt32(c, b); },
 	"in": function (a, b, c) { return b.hasProperty(a.toString()); },
 	"instanceof": function (a, b) {
 		if (b.type !== "function") {
 			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
 		}
 
-		if (a.isPrimitive) {
-			return false;
-		}
+		// if (a.isPrimitive) {
+		// 	return false;
+		// }
 
 		var visited = [];
 		var current = a;
@@ -105,6 +104,10 @@ var binaryOperators = {
 			// keep a stack to avoid circular reference
 			visited.push(current);
 			if (current === b.proto) {
+				return true;
+			}
+
+			if (current.parent && current.parent.proto === b.proto) {
 				return true;
 			}
 
@@ -120,5 +123,5 @@ module.exports = function BinaryExpression (context) {
 	var right = context.create(context.node.right).execute().result;
 	var newValue = binaryOperators[context.node.operator](left, right, context);
 
-	return context.result(objectFactory.createPrimitive(newValue));
+	return context.result(context.scope.global.factory.createPrimitive(newValue));
 };

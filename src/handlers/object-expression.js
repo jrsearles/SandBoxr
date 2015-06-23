@@ -1,16 +1,15 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var func = require("../utils/func");
 
 function setDescriptor (context, obj, name, descriptor) {
 	if (descriptor.get) {
 		descriptor.getter = function () {
-			return utils.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
+			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
 		};
 	}
 
 	if (descriptor.set) {
 		descriptor.setter = function () {
-			return utils.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
+			return func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
 		};
 	}
 
@@ -18,7 +17,7 @@ function setDescriptor (context, obj, name, descriptor) {
 }
 
 module.exports = function ObjectExpression (context) {
-	var obj = objectFactory.createObject();
+	var obj = context.scope.global.factory.createObject();
 	var descriptors = Object.create(null);
 
 	context.node.properties.forEach(function (property) {

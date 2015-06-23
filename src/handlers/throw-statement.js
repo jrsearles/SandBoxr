@@ -6,5 +6,7 @@ module.exports = function ThrowStatement (context) {
 		throw arg.value;
 	}
 
-	throw new Error(arg.getValue("message"));
+	var err = new Error(arg.getValue("message"));
+	err.wrappedError = arg;
+	throw err;
 };

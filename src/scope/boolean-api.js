@@ -1,23 +1,19 @@
-var objectFactory = require("../types/object-factory");
+var convert = require("../utils/convert");
 
 var propertyConfig = { enumerable: false };
 
 module.exports = function (globalScope) {
+	var objectFactory = globalScope.factory;
 	var booleanClass = objectFactory.createFunction(function (obj) {
-		var value = obj && obj.isPrimitive ? obj.toBoolean() : !!obj;
-		var booleanValue = objectFactory.create("Boolean", value);
+		var booleanValue = obj && obj.isPrimitive ? obj.toBoolean() : !!obj;
 
 		// called as new
 		if (this.isNew) {
-			booleanValue.type = "object";
-			booleanValue.isPrimitive = false;
-
-			// this is a quirk in the spec
-			booleanValue.toBoolean = function () { return true; };
+			return convert.toObject(booleanValue, objectFactory);
 		}
 
-		return booleanValue;
-	}, globalScope);
+		return objectFactory.create("Boolean", booleanValue);
+	}, globalScope, undefined, null, { configurable: false, enumerable: false, writable: false });
 
 	booleanClass.proto.className = "Boolean";
 	booleanClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {

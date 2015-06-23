@@ -11,7 +11,7 @@ function NativeFunctionType (fn, parentScope) {
 NativeFunctionType.prototype = Object.create(FunctionType.prototype);
 NativeFunctionType.prototype.constructor = NativeFunctionType;
 
-NativeFunctionType.prototype.init = function (objectFactory, proto) {
+NativeFunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
 	var length = this.nativeFunction.length;
 	if ("nativeLength" in this.nativeFunction) {
 		length = this.nativeFunction.nativeLength;
@@ -21,7 +21,7 @@ NativeFunctionType.prototype.init = function (objectFactory, proto) {
 
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor({ configurable: true, enumerable: false, writable: true, value: this });
-	this.setProto(proto, { configurable: false, enumerable: false, writable: true });
+	this.setProto(proto, descriptor || { configurable: false, enumerable: false, writable: true });
 };
 
 module.exports = NativeFunctionType;

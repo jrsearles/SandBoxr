@@ -6,7 +6,11 @@ function ErrorType (source) {
 	this.className = "Error";
 }
 
-ErrorType.prototype = new ObjectType();
+ErrorType.prototype = Object.create(ObjectType.prototype);
 ErrorType.prototype.constructor = ErrorType;
+
+ErrorType.prototype.toString = function () {
+	return String(this.source);
+};
 
 module.exports = ErrorType;

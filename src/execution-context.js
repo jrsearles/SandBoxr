@@ -14,11 +14,14 @@ ExecutionContext.prototype.execute = function () {
 };
 
 ExecutionContext.prototype.create = function (node, callee, scope, isNew) {
-	return new ExecutionContext(this.runner, node, callee, scope || this.scope, isNew);
+	var context = new ExecutionContext(this.runner, node, callee, scope || this.scope, isNew);
+	context.trying = this.trying;
+	return context;
 };
 
 ExecutionContext.prototype.createLabel = function (node, label) {
 	var context = new ExecutionContext(this.runner, node, null, this.scope);
+	context.trying = this.trying;
 	context.label = label;
 	return context;
 };
@@ -49,6 +52,14 @@ ExecutionContext.prototype.reference = function (value, name, obj) {
 	var ref = new ExecutionResult(value, name, obj);
 	ref.reference = true;
 	return ref;
+};
+
+ExecutionContext.prototype.startTry = function () {
+	this.trying = true;
+};
+
+ExecutionContext.prototype.endTry = function () {
+	this.trying = false;
 };
 
 ExecutionContext.prototype.empty = function () {

@@ -1,6 +1,5 @@
 var FunctionType = require("../types/function-type");
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var func = require("../utils/func");
 
 module.exports = function CallExpression (context) {
 	var node = context.node;
@@ -15,7 +14,7 @@ module.exports = function CallExpression (context) {
 	var native = fn.result.native;
 
 	if (isNew && !native) {
-		returnResult = objectFactory.createObject(fn.result);
+		returnResult = context.scope.global.factory.createObject(fn.result);
 	}
 
 	var params = native ? [] : fn.result.node.params;
@@ -23,5 +22,5 @@ module.exports = function CallExpression (context) {
 	var thisArg = returnResult || fn.object;
 	var callee = native ? fn : fn.result.node;
 
-	return context.result(utils.executeFunction(context, fn.result, params, args, thisArg, callee, isNew));
+	return context.result(func.executeFunction(context, fn.result, params, args, thisArg, callee, isNew));
 };

@@ -1,5 +1,4 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var convert = require("../utils/convert");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
@@ -19,22 +18,20 @@ var polyfills = {
 };
 
 module.exports = function (globalScope) {
-	var numberClass = objectFactory.createFunction(function (value) {
-		value = Number(utils.toPrimitive(this, value, "number"));
-		var numberValue = objectFactory.create("Number", value);
+	var objectFactory = globalScope.factory;
+	var numberClass = objectFactory.createFunction(function (obj) {
+		var numberValue = Number(convert.toPrimitive(this, obj, "number"));
 
 		if (this.isNew) {
-			numberValue.type = "object";
-			numberValue.isPrimitive = false;
-			// return utils.createWrappedPrimitive(this.node, value);
+			return convert.toObject(numberValue, objectFactory);
 		}
 
-		return numberValue;
-		// return objectFactory.createPrimitive(value);
-	}, globalScope);
+		return objectFactory.create("Number", numberValue);
+	}, globalScope, undefined, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = numberClass.proto;
 	proto.className = "Number";
+
 	proto.defineOwnProperty("toString", objectFactory.createFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
@@ -42,7 +39,7 @@ module.exports = function (globalScope) {
 
 		var radixValue = 10;
 		if (radix) {
-			radixValue = utils.toPrimitive(this, radix, "number");
+			radixValue = convert.toPrimitive(this, radix, "number");
 			if (radixValue < 2 || radixValue > 36) {
 				throw new RangeError("toString() radix argument must be between 2 and 36");
 			}
@@ -54,7 +51,7 @@ module.exports = function (globalScope) {
 	proto.defineOwnProperty("toFixed", objectFactory.createFunction(function (fractionDigits) {
 		var digits = 0;
 		if (fractionDigits) {
-			digits = utils.toPrimitive(this, fractionDigits, "number");
+			digits = convert.toPrimitive(this, fractionDigits, "number");
 		}
 
 		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
@@ -75,14 +72,14 @@ module.exports = function (globalScope) {
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			proto.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			proto.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 
 	staticMethods.forEach(function (name) {
 		var fn = Number[name] || polyfills[name];
 		if (fn) {
-			numberClass.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(fn)), { configurable: true, enumerable: false, writable: true });
+			numberClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(fn)), { configurable: true, enumerable: false, writable: true });
 		}
 	});
 

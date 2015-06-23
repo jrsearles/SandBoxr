@@ -13,28 +13,15 @@ function FunctionType (node, parentScope) {
 FunctionType.prototype = Object.create(ObjectType.prototype);
 FunctionType.prototype.constructor = FunctionType;
 
-FunctionType.prototype.init = function (objectFactory, proto, ctor) {
+FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
 	// set length property from the number of parameters
 	this.putValue("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: ctor || this });
-	this.setProto(proto);
+	this.setProto(proto, descriptor);
 };
-
-// FunctionType.prototype.getProperty = function (name) {
-// 	name = String(name);
-// 	if (name in this.properties) {
-// 		return this.properties[name];
-// 	}
-
-// 	if (this.parent && this.parent.proto && name in this.parent.proto) {
-// 		return this.parent.proto[name];
-// 	}
-
-// 	return undefined;
-// };
 
 FunctionType.prototype.createScope = function (currentScope, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope

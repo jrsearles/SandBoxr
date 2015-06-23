@@ -1,6 +1,6 @@
 var Scope = require("./scope");
 var PrimitiveType = require("../types/primitive-type");
-var objectFactory = require("../types/object-factory");
+var ObjectFactory = require("../types/object-factory");
 var numberAPI = require("./number-api");
 var stringAPI = require("./string-api");
 var functionAPI = require("./function-api");
@@ -13,13 +13,13 @@ var regexAPI = require("./regex-api");
 var errorAPI = require("./error-api");
 var jsonAPI = require("./json-api");
 var consoleAPI = require("./console-api");
-var utils = require("../utils");
+var convert = require("../utils/convert");
 
 var globalFunctions = ["isNaN", "parseFloat", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
 
 module.exports = function (options) {
 	var globalScope = new Scope();
-	globalScope.start();
+	var objectFactory = new ObjectFactory(globalScope);
 
 	var undefinedClass = new PrimitiveType(undefined);
 	globalScope.defineOwnProperty("undefined", undefinedClass, { configurable: false, enumerable: false, writable: false });
@@ -47,12 +47,12 @@ module.exports = function (options) {
 	consoleAPI(globalScope, options);
 
 	globalFunctions.forEach(function (name) {
-		globalScope.defineOwnProperty(name, objectFactory.createFunction(utils.wrapNative(global[name]), globalScope, null), { enumerable: false });
+		globalScope.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(global[name]), globalScope, null), { enumerable: false });
 	});
 
 	globalScope.defineOwnProperty("parseInt", objectFactory.createFunction(function (value, radix) {
-		value = utils.toPrimitive(this, value, "string");
-		radix = utils.toPrimitive(this, radix, "number");
+		value = convert.toPrimitive(this, value, "string");
+		radix = convert.toPrimitive(this, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(value, radix));
 	}, globalScope, null), { enumerable: false });
@@ -98,6 +98,6 @@ module.exports = function (options) {
 	}
 
 	globalScope.setProto(globalScope.getValue("Object").proto);
-	globalScope.end();
+	objectFactory.endScope();
 	return globalScope;
 };

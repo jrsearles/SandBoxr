@@ -88,6 +88,11 @@ describe("Expressions", function () {
 				var result = runner.runBlock("function C(){}\nfunction D(){}\nD.prototype = new C();\nvar o = new D();(o instanceof C) && (o instanceof D);");
 				expect(result.value).to.be.true;
 			});
+
+			it("should return true for primitive", function () {
+				var result = runner.runBlock("'foo' instanceof String;");
+				expect(result.value).to.be.true;
+			});
 		});
 	});
 });

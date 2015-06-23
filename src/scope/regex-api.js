@@ -1,9 +1,9 @@
-var objectFactory = require("../types/object-factory");
-var utils = require("../utils");
+var convert = require("../utils/convert");
 
 var propertyConfig = { enumerable: false };
 
 module.exports = function (globalScope) {
+	var objectFactory = globalScope.factory;
 	var regexClass = objectFactory.createFunction(function (pattern, flags) {
 		if (pattern && pattern.className === "RegExp") {
 			return pattern;
@@ -17,7 +17,7 @@ module.exports = function (globalScope) {
 
 	var proto = regexClass.proto;
 	proto.defineOwnProperty("test", objectFactory.createFunction(function (str) {
-		var value = utils.toPrimitive(this, str, "string");
+		var value = convert.toPrimitive(this, str, "string");
 		return objectFactory.createPrimitive(this.node.source.test(value));
 	}), propertyConfig);
 
@@ -62,7 +62,7 @@ module.exports = function (globalScope) {
 		return objectFactory.create("String", str);
 	}), propertyConfig);
 
-	proto.defineOwnProperty("compile", objectFactory.createFunction(utils.wrapNative(RegExp.prototype.compile)), propertyConfig);
+	proto.defineOwnProperty("compile", objectFactory.createFunction(convert.toNativeFunction(RegExp.prototype.compile)), propertyConfig);
 
 	var frozen = { configurable: false, enumerable: false, writable: false };
 	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {

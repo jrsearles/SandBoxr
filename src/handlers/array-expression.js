@@ -1,14 +1,21 @@
-var objectFactory = require("../types/object-factory");
-
 module.exports = function ArrayExpression (context) {
+	var objectFactory = context.scope.global.factory;
 	var arr = objectFactory.create("Array");
-	var undef = context.scope.global.getValue("undefined");
 
 	if (context.node.elements) {
-		context.node.elements.forEach(function (element, index) {
-			var item = element ? context.create(element).execute().result : undef;
-			arr.putValue(index, item);
-		});
+		var i = 0;
+		var ln = context.node.elements.length;
+
+		while (i < ln) {
+			if (context.node.elements[i]) {
+				var item = context.create(context.node.elements[i]).execute().result;
+				arr.defineOwnProperty(i, item);
+			}
+
+			i++;
+		}
+
+		arr.putValue("length", objectFactory.createPrimitive(ln));
 	}
 
 	return context.result(arr);

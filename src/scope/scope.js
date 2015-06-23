@@ -1,5 +1,4 @@
 var ObjectType = require("../types/object-type");
-var objectFactory = require("../types/object-factory");
 var keywords = require("../keywords");
 
 function Scope (parent, thisNode) {
@@ -25,14 +24,6 @@ function Scope (parent, thisNode) {
 Scope.prototype = Object.create(ObjectType.prototype);
 Scope.prototype.constructor = Scope;
 
-Scope.prototype.start = function () {
-	objectFactory.startScope(this);
-};
-
-Scope.prototype.end = function () {
-	objectFactory.endScope();
-};
-
 Scope.prototype.getValue = function (name) {
 	var current = this;
 
@@ -44,7 +35,7 @@ Scope.prototype.getValue = function (name) {
 		current = current.parent;
 	}
 
-	return undefined; //ObjectType.prototype.getValue.call(this, name);
+	return undefined;
 };
 
 Scope.prototype.defineOwnProperty = function (name, value, descriptor, throwOnError) {
@@ -108,18 +99,6 @@ Scope.prototype.withObject = function (obj) {
 	var scope = new Scope(this);
 	scope.properties = obj.properties;
 	return scope;
-};
-
-Scope.prototype.createPrimitive = function (value) {
-	return objectFactory.createPrimitive(value);
-};
-
-Scope.prototype.createObject = function (value) {
-	return objectFactory.createObject(value);
-};
-
-Scope.prototype.createFunction = function (fnOrNode) {
-	return objectFactory.createFunction(fnOrNode);
 };
 
 Scope.prototype.setStrict = function (strict) {

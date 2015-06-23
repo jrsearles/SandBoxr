@@ -1,5 +1,3 @@
-var objectFactory = require("../types/object-factory");
-
 module.exports = function ForInStatement (context) {
 	var left;
 	if (context.node.left.type === "VariableDeclaration") {
@@ -19,7 +17,7 @@ module.exports = function ForInStatement (context) {
 	while (obj) {
 		for (var prop in obj.properties) {
 			if (obj.properties[prop].enumerable) {
-				context.scope.putValue(left.name, objectFactory.createPrimitive(prop));
+				context.scope.putValue(left.name, context.scope.global.factory.createPrimitive(prop));
 				result = context.create(context.node.body).execute();
 
 				if (result && result.shouldBreak(context, true)) {

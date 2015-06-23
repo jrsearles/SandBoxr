@@ -1,5 +1,3 @@
-var objectFactory = require("../types/object-factory");
-
 module.exports = function (context) {
 	var result;
 
@@ -8,7 +6,8 @@ module.exports = function (context) {
 	} catch (err) {
 		if (context.node.handler) {
 			var scope = context.scope.createScope();
-			scope.putValue(context.node.handler.param.name, objectFactory.createPrimitive(err));
+			var caughtError = err.wrappedError || context.scope.global.factory.createPrimitive(err);
+			scope.putValue(context.node.handler.param.name, caughtError);
 
 			result = context.create(context.node.handler.body, context.node.handler, scope).execute();
 		}

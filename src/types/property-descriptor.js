@@ -36,12 +36,18 @@ PropertyDescriptor.prototype.update = function (descriptor) {
 		this.dataProperty = false;
 		this.value = undefined;
 	} else if (descriptor.value) {
+		if (!this.configurable && (this.getter || this.setter)) {
+			throw new TypeError("Cannot redefine property");
+		}
+
 		this.get = this.getter = this.set = this.setter = undefined;
 
 		this.writable = descriptor.writable;
 		this.dataProperty = true;
 		this.value = descriptor.value;
 	}
+
+	this.configurable = this.configurable && descriptor.configurable !== false;
 };
 
 PropertyDescriptor.prototype.getValue = function (obj) {
