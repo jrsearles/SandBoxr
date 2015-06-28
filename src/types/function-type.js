@@ -15,12 +15,21 @@ FunctionType.prototype.constructor = FunctionType;
 
 FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
 	// set length property from the number of parameters
-	this.putValue("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
+	this.defineOwnProperty("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor({ configurable: false, enumerable: false, writable: true, value: ctor || this });
-	this.setProto(proto, descriptor);
+	proto.properties.constructor = new PropertyDescriptor({ configurable: true, enumerable: false, writable: true, value: ctor || this });
+	this.setProto(proto, { configurable: true, enumerable: false, writable: true });
+};
+
+FunctionType.prototype.getOwnPropertyNames = function () {
+	var props = ObjectType.prototype.getOwnPropertyNames.call(this);
+	if ("prototype" in this.properties) {
+		props.push("prototype");
+	}
+
+	return props;
 };
 
 FunctionType.prototype.createScope = function (currentScope, thisArg) {

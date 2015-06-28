@@ -36,6 +36,16 @@ StringType.prototype.getProperty = function (name) {
 	return PrimitiveType.prototype.getProperty.apply(this, arguments);
 };
 
+StringType.prototype.getOwnPropertyNames = function () {
+	var props = [];
+	var ln, i;
+	for (i = 0, ln = this.value.length; i < ln; i++) {
+		props.push(String(i));
+	}
+
+	return props.concat(PrimitiveType.prototype.getOwnPropertyNames.call(this));
+};
+
 StringType.prototype.hasOwnProperty = function (name) {
 	if (types.isInteger(name)) {
 		return name < this.value.length;

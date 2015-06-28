@@ -1,6 +1,15 @@
 var ObjectType = require("../types/object-type");
 var keywords = require("../keywords");
 
+function createDescriptor (value) {
+	return {
+		configurable: false,
+		enumerable: true,
+		writable: true,
+		value: value
+	};
+}
+
 function Scope (parent, thisNode) {
 	ObjectType.call(this);
 
@@ -35,10 +44,10 @@ Scope.prototype.getValue = function (name) {
 		current = current.parent;
 	}
 
-	return undefined;
+	return this.global.proto && this.global.proto.getValue(name);
 };
 
-Scope.prototype.defineOwnProperty = function (name, value, descriptor, throwOnError) {
+Scope.prototype.defineOwnProperty = function (name, value, descriptor, throwOnError, context) {
 	if (throwOnError) {
 		if (keywords.isReserved(name, this)) {
 			throw new SyntaxError("Unexpected token " + name);
@@ -46,22 +55,23 @@ Scope.prototype.defineOwnProperty = function (name, value, descriptor, throwOnEr
 	}
 
 	// add to current scope
-	ObjectType.prototype.defineOwnProperty.call(this, name, value, descriptor || { configurable: false });
+	descriptor = descriptor || createDescriptor(value);
+	ObjectType.prototype.defineOwnProperty.call(this, name, value, descriptor, context);
 };
 
-Scope.prototype.putValue = function (name, value, descriptor) {
+Scope.prototype.putValue = function (name, value, throwOnError, context) {
 	// look for existing in scope and traverse up scope
 	var current = this;
 	while (current) {
 		if (name in current.properties) {
-			ObjectType.prototype.putValue.call(current, name, value);
+			ObjectType.prototype.putValue.call(current, name, value, context);
 			return;
 		}
 
 		current = current.parent;
 	}
 
-	this.defineOwnProperty(name, value, descriptor);
+	this.defineOwnProperty(name, null, createDescriptor(value), throwOnError, context);
 };
 
 Scope.prototype.deleteProperty = function (name) {
@@ -78,18 +88,35 @@ Scope.prototype.deleteProperty = function (name) {
 	return true;
 };
 
-Scope.prototype.hasProperty = function (name) {
+Scope.prototype.getProperty = function (name) {
+	name = String(name);
+
 	var current = this;
 	while (current) {
 		if (name in current.properties) {
-			return true;
+			return current.properties[name];
 		}
 
 		current = current.parent;
 	}
 
-	return false;
+	return this.global.proto && this.global.proto.getProperty(name);
 };
+
+// Scope.prototype.hasProperty = function (name) {
+// 	// var current = this;
+// 	// while (current) {
+// 	// 	if (name in current.properties) {
+// 	// 		return true;
+// 	// 	}
+
+// 	// 	current = current.parent;
+// 	// }
+
+// 	// return this.global.proto.hasProperty(name);
+
+// 	// return false;
+// };
 
 Scope.prototype.createScope = function (thisNode) {
 	return new Scope(this, thisNode);

@@ -152,11 +152,11 @@ ObjectFactory.prototype = {
 		instance.parent = objectClass;
 
 		for (i = 0, ln = args.length; i < ln; i++) {
-			instance.defineOwnProperty(i, args[i], { configurable: true });
+			instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true });
 		}
 
-		instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: false, enumerable: false });
-		instance.defineOwnProperty("callee", callee, { enumerable: false });
+		instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: false, enumerable: false, writable: true });
+		instance.defineOwnProperty("callee", callee, { configurable: true, enumerable: false, writable: true });
 		return instance;
 	},
 

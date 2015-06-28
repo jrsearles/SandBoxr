@@ -37,6 +37,11 @@ describe("Functions", function () {
 		expect(result.value).to.equal(50);
 	});
 
+	it("should be able to coercively compare functions", function () {
+		var result = runner.runBlock("var a = function(){};var b = a;a == b;");
+		expect(result.value).to.be.true;
+	});
+
 	describe("Function.prototype.bind", function () {
 		it("should return a function", function () {
 			var result = runner.runBlock("var a = function () {};typeof a.bind({}) === 'function';");

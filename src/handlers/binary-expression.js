@@ -5,7 +5,7 @@ function implicitEquals (a, b, context) {
 		return a.value == b.value;
 	}
 
-	if (a.type === "object" && b.type === "object") {
+	if ((a.type === "object" && b.type === "object") || (a.type === "function" && b.type === "function")) {
 		return a === b;
 	}
 

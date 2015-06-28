@@ -173,7 +173,7 @@ describe("Types", function () {
 
 		describe("Object.defineProperty", function () {
 			it("should add the property to the object", function () {
-				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo'); 'foo' in a;");
+				var result = runner.runBlock("var a = {}; Object.defineProperty(a, 'foo', { value: 42 }); 'foo' in a;");
 				expect(result.value).to.be.true;
 			});
 

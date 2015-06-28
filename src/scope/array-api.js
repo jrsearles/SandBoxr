@@ -2,9 +2,8 @@ var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 var convert = require("../utils/convert");
 var ArrayType = require("../types/array-type");
-var NativeFunctionType = require("../types/native-function-type");
 
-var propertyConfig = { enumerable: false };
+var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 function getStartIndex (index, length) {
 	if (index < 0) {
@@ -50,19 +49,19 @@ module.exports = function (globalScope) {
 
 		if (arguments.length > 0) {
 			if (arguments.length === 1 && length.type === "number") {
-				newArray.putValue("length", length);
+				newArray.putValue("length", length, false, this);
 			} else {
 				for (var i = 0, ln = arguments.length; i < ln; i++) {
-					newArray.putValue(i, arguments[i]);
+					newArray.putValue(i, arguments[i], false, this);
 				}
 			}
 		}
 
 		return newArray;
-	}, globalScope);
+	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = arrayClass.proto;
-	proto.defineOwnProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false });
+	proto.defineOwnProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
 	arrayClass.defineOwnProperty("isArray", objectFactory.createFunction(function (obj) {
 		return objectFactory.createPrimitive(obj === proto || obj instanceof ArrayType);
@@ -82,9 +81,7 @@ module.exports = function (globalScope) {
 		return newLength;
 	}, 1, "Array.prototype.push"), propertyConfig);
 
-	var popFunc = new NativeFunctionType(function () {
-		contracts.assertIsNotConstructor(this, "Array.prototype.pop");
-
+	proto.defineOwnProperty("pop", objectFactory.createBuiltInFunction(function () {
 		var obj;
 		var length = convert.toUInt32(this, this.node.getValue("length"));
 		if (length) {
@@ -94,10 +91,7 @@ module.exports = function (globalScope) {
 
 		this.node.putValue("length", objectFactory.createPrimitive(length || 0));
 		return obj || this.scope.global.getValue("undefined");
-	}, globalScope);
-	// popFunc.parent = globalScope.getValue("Function");
-	popFunc.putValue("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: false });
-	proto.defineOwnProperty("pop", popFunc, propertyConfig);
+	}, 0, "Array.prototype.pop"), propertyConfig);
 
 	proto.defineOwnProperty("shift", objectFactory.createBuiltInFunction(function () {
 		var obj;
@@ -333,26 +327,7 @@ module.exports = function (globalScope) {
 		}
 	}, 1, "Array.prototype.forEach"), propertyConfig);
 
-/*
-Let O be the result of calling ToObject passing the this value as the argument.
-Let lenValue be the result of calling the [[Get]] internal method of O with the argument "length".
-Let len be ToUint32(lenValue).
-If IsCallable(callbackfn) is false, throw a TypeError exception.
-If thisArg was supplied, let T be thisArg; else let T be undefined.
-Let A be a new array created as if by the expression new Array(len) where Array is the standard built-in constructor with that name and len is the value of len.
-Let k be 0.
-Repeat, while k < len
-Let Pk be ToString(k).
-Let kPresent be the result of calling the [[HasProperty]] internal method of O with argument Pk.
-If kPresent is true, then
-Let kValue be the result of calling the [[Get]] internal method of O with argument Pk.
-Let mappedValue be the result of calling the [[Call]] internal method of callbackfn with T as the this value and argument list containing kValue, k, and O.
-Call the [[DefineOwnProperty]] internal method of A with arguments Pk, Property Descriptor {[[Value]]: mappedValue, [[Writable]]: true, [[Enumerable]]: true, [[Configurable]]: true}, and false.
-Increase k by 1.
-Return A.
-*/
 	proto.defineOwnProperty("map", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		var undef = this.scope.global.getValue("undefined");
 		var length = convert.toUInt32(this, this.node.getValue("length"));
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.map");
 		contracts.assertIsFunction(callback);
@@ -522,7 +497,7 @@ Return A.
 		convert.toArray(arr)
 			.sort(wrappedComparer || defaultComparer)
 			.forEach(function (element, index) {
-				arr.putValue(index, element);
+				arr.putValue(index, element, false, this);
 			});
 
 		return arr;

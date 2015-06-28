@@ -4,7 +4,7 @@ var staticMethods = ["now"];
 var protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString", "valueOf"];
 var setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 var slice = Array.prototype.slice;
-var propertyConfig = { enumerable: false };
+var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (globalScope) {
 	var objectFactory = globalScope.factory;
@@ -46,7 +46,7 @@ module.exports = function (globalScope) {
 
 		dateValue = Date.apply(null, args);
 		return objectFactory.createPrimitive(dateValue);
-	}, globalScope);
+	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	dateClass.defineOwnProperty("parse", objectFactory.createFunction(function (value) {
 		var stringValue = convert.toPrimitive(this, value, "string");
@@ -63,7 +63,7 @@ module.exports = function (globalScope) {
 	var proto = dateClass.proto;
 
 	staticMethods.forEach(function (name) {
-		dateClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Date[name])));
+		dateClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Date[name])), propertyConfig);
 	});
 
 	protoMethods.forEach(function (name) {

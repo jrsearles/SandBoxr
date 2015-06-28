@@ -55,9 +55,9 @@ function hoistVariables (nodes, scope) {
 
 		if (decl.type === "FunctionDeclaration") {
 			// functions can be used before they are defined
-			scope.defineOwnProperty(name, scope.global.factory.createFunction(decl, scope), { configurable: false, enumerable: false }, true);
+			scope.defineOwnProperty(name, scope.global.factory.createFunction(decl, scope), { configurable: false, enumerable: false, writable: true }, true);
 		} else {
-			scope.defineOwnProperty(name, undef, { configurable: false, enumerable: false }, true);
+			scope.defineOwnProperty(name, undef, { configurable: false, enumerable: false, writable: true }, true);
 		}
 	});
 }

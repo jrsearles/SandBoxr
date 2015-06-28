@@ -50,5 +50,10 @@ describe("Types", function () {
 				expect(result.value).to.equal(1);
 			});
 		});
+
+		it("should evaluate signed numbers per spec", function () {
+			var result = runner.runBlock("1/+0 !== 1/-0;");
+			expect(result.value).to.be.true;
+		});
 	});
 });

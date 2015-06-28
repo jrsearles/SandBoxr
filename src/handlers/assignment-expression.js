@@ -22,7 +22,7 @@ module.exports = function AssignmentExpression (context) {
 		}
 
 		// not found - add as reference
-		context.scope.global.putValue(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true });
+		context.scope.global.putValue(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true, enumerable: true, writable: true });
 	}
 
 	var left = context.create(context.node.left).execute();
@@ -43,9 +43,10 @@ module.exports = function AssignmentExpression (context) {
 	var name = left.name;
 
 	if (obj.hasProperty(name)) {
-		obj.putValue(name, newValue);
+		obj.putValue(name, newValue, false, context);
 	} else {
-		obj.putValue(name, newValue, { configurable: left.object ? true : false });
+		var descriptor = { value: newValue, configurable: true, enumerable: true, writable: true };
+		obj.defineOwnProperty(name, null, descriptor, false, context);
 	}
 
 	return context.result(newValue, name);

@@ -8,9 +8,7 @@ function ObjectType () {
 
 	this.properties = Object.create(null);
 
-	this.frozen = false;
 	this.extensible = true;
-	this.sealed = false;
 }
 
 ObjectType.prototype = {
@@ -24,7 +22,7 @@ ObjectType.prototype = {
 		}
 
 		this.proto = proto;
-		this.properties.prototype = new PropertyDescriptor(descriptor || { enumerable: false }, proto);
+		this.properties.prototype = new PropertyDescriptor(descriptor || { configurable: true, enumerable: false, writable: true }, proto);
 	},
 
 	getProperty: function (name) {
@@ -41,14 +39,8 @@ ObjectType.prototype = {
 				return current.properties[name];
 			}
 
-			// current = current.proto;
-			current = current.parent && current.parent.proto;  // current.proto;
+			current = current.parent && current.parent.proto;
 		}
-
-		// check parent
-		// if (this.parent && this.parent.proto) {
-		// 	return this.parent.getProperty(name);
-		// }
 
 		return undefined;
 	},
@@ -57,17 +49,30 @@ ObjectType.prototype = {
 		return this.properties[String(name)];
 	},
 
+	getOwnPropertyNames: function () {
+		var props = [];
+		for (var prop in this.properties) {
+			// ignore prototype
+			if (prop === "prototype" && this.properties[prop].getValue(this) === this.proto) {
+				continue;
+			}
+
+			props.push(prop);
+		}
+
+		return props;
+	},
+
 	hasProperty: function (name) {
-		name = String(name);
-		return this.hasOwnProperty(name) || !!this.getProperty(name);
+		return !!this.getProperty(String(name));
 	},
 
 	hasOwnProperty: function (name) {
 		return String(name) in this.properties;
 	},
 
-	putValue: function (name, value, options) {
-		if (this.isPrimitive || this.frozen) {
+	putValue: function (name, value, throwOnError) {
+		if (this.isPrimitive) {
 			return;
 		}
 
@@ -78,10 +83,6 @@ ObjectType.prototype = {
 		}
 
 		var descriptor = this.getProperty(name);
-		if (descriptor && options) {
-			descriptor.update(options);
-		}
-
 		if (descriptor) {
 			if (!descriptor.canSetValue()) {
 				return;
@@ -93,13 +94,37 @@ ObjectType.prototype = {
 				descriptor.setValue(this, value);
 			}
 		} else {
-			this.defineOwnProperty(name, value, options);
+			this.defineOwnProperty(name, value, { configurable: true, enumerable: true, writable: true }, throwOnError);
 		}
 	},
 
-	defineOwnProperty: function (name, value, descriptor) {
-		if (this.isPrimitive || !this.extensible) {
-			return;
+	defineOwnProperty: function (name, value, descriptor, throwOnError) {
+		if (this.isPrimitive) {
+			if (throwOnError) {
+				throw new TypeError("Cannot define property: " + name + ", object is not extensible");
+			}
+
+			return false;
+		}
+
+		var current = this.getOwnProperty(name);
+		if (current) {
+			if (current.canUpdate(descriptor)) {
+				current.update(descriptor);
+				return true;
+			}
+
+			if (throwOnError) {
+				throw new TypeError("Cannot redefine property: " + name);
+			}
+
+			return false;
+		} else if (!this.extensible) {
+			if (throwOnError) {
+				throw new TypeError("Cannot define property: " + name + ", object is not extensible");
+			}
+
+			return false;
 		}
 
 		if (value && value.reference) {
@@ -107,6 +132,8 @@ ObjectType.prototype = {
 		} else {
 			this.properties[name] = new PropertyDescriptor(descriptor, value);
 		}
+
+		return true;
 	},
 
 	getValue: function (name) {
@@ -115,7 +142,7 @@ ObjectType.prototype = {
 	},
 
 	deleteProperty: function (name) {
-		if (this.isPrimitive || this.sealed) {
+		if (this.isPrimitive) {
 			return false;
 		}
 
@@ -137,9 +164,15 @@ ObjectType.prototype = {
 	},
 
 	freeze: function () {
+		for (var prop in this.properties) {
+			if (this.properties[prop].dataProperty) {
+				this.defineOwnProperty(prop, null, { writable: false, configurable: false }, true);
+			} else {
+				this.defineOwnProperty(prop, null, { configurable: false }, true);
+			}
+		}
+
 		this.preventExtensions();
-		this.seal();
-		this.frozen = true;
 	},
 
 	preventExtensions: function () {
@@ -147,8 +180,11 @@ ObjectType.prototype = {
 	},
 
 	seal: function () {
+		for (var prop in this.properties) {
+			this.defineOwnProperty(prop, null, { configurable: false }, true);
+		}
+
 		this.preventExtensions();
-		this.sealed = true;
 	},
 
 	toBoolean: function () {
@@ -165,6 +201,15 @@ ObjectType.prototype = {
 
 	valueOf: function () {
 		return this;
+	},
+
+	"with": function (executionContext) {
+		this.executionContext = executionContext;
+		return this;
+	},
+
+	endWith: function () {
+		this.executionContext = null;
 	},
 
 	equals: function (obj) {

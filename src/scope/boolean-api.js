@@ -1,6 +1,6 @@
 var convert = require("../utils/convert");
 
-var propertyConfig = { enumerable: false };
+var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (globalScope) {
 	var objectFactory = globalScope.factory;
@@ -9,11 +9,11 @@ module.exports = function (globalScope) {
 
 		// called as new
 		if (this.isNew) {
-			return convert.toObject(booleanValue, objectFactory);
+			return convert.primitiveToObject(booleanValue, objectFactory);
 		}
 
 		return objectFactory.create("Boolean", booleanValue);
-	}, globalScope, undefined, null, { configurable: false, enumerable: false, writable: false });
+	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	booleanClass.proto.className = "Boolean";
 	booleanClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {

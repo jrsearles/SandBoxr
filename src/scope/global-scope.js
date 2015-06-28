@@ -16,6 +16,7 @@ var consoleAPI = require("./console-api");
 var convert = require("../utils/convert");
 
 var globalFunctions = ["isNaN", "parseFloat", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
+var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (options) {
 	var globalScope = new Scope();
@@ -31,7 +32,7 @@ module.exports = function (options) {
 	globalScope.defineOwnProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
 
 	// todo: node vs browser - do we care?
-	globalScope.defineOwnProperty("window", globalScope, { configurable: false, writable: false });
+	globalScope.defineOwnProperty("window", globalScope, { configurable: false, enumerable: true, writable: false });
 
 	functionAPI(globalScope, options);
 	objectAPI(globalScope, options);
@@ -47,7 +48,7 @@ module.exports = function (options) {
 	consoleAPI(globalScope, options);
 
 	globalFunctions.forEach(function (name) {
-		globalScope.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(global[name]), globalScope, null), { enumerable: false });
+		globalScope.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(global[name]), globalScope, null), propertyConfig);
 	});
 
 	globalScope.defineOwnProperty("parseInt", objectFactory.createFunction(function (value, radix) {
@@ -55,7 +56,7 @@ module.exports = function (options) {
 		radix = convert.toPrimitive(this, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(value, radix));
-	}, globalScope, null), { enumerable: false });
+	}, globalScope, null), propertyConfig);
 
 	if (options.parser) {
 		var evalFunc = objectFactory.createFunction(function (code) {
@@ -94,7 +95,7 @@ module.exports = function (options) {
 
 		// evalFunc.parent = globalScope.getValue("Object");
 		// evalFunc.setProto(null);
-		globalScope.defineOwnProperty("eval", evalFunc, { enumerable: false });
+		globalScope.defineOwnProperty("eval", evalFunc, propertyConfig);
 	}
 
 	globalScope.setProto(globalScope.getValue("Object").proto);

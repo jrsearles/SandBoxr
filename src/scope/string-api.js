@@ -14,11 +14,11 @@ module.exports = function (globalScope) {
 
 		// called as new
 		if (this.isNew) {
-			return convert.toObject(stringValue, objectFactory);
+			return convert.primitiveToObject(stringValue, objectFactory);
 		}
 
 		return objectFactory.createPrimitive(stringValue);
-	}, globalScope);
+	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = stringClass.proto;
 
@@ -56,10 +56,11 @@ module.exports = function (globalScope) {
 		limit = limit && limit.toNumber();
 
 		var result = this.node.value.split(separator, limit);
-
 		var arr = objectFactory.create("Array");
+		var context = this;
+
 		result.forEach(function (value, index) {
-			arr.putValue(index, objectFactory.createPrimitive(value));
+			arr.putValue(index, objectFactory.createPrimitive(value), false, context);
 		});
 
 		return arr;
@@ -89,8 +90,9 @@ module.exports = function (globalScope) {
 		var results = this.node.toString().match(regex && regex.source);
 		if (results) {
 			var matches = objectFactory.create("Array");
+			var context = this;
 			results.forEach(function (value, index) {
-				matches.putValue(index, objectFactory.createPrimitive(value));
+				matches.putValue(index, objectFactory.createPrimitive(value), false, context);
 			});
 
 			return matches;
@@ -106,5 +108,5 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(value.trim());
 	}), propertyConfig);
 
-	globalScope.defineOwnProperty("String", stringClass, { enumerable: false });
+	globalScope.defineOwnProperty("String", stringClass, propertyConfig);
 };

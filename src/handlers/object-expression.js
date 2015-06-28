@@ -16,6 +16,10 @@ function setDescriptor (context, obj, name, descriptor) {
 	obj.defineOwnProperty(name, null, descriptor);
 }
 
+function createDescriptor () {
+	return { configurable: true, enumerable: true, writable: true };
+}
+
 module.exports = function ObjectExpression (context) {
 	var obj = context.scope.global.factory.createObject();
 	var descriptors = Object.create(null);
@@ -27,12 +31,12 @@ module.exports = function ObjectExpression (context) {
 		switch (property.kind) {
 			case "get":
 			case "set":
-				descriptors[name] = descriptors[name] || Object.create(null);
+				descriptors[name] = descriptors[name] || createDescriptor();
 				descriptors[name][property.kind] = value;
 				break;
 
 			default:
-				obj.defineOwnProperty(name, value);
+				obj.defineOwnProperty(name, value, createDescriptor());
 				break;
 		}
 	});

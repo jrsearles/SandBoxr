@@ -22,13 +22,13 @@ var tests = [
 	// root + "suite/ch07/**/*.js",	// passed!
 	// root + "suite/ch08/**/*.js",	// passed!
 	// root + "suite/ch09/**/*.js",	// passed!
-	// root + "suite/ch10/**/*.js",	// scope
+	root + "suite/ch10/**/*.js",	// scope
 	// root + "suite/ch11/11.4/11.4.1/**/*.js",
 	// root + "suite/ch12/12.10/**/*.js"
 	// root + "suite/ch13/**/*.js",	// functions
 	// root + "suite/ch14/**/*.js",	// program
 	// root + "suite/ch15/15.1/**/*.js",	// global
-	root + "suite/ch15/15.2/15.2.3/15.2.3.6/**/*.js",	// object
+	// root + "suite/ch15/15.2/**/*.js",	// object
 	// root + "suite/ch15/15.3/**/*.js",	// function
 	// root + "suite/ch15/15.4/15.4.4/15.4.4.19/**/*.js",	// array
 	// root + "suite/ch15/15.5/**/*.js",	// string

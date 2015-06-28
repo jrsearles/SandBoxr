@@ -1,6 +1,6 @@
 var convert = require("../utils/convert");
 
-var propertyConfig = { enumerable: false };
+var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (globalScope) {
 	var objectFactory = globalScope.factory;
@@ -13,7 +13,7 @@ module.exports = function (globalScope) {
 		flags = flags && flags.toString();
 
 		return objectFactory.create("RegExp", new RegExp(pattern, flags));
-	});
+	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = regexClass.proto;
 	proto.defineOwnProperty("test", objectFactory.createFunction(function (str) {
@@ -34,8 +34,8 @@ module.exports = function (globalScope) {
 			}
 
 			// extra properties are added to the array
-			arr.putValue("index", objectFactory.createPrimitive(match.index));
-			arr.putValue("input", objectFactory.createPrimitive(match.input));
+			arr.putValue("index", objectFactory.createPrimitive(match.index), false, this);
+			arr.putValue("input", objectFactory.createPrimitive(match.input), false, this);
 			return arr;
 		}
 
@@ -69,5 +69,5 @@ module.exports = function (globalScope) {
 		proto.defineOwnProperty(name, objectFactory.createPrimitive(RegExp.prototype[name]), frozen);
 	});
 
-	globalScope.defineOwnProperty("RegExp", regexClass, { enumerable: false });
+	globalScope.defineOwnProperty("RegExp", regexClass, propertyConfig);
 };
