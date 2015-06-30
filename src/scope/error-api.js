@@ -35,6 +35,7 @@ module.exports = function (globalScope) {
 			return err;
 		}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
+		errClass.proto.parent = errorClass;
 		globalScope.defineOwnProperty(type, errClass, propertyConfig);
 	});
 };

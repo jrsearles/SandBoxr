@@ -6,7 +6,7 @@ module.exports = function (context) {
 	} catch (err) {
 		if (context.node.handler) {
 			var scope = context.scope.createScope();
-			var caughtError = err.wrappedError || context.scope.global.factory.createPrimitive(err);
+			var caughtError = err && err.wrappedError || context.scope.global.factory.createPrimitive(err);
 			scope.putValue(context.node.handler.param.name, caughtError, false, context);
 
 			result = context.create(context.node.handler.body, context.node.handler, scope).execute();

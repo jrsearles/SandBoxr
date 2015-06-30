@@ -84,37 +84,20 @@ var binaryOperators = {
 	"|": function (a, b, c) { return convert.toInt32(c, a) | convert.toInt32(c, b); },
 	"^": function (a, b, c) { return convert.toInt32(c, a) ^ convert.toInt32(c, b); },
 	"&": function (a, b, c) { return convert.toInt32(c, a) & convert.toInt32(c, b); },
-	"in": function (a, b, c) { return b.hasProperty(a.toString()); },
+	"in": function (a, b, c) {
+		a = a.toString();
+		if (b.isPrimitive) {
+			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + b.toString());
+		}
+
+		return b.hasProperty(a);
+	},
 	"instanceof": function (a, b) {
 		if (b.type !== "function") {
 			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
 		}
 
-		// if (a.isPrimitive) {
-		// 	return false;
-		// }
-
-		var visited = [];
-		var current = a;
-		while (current) {
-			if (visited.indexOf(current) >= 0) {
-				return false;
-			}
-
-			// keep a stack to avoid circular reference
-			visited.push(current);
-			if (current === b.proto) {
-				return true;
-			}
-
-			if (current.parent && current.parent.proto === b.proto) {
-				return true;
-			}
-
-			current = current.proto;
-		}
-
-		return false;
+		return b.hasInstance(a);
 	}
 };
 

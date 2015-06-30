@@ -29,6 +29,13 @@ function populateHoistedVariables (node, declarators) {
 			// keep analyzing
 		}
 
+		if (node.type === "IfStatement") {
+			// cannot hoist variables within if
+			populateHoistedVariables(node.consequent, declarators);
+			populateHoistedVariables(node.alternate, declarators);
+			return;
+		}
+
 		if (scopedBlock[node.type]) {
 			return;
 		}
@@ -55,11 +62,28 @@ function hoistVariables (nodes, scope) {
 
 		if (decl.type === "FunctionDeclaration") {
 			// functions can be used before they are defined
-			scope.defineOwnProperty(name, scope.global.factory.createFunction(decl, scope), { configurable: false, enumerable: false, writable: true }, true);
+			var func = scope.global.factory.createFunction(decl, scope);
+
+			// note: since the function name may collide with a variable we need to test for existence
+			if (scope.hasOwnProperty(name)) {
+				scope.putValue(name, func);
+			} else {
+				scope.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
+			}
 		} else {
-			scope.defineOwnProperty(name, undef, { configurable: false, enumerable: false, writable: true }, true);
+			scope.defineOwnProperty(name, null, { value: scope.getValue(name) || undef, configurable: false, enumerable: false, writable: true }, true);
 		}
 	});
+}
+
+function setStrictMode (context, executionResult) {
+	var node = context.node.body[0];
+	if (node.type !== "ExpressionStatement" || node.expression.type !== "Literal" || node.expression.value !== "use strict") {
+		return false;
+	}
+
+	context.setStrict(true);
+	return true;
 }
 
 module.exports = function BlockStatement (context) {
@@ -70,6 +94,10 @@ module.exports = function BlockStatement (context) {
 	hoistVariables(context.node.body, context.scope);
 
 	for (; i < ln; i++) {
+		if (i === 0 && setStrictMode(context)) {
+			continue;
+		}
+
 		result = context.create(context.node.body[i]).execute();
 		if (result && result.shouldBreak(context)) {
 			break;

@@ -14,6 +14,7 @@ var assignOperators = {
 
 module.exports = function AssignmentExpression (context) {
 	var assignment = context.node.operator === "=";
+	var right = context.create(context.node.right).execute();
 
 	// check for undeclared global
 	if (context.node.left.type === "Identifier" && !context.scope.hasProperty(context.node.left.name)) {
@@ -22,7 +23,7 @@ module.exports = function AssignmentExpression (context) {
 		}
 
 		// not found - add as reference
-		context.scope.global.putValue(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true, enumerable: true, writable: true });
+		context.scope.global.defineOwnProperty(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true, enumerable: true, writable: true });
 	}
 
 	var left = context.create(context.node.left).execute();
@@ -30,9 +31,7 @@ module.exports = function AssignmentExpression (context) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
 
-	var right = context.create(context.node.right).execute();
 	var newValue;
-
 	if (assignment) {
 		newValue = right.result;
 	} else {
@@ -43,10 +42,10 @@ module.exports = function AssignmentExpression (context) {
 	var name = left.name;
 
 	if (obj.hasProperty(name)) {
-		obj.putValue(name, newValue, false, context);
+		obj.putValue(name, newValue, context.strict, context);
 	} else {
 		var descriptor = { value: newValue, configurable: true, enumerable: true, writable: true };
-		obj.defineOwnProperty(name, null, descriptor, false, context);
+		obj.defineOwnProperty(name, null, descriptor, context.strict, context);
 	}
 
 	return context.result(newValue, name);

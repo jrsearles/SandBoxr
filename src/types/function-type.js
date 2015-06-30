@@ -37,4 +37,33 @@ FunctionType.prototype.createScope = function (currentScope, thisArg) {
 	return (this.parentScope || currentScope).createScope(thisArg);
 };
 
+FunctionType.prototype.hasInstance = function (obj) {
+	if (obj.isPrimitive || obj === this) {
+		return false;
+	}
+
+	var visited = [];
+	var current = obj;
+
+	while (current) {
+		if (visited.indexOf(current) >= 0) {
+			return false;
+		}
+
+		// keep a stack to avoid circular reference
+		visited.push(current);
+		if (current === this.proto) {
+			return true;
+		}
+
+		if (current.parent && current.parent.proto === this.proto) {
+			return true;
+		}
+
+		current = current.proto;
+	}
+
+	return false;
+};
+
 module.exports = FunctionType;

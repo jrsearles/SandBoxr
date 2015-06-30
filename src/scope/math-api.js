@@ -14,7 +14,7 @@ module.exports = function (globalScope) {
 	});
 
 	methods.forEach(function (name) {
-		mathClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Math[name])), propertyConfig);
+		mathClass.defineOwnProperty(name, convert.toNativeFunction(objectFactory, Math[name], "Math." + name), propertyConfig);
 	});
 
 	globalScope.defineOwnProperty("Math", mathClass, propertyConfig);

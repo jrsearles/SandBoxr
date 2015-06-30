@@ -15,7 +15,7 @@ var jsonAPI = require("./json-api");
 var consoleAPI = require("./console-api");
 var convert = require("../utils/convert");
 
-var globalFunctions = ["isNaN", "parseFloat", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
+var globalFunctions = ["isNaN", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (options) {
@@ -48,18 +48,23 @@ module.exports = function (options) {
 	consoleAPI(globalScope, options);
 
 	globalFunctions.forEach(function (name) {
-		globalScope.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(global[name]), globalScope, null), propertyConfig);
+		globalScope.defineOwnProperty(name, convert.toNativeFunction(objectFactory, global[name], name), propertyConfig);
 	});
 
-	globalScope.defineOwnProperty("parseInt", objectFactory.createFunction(function (value, radix) {
-		value = convert.toPrimitive(this, value, "string");
+	globalScope.defineOwnProperty("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
+		var stringValue = convert.toPrimitive(this, value, "string");
 		radix = convert.toPrimitive(this, radix, "number");
 
-		return objectFactory.createPrimitive(parseInt(value, radix));
-	}, globalScope, null), propertyConfig);
+		return objectFactory.createPrimitive(parseInt(stringValue, radix));
+	}, 2, "parseInt"), propertyConfig);
+
+	globalScope.defineOwnProperty("parseFloat", objectFactory.createBuiltInFunction(function (value) {
+		var stringValue = convert.toPrimitive(this, value, "string");
+		return objectFactory.createPrimitive(parseFloat(stringValue));
+	}, 2, "parseFloat"), propertyConfig);
 
 	if (options.parser) {
-		var evalFunc = objectFactory.createFunction(function (code) {
+		var evalFunc = objectFactory.createBuiltInFunction(function (code) {
 			if (this.isNew) {
 				throw new TypeError("function eval() is not a constructor");
 			}
@@ -91,7 +96,7 @@ module.exports = function (options) {
 			}
 
 			return undefinedClass;
-		}, null, null);
+		}, 1, "eval");
 
 		// evalFunc.parent = globalScope.getValue("Object");
 		// evalFunc.setProto(null);

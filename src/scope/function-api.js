@@ -9,6 +9,8 @@ module.exports = function (globalScope, options) {
 	// var proto = new ObjectType();
 	var functionClass = objectFactory.createFunction(function () {
 		var context = this;
+		var funcInstance;
+
 		if (options.parser && arguments.length > 0) {
 			var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "string"); });
 			var body = options.parser("(function () {" + args.pop() + "}).apply(this, arguments);");
@@ -24,21 +26,38 @@ module.exports = function (globalScope, options) {
 				body: body
 			};
 
-			var fn = objectFactory.createFunction(fnNode, globalScope);
-			fn.putValue("constructor", functionClass, false, this);
-			return fn;
+			funcInstance = objectFactory.createFunction(fnNode, globalScope);
+		} else {
+			funcInstance = objectFactory.createFunction(function () {});
 		}
 
-		if (this.isNew) {
-			this.node.putValue("constructor", functionClass, false, this);
-			return this.node;
-		}
+		funcInstance.putValue("constructor", functionClass);
+		return funcInstance;
 
-		return objectFactory.createObject();
+		// if (this.isNew) {
+		// 	// todo: verify the behavior here
+		// 	this.node.putValue("constructor", functionClass, false, this);
+		// 	this.node.type = "function";
+		// 	this.node.className = "Function";
+		// 	return this.node;
+		// }
+
+		// return objectFactory.createObject();
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	functionClass.putValue("constructor", functionClass);
 
 	var proto = functionClass.proto;
-	proto.defineOwnProperty("toString", objectFactory.createFunction(convert.toNativeFunction(Function.prototype.toString)), propertyConfig);
+	proto.type = "function";
+	proto.defineOwnProperty("length", objectFactory.createPrimitive(0));
+
+	proto.defineOwnProperty("toString", objectFactory.createBuiltInFunction(function () {
+		if (this.node.native) {
+			return objectFactory.createPrimitive("function () { [native code] }");
+		}
+
+		return objectFactory.createPrimitive("function () { [user code] }");
+	}), propertyConfig);
+
 	proto.defineOwnProperty("valueOf", objectFactory.createBuiltInFunction(function () {
 		return this.node;
 	}, 0, "Function.prototype.valueOf"), propertyConfig);

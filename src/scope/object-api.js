@@ -135,15 +135,17 @@ module.exports = function (globalScope) {
 	proto.defineOwnProperty("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		var current = obj;
 		while (current) {
-			if (current === this.scope.thisNode) {
+			if (this.scope.thisNode === current || this.scope.thisNode === (current.parent && current.parent.proto)) {
 				return objectFactory.createPrimitive(true);
 			}
 
-			if (current.parent && current.parent.proto === this.scope.thisNode) {
-				return objectFactory.createPrimitive(true);
-			}
+			current = current.getValue("prototype");
 
-			current = current.proto; // && current.parent.proto;
+			// if (current.parent && current.parent.proto === this.scope.thisNode) {
+			// 	return objectFactory.createPrimitive(true);
+			// }
+
+			// current = current.proto; // && current.parent.proto;
 		}
 
 		return objectFactory.createPrimitive(false);

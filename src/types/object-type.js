@@ -85,6 +85,10 @@ ObjectType.prototype = {
 		var descriptor = this.getProperty(name);
 		if (descriptor) {
 			if (!descriptor.canSetValue()) {
+				if (throwOnError) {
+					throw new TypeError("Cannot assign to read only property '" + name + "' of " + this.toString());
+				}
+				
 				return;
 			}
 
@@ -105,6 +109,11 @@ ObjectType.prototype = {
 			}
 
 			return false;
+		}
+
+		// todo: obsolete the value arg
+		if (value && descriptor && !descriptor.value) {
+			descriptor.value = value;
 		}
 
 		var current = this.getOwnProperty(name);

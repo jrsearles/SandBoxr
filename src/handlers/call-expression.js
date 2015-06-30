@@ -7,6 +7,8 @@ module.exports = function CallExpression (context) {
 	var returnResult;
 
 	var fn = context.create(node.callee).execute();
+	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result; });
+
 	if (!fn.result || !(fn.result instanceof FunctionType)) {
 		throw new TypeError(fn.result.toString() + " not a function");
 	}
@@ -18,7 +20,6 @@ module.exports = function CallExpression (context) {
 	}
 
 	var params = native ? [] : fn.result.node.params;
-	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result; });
 	var thisArg = returnResult || fn.object;
 	var callee = native ? fn : fn.result.node;
 

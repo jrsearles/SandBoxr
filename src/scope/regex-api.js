@@ -62,7 +62,7 @@ module.exports = function (globalScope) {
 		return objectFactory.create("String", str);
 	}), propertyConfig);
 
-	proto.defineOwnProperty("compile", objectFactory.createFunction(convert.toNativeFunction(RegExp.prototype.compile)), propertyConfig);
+	proto.defineOwnProperty("compile", convert.toNativeFunction(objectFactory, RegExp.prototype.compile, "RegExp.prototype.compile"), propertyConfig);
 
 	var frozen = { configurable: false, enumerable: false, writable: false };
 	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {

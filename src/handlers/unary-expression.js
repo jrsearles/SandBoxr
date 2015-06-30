@@ -47,7 +47,7 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "~":
-			newValue = objectFactory.createPrimitive(~(convert.toPrimitive(context, value)));
+			newValue = objectFactory.createPrimitive(~(convert.toInt32(context, value)));
 			break;
 
 		case "delete":

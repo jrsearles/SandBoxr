@@ -1,7 +1,7 @@
 var convert = require("../utils/convert");
 
 var staticMethods = ["now"];
-var protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString", "valueOf"];
+var protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString"];
 var setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
@@ -15,19 +15,28 @@ module.exports = function (globalScope) {
 		if (arguments.length === 0) {
 			args = [];
 		} else if (arguments.length === 1) {
-			args = [convert.toPrimitive(this, arguments[0], "string")];
+			if (p1.isPrimitive) {
+				args = [p1.value];
+			} else {
+				var primitiveValue = convert.toPrimitive(this, p1);
+				if (typeof primitiveValue !== "string") {
+					primitiveValue = convert.toNumber(this, p1);
+				}
+
+				args = [primitiveValue];
+			}
 		} else {
 			args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "number"); });
 		}
 
 		if (this.isNew) {
-			switch (arguments.length) {
+			switch (args.length) {
 				case 0:
 					dateValue = new Date();
 					break;
 
 				case 1:
-					dateValue = new Date(arguments[0].value);
+					dateValue = new Date(args[0]);
 					break;
 
 				default:
@@ -63,11 +72,11 @@ module.exports = function (globalScope) {
 	var proto = dateClass.proto;
 
 	staticMethods.forEach(function (name) {
-		dateClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Date[name])), propertyConfig);
+		dateClass.defineOwnProperty(name, convert.toNativeFunction(objectFactory, Date[name], "Date." + name), propertyConfig);
 	});
 
 	protoMethods.forEach(function (name) {
-		proto.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(Date.prototype[name])), propertyConfig);
+		proto.defineOwnProperty(name, convert.toNativeFunction(objectFactory, Date.prototype[name], "Date.prototype." + name), propertyConfig);
 	});
 
 	setters.forEach(function (name) {

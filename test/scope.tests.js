@@ -45,5 +45,10 @@ describe("Scope", function () {
 			var scope = runner.getScope("var obj = {};__ref = obj;");
 			expect(scope.global.getValue("__ref")).not.to.be.undefined;
 		});
+
+		it("should create functions before they are called", function () {
+			var result = runner.runBlock("function f() { var x;return x;function x() {}\n}\ntypeof f() === 'function'");
+			expect(result.value).to.be.true;
+		});
 	});
 });

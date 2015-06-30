@@ -5,8 +5,9 @@ function ExecutionContext (runner, node, callee, scope, isNew) {
 	this.node = node;
 	this.callee = callee;
 	this.scope = scope;
-	this.label = null;
+	this.label = "";
 	this.isNew = !!isNew;
+	this.strict = false;
 }
 
 ExecutionContext.prototype.execute = function () {
@@ -14,13 +15,20 @@ ExecutionContext.prototype.execute = function () {
 };
 
 ExecutionContext.prototype.create = function (node, callee, scope, isNew) {
-	return new ExecutionContext(this.runner, node, callee, scope || this.scope, isNew);
+	var context = new ExecutionContext(this.runner, node, callee, scope || this.scope, isNew);
+	context.strict = this.strict;
+	return context;
 };
 
 ExecutionContext.prototype.createLabel = function (node, label) {
 	var context = new ExecutionContext(this.runner, node, null, this.scope);
 	context.label = label;
+	context.strict = this.strict;
 	return context;
+};
+
+ExecutionContext.prototype.setStrict = function () {
+	this.strict = true;
 };
 
 ExecutionContext.prototype.cancel = function (label) {

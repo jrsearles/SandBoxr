@@ -74,14 +74,14 @@ module.exports = function (globalScope) {
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			proto.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(fn)), propertyConfig);
+			proto.defineOwnProperty(name, convert.toNativeFunction(objectFactory, fn, "Number.prototype." + name), propertyConfig);
 		}
 	});
 
 	staticMethods.forEach(function (name) {
 		var fn = Number[name] || polyfills[name];
 		if (fn) {
-			numberClass.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(fn)), propertyConfig);
+			numberClass.defineOwnProperty(name, convert.toNativeFunction(objectFactory, fn, "Number." + name), propertyConfig);
 		}
 	});
 

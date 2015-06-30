@@ -2,8 +2,9 @@ var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 var func = require("../utils/func");
 var types = require("../utils/types");
+var RegexType = require("../types/regex-type");
 
-var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "slice", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "trim", "valueOf"];
+var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toString", "toUpperCase", "valueOf"];
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
@@ -21,6 +22,7 @@ module.exports = function (globalScope) {
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = stringClass.proto;
+	proto.defineOwnProperty("length", objectFactory.createPrimitive(0));
 
 	proto.defineOwnProperty("search", objectFactory.createFunction(function (regex) {
 		return objectFactory.createPrimitive(this.node.value.search(regex.source));
@@ -41,7 +43,7 @@ module.exports = function (globalScope) {
 	protoMethods.forEach(function (name) {
 		var fn = String.prototype[name];
 		if (fn) {
-			proto.defineOwnProperty(name, objectFactory.createFunction(convert.toNativeFunction(fn)), propertyConfig);
+			proto.defineOwnProperty(name, convert.toNativeFunction(objectFactory, fn, "String.prototype." + name), propertyConfig);
 		}
 	}, propertyConfig);
 
@@ -51,11 +53,29 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(String.fromCharCode.apply(null, args));
 	}), propertyConfig);
 
-	proto.defineOwnProperty("split", objectFactory.createFunction(function (separator, limit) {
-		separator = separator && (separator.source || separator.value);
-		limit = limit && limit.toNumber();
+	proto.defineOwnProperty("slice", objectFactory.createBuiltInFunction(function (start, end) {
+		var stringValue = convert.toString(this, this.node);
+		var startValue = convert.toInteger(this, start);
+		var endValue;
 
-		var result = this.node.value.split(separator, limit);
+		if (!types.isNullOrUndefined(end)) {
+			endValue = convert.toInteger(this, end);
+		}
+
+		return objectFactory.createPrimitive(stringValue.slice(startValue, endValue));
+	}, 2, "String.prototype.slice"), propertyConfig);
+
+	proto.defineOwnProperty("split", objectFactory.createBuiltInFunction(function (separator, limit) {
+		var stringValue = convert.toString(this, this.node);
+		var separatorValue = separator && separator.className === "RegExp" ? separator.source : convert.toString(this, separator);
+		var limitValue;
+
+		if (!types.isNullOrUndefined(limit)) {
+			limitValue = convert.toUInt32(this, limit);
+		}
+
+		var result = stringValue.split(separatorValue, limitValue);
+
 		var arr = objectFactory.create("Array");
 		var context = this;
 
@@ -87,10 +107,20 @@ module.exports = function (globalScope) {
 	}), propertyConfig);
 
 	proto.defineOwnProperty("match", objectFactory.createFunction(function (regex) {
-		var results = this.node.toString().match(regex && regex.source);
+		var stringValue = convert.toString(this, this.node);
+		var actualRegex;
+
+		if (regex && regex instanceof RegexType) {
+			actualRegex = regex.source;
+		} else if (regex) {
+			actualRegex = new RegExp(convert.toPrimitive(this, regex));
+		}
+
+		var results = stringValue.match(actualRegex);
 		if (results) {
 			var matches = objectFactory.create("Array");
 			var context = this;
+			
 			results.forEach(function (value, index) {
 				matches.putValue(index, objectFactory.createPrimitive(value), false, context);
 			});
@@ -101,12 +131,12 @@ module.exports = function (globalScope) {
 		return globalScope.getValue("null");
 	}), propertyConfig);
 
-	proto.defineOwnProperty("trim", objectFactory.createFunction(function () {
+	proto.defineOwnProperty("trim", objectFactory.createBuiltInFunction(function () {
 		contracts.assertIsNotNullOrUndefined(this.node, "String.prototype.trim");
 
-		var value = convert.toPrimitive(this, this.node, "string");
-		return objectFactory.createPrimitive(value.trim());
-	}), propertyConfig);
+		var stringValue = convert.toPrimitive(this, this.node, "string");
+		return objectFactory.createPrimitive(stringValue.trim());
+	}, 0, "String.prototype.trim"), propertyConfig);
 
 	globalScope.defineOwnProperty("String", stringClass, propertyConfig);
 };
