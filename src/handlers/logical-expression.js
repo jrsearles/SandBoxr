@@ -1,6 +1,7 @@
 module.exports = function LogicalExpression (context) {
 	var left = context.create(context.node.left).execute();
-	var passed = left.result.toBoolean();
+	var passed = left.result.getValue().toBoolean();
+
 	if (passed && context.node.operator === "||") {
 		return left;
 	}

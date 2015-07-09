@@ -1,23 +1,16 @@
-// var typeRegistry = require("../types/type-registry");
+var convert = require("../utils/convert");
+var PropertyReference = require("../env/property-reference");
 
 module.exports = function MemberExpression (context) {
-	var obj = context.create(context.node.object).execute().result;
-	var undef = context.scope.global.getValue("undefined");
+	var obj = context.create(context.node.object).execute().result.getValue();
 	var name, value;
 
 	if (context.node.computed) {
-		name = context.create(context.node.property).execute().result.value;
-		// value = obj.getProperty(name);
+		name = convert.toString(context, context.create(context.node.property).execute().result.getValue());
 	} else {
 		name = context.node.property.name;
-		// value = context.create(context.node.property, context.node, obj).execute().result;
 	}
 
-	// if (obj.hasProperty(name)) {
-	value = obj.getValue(name);
-	// } else {
-	// 	obj.setProperty(name, undef);
-	// }
-
-	return context.reference(value || undef, name, obj);
+	value = new PropertyReference(name, obj);
+	return context.result(value);
 };

@@ -97,14 +97,23 @@ var binaryOperators = {
 			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
 		}
 
+		if (a.isPrimitive) {
+			return false;
+		}
+
 		return b.hasInstance(a);
 	}
 };
 
 module.exports = function BinaryExpression (context) {
+	var undef = context.env.global.getProperty("undefined").getValue();
 	var left = context.create(context.node.left).execute().result;
-	var right = context.create(context.node.right).execute().result;
-	var newValue = binaryOperators[context.node.operator](left, right, context);
+	var leftValue = left.getValue() || undef;
 
-	return context.result(context.scope.global.factory.createPrimitive(newValue));
+	var right = context.create(context.node.right).execute().result;
+	var rightValue = right.getValue() || undef;
+
+	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context);
+
+	return context.result(context.env.objectFactory.createPrimitive(newValue));
 };

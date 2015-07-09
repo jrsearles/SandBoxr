@@ -11,13 +11,13 @@ module.exports = function ForInStatement (context) {
 		left = context.create(context.node.left).execute();
 	}
 
-	var obj = context.create(context.node.right).execute().result;
+	var obj = context.create(context.node.right).execute().result.getValue();
 	var result;
 
 	while (obj) {
 		for (var prop in obj.properties) {
 			if (obj.properties[prop].enumerable) {
-				context.scope.putValue(left.name, context.scope.global.factory.createPrimitive(prop), false, context);
+				context.env.putValue(left.name, context.env.objectFactory.createPrimitive(prop), false, context);
 				result = context.create(context.node.body).execute();
 
 				if (result && result.shouldBreak(context, true)) {

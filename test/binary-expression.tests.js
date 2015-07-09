@@ -41,10 +41,10 @@ describe("Expressions", function () {
 
 		operators.forEach(function (current) {
 			it("should apply " + current.op, function() {
-				var code = "" + left + " " + current.op + " " + right + ";";
+				var code = "(" + left + " " + current.op + " " + right + ") === (" + current.expected + ");";
 	 			var result = runner.runBlock(code);
 
-	 			expect(result.value).to.equal(current.expected);
+	 			expect(result.value).to.be.true;
 			});
 		});
 
@@ -54,22 +54,22 @@ describe("Expressions", function () {
 		});
 
 		it("should show that a property is not in the object if it is not", function () {
-			var result = runner.runBlock("var a = { foo: 1 };\n'bar' in a;");
-			expect(result.value).to.be.false;
+			var result = runner.runBlock("var a = { foo: 1 };\n!('bar' in a);");
+			expect(result.value).to.be.true;
 		});
 
 		describe("Quirks", function () {
 			it("should convert to string if either side is string", function () {
-				var result = runner.runBlock("'1' + 2");
-				expect(result.value).to.equal("12");
+				var result = runner.runBlock("'1' + 2 === '12';");
+				expect(result.value).to.be.true;
 
-				result = runner.runBlock("1 + '2'");
-				expect(result.value).to.equal("12");
+				result = runner.runBlock("1 + '2' === '12'");
+				expect(result.value).to.be.true;
 			});
 
 			it("should convert to number for subtraction operator", function () {
-				var result = runner.runBlock("'1' - 2");
-				expect(result.value).to.equal(-1);
+				var result = runner.runBlock("'1' - 2 === -1;");
+				expect(result.value).to.be.true;
 			});
 		});
 
@@ -80,8 +80,8 @@ describe("Expressions", function () {
 			});
 
 			it("should return false for not an object", function () {
-				var result = runner.runBlock("({} instanceof String);");
-				expect(result.value).to.be.false;
+				var result = runner.runBlock("!({} instanceof String);");
+				expect(result.value).to.be.true;
 			});
 
 			it("should respect inheritance", function () {

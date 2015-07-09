@@ -5,24 +5,24 @@ describe("Scope", function () {
 	describe("Global variables", function () {
 		it("undefined exists", function () {
 			var result = runner.runBlock("undefined");
-			expect(result.value).to.be.undefined;
+			expect(result.getValue().value).to.be.undefined;
 		});
 
 		it("Infinity exists", function () {
 			var result = runner.runBlock("Infinity");
-			expect(result.value).to.equal(Infinity);
+			expect(result.getValue().value).to.equal(Infinity);
 		});
 
 		it("NaN exists", function () {
 			var result = runner.runBlock("NaN");
 
 			// nan doesn't equal itself
-			expect(result.value).not.to.equal(result.value);
+			expect(result.getValue().value).not.to.equal(result.getValue().value);
 		});
 
 		it("window exists", function () {
 			var scope = runner.getScope("var x;");
-			expect(scope.getValue("window")).to.be.ok;
+			expect(scope.global.getProperty("window").getValue()).to.be.ok;
 		});
 
 		it("`this` should refer to global object", function () {
@@ -42,8 +42,8 @@ describe("Scope", function () {
 		});
 
 		it("should assign undeclared variable to global", function () {
-			var scope = runner.getScope("var obj = {};__ref = obj;");
-			expect(scope.global.getValue("__ref")).not.to.be.undefined;
+			var result = runner.runBlock("var obj = {};__ref = obj;__ref !== undefined;");
+			expect(result.value).to.be.true;
 		});
 
 		it("should create functions before they are called", function () {

@@ -8,7 +8,7 @@ var date_2099_end = 4102444799999;
 var date_2100_start = 4102444800000;
 
 function $ERROR (message) {
-	// console.error(message);
+	console.error(message);
 	throw new Error(message);
 }
 
@@ -17,7 +17,7 @@ function $FAIL (message) {
 }
 
 function $PRINT (message) {
-    // console.log(message);
+    console.log(message);
 }
 
 function $INCLUDE() {}

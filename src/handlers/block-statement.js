@@ -1,4 +1,9 @@
-var scopedBlock = { "CallExpression": true, "NewExpression": true, "FunctionExpression": true };
+var scopedBlocks = {
+	"CallExpression": true,
+	"NewExpression": true,
+	"FunctionExpression": true,
+	"WithStatement": true
+};
 
 function populateHoistedVariables (node, declarators) {
 	if (Array.isArray(node)) {
@@ -36,7 +41,7 @@ function populateHoistedVariables (node, declarators) {
 			return;
 		}
 
-		if (scopedBlock[node.type]) {
+		if (scopedBlocks[node.type]) {
 			return;
 		}
 	}
@@ -50,8 +55,8 @@ function populateHoistedVariables (node, declarators) {
 	}
 }
 
-function hoistVariables (nodes, scope) {
-	var undef = scope.global.getValue("undefined");
+function hoistVariables (nodes, env, strict) {
+	var undef = env.global.getProperty("undefined").getValue();
 	var variables = [];
 	var name;
 
@@ -62,42 +67,44 @@ function hoistVariables (nodes, scope) {
 
 		if (decl.type === "FunctionDeclaration") {
 			// functions can be used before they are defined
-			var func = scope.global.factory.createFunction(decl, scope);
-
+			var func = env.objectFactory.createFunction(decl, env.current);
+			env.createBinding(name);
+			env.setBinding(name, func, strict);
 			// note: since the function name may collide with a variable we need to test for existence
-			if (scope.hasOwnProperty(name)) {
-				scope.putValue(name, func);
-			} else {
-				scope.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
-			}
+
+			// if (env.hasBinding(name)) {
+			// 	env.putValue(name, func);
+			// } else {
+			// 	env.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
+			// }
 		} else {
-			scope.defineOwnProperty(name, null, { value: scope.getValue(name) || undef, configurable: false, enumerable: false, writable: true }, true);
+			if (env.hasBinding(name)) {
+				env.setBinding(name, undef, strict);
+			} else {
+				env.createBinding(name);
+			}
 		}
 	});
 }
 
-function setStrictMode (context, executionResult) {
-	var node = context.node.body[0];
-	if (node.type !== "ExpressionStatement" || node.expression.type !== "Literal" || node.expression.value !== "use strict") {
-		return false;
-	}
-
-	context.setStrict(true);
-	return true;
+function isStrictMode (node) {
+	return node.type === "ExpressionStatement"
+		&& node.expression.type === "Literal"
+		&& node.expression.value === "use strict";
 }
 
 module.exports = function BlockStatement (context) {
-	var i = 0;
-	var ln = context.node.body.length;
 	var result;
 
-	hoistVariables(context.node.body, context.scope);
+	// var strict = context.node.body.length > 0 && isStrictMode(context.node.body[0]);
+	// var i = strict ? 1 : 0;
+	// hoistVariables(context.node.body, context.env, strict);
 
-	for (; i < ln; i++) {
-		if (i === 0 && setStrictMode(context)) {
-			continue;
-		}
+	if (context.node.type === "Program") {
+		context.env.initScope(context.node.body);
+	}
 
+	for (var i = 0, ln = context.node.body.length; i < ln; i++) {
 		result = context.create(context.node.body[i]).execute();
 		if (result && result.shouldBreak(context)) {
 			break;
@@ -105,4 +112,6 @@ module.exports = function BlockStatement (context) {
 	}
 
 	return result;
+	// var resultValue = result && result.result && result.result.getValue();
+	// return context.result(resultValue);
 };

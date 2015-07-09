@@ -32,7 +32,7 @@ result;
 		var runner = new SandBoxr(ast, { parser: acorn.parse });
 		var value = runner.execute();
 
-		document.getElementById("result").innerHTML = JSON.stringify(value && value.result.value);
+		document.getElementById("result").innerHTML = JSON.stringify(value && value.result && value.result.getValue().value);
 	};
 
 	document.getElementById("interpretButton").onclick = function () {

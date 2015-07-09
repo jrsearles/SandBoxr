@@ -2,14 +2,14 @@ var handlers = require("./handlers");
 var globalScope = require("./scope/global-scope");
 var ExecutionContext = require("./execution-context");
 
-function SandBoxr (ast, options) {
+function SandBoxr (ast, config) {
 	this.ast = ast;
-	this.options = options || {};
-	this.scope = null;
+	this.config = config || {};
+	this.env = null;
 }
 
 SandBoxr.prototype.execute = function (context) {
-	context = context || new ExecutionContext(this, this.ast, null, this.scope || this.createScope());
+	context = context || new ExecutionContext(this.env || this.createScope(), this.ast);
 
 	if (!(context.node.type in handlers)) {
 		throw new TypeError("No handler defined for: " + context.node.type);
@@ -19,7 +19,7 @@ SandBoxr.prototype.execute = function (context) {
 };
 
 SandBoxr.prototype.createScope = function () {
-	return (this.scope = globalScope(this.options));
+	return (this.env = globalScope(this));
 };
 
 module.exports = SandBoxr;

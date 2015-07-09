@@ -1,3 +1,5 @@
+var Reference = require("../env/reference");
+
 var assignOperators = {
 	"+=": function (a, b) { return a.value + b.value; },
 	"-=": function (a, b) { return a.value - b.value; },
@@ -14,39 +16,32 @@ var assignOperators = {
 
 module.exports = function AssignmentExpression (context) {
 	var assignment = context.node.operator === "=";
-	var right = context.create(context.node.right).execute();
+	var right = context.create(context.node.right).execute().result;
 
-	// check for undeclared global
-	if (context.node.left.type === "Identifier" && !context.scope.hasProperty(context.node.left.name)) {
-		if (!assignment) {
-			throw new ReferenceError(context.node.left.name + " is not defined");
-		}
-
-		// not found - add as reference
-		context.scope.global.defineOwnProperty(context.node.left.name, context.scope.global.getValue("undefined"), { configurable: true, enumerable: true, writable: true });
-	}
-
-	var left = context.create(context.node.left).execute();
-	if (!left.reference) {
+	var left = context.create(context.node.left).execute().result;
+	if (!(left instanceof Reference)) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
 
 	var newValue;
 	if (assignment) {
-		newValue = right.result;
+		newValue = right.getValue();
 	} else {
-		newValue = context.scope.global.factory.createPrimitive(assignOperators[context.node.operator](left.result, right.result));
+		var rawValue = assignOperators[context.node.operator](left.getValue(), right.getValue());
+		newValue = context.env.objectFactory.createPrimitive(rawValue);
 	}
 
-	var obj = left.object || context.scope;
-	var name = left.name;
+	left.putValue(newValue);
+	// var obj = left.object || context.env;
+	// var name = left.name;
 
-	if (obj.hasProperty(name)) {
-		obj.putValue(name, newValue, context.strict, context);
-	} else {
-		var descriptor = { value: newValue, configurable: true, enumerable: true, writable: true };
-		obj.defineOwnProperty(name, null, descriptor, context.strict, context);
-	}
 
-	return context.result(newValue, name);
+	// if (obj.hasProperty(name)) {
+	// 	obj.putValue(name, newValue, context.strict, context);
+	// } else {
+	// 	var descriptor = { value: newValue, configurable: true, enumerable: true, writable: true };
+	// 	obj.defineOwnProperty(name, null, descriptor, context.strict, context);
+	// }
+
+	return context.result(newValue);
 };

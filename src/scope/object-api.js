@@ -22,7 +22,7 @@ function defineProperty (context, obj, name, descriptor) {
 		throw new TypeError("Property description must be an object: " + (descriptor ? descriptor.toString() : "undefined"));
 	}
 
-	var undef = context.scope.global.getValue("undefined");
+	var undef = context.env.global.getProperty("undefined").getValue();
 	var options = {};  // { writable: false, enumerable: false, configurable: false };
 
 	if (descriptor) {
@@ -36,14 +36,16 @@ function defineProperty (context, obj, name, descriptor) {
 
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
 			if (descriptor.hasProperty(prop)) {
-				var attrValue = descriptor.getValue(prop);
+				var attrValue = descriptor.getProperty(prop).getValue();
 				options[prop] = !!(attrValue && attrValue.toBoolean());
 			}
 		});
 
+		var currentScope = context.env.current;
+
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
-			var getter = descriptor.getValue("get") || undef;
+			var getter = descriptor.getProperty("get").getValue() || undef;
 			if (getter.isPrimitive && getter.value === undefined) {
 				options.get = options.getter = undefined;
 			} else {
@@ -53,14 +55,23 @@ function defineProperty (context, obj, name, descriptor) {
 
 				options.get = getter;
 				options.getter = function () {
-					var getResult = func.getFunctionResult(context, getter, getter.node.params, [], this, getter.node);
-					return getResult && getResult.exit ? getResult.result : undef;
+					var scope = context.env.setScope(currentScope);
+
+					try {
+						var getResult = func.getFunctionResult(context, getter, getter.node.params, [], this, getter.node);
+						return getResult && getResult.exit ? getResult.result.getValue() : undef;
+					} catch (err) {
+						scope.exitScope();
+						throw err;
+					}
+
+					scope.exitScope();
 				};
 			}
 		}
 
 		if (hasSetter) {
-			var setter = descriptor.getValue("set") || undef;
+			var setter = descriptor.getProperty("set").getValue() || undef;
 			if (setter.isPrimitive && setter.value === undefined) {
 				options.set = options.setter = undefined;
 			} else {
@@ -70,22 +81,33 @@ function defineProperty (context, obj, name, descriptor) {
 
 				options.set = setter;
 				options.setter = function () {
-					return func.executeFunction(context, setter, setter.node.params, arguments, this, setter.node);
+					var scope = context.env.setScope(currentScope);
+
+					try {
+						func.executeFunction(context, setter, setter.node.params, arguments, this, setter.node);
+						return undef;
+					} catch (err) {
+						scope.exitScope();
+						throw err;
+					}
+
+					scope.exitScope();
 				};
 			}
 		}
 
 		if (hasValue) {
-			options.value = descriptor.getValue("value") || undef;
+			options.value = descriptor.getProperty("value").getValue() || undef;
 		}
 	}
 
 	obj.defineOwnProperty(name, null, options, true, context);
 }
 
-module.exports = function (globalScope) {
-	var objectFactory = globalScope.factory;
-	var undef = globalScope.getValue("undefined");
+module.exports = function (env) {
+	var globalObject = env.global;
+	var objectFactory = env.objectFactory;
+	var undef = globalObject.getProperty("undefined").getValue();
 
 	var proto = new ObjectType();
 	var objectClass = objectFactory.createFunction(function (value) {
@@ -107,7 +129,7 @@ module.exports = function (globalScope) {
 		}
 
 		return objectFactory.createObject();
-	}, globalScope, proto, null, { configurable: false, enumerable: false, writable: false });
+	}, null, proto, null, { configurable: false, enumerable: false, writable: false });
 
 	// var proto = objectClass.proto;
 	proto.defineOwnProperty("hasOwnProperty", objectFactory.createBuiltInFunction(function (name) {
@@ -124,7 +146,7 @@ module.exports = function (globalScope) {
 	}, 0, "Object.prototype.valueOf"), propertyConfig);
 
 	var toStringFunc = objectFactory.createBuiltInFunction(function () {
-		var obj = this.scope.thisNode;
+		var obj = this.env.current.thisNode;
 		return objectFactory.createPrimitive("[object " + obj.className + "]");
 	}, 0, "Object.prototype.toString");
 
@@ -134,12 +156,18 @@ module.exports = function (globalScope) {
 
 	proto.defineOwnProperty("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		var current = obj;
+		var thisNode = this.env.current.thisNode;
+
 		while (current) {
-			if (this.scope.thisNode === current || this.scope.thisNode === (current.parent && current.parent.proto)) {
+			if (thisNode === current || thisNode === (current.parent && current.parent.proto)) {
 				return objectFactory.createPrimitive(true);
 			}
 
-			current = current.getValue("prototype");
+			if (!current.hasOwnProperty("prototype")) {
+				break;
+			}
+
+			current = current.getProperty("prototype").getValue();
 
 			// if (current.parent && current.parent.proto === this.scope.thisNode) {
 			// 	return objectFactory.createPrimitive(true);
@@ -175,7 +203,7 @@ module.exports = function (globalScope) {
 		if (descriptors) {
 			for (var prop in descriptors.properties) {
 				if (descriptors.properties[prop].enumerable) {
-					defineProperty(this, obj, prop, descriptors.getValue(prop));
+					defineProperty(this, obj, prop, descriptors.getProperty(prop).getValue());
 				}
 			}
 		}
@@ -195,7 +223,7 @@ module.exports = function (globalScope) {
 
 		for (var prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
-				defineProperty(this, obj, prop, descriptors.getValue(prop));
+				defineProperty(this, obj, prop, descriptors.getProperty(prop).getValue());
 			}
 		}
 
@@ -255,7 +283,7 @@ module.exports = function (globalScope) {
 
 	objectClass.defineOwnProperty("getPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
-		return obj.parent && obj.parent.proto || obj.proto || globalScope.getValue("null");
+		return obj.parent && obj.parent.proto || obj.proto || globalObject.getProperty("null").getValue();
 	}, 1, "Object.getPrototypeOf"), propertyConfig);
 
 	objectClass.defineOwnProperty("freeze", objectFactory.createBuiltInFunction(function (obj) {
@@ -318,6 +346,6 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(!obj.extensible);
 	}, 1, "Object.isSealed"), propertyConfig);
 
-	globalScope.getValue("Function").parent = objectClass;
-	globalScope.defineOwnProperty("Object", objectClass, propertyConfig);
+	globalObject.getProperty("Function").getValue().parent = objectClass;
+	globalObject.defineOwnProperty("Object", objectClass, propertyConfig);
 };

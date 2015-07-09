@@ -4,8 +4,10 @@ var func = require("../utils/func");
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
-module.exports = function (globalScope, options) {
-	var objectFactory = globalScope.factory;
+module.exports = function (env, options) {
+	var globalObject = env.global;
+	var undef = globalObject.getProperty("undefined").getValue();
+	var objectFactory = env.objectFactory;
 	// var proto = new ObjectType();
 	var functionClass = objectFactory.createFunction(function () {
 		var context = this;
@@ -26,7 +28,7 @@ module.exports = function (globalScope, options) {
 				body: body
 			};
 
-			funcInstance = objectFactory.createFunction(fnNode, globalScope);
+			funcInstance = objectFactory.createFunction(fnNode, env.globalScope);
 		} else {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
@@ -45,6 +47,7 @@ module.exports = function (globalScope, options) {
 		// return objectFactory.createObject();
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 	functionClass.putValue("constructor", functionClass);
+	globalObject.defineOwnProperty("Function", functionClass, propertyConfig);
 
 	var proto = functionClass.proto;
 	proto.type = "function";
@@ -83,14 +86,27 @@ module.exports = function (globalScope, options) {
 	proto.defineOwnProperty("bind", objectFactory.createFunction(function (thisArg) {
 		thisArg = convert.toObject(thisArg, objectFactory);
 		var args = slice.call(arguments, 1);
-		var callee = this.node;
+		var fn = this.node;
+		var params = fn.native ? [] : fn.node.params;
+		var callee = fn.native ? fn : fn.node;
 
 		return objectFactory.createFunction(function () {
-			var scope = this.scope.createScope(thisArg);
-			func.loadArguments(callee.node.params, args.concat(slice.call(arguments)), scope);
-			return this.create(callee.node.body, callee, scope).execute().result;
-		});
-	}), propertyConfig);
+			var mergedArgs = args.concat(slice.call(arguments));
+			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee);
+			
+			// var scope = this.env.createScope(thisArg);
+			// scope.init(callee.node.body);
 
-	globalScope.defineOwnProperty("Function", functionClass, propertyConfig);
+			// func.loadArguments(callee.node.params, args.concat(slice.call(arguments)), env, callee);
+
+			// try {
+			// 	var result = this.create(callee.node.body, callee).execute().result;
+			// 	return result ? result.getValue() : undef;
+			// } catch (err) {
+			// 	scope.exitScope();
+			// }
+
+			// scope.exitScope();
+		}, this.env.current);
+	}), propertyConfig);
 };

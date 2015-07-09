@@ -51,14 +51,15 @@ module.exports = {
 		"yield"],
 
 	isReserved: function (name, scope) {
-		if (this[scope.version].indexOf(name) >= 0) {
-			return true;
-		}
+		return this.es5.indexOf(name) >= 0;
+		// if (this[scope.version].indexOf(name) >= 0) {
+		// 	return true;
+		// }
 
-		if (scope.strict && this[scope.version + "-strict"].indexOf >= 0) {
-			return true;
-		}
+		// if (scope.strict && this[scope.version + "-strict"].indexOf >= 0) {
+		// 	return true;
+		// }
 
-		return false;
+		// return false;
 	}
 };

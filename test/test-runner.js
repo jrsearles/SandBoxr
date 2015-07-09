@@ -9,7 +9,7 @@ module.exports = {
 	getScope: function (code) {
 		var runner = this.getRunner(code);
 		runner.execute();
-		return runner.scope;
+		return runner.env;
 	},
 
 	getRunner: function (code) {

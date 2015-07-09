@@ -12,13 +12,13 @@ function PrimitiveType (value) {
 PrimitiveType.prototype = Object.create(ObjectType.prototype);
 PrimitiveType.prototype.constructor = PrimitiveType;
 
-PrimitiveType.prototype.getValue = function (name) {
+PrimitiveType.prototype.getProperty = function (name) {
 	// can't read properties off null/undefined
 	if (this.value == null) {
 		throw new TypeError("Cannot read property '" + name + "' of " + this.type);
 	}
 
-	return ObjectType.prototype.getValue.apply(this, arguments);
+	return ObjectType.prototype.getProperty.apply(this, arguments);
 };
 
 // overwrite object methods

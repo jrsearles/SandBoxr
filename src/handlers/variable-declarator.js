@@ -8,7 +8,7 @@ module.exports = function VariableDeclarator (context) {
 
 	// variables have already been hoisted so we just need to initialize them if defined
 	if (value) {
-		context.scope.putValue(id, value, false, context);
+		context.env.putValue(id, value.getValue(), false, context);
 	}
 
 	return context.result(value, id);

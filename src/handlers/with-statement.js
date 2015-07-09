@@ -1,10 +1,17 @@
 module.exports = function WithStatement (context) {
-	var obj = context.create(context.node.object).execute().result;
+	var obj = context.create(context.node.object).execute().result.getValue();
+	var scope = context.env.createObjectScope(obj);
+	var result;
 
-	// context.scope.startWith(obj);
-	// var result = context.create(context.node.body).execute();
-	// context.scope.endWith();
+	scope.init(context.node.body);
 
-	var result = context.create(context.node.body, null, context.scope.withObject(obj)).execute();
+	try {
+		result = context.create(context.node.body).execute();
+	} catch (err) {
+		scope.exitScope();
+		throw err;
+	}
+
+	scope.exitScope();
 	return result;
 };

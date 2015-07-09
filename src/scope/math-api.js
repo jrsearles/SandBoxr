@@ -4,8 +4,9 @@ var constants = ["E", "LN10", "LN2", "LOG10E", "LOG2E", "PI", "SQRT1_2", "SQRT2"
 var methods = ["abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "random", "round", "sin", "sqrt", "tan"];
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
-module.exports = function (globalScope) {
-	var objectFactory = globalScope.factory;
+module.exports = function (env) {
+	var globalObject = env.global;
+	var objectFactory = env.objectFactory;
 	var mathClass = objectFactory.createObject();
 	mathClass.className = "Math";
 
@@ -17,5 +18,5 @@ module.exports = function (globalScope) {
 		mathClass.defineOwnProperty(name, convert.toNativeFunction(objectFactory, Math[name], "Math." + name), propertyConfig);
 	});
 
-	globalScope.defineOwnProperty("Math", mathClass, propertyConfig);
+	globalObject.defineOwnProperty("Math", mathClass, propertyConfig);
 };

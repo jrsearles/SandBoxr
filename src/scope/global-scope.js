@@ -1,4 +1,5 @@
-var Scope = require("./scope");
+var Environment = require("../env/environment");
+// var Scope = require("./scope");
 var PrimitiveType = require("../types/primitive-type");
 var ObjectFactory = require("../types/object-factory");
 var numberAPI = require("./number-api");
@@ -14,61 +15,62 @@ var errorAPI = require("./error-api");
 var jsonAPI = require("./json-api");
 var consoleAPI = require("./console-api");
 var convert = require("../utils/convert");
+var Reference = require("../env/reference");
 
 var globalFunctions = ["isNaN", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
-module.exports = function (options) {
-	var globalScope = new Scope();
-	var objectFactory = new ObjectFactory(globalScope);
+module.exports = function GlobalScope (runner) {
+	var config = runner.config;
+	var env = new Environment(runner);
+	var objectFactory = env.objectFactory = new ObjectFactory(env);
+	var globalObject = env.global = objectFactory.createObject();
+
+	env.createObjectScope(globalObject);
 
 	var undefinedClass = new PrimitiveType(undefined);
-	globalScope.defineOwnProperty("undefined", undefinedClass, { configurable: false, enumerable: false, writable: false });
+	globalObject.defineOwnProperty("undefined", undefinedClass);
 
 	var nullClass = new PrimitiveType(null);
-	globalScope.defineOwnProperty("null", nullClass, { configurable: false, writable: false });
+	globalObject.defineOwnProperty("null", nullClass);
 
-	globalScope.defineOwnProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
-	globalScope.defineOwnProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
+	globalObject.defineOwnProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
+	globalObject.defineOwnProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
 
 	// todo: node vs browser - do we care?
-	globalScope.defineOwnProperty("window", globalScope, { configurable: false, enumerable: true, writable: false });
+	globalObject.defineOwnProperty("window", globalObject, { configurable: false, enumerable: true, writable: false });
 
-	functionAPI(globalScope, options);
-	objectAPI(globalScope, options);
-	arrayAPI(globalScope, options);
-	booleanAPI(globalScope, options);
-	numberAPI(globalScope, options);
-	stringAPI(globalScope, options);
-	dateAPI(globalScope, options);
-	regexAPI(globalScope, options);
-	mathAPI(globalScope, options);
-	errorAPI(globalScope, options);
-	jsonAPI(globalScope, options);
-	consoleAPI(globalScope, options);
+	functionAPI(env, config);
+	objectAPI(env, config);
+	arrayAPI(env, config);
+	booleanAPI(env, config);
+	numberAPI(env, config);
+	stringAPI(env, config);
+	dateAPI(env, config);
+	regexAPI(env, config);
+	mathAPI(env, config);
+	errorAPI(env, config);
+	jsonAPI(env, config);
+	consoleAPI(env, config);
 
 	globalFunctions.forEach(function (name) {
-		globalScope.defineOwnProperty(name, convert.toNativeFunction(objectFactory, global[name], name), propertyConfig);
+		globalObject.defineOwnProperty(name, convert.toNativeFunction(objectFactory, global[name], name), propertyConfig);
 	});
 
-	globalScope.defineOwnProperty("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
+	globalObject.defineOwnProperty("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
 		var stringValue = convert.toPrimitive(this, value, "string");
 		radix = convert.toPrimitive(this, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"), propertyConfig);
 
-	globalScope.defineOwnProperty("parseFloat", objectFactory.createBuiltInFunction(function (value) {
+	globalObject.defineOwnProperty("parseFloat", objectFactory.createBuiltInFunction(function (value) {
 		var stringValue = convert.toPrimitive(this, value, "string");
 		return objectFactory.createPrimitive(parseFloat(stringValue));
 	}, 2, "parseFloat"), propertyConfig);
 
-	if (options.parser) {
+	if (config.parser) {
 		var evalFunc = objectFactory.createBuiltInFunction(function (code) {
-			if (this.isNew) {
-				throw new TypeError("function eval() is not a constructor");
-			}
-
 			if (!code) {
 				return undefinedClass;
 			}
@@ -77,10 +79,11 @@ module.exports = function (options) {
 				return code;
 			}
 
-			var indirect = this.callee.name !== "eval";
+			var indirect = !(this.callee instanceof Reference) || this.callee.base !== globalObject;
+			var ast;
 
 			try {
-				var ast = options.parser(code.toString());
+				ast = config.parser(code.value);
 			} catch (err) {
 				if (err instanceof SyntaxError && /assigning to rvalue/i.test(err.message)) {
 					// hack because acorn throws syntax error
@@ -90,20 +93,28 @@ module.exports = function (options) {
 				throw err;
 			}
 
-			var executionResult = this.create(ast, null, indirect ? globalScope : this.scope.parent).execute();
-			if (executionResult && executionResult.result) {
-				return executionResult.result;
+			// use the same scope unless this is an "indirect" call
+			// in which case we use the global scope
+			var scope = this.env.setScope(indirect ? this.env.globalScope : this.env.current.parent);
+			var executionResult;
+
+			try {
+				executionResult = this.create(ast).execute();
+			} catch (err) {
+				scope.exitScope();
+				throw err;
 			}
 
-			return undefinedClass;
+			scope.exitScope();
+			return executionResult && executionResult.result ? executionResult.result.getValue() : undefinedClass;
 		}, 1, "eval");
 
-		// evalFunc.parent = globalScope.getValue("Object");
+		// evalFunc.parent = globalObject.getValue("Object");
 		// evalFunc.setProto(null);
-		globalScope.defineOwnProperty("eval", evalFunc, propertyConfig);
+		globalObject.defineOwnProperty("eval", evalFunc, propertyConfig);
 	}
 
-	globalScope.setProto(globalScope.getValue("Object").proto);
-	objectFactory.endScope();
-	return globalScope;
+	// globalObject.setProto(globalObject.getValue("Object").proto);
+	objectFactory.init();
+	return env;
 };

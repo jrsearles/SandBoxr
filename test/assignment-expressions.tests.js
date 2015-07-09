@@ -28,33 +28,29 @@ describe("Expressions", function () {
 			{ op:	"&=", name: "Bitwise OR assignment", expected: left & right }
 		].forEach(function (current) {
 			it("should apply " + current.op, function () {
-				var code = "var a = " + left + "; a " + current.op + " " + right + ";";
-				var scope = runner.getScope(code);
-
-				expect(scope.getValue("a").value).to.equal(current.expected);
+				var code = "var a = " + left + "; a " + current.op + " " + right + ";a == " + current.expected + ";";
+				var result = runner.runBlock(code);
+				expect(result.value).to.be.true;
 			});
 		});
 	});
 
 	it("should increment value", function () {
-		var code = "var a = 0; a++;";
-		var scope = runner.getScope(code);
-
-		expect(scope.getValue("a").value).to.equal(1);
+		var code = "var a = 0; a++;a==1;";
+		var result = runner.runBlock(code);
+		expect(result.value).to.be.true;
 	});
 
 	it("should decrement value", function () {
-		var code = "var a = 0; a--";
-		var scope = runner.getScope(code);
-
-		expect(scope.getValue("a").value).to.equal(-1);
+		var code = "var a = 0; a--;a==-1;";
+		var result = runner.runBlock(code);
+		expect(result.value).to.be.true;
 	});
 
 
 	it("should decrement value after returning", function () {
-		var code = "var a = 0; var b = a--";
-		var scope = runner.getScope(code);
-
-		expect(scope.getValue("b").value).to.equal(0);
+		var code = "var a = 0; var b = a--;b==0;";
+		var result = runner.runBlock(code);
+		expect(result.value).to.be.true;
 	});
 });

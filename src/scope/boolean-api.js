@@ -2,8 +2,9 @@ var convert = require("../utils/convert");
 
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
-module.exports = function (globalScope) {
-	var objectFactory = globalScope.factory;
+module.exports = function (env) {
+	var globalObject = env.global;
+	var objectFactory = env.objectFactory;
 	var booleanClass = objectFactory.createFunction(function (obj) {
 		var booleanValue = obj && obj.isPrimitive ? obj.toBoolean() : !!obj;
 
@@ -32,5 +33,5 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value || false);
 	}), propertyConfig);
 
-	globalScope.defineOwnProperty("Boolean", booleanClass, propertyConfig);
+	globalObject.defineOwnProperty("Boolean", booleanClass, propertyConfig);
 };

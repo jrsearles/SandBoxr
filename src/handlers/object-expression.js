@@ -1,6 +1,8 @@
 var func = require("../utils/func");
 
 function setDescriptor (context, obj, name, descriptor) {
+	// var currentScope = context.env.current;
+
 	if (descriptor.get) {
 		descriptor.getter = function () {
 			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
@@ -9,7 +11,7 @@ function setDescriptor (context, obj, name, descriptor) {
 
 	if (descriptor.set) {
 		descriptor.setter = function () {
-			return func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
+			func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
 		};
 	}
 
@@ -21,11 +23,11 @@ function createDescriptor () {
 }
 
 module.exports = function ObjectExpression (context) {
-	var obj = context.scope.global.factory.createObject();
+	var obj = context.env.objectFactory.createObject();
 	var descriptors = Object.create(null);
 
 	context.node.properties.forEach(function (property) {
-		var value = context.create(property.value).execute().result;
+		var value = context.create(property.value).execute().result.getValue();
 		var name = property.key.name || property.key.value;
 
 		switch (property.kind) {

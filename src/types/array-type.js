@@ -17,7 +17,7 @@ var localObjectFactory;
 function setIndex (context, arr, name, descriptor, throwOnError) {
 	var index = Number(name);
 	var lengthProperty = arr.getProperty("length");
-	var lengthValue = lengthProperty.getValue(arr).value;
+	var lengthValue = lengthProperty.getValue().value;
 
 	if ((!lengthProperty.canSetValue() && index >= lengthValue)
 		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, null, descriptor, false, context)) {
@@ -71,7 +71,7 @@ function setLength (context, arr, name, descriptor, throwOnError) {
 
 	descriptor.value = localObjectFactory.createPrimitive(newLengthValue);
 	var newLength = descriptor.value;
-	var currentLength = arr.getValue("length");
+	var currentLength = arr.getProperty("length").getValue();
 	contracts.assertIsValidArrayLength(newLength.value);
 
 	if (newLength.value >= currentLength.value) {

@@ -1,13 +1,14 @@
 var contracts = require("../utils/contracts");
 
 var defaultDescriptor = {
-	configurable: true,
-	enumerable: true,
-	writable: true
+	configurable: false,
+	enumerable: false,
+	writable: false
 };
 
-function PropertyDescriptor (config, value) {
+function PropertyDescriptor (base, config, value) {
 	config = config || defaultDescriptor;
+	this.base = base;
 	this.configurable = config.configurable || false;
 	this.enumerable = config.enumerable || false;
 
@@ -86,28 +87,28 @@ PropertyDescriptor.prototype.canUpdate = function (descriptor) {
 	return true;
 };
 
-PropertyDescriptor.prototype.getValue = function (obj) {
-	if (this.getter || this.setter) {
-		return this.getter ? this.getter.call(obj) : undefined;
+PropertyDescriptor.prototype.getValue = function () {
+	if (this.dataProperty) {
+		return this.value;
 	}
 
-	return this.value;
+	if (this.getter) {
+		return this.getter.call(this.base);
+	}
+
+	return undefined;
 };
 
-PropertyDescriptor.prototype.setValue = function (obj, value) {
+PropertyDescriptor.prototype.setValue = function (value) {
 	if (!this.canSetValue()) {
 		return;
 	}
 
-	if (this.getter || this.setter) {
-		if (this.setter) {
-			this.setter.call(obj, value);
-		}
-
-		return;
+	if (this.dataProperty) {
+		this.value = value;
+	} else if (this.setter) {
+		this.setter.call(this.base, value);
 	}
-
-	this.value = value;
 };
 
 PropertyDescriptor.prototype.canSetValue = function () {

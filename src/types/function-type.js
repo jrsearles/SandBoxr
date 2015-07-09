@@ -19,7 +19,7 @@ FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) 
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor({ configurable: true, enumerable: false, writable: true, value: ctor || this });
+	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: ctor || this });
 	this.setProto(proto, { configurable: true, enumerable: false, writable: true });
 };
 
@@ -32,15 +32,32 @@ FunctionType.prototype.getOwnPropertyNames = function () {
 	return props;
 };
 
-FunctionType.prototype.createScope = function (currentScope, thisArg) {
+FunctionType.prototype.createScope = function (env, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
-	return (this.parentScope || currentScope).createScope(thisArg);
+	// return (this.parentScope || currentScope).createScope(thisArg);
+
+	var priorScope = env.current;
+	if (this.parentScope) {
+		env.current = this.parentScope;
+	}
+
+	var scope = env.createScope.apply(env, Array.prototype.slice.call(arguments, 1));
+	if (!this.native) {
+		scope.init(this.node.body);
+	}
+
+	return {
+		exitScope: function () {
+			scope.exitScope();
+			env.current = priorScope;
+		}
+	};
 };
 
 FunctionType.prototype.hasInstance = function (obj) {
-	if (obj.isPrimitive || obj === this) {
-		return false;
-	}
+	// if (obj.isPrimitive || obj === this) {
+	// 	return false;
+	// }
 
 	var visited = [];
 	var current = obj;

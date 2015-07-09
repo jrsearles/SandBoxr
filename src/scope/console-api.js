@@ -2,16 +2,17 @@ var convert = require("../utils/convert");
 
 var methods = ["log", "info", "error"];
 
-module.exports = function (globalScope) {
-	var objectFactory = globalScope.factory;
+module.exports = function (env) {
+	var globalObject = env.global;
+	var objectFactory = env.objectFactory;
 	var consoleClass = objectFactory.createObject();
 
 	methods.forEach(function (name) {
-		consoleClass.defineOwnProperty(name, convert.toNativeFunction(objectFactory, function (message) {
+		consoleClass.defineOwnProperty(name, objectFactory.createBuiltInFunction(function (message) {
 			var stringValue = convert.toString(this, message);
 			console[name](stringValue);
-		}, "console." + name));
+		}, 1, "console." + name));
 	});
 
-	globalScope.defineOwnProperty("console", consoleClass);
+	globalObject.defineOwnProperty("console", consoleClass);
 };

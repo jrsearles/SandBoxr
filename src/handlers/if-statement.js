@@ -1,5 +1,5 @@
 module.exports = function IfStatement (context) {
-	var testValue = context.create(context.node.test).execute().result;
+	var testValue = context.create(context.node.test).execute().result.getValue();
 	if (testValue.toBoolean()) {
 		return context.create(context.node.consequent).execute();
 	}

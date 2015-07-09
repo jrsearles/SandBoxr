@@ -1,60 +1,49 @@
+var Reference = require("../env/reference");
 var convert = require("../utils/convert");
 
-var safeOperators = {
-	"typeof": true,
-	"delete": true
-};
-
-function getArgument (context) {
-	if (safeOperators[context.node.operator]) {
-		// when checking typeof the argument might not exist
-		// todo: this is ugly - need to come up with better strategy
-		try {
-			return context.create(context.node.argument).execute();
-		} catch (ex) {
-			if (ex instanceof ReferenceError) {
-				return undefined;
-			}
-
-			throw ex;
-		}
-	}
-
-	return context.create(context.node.argument).execute();
-}
-
 module.exports = function UnaryExpression (context) {
-	var result = getArgument(context);
-	var objectFactory = context.scope.global.factory;
-	var value = result && result.result;
-	var newValue;
+	var result = context.create(context.node.argument).execute().result;
+	var objectFactory = context.env.objectFactory;
+	var value, newValue;
 
 	switch (context.node.operator) {
 		case "typeof":
-			newValue = result ? objectFactory.createPrimitive(value.type) : objectFactory.createPrimitive("undefined");
+			var type;
+			if (result instanceof Reference && result.isUnresolved()) {
+				type = "undefined";
+			} else {
+				value = result.getValue();
+				type = value ? value.type : "undefined";
+			}
+
+			newValue = objectFactory.createPrimitive(type);
 			break;
 
 		case "-":
+			value = result.getValue();
 			newValue = objectFactory.createPrimitive(-(convert.toNumber(context, value)));
 			break;
 
 		case "+":
+			value = result.getValue();
 			newValue = objectFactory.createPrimitive(+(convert.toNumber(context, value)));
 			break;
 
 		case "!":
+			value = result.getValue();
 			newValue = objectFactory.createPrimitive(!(value.isPrimitive ? value.toBoolean() : true));
 			break;
 
 		case "~":
+			value = result.getValue();
 			newValue = objectFactory.createPrimitive(~(convert.toInt32(context, value)));
 			break;
 
 		case "delete":
 			var deleted = true;
-			if (result) {
-				if (result.reference && result.name !== null) {
-					deleted = (result.object || context.scope).deleteProperty(result.name);
+			if (result && result instanceof Reference) {
+				if (!result.isUnresolved()) {
+					deleted = result.deleteBinding(result.name);
 				}
 			} else if (context.node.argument.object) {
 				throw new ReferenceError(context.node.argument.object.name + " is not defined");
@@ -68,7 +57,7 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		default:
-			throw new TypeError("Unknown unary operator: " + context.node.operator);
+			throw new SyntaxError("Unknown unary operator: " + context.node.operator);
 	}
 
 	return context.result(newValue);

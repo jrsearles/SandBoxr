@@ -3,7 +3,7 @@ function shouldContinue (context) {
 		return true;
 	}
 
-	return context.create(context.node.test).execute().result.toBoolean();
+	return context.create(context.node.test).execute().result.getValue().toBoolean();
 }
 
 module.exports = function ForStatement (context) {

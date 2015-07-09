@@ -1,34 +1,29 @@
 var ExecutionResult = require("./execution-result");
 
-function ExecutionContext (runner, node, callee, scope, isNew) {
-	this.runner = runner;
+function ExecutionContext (env, node, callee) {
 	this.node = node;
 	this.callee = callee;
-	this.scope = scope;
+	this.env = env;
+
 	this.label = "";
-	this.isNew = !!isNew;
+	this.isNew = false;
 	this.strict = false;
 }
 
 ExecutionContext.prototype.execute = function () {
-	return this.runner.execute(this);
+	return this.env.runner.execute(this);
 };
 
-ExecutionContext.prototype.create = function (node, callee, scope, isNew) {
-	var context = new ExecutionContext(this.runner, node, callee, scope || this.scope, isNew);
-	context.strict = this.strict;
+ExecutionContext.prototype.create = function (node, callee, isNew) {
+	var context = new ExecutionContext(this.env, node, callee);
+	context.isNew = !!isNew;
 	return context;
 };
 
 ExecutionContext.prototype.createLabel = function (node, label) {
-	var context = new ExecutionContext(this.runner, node, null, this.scope);
+	var context = new ExecutionContext(this.env, node);
 	context.label = label;
-	context.strict = this.strict;
 	return context;
-};
-
-ExecutionContext.prototype.setStrict = function () {
-	this.strict = true;
 };
 
 ExecutionContext.prototype.cancel = function (label) {
@@ -51,12 +46,6 @@ ExecutionContext.prototype.exit = function (value) {
 
 ExecutionContext.prototype.result = function (value, name, obj) {
 	return new ExecutionResult(value, name, obj);
-};
-
-ExecutionContext.prototype.reference = function (value, name, obj) {
-	var ref = new ExecutionResult(value, name, obj);
-	ref.reference = true;
-	return ref;
 };
 
 ExecutionContext.prototype.empty = function () {

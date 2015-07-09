@@ -1,13 +1,10 @@
 var PropertyDescriptor = require("./property-descriptor");
-var ValueReference = require("./value-reference");
 
 function ObjectType () {
 	this.isPrimitive = false;
 	this.type = "object";
 	this.className = "Object";
-
 	this.properties = Object.create(null);
-
 	this.extensible = true;
 }
 
@@ -22,7 +19,7 @@ ObjectType.prototype = {
 		}
 
 		this.proto = proto;
-		this.properties.prototype = new PropertyDescriptor(descriptor || { configurable: true, enumerable: false, writable: true }, proto);
+		this.properties.prototype = new PropertyDescriptor(this, descriptor || { configurable: true, enumerable: false, writable: true }, proto);
 	},
 
 	getProperty: function (name) {
@@ -53,7 +50,7 @@ ObjectType.prototype = {
 		var props = [];
 		for (var prop in this.properties) {
 			// ignore prototype
-			if (prop === "prototype" && this.properties[prop].getValue(this) === this.proto) {
+			if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
 				continue;
 			}
 
@@ -93,9 +90,9 @@ ObjectType.prototype = {
 			}
 
 			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
-				this.properties[name] = new PropertyDescriptor(descriptor, value);
+				this.properties[name] = new PropertyDescriptor(this, descriptor, value);
 			} else {
-				descriptor.setValue(this, value);
+				descriptor.setValue(value);
 			}
 		} else {
 			this.defineOwnProperty(name, value, { configurable: true, enumerable: true, writable: true }, throwOnError);
@@ -139,15 +136,16 @@ ObjectType.prototype = {
 		if (value && value.reference) {
 			this.properties[name] = value;
 		} else {
-			this.properties[name] = new PropertyDescriptor(descriptor, value);
+			this.properties[name] = new PropertyDescriptor(this, descriptor, value);
 		}
 
 		return true;
 	},
 
-	getValue: function (name) {
-		var descriptor = this.getProperty(name);
-		return descriptor && descriptor.getValue(this);
+	getValue: function () {
+		return this;
+		// var descriptor = this.getProperty(name);
+		// return descriptor && descriptor.getValue(this);
 	},
 
 	deleteProperty: function (name) {
@@ -160,16 +158,6 @@ ObjectType.prototype = {
 		}
 
 		return delete this.properties[name];
-	},
-
-	createReference: function (name) {
-		name = String(name);
-		var descriptor = this.getProperty(name);
-		if (descriptor) {
-			return new ValueReference(name, this, descriptor);
-		}
-
-		return undefined;
 	},
 
 	freeze: function () {

@@ -74,56 +74,56 @@ describe("String", function () {
 			var result = runner.runBlock(code);
 
 			if (Array.isArray(expected)) {
-				expect(result.getValue("length").value).to.equal(expected.length);
+				expect(result.getProperty("length").getValue().value).to.equal(expected.length);
 				expected.forEach(function (value, index) {
-					expect(result.getValue(index).value).to.equal(value);
+					expect(result.getProperty(index).getValue().value).to.equal(value);
 				});
 			} else {
-				expect(result.value).to.equal(expected);
+				expect(result.getValue().value).to.equal(expected);
 			}
 		});
 	});
 
 	describe("String.fromCharCode", function () {
 		it("should return expected value.", function () {
-			var result = runner.runBlock("String.fromCharCode(65, 66, 67);");
-			expect(result.value).to.equal("ABC");
+			var result = runner.runBlock("String.fromCharCode(65, 66, 67)=='ABC';");
+			expect(result.value).to.be.true;
 		});
 	});
 
 	describe("String.prototype.length", function () {
 		it("should return the length of the string.", function () {
-			var result = runner.runBlock("'foo'.length;");
-			expect(result.value).to.equal(3);
+			var result = runner.runBlock("'foo'.length==3;");
+			expect(result.value).to.be.true;
 		});
 
 		it("should ignore when length is set", function () {
-			var result = runner.runBlock("var a = 'foo';a.length = 2;a.length;");
-			expect(result.value).to.equal(3);
+			var result = runner.runBlock("var a = 'foo';a.length = 2;a.length==3;");
+			expect(result.value).to.be.true;
 		});
 	});
 
 	describe("When using bracket notation", function () {
 		it("should return character at that position", function () {
-			var result = runner.runBlock("'foo'[1];");
-			expect(result.value).to.equal("o");
+			var result = runner.runBlock("'foo'[1] == 'o';");
+			expect(result.value).to.be.true;
 		});
 
 		it("should return undefined if position is not in array", function () {
-			var result = runner.runBlock("'foo'[99];");
-			expect(result.value).to.be.undefined;
+			var result = runner.runBlock("'foo'[99] === undefined;");
+			expect(result.value).to.be.true;
 		});
 
 		it("should not allow character to be replaced by position", function () {
-			var result = runner.runBlock("var a = 'foo'; a[1] = 'f';a;");
-			expect(result.value).to.equal("foo");
+			var result = runner.runBlock("var a = 'foo'; a[1] = 'f';a === 'foo';");
+			expect(result.value).to.be.true;
 		});
 	});
 
 	describe("When creating a string", function () {
 		it("should use overridden `toString` if set.", function () {
-			var result = runner.runBlock("var a = {toString:function() { return 'foo'; } };String(a);");
-			expect(result.value).to.equal("foo");
+			var result = runner.runBlock("var a = {toString:function() { return 'foo'; } };String(a) == 'foo';");
+			expect(result.value).to.be.true;
 		});
 
 		it("should throw a type error if overridden `toString` returns an object", function () {
@@ -133,8 +133,8 @@ describe("String", function () {
 		});
 
 		it("should show typeof `object` when creating use `new`", function () {
-			var result = runner.runBlock("typeof new String('foo');");
-			expect(result.value).to.equal("object");
+			var result = runner.runBlock("typeof new String('foo') == 'object';");
+			expect(result.value).to.be.true;
 		});
 
 		it("should not strictly equal a primitive string", function () {

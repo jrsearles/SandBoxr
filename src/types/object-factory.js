@@ -36,15 +36,15 @@ function setOrphans (scope) {
 	orphans = Object.create(null);
 }
 
-function setProto (typeName, instance, scope) {
+function setProto (typeName, instance, env) {
 	if (typeName in parentless) {
 		return;
 	}
 
-	var parent = scope.getValue(typeName);
-	if (parent) {
-		instance.parent = parent;
-		instance.setProto(parent.proto);
+	var parent = env.getReference(typeName);
+	if (!parent.isUnresolved()) {
+		instance.parent = parent.getValue();
+		instance.setProto(instance.parent.proto);
 		return;
 	}
 
@@ -55,16 +55,15 @@ function setProto (typeName, instance, scope) {
 	orphans[typeName].push(instance);
 }
 
-function ObjectFactory (globalScope) {
-	this.scope = globalScope;
-	globalScope.factory = this;
+function ObjectFactory (env) {
+	this.env = env;
 }
 
 ObjectFactory.prototype = {
 	constructor: ObjectFactory,
 
-	endScope: function () {
-		setOrphans(this.scope);
+	init: function () {
+		setOrphans(this.env);
 	},
 
 	createPrimitive: function (value) {
@@ -107,6 +106,7 @@ ObjectFactory.prototype = {
 
 				instance = new ErrorType(value);
 				instance.putValue("message", this.createPrimitive(message));
+				instance.putValue("name", this.createPrimitive(typeName));
 				break;
 
 			default:
@@ -114,33 +114,18 @@ ObjectFactory.prototype = {
 		}
 
 		instance.init(this);
-		setProto(typeName, instance, this.scope);
+		setProto(typeName, instance, this.env);
 		return instance;
 	},
 
 	createObject: function (parent) {
-		if (parent) {
-			// special cases
-			if (parent === this.scope.getValue("Date")) {
-				return this.create("Date", new Date());
-			}
-
-			if (parent === this.scope.getValue("Array")) {
-				return this.create("Array");
-			}
-		}
-
-		// if (parent !== null) {
-		// 	parent = parent || this.scope.getValue("Object");
-		// }
-
 		var instance = new ObjectType();
 		if (parent !== null) {
 			if (parent) {
 				instance.parent = parent;
-				instance.setProto(parent && parent.proto);
+				instance.setProto(parent.proto);
 			} else {
-				setProto("Object", instance, this.scope);
+				setProto("Object", instance, this.env);
 			}
 		}
 
@@ -150,14 +135,12 @@ ObjectFactory.prototype = {
 
 	createArguments: function (args, callee) {
 		var instance = new ArgumentType();
-		var objectClass = this.scope.getValue("Object");
-		var i, ln;
+		var objectClass = this.env.global.getProperty("Object").getValue();
 
-		// instance.setProto(proto);
 		instance.init(this, objectClass, objectClass.proto);
 		instance.parent = objectClass;
 
-		for (i = 0, ln = args.length; i < ln; i++) {
+		for (var i = 0, ln = args.length; i < ln; i++) {
 			instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true }, false);
 		}
 
@@ -177,17 +160,9 @@ ObjectFactory.prototype = {
 		}
 
 		instance.init(this, proto, ctor, descriptor);
-		var functionClass = this.scope.getValue("Function");
-		if (functionClass) {
-			instance.parent = functionClass;
-			// for (var prop in functionClass.proto) {
-			// 	instance.properties[prop] = functionClass.properties[prop];
-			// }
-			// instance.setProto(functionClass);
-			// instance.parent = functionClass;
-		} else {
-			// delete instance.properties.prototype;
-			// delete instance.proto;
+		var functionClass = this.env.getReference("Function");
+		if (functionClass && !functionClass.isUnresolved()) {
+			instance.parent = functionClass.getValue();
 		}
 
 		return instance;
@@ -201,7 +176,8 @@ ObjectFactory.prototype = {
 
 			return fn.apply(this, arguments);
 		});
-		instance.parent = this.scope.getValue("Function");
+
+		instance.parent = this.env.getValue("Function");
 		instance.defineOwnProperty("length", this.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
 		return instance;
 	}

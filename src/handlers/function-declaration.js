@@ -1,3 +1,3 @@
 module.exports = function FunctionDeclaration (context) {
-	return context.result(context.scope.getValue(context.node.id.name));
+	return context.result(context.env.getValue(context.node.id.name));
 };

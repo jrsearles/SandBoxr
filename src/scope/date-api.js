@@ -6,8 +6,9 @@ var setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinu
 var slice = Array.prototype.slice;
 var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
-module.exports = function (globalScope) {
-	var objectFactory = globalScope.factory;
+module.exports = function (env) {
+	var globalObject = env.global;
+	var objectFactory = env.objectFactory;
 	var dateClass = objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
 		var context = this;
 		var dateValue, args;
@@ -57,17 +58,17 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(dateValue);
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	dateClass.defineOwnProperty("parse", objectFactory.createFunction(function (value) {
+	dateClass.defineOwnProperty("parse", objectFactory.createBuiltInFunction(function (value) {
 		var stringValue = convert.toPrimitive(this, value, "string");
 		var dateValue = Date.parse(stringValue);
 		return objectFactory.createPrimitive(dateValue);
-	}, globalScope), propertyConfig);
+	}, 1, "Date.prototype.parse"), propertyConfig);
 
-	dateClass.defineOwnProperty("UTC", objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
+	dateClass.defineOwnProperty("UTC", objectFactory.createBuiltInFunction(function (p1, p2, p3, p4, p5, p6, p7) {
 		var context = this;
 		var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
-	}, globalScope), propertyConfig);
+	}, 7, "Date.prototype.UTC"), propertyConfig);
 
 	var proto = dateClass.proto;
 
@@ -93,5 +94,5 @@ module.exports = function (globalScope) {
 		return objectFactory.createPrimitive(this.node.value.valueOf());
 	}), propertyConfig);
 
-	globalScope.defineOwnProperty("Date", dateClass, propertyConfig);
+	globalObject.defineOwnProperty("Date", dateClass, propertyConfig);
 };
