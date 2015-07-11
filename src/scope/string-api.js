@@ -6,7 +6,6 @@ var RegexType = require("../types/regex-type");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
 var slice = Array.prototype.slice;
-var propertyConfig = { configurable: true, enumerable: false, writable: true };
 
 module.exports = function (env) {
 	var globalObject = env.global;
@@ -27,10 +26,9 @@ module.exports = function (env) {
 	// prototype can be coerced into an empty string
 	proto.value = "";
 	proto.className = "String";
-	
-	proto.defineOwnProperty("length", objectFactory.createPrimitive(0));
+	proto.defineOwnProperty("length", { value: objectFactory.createPrimitive(0) });
 
-	proto.defineOwnProperty("search", objectFactory.createBuiltInFunction(function (regex) {
+	proto.define("search", objectFactory.createBuiltInFunction(function (regex) {
 		var stringValue = convert.toString(this, this.node);
 		var underlyingRegex;
 
@@ -43,9 +41,9 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createPrimitive(stringValue.search(underlyingRegex));
-	}, 1, "String.prototype.search"), propertyConfig);
+	}, 1, "String.prototype.search"));
 
-	proto.defineOwnProperty("substring", objectFactory.createBuiltInFunction(function (start, end) {
+	proto.define("substring", objectFactory.createBuiltInFunction(function (start, end) {
 		contracts.assertIsNotConstructor(this, "substring");
 
 		var value = convert.toPrimitive(this, this.node, "string");
@@ -55,28 +53,28 @@ module.exports = function (env) {
 		end = types.isNullOrUndefined(end) ? length : convert.toInteger(this, end);
 
 		return objectFactory.createPrimitive(value.substring(start, end));
-	}, 2, "String.prototype.substring"), propertyConfig);
+	}, 2, "String.prototype.substring"));
 
 	protoMethods.forEach(function (name) {
 		var fn = String.prototype[name];
 		if (fn) {
-			proto.defineOwnProperty(name, objectFactory.createBuiltInFunction(function () {
+			proto.define(name, objectFactory.createBuiltInFunction(function () {
 				var context = this;
 				var stringValue = convert.toString(this, this.node);
 				var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg); });
 				return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
-			}, String.prototype[name].length, "String.prototype." + name), propertyConfig);
+			}, String.prototype[name].length, "String.prototype." + name));
 			// proto.defineOwnProperty(name, convert.toNativeFunction(objectFactory, fn, "String.prototype." + name), propertyConfig);
 		}
-	}, propertyConfig);
+	});
 
-	stringClass.defineOwnProperty("fromCharCode", objectFactory.createBuiltInFunction(function (charCode) {
+	stringClass.define("fromCharCode", objectFactory.createBuiltInFunction(function (charCode) {
 		var context = this;
 		var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg); });
 		return objectFactory.createPrimitive(String.fromCharCode.apply(null, args));
-	}, 1, "String.fromCharCode"), propertyConfig);
+	}, 1, "String.fromCharCode"));
 
-	proto.defineOwnProperty("slice", objectFactory.createBuiltInFunction(function (start, end) {
+	proto.define("slice", objectFactory.createBuiltInFunction(function (start, end) {
 		var stringValue = convert.toString(this, this.node);
 		var startValue = convert.toInteger(this, start);
 		var endValue;
@@ -86,9 +84,9 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createPrimitive(stringValue.slice(startValue, endValue));
-	}, 2, "String.prototype.slice"), propertyConfig);
+	}, 2, "String.prototype.slice"));
 
-	proto.defineOwnProperty("split", objectFactory.createBuiltInFunction(function (separator, limit) {
+	proto.define("split", objectFactory.createBuiltInFunction(function (separator, limit) {
 		var stringValue = convert.toString(this, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
@@ -118,9 +116,9 @@ module.exports = function (env) {
 		}
 
 		return arr;
-	}, 2, "String.prototype.split"), propertyConfig);
+	}, 2, "String.prototype.split"));
 
-	proto.defineOwnProperty("replace", objectFactory.createBuiltInFunction(function (regexOrSubstr, substrOrFn) {
+	proto.define("replace", objectFactory.createBuiltInFunction(function (regexOrSubstr, substrOrFn) {
 		var stringValue = convert.toString(this, this.node);
 
 		var matcher;
@@ -140,31 +138,15 @@ module.exports = function (env) {
 				var args = slice.call(arguments).map(function (arg) { return objectFactory.createPrimitive(arg); });
 				var replacedValue = func.executeFunction(executionContext, substrOrFn, params, args, globalObject, callee);
 				return replacedValue ? convert.toString(executionContext, replacedValue) : undefined;
-				// var scope = executionContext.env.createScope(globalObject);
-				// scope.init(substrOrFn.node.body);
-
-				// var args = slice.call(arguments).map(function (arg) { return objectFactory.createPrimitive(arg); });
-
-				// func.loadArguments(substrOrFn.node.params, args, executionContext.env);
-
-				// try {
-				// 	var result = executionContext.create(substrOrFn.node.body, substrOrFn.node).execute().result;
-				// 	return result && result.getValue().value;
-				// } catch (err) {
-				// 	scope.exitScope();
-				// 	throw err;
-				// }
-
-				// scope.exitScope();
 			};
 		} else {
 			replacer = convert.toString(this, substrOrFn);
 		}
 
 		return objectFactory.createPrimitive(stringValue.replace(matcher, replacer));
-	}, 2, "String.prototype.replace"), propertyConfig);
+	}, 2, "String.prototype.replace"));
 
-	proto.defineOwnProperty("match", objectFactory.createBuiltInFunction(function (regex) {
+	proto.define("match", objectFactory.createBuiltInFunction(function (regex) {
 		var stringValue = convert.toString(this, this.node);
 		var actualRegex;
 
@@ -189,30 +171,30 @@ module.exports = function (env) {
 		}
 
 		return globalObject.getProperty("null").getValue();
-	}, 1, "String.prototype.match"), propertyConfig);
+	}, 1, "String.prototype.match"));
 
-	proto.defineOwnProperty("trim", objectFactory.createBuiltInFunction(function () {
+	proto.define("trim", objectFactory.createBuiltInFunction(function () {
 		contracts.assertIsNotNullOrUndefined(this.node, "String.prototype.trim");
 
 		var stringValue = convert.toPrimitive(this, this.node, "string");
 		return objectFactory.createPrimitive(stringValue.trim());
-	}, 0, "String.prototype.trim"), propertyConfig);
+	}, 0, "String.prototype.trim"));
 
-	proto.defineOwnProperty("toString", objectFactory.createBuiltInFunction(function () {
+	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.className !== "String") {
 			throw new TypeError("String.prototype.toString is not generic");
 		}
 
 		return objectFactory.createPrimitive(this.node.value);
-	}, 0, "String.prototype.toString"), propertyConfig);
+	}, 0, "String.prototype.toString"));
 
-	proto.defineOwnProperty("valueOf", objectFactory.createBuiltInFunction(function () {
+	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
 		if (this.node.className !== "String") {
 			throw new TypeError("String.prototype.valueOf is not generic");
 		}
 
 		return objectFactory.createPrimitive(this.node.value);
-	}, 0, "String.prototype.valueOf"), propertyConfig);
+	}, 0, "String.prototype.valueOf"));
 
-	globalObject.defineOwnProperty("String", stringClass, propertyConfig);
+	globalObject.define("String", stringClass);
 };

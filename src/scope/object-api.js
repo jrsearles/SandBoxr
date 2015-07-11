@@ -3,8 +3,6 @@ var convert = require("../utils/convert");
 var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 
-var propertyConfig = { configurable: true, enumerable: false, writable: true };
-
 function isObject (obj) {
 	if (!obj) {
 		return false;
@@ -101,7 +99,7 @@ function defineProperty (context, obj, name, descriptor) {
 		}
 	}
 
-	obj.defineOwnProperty(name, null, options, true, context);
+	obj.defineOwnProperty(name, options, true, context);
 }
 
 module.exports = function (env) {
@@ -132,18 +130,18 @@ module.exports = function (env) {
 	}, null, proto, null, { configurable: false, enumerable: false, writable: false });
 
 	// var proto = objectClass.proto;
-	proto.defineOwnProperty("hasOwnProperty", objectFactory.createBuiltInFunction(function (name) {
+	proto.define("hasOwnProperty", objectFactory.createBuiltInFunction(function (name) {
 		name = name.toString();
 		return objectFactory.createPrimitive(name in this.node.properties);
-	}, 1, "Object.prototype.hasOwnProperty"), propertyConfig);
+	}, 1, "Object.prototype.hasOwnProperty"));
 
-	proto.defineOwnProperty("valueOf", objectFactory.createBuiltInFunction(function () {
+	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
 		// if ("value" in this.node) {
 		// 	return objectFactory.createPrimitive(this.node.value);
 		// }
 
 		return this.node;
-	}, 0, "Object.prototype.valueOf"), propertyConfig);
+	}, 0, "Object.prototype.valueOf"));
 
 	var toStringFunc = objectFactory.createBuiltInFunction(function () {
 		var obj = this.env.current.thisNode;
@@ -151,10 +149,10 @@ module.exports = function (env) {
 	}, 0, "Object.prototype.toString");
 
 	// Object.prototype.toString === Object.prototype.toLocaleString
-	proto.defineOwnProperty("toString", toStringFunc, propertyConfig);
-	proto.defineOwnProperty("toLocaleString", toStringFunc, propertyConfig);
+	proto.define("toString", toStringFunc);
+	proto.define("toLocaleString", toStringFunc);
 
-	proto.defineOwnProperty("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
+	proto.define("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		var current = obj;
 		var thisNode = this.env.current.thisNode;
 
@@ -177,15 +175,15 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createPrimitive(false);
-	}, 1, "Object.isPrototypeOf"), propertyConfig);
+	}, 1, "Object.isPrototypeOf"));
 
-	proto.defineOwnProperty("propertyIsEnumerable", objectFactory.createBuiltInFunction(function (name) {
+	proto.define("propertyIsEnumerable", objectFactory.createBuiltInFunction(function (name) {
 		name = convert.toPrimitive(this, name, "string");
 		var descriptor = this.node.getOwnProperty(name);
 		return objectFactory.createPrimitive(!!(descriptor && descriptor.enumerable));
-	}, 1, "Object.propertyIsEnumerable"), propertyConfig);
+	}, 1, "Object.propertyIsEnumerable"));
 
-	objectClass.defineOwnProperty("create", objectFactory.createBuiltInFunction(function (parent, descriptors) {
+	objectClass.define("create", objectFactory.createBuiltInFunction(function (parent, descriptors) {
 		if (parent && parent.isPrimitive && parent.value !== null) {
 			throw new TypeError("Object prototype may only be an Object or null:" + parent.toString());
 		}
@@ -209,15 +207,15 @@ module.exports = function (env) {
 		}
 
 		return obj;
-	}, 2, "Object.create"), propertyConfig);
+	}, 2, "Object.create"));
 
-	objectClass.defineOwnProperty("defineProperty", objectFactory.createBuiltInFunction(function (obj, prop, descriptor) {
+	objectClass.define("defineProperty", objectFactory.createBuiltInFunction(function (obj, prop, descriptor) {
 		contracts.assertIsObject(obj, "Object.defineProperty");
 		defineProperty(this, obj, convert.toPrimitive(this, prop, "string"), descriptor);
 		return obj;
-	}, 3, "Object.defineProperty"), propertyConfig);
+	}, 3, "Object.defineProperty"));
 
-	objectClass.defineOwnProperty("defineProperties", objectFactory.createBuiltInFunction(function (obj, descriptors) {
+	objectClass.define("defineProperties", objectFactory.createBuiltInFunction(function (obj, descriptors) {
 		contracts.assertIsObject(obj, "Object.defineProperties");
 		contracts.assertArgIsNotNullOrUndefined(descriptors);
 
@@ -228,9 +226,9 @@ module.exports = function (env) {
 		}
 
 		return obj;
-	}, 2, "Object.defineProperties"), propertyConfig);
+	}, 2, "Object.defineProperties"));
 
-	objectClass.defineOwnProperty("getOwnPropertyDescriptor", objectFactory.createBuiltInFunction(function (obj, prop) {
+	objectClass.define("getOwnPropertyDescriptor", objectFactory.createBuiltInFunction(function (obj, prop) {
 		contracts.assertIsObject(obj, "Object.getOwnPropertyDescriptor");
 
 		prop = convert.toPrimitive(this, prop, "string");
@@ -254,9 +252,9 @@ module.exports = function (env) {
 		}
 
 		return undef;
-	}, 2, "Object.getOwnPropertyDescriptor"), propertyConfig);
+	}, 2, "Object.getOwnPropertyDescriptor"));
 
-	objectClass.defineOwnProperty("keys", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("keys", objectFactory.createBuiltInFunction(function (obj) {
 		var arr = objectFactory.create("Array");
 		var index = 0;
 		var context = this;
@@ -268,9 +266,9 @@ module.exports = function (env) {
 		});
 
 		return arr;
-	}, 1, "Object.keys"), propertyConfig);
+	}, 1, "Object.keys"));
 
-	objectClass.defineOwnProperty("getOwnPropertyNames", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("getOwnPropertyNames", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getOwnPropertyNames");
 
 		var arr = objectFactory.create("Array");
@@ -279,21 +277,21 @@ module.exports = function (env) {
 		});
 
 		return arr;
-	}, 1, "Object.getOwnPropertyNames"), propertyConfig);
+	}, 1, "Object.getOwnPropertyNames"));
 
-	objectClass.defineOwnProperty("getPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("getPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
 		return obj.parent && obj.parent.proto || obj.proto || globalObject.getProperty("null").getValue();
-	}, 1, "Object.getPrototypeOf"), propertyConfig);
+	}, 1, "Object.getPrototypeOf"));
 
-	objectClass.defineOwnProperty("freeze", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("freeze", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.freeze");
 
 		obj.freeze();
 		return obj;
-	}, 1, "Object.freeze"), propertyConfig);
+	}, 1, "Object.freeze"));
 
-	objectClass.defineOwnProperty("isFrozen", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("isFrozen", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.isFrozen");
 
 		if (obj.isPrimitive) {
@@ -311,26 +309,26 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createPrimitive(!obj.extensible);
-	}, 1, "Object.isFrozen"), propertyConfig);
+	}, 1, "Object.isFrozen"));
 
-	objectClass.defineOwnProperty("preventExtensions", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("preventExtensions", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.preventExtensions");
 		obj.preventExtensions();
 		return obj;
-	}, 1, "Object.preventExtensions"), propertyConfig);
+	}, 1, "Object.preventExtensions"));
 
-	objectClass.defineOwnProperty("isExtensible", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("isExtensible", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.isExtensible");
 		return objectFactory.createPrimitive(obj.extensible);
-	}, 1, "Object.isExtensible"), propertyConfig);
+	}, 1, "Object.isExtensible"));
 
-	objectClass.defineOwnProperty("seal", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("seal", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.seal");
 		obj.seal();
 		return obj;
-	}, 1, "Object.seal"), propertyConfig);
+	}, 1, "Object.seal"));
 
-	objectClass.defineOwnProperty("isSealed", objectFactory.createBuiltInFunction(function (obj) {
+	objectClass.define("isSealed", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.isSealed");
 
 		if (!obj.extensible) {
@@ -344,8 +342,8 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createPrimitive(!obj.extensible);
-	}, 1, "Object.isSealed"), propertyConfig);
+	}, 1, "Object.isSealed"));
 
 	globalObject.getProperty("Function").getValue().parent = objectClass;
-	globalObject.defineOwnProperty("Object", objectClass, propertyConfig);
+	globalObject.define("Object", objectClass);
 };

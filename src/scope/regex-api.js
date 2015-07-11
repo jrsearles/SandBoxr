@@ -1,8 +1,6 @@
 var convert = require("../utils/convert");
 var types = require("../utils/types");
 
-var propertyConfig = { configurable: true, enumerable: false, writable: true };
-
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
@@ -24,7 +22,7 @@ module.exports = function (env) {
 	var proto = regexClass.proto;
 	proto.className = "RegExp";
 
-	proto.defineOwnProperty("test", objectFactory.createBuiltInFunction(function (str) {
+	proto.define("test", objectFactory.createBuiltInFunction(function (str) {
 		var stringValue = convert.toString(this, str);
 
 		this.node.source.lastIndex = convert.toInt32(this, this.node.getProperty("lastIndex").getValue());
@@ -32,9 +30,9 @@ module.exports = function (env) {
 		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
 
 		return objectFactory.createPrimitive(testValue);
-	}, 1, "RegExp.prototype.test"), propertyConfig);
+	}, 1, "RegExp.prototype.test"));
 
-	proto.defineOwnProperty("exec", objectFactory.createBuiltInFunction(function (str) {
+	proto.define("exec", objectFactory.createBuiltInFunction(function (str) {
 		var stringValue = convert.toString(this, str);
 
 		// update underlying regex in case the index was manually updated
@@ -59,9 +57,9 @@ module.exports = function (env) {
 		}
 
 		return this.env.global.getProperty("null").getValue();
-	}, 1, "RegExp.prototype.exec"), propertyConfig);
+	}, 1, "RegExp.prototype.exec"));
 
-	proto.defineOwnProperty("toString", objectFactory.createBuiltInFunction(function () {
+	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		var str = "/";
 		str += this.node.getProperty("source").getValue().toString();
 		str += "/";
@@ -79,14 +77,14 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.create("String", str);
-	}, 0, "RegExp.prototype.toString"), propertyConfig);
+	}, 0, "RegExp.prototype.toString"));
 
-	proto.defineOwnProperty("compile", convert.toNativeFunction(objectFactory, RegExp.prototype.compile, "RegExp.prototype.compile"), propertyConfig);
-	proto.defineOwnProperty("lastIndex", objectFactory.createPrimitive(0), { writable: true });
+	proto.define("compile", convert.toNativeFunction(objectFactory, RegExp.prototype.compile, "RegExp.prototype.compile"));
+	proto.defineOwnProperty("lastIndex", { value: objectFactory.createPrimitive(0), writable: true });
 
 	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {
-		proto.defineOwnProperty(name, objectFactory.createPrimitive(RegExp.prototype[name]));
+		proto.defineOwnProperty(name, { value: objectFactory.createPrimitive(RegExp.prototype[name]) });
 	});
 
-	globalObject.defineOwnProperty("RegExp", regexClass, propertyConfig);
+	globalObject.define("RegExp", regexClass);
 };

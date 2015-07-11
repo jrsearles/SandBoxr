@@ -15,7 +15,7 @@ FunctionType.prototype.constructor = FunctionType;
 
 FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
 	// set length property from the number of parameters
-	this.defineOwnProperty("length", objectFactory.createPrimitive(this.node.params.length), { configurable: false, enumerable: false, writable: false });
+	this.defineOwnProperty("length", { value: objectFactory.createPrimitive(this.node.params.length), configurable: false, enumerable: false, writable: false });
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();

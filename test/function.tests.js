@@ -42,6 +42,11 @@ describe("Functions", function () {
 		expect(result.value).to.be.true;
 	});
 
+	it("should link arguments object to the named parameters", function () {
+		var result = runner.runBlock("(function (a) { a++;return a===arguments[0]; })(1)==true;");
+		expect(result.value).to.be.true;
+	});
+
 	describe("Function.prototype.bind", function () {
 		it("should return a function", function () {
 			var result = runner.runBlock("var a = function () {};typeof a.bind({}) === 'function';");

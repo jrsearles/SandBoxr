@@ -15,11 +15,11 @@ function setDescriptor (context, obj, name, descriptor) {
 		};
 	}
 
-	obj.defineOwnProperty(name, null, descriptor);
+	obj.defineOwnProperty(name, descriptor);
 }
 
-function createDescriptor () {
-	return { configurable: true, enumerable: true, writable: true };
+function createDescriptor (value) {
+	return { value: value, configurable: true, enumerable: true, writable: true };
 }
 
 module.exports = function ObjectExpression (context) {
@@ -38,7 +38,7 @@ module.exports = function ObjectExpression (context) {
 				break;
 
 			default:
-				obj.defineOwnProperty(name, value, createDescriptor());
+				obj.defineOwnProperty(name, createDescriptor(value));
 				break;
 		}
 	});

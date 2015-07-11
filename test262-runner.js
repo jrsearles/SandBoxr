@@ -20,18 +20,18 @@ var root = "test262/test/";
 var include = fs.readFileSync("test262-harness.js");
 
 var tests = [
-	root + "suite/ch06/**/*.js", 	// passed!
-	root + "suite/ch07/**/*.js",	// passed!
-	root + "suite/ch08/**/*.js",	// passed! *
-	root + "suite/ch09/**/*.js",	// passed!
-	root + "suite/ch10/**/*.js",	// passed! *
+	// root + "suite/ch06/**/*.js", 	// passed!
+	// root + "suite/ch07/**/*.js",	// passed!
+	// root + "suite/ch08/**/*.js",	// passed! *
+	// root + "suite/ch09/**/*.js",	// passed!
+	// root + "suite/ch10/**/*.js",	// passed! *
 	// root + "suite/ch11/**/*.js",
 	// root + "suite/ch12/**/*.js"
 	// root + "suite/ch13/**/*.js",	// functions
 	// root + "suite/ch14/**/*.js",	// program	-- passed!
 	// root + "suite/ch15/15.1/**/*.js",	// global
 	// root + "suite/ch15/15.2/**/*.js",	// object
-	// root + "suite/ch15/15.3/**/*.js",	// function
+	root + "suite/ch15/15.3/**/*.js",	// function
 	// root + "suite/ch15/15.4/15.4.4/15.4.4.19/**/*.js",	// array
 	// root + "suite/ch15/15.5/**/*.js",	// string 	-- passed
 	// root + "suite/ch15/15.6/**/*.js",	// boolean	-- passed

@@ -22,7 +22,7 @@ StringType.prototype = Object.create(PrimitiveType.prototype);
 StringType.prototype.constructor = StringType;
 
 StringType.prototype.init = function (objectFactory) {
-	this.properties.length = new PropertyDescriptor(this, { configurable: false, enumerable: false, writable: false }, objectFactory.createPrimitive(this.value.length));
+	this.properties.length = new PropertyDescriptor(this, { configurable: false, enumerable: false, writable: false, value: objectFactory.createPrimitive(this.value.length) });
 };
 
 StringType.prototype.getProperty = function (name) {

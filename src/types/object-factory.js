@@ -140,12 +140,12 @@ ObjectFactory.prototype = {
 		instance.init(this, objectClass, objectClass.proto);
 		instance.parent = objectClass;
 
-		for (var i = 0, ln = args.length; i < ln; i++) {
-			instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true }, false);
-		}
+		// for (var i = 0, ln = args.length; i < ln; i++) {
+		// 	instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true }, false);
+		// }
 
-		instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: true, enumerable: false, writable: true }, false);
-		instance.defineOwnProperty("callee", callee, { configurable: true, enumerable: false, writable: true });
+		// instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: true, enumerable: false, writable: true }, false);
+		instance.defineOwnProperty("callee", { value: callee, configurable: true, enumerable: false, writable: true });
 		return instance;
 	},
 
@@ -178,7 +178,7 @@ ObjectFactory.prototype = {
 		});
 
 		instance.parent = this.env.getValue("Function");
-		instance.defineOwnProperty("length", this.createPrimitive(length), { configurable: false, enumerable: false, writable: false });
+		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
 	}
 };

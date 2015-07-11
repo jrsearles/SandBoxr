@@ -5,22 +5,13 @@ var convert = require("../utils/convert");
 
 var localObjectFactory;
 
-// Let index be ToUint32(P).
-// Reject if index ≥ oldLen and oldLenDesc.[[Writable]] is false.
-// Let succeeded be the result of calling the default [[DefineOwnProperty]] internal method (8.12.9) on A passing P, Desc, and false as arguments.
-// Reject if succeeded is false.
-// If index ≥ oldLen
-// Set oldLenDesc.[[Value]] to index + 1.
-// Call the default [[DefineOwnProperty]] internal method (8.12.9) on A passing "length", oldLenDesc, and false as arguments. This call will always return true.
-// Return true.
-
 function setIndex (context, arr, name, descriptor, throwOnError) {
 	var index = Number(name);
 	var lengthProperty = arr.getProperty("length");
 	var lengthValue = lengthProperty.getValue().value;
 
 	if ((!lengthProperty.canSetValue() && index >= lengthValue)
-		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, null, descriptor, false, context)) {
+		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, false, context)) {
 
 		if (throwOnError) {
 			throw new TypeError("Cannot define property: " + name + ", object is not extensible.");
@@ -31,33 +22,11 @@ function setIndex (context, arr, name, descriptor, throwOnError) {
 
 	if (index >= lengthValue) {
 		var newLength = localObjectFactory.createPrimitive(index + 1);
-		arr.defineOwnProperty("length", null, { value: newLength }, false, context);
+		arr.defineOwnProperty("length", { value: newLength }, false, context);
 	}
 
 	return true;
 }
-
-// Let index be ToUint32(P).
-// Reject if index ≥ oldLen and oldLenDesc.[[Writable]] is false.
-// Let succeeded be the result of calling the default [[DefineOwnProperty]] internal method (8.12.9) on A passing P, Desc, and false as arguments.
-// Reject if succeeded is false.
-// If index ≥ oldLen
-// Set oldLenDesc.[[Value]] to index + 1.
-// Call the default [[DefineOwnProperty]] internal method (8.12.9) on A passing "length", oldLenDesc, and false as arguments. This call will always return true.
-// Return true.
-
-// function setIndex (context, arr, name, descriptor, throwOnError) {
-// 	var index = convert.toUInt32(context, descriptor.value);
-// 	var lengthProperty = arr.getProperty("length");
-
-// 	if (!lengthProperty.canSetValue() && index >= lengthProperty.getValue(arr).value) {
-// 		if (throwOnError) {
-// 			throw new TypeError("Cannot define property: " + name + ", object is not extensible.");
-// 		}
-
-// 		return false;
-// 	}
-// }
 
 function setLength (context, arr, name, descriptor, throwOnError) {
 	var newLengthValue = convert.toUInt32(context, descriptor.value);
@@ -75,7 +44,7 @@ function setLength (context, arr, name, descriptor, throwOnError) {
 	contracts.assertIsValidArrayLength(newLength.value);
 
 	if (newLength.value >= currentLength.value) {
-		return ObjectType.prototype.defineOwnProperty.call(arr, name, null, descriptor, throwOnError);
+		return ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, throwOnError);
 	}
 
 	if (arr.properties.length.writable === false) {
@@ -93,7 +62,7 @@ function setLength (context, arr, name, descriptor, throwOnError) {
 	}
 
 	var i = currentLength.value;
-	if (!ObjectType.prototype.defineOwnProperty.call(arr, name, null, descriptor, throwOnError)) {
+	if (!ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, throwOnError)) {
 		return false;
 	}
 
@@ -101,14 +70,14 @@ function setLength (context, arr, name, descriptor, throwOnError) {
 	while (i > newLength.value) {
 		if (!arr.deleteProperty(--i, false)) {
 			newLength = localObjectFactory.createPrimitive(i + 1);
-			arr.defineOwnProperty("length", null, { value: newLength }, false);
+			arr.defineOwnProperty("length", { value: newLength }, false);
 			succeeded = false;
 			break;
 		}
 	}
 
 	if (notWritable) {
-		arr.defineOwnProperty("length", null, { writable: false }, false);
+		arr.defineOwnProperty("length", { writable: false }, false);
 	}
 
 	if (!succeeded && throwOnError) {
@@ -128,7 +97,7 @@ ArrayType.prototype.constructor = ArrayType;
 
 ArrayType.prototype.putValue = function (name, value, throwOnError, context) {
 	if (!this.hasOwnProperty(name)) {
-		this.defineOwnProperty(name, null, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
+		this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
 		return;
 	}
 
@@ -148,7 +117,7 @@ ArrayType.prototype.putValue = function (name, value, throwOnError, context) {
 	// this.defineOwnProperty(name, null, { value: value }, false);
 };
 
-ArrayType.prototype.defineOwnProperty = function (name, value, descriptor, throwOnError, context) {
+ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, context) {
 	if (types.isInteger(name) && "value" in descriptor) {
 		return setIndex(context, this, name, descriptor, throwOnError);
 	}
@@ -162,7 +131,7 @@ ArrayType.prototype.defineOwnProperty = function (name, value, descriptor, throw
 
 ArrayType.prototype.init = function (objectFactory) {
 	localObjectFactory = objectFactory;
-	this.defineOwnProperty("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
+	this.defineOwnProperty("length", { value: objectFactory.createPrimitive(0), configurable: false, enumerable: false, writable: true });
 };
 
 module.exports = ArrayType;

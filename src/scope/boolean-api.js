@@ -1,7 +1,5 @@
 var convert = require("../utils/convert");
 
-var propertyConfig = { configurable: true, enumerable: false, writable: true };
-
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
@@ -17,21 +15,21 @@ module.exports = function (env) {
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	booleanClass.proto.className = "Boolean";
-	booleanClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
+	booleanClass.proto.define("toString", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
 		}
 
 		return objectFactory.createPrimitive(this.node.value ? this.node.value.toString() : "false");
-	}), propertyConfig);
+	}));
 
-	booleanClass.proto.defineOwnProperty("valueOf", objectFactory.createFunction(function () {
+	booleanClass.proto.define("valueOf", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.valueOf is not generic.");
 		}
 
 		return objectFactory.createPrimitive(this.node.value || false);
-	}), propertyConfig);
+	}));
 
-	globalObject.defineOwnProperty("Boolean", booleanClass, propertyConfig);
+	globalObject.define("Boolean", booleanClass);
 };

@@ -1,7 +1,5 @@
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
-var propertyConfig = { configurable: true, enumerable: false, writable: true };
-
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
@@ -12,7 +10,7 @@ module.exports = function (env) {
 		return obj;
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	errorClass.proto.defineOwnProperty("toString", objectFactory.createFunction(function () {
+	errorClass.proto.define("toString", objectFactory.createFunction(function () {
 		var name = this.node.getProperty("name").getValue();
 		var msg = this.node.getProperty("message").getValue();
 
@@ -24,9 +22,9 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.create("String", name || msg);
-	}), propertyConfig);
+	}));
 
-	globalObject.defineOwnProperty("Error", errorClass, propertyConfig);
+	globalObject.define("Error", errorClass);
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
@@ -37,6 +35,6 @@ module.exports = function (env) {
 		}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 		errClass.proto.parent = errorClass;
-		globalObject.defineOwnProperty(type, errClass, propertyConfig);
+		globalObject.define(type, errClass);
 	});
 };

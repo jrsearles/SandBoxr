@@ -89,9 +89,9 @@ describe("Expressions", function () {
 				expect(result.value).to.be.true;
 			});
 
-			it("should return true for primitive", function () {
+			it("should return false for primitive", function () {
 				var result = runner.runBlock("'foo' instanceof String;");
-				expect(result.value).to.be.true;
+				expect(result.value).to.be.false;
 			});
 		});
 	});

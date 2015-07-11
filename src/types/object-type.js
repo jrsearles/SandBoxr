@@ -33,7 +33,7 @@ ObjectType.prototype = {
 
 		while (current) {
 			if (name in current.properties) {
-				return current.properties[name];
+				return current.properties[name].bind(this);
 			}
 
 			current = current.parent && current.parent.proto;
@@ -61,7 +61,7 @@ ObjectType.prototype = {
 	},
 
 	hasProperty: function (name) {
-		return !!this.getProperty(String(name));
+		return !!this.getProperty(name);
 	},
 
 	hasOwnProperty: function (name) {
@@ -85,32 +85,32 @@ ObjectType.prototype = {
 				if (throwOnError) {
 					throw new TypeError("Cannot assign to read only property '" + name + "' of " + this.toString());
 				}
-				
+
 				return;
 			}
 
 			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
-				this.properties[name] = new PropertyDescriptor(this, descriptor, value);
+				this.properties[name] = new PropertyDescriptor(this, {
+					value: value,
+					configurable: descriptor.configurable,
+					enumerable: descriptor.enumerable,
+					writable: descriptor.writable
+				});
 			} else {
 				descriptor.setValue(value);
 			}
 		} else {
-			this.defineOwnProperty(name, value, { configurable: true, enumerable: true, writable: true }, throwOnError);
+			this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
 		}
 	},
 
-	defineOwnProperty: function (name, value, descriptor, throwOnError) {
+	defineOwnProperty: function (name, descriptor, throwOnError) {
 		if (this.isPrimitive) {
 			if (throwOnError) {
 				throw new TypeError("Cannot define property: " + name + ", object is not extensible");
 			}
 
 			return false;
-		}
-
-		// todo: obsolete the value arg
-		if (value && descriptor && !descriptor.value) {
-			descriptor.value = value;
 		}
 
 		var current = this.getOwnProperty(name);
@@ -133,19 +133,18 @@ ObjectType.prototype = {
 			return false;
 		}
 
-		if (value && value.reference) {
-			this.properties[name] = value;
-		} else {
-			this.properties[name] = new PropertyDescriptor(this, descriptor, value);
-		}
-
+		this.properties[name] = new PropertyDescriptor(this, descriptor);
 		return true;
+	},
+
+	define: function (name, value, descriptor) {
+		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
+		descriptor.value = value;
+		return this.defineOwnProperty(name, descriptor, false);
 	},
 
 	getValue: function () {
 		return this;
-		// var descriptor = this.getProperty(name);
-		// return descriptor && descriptor.getValue(this);
 	},
 
 	deleteProperty: function (name) {
@@ -163,9 +162,9 @@ ObjectType.prototype = {
 	freeze: function () {
 		for (var prop in this.properties) {
 			if (this.properties[prop].dataProperty) {
-				this.defineOwnProperty(prop, null, { writable: false, configurable: false }, true);
+				this.defineOwnProperty(prop, { writable: false, configurable: false }, true);
 			} else {
-				this.defineOwnProperty(prop, null, { configurable: false }, true);
+				this.defineOwnProperty(prop, { configurable: false }, true);
 			}
 		}
 
@@ -178,7 +177,7 @@ ObjectType.prototype = {
 
 	seal: function () {
 		for (var prop in this.properties) {
-			this.defineOwnProperty(prop, null, { configurable: false }, true);
+			this.defineOwnProperty(prop, { configurable: false }, true);
 		}
 
 		this.preventExtensions();
@@ -198,15 +197,6 @@ ObjectType.prototype = {
 
 	valueOf: function () {
 		return this;
-	},
-
-	"with": function (executionContext) {
-		this.executionContext = executionContext;
-		return this;
-	},
-
-	endWith: function () {
-		this.executionContext = null;
 	},
 
 	equals: function (obj) {

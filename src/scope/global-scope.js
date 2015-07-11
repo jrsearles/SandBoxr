@@ -18,7 +18,7 @@ var convert = require("../utils/convert");
 var Reference = require("../env/reference");
 
 var globalFunctions = ["isNaN", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
-var propertyConfig = { configurable: true, enumerable: false, writable: true };
+var frozen = { configurable: false, enumerable: false, writable: false };
 
 module.exports = function GlobalScope (runner) {
 	var config = runner.config;
@@ -29,16 +29,16 @@ module.exports = function GlobalScope (runner) {
 	env.createObjectScope(globalObject);
 
 	var undefinedClass = new PrimitiveType(undefined);
-	globalObject.defineOwnProperty("undefined", undefinedClass);
+	globalObject.define("undefined", undefinedClass, frozen);
 
 	var nullClass = new PrimitiveType(null);
-	globalObject.defineOwnProperty("null", nullClass);
+	globalObject.define("null", nullClass, frozen);
 
-	globalObject.defineOwnProperty("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false, enumerable: false });
-	globalObject.defineOwnProperty("NaN", objectFactory.createPrimitive(NaN), { configurable: false, writable: false, enumerable: false });
+	globalObject.define("Infinity", objectFactory.createPrimitive(Infinity), frozen);
+	globalObject.define("NaN", objectFactory.createPrimitive(NaN), frozen);
 
 	// todo: node vs browser - do we care?
-	globalObject.defineOwnProperty("window", globalObject, { configurable: false, enumerable: true, writable: false });
+	globalObject.define("window", globalObject, frozen);
 
 	functionAPI(env, config);
 	objectAPI(env, config);
@@ -54,20 +54,20 @@ module.exports = function GlobalScope (runner) {
 	consoleAPI(env, config);
 
 	globalFunctions.forEach(function (name) {
-		globalObject.defineOwnProperty(name, convert.toNativeFunction(objectFactory, global[name], name), propertyConfig);
+		globalObject.define(name, convert.toNativeFunction(objectFactory, global[name], name));
 	});
 
-	globalObject.defineOwnProperty("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
+	globalObject.define("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
 		var stringValue = convert.toPrimitive(this, value, "string");
 		radix = convert.toPrimitive(this, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
-	}, 2, "parseInt"), propertyConfig);
+	}, 2, "parseInt"));
 
-	globalObject.defineOwnProperty("parseFloat", objectFactory.createBuiltInFunction(function (value) {
+	globalObject.define("parseFloat", objectFactory.createBuiltInFunction(function (value) {
 		var stringValue = convert.toPrimitive(this, value, "string");
 		return objectFactory.createPrimitive(parseFloat(stringValue));
-	}, 2, "parseFloat"), propertyConfig);
+	}, 2, "parseFloat"));
 
 	if (config.parser) {
 		var evalFunc = objectFactory.createBuiltInFunction(function (code) {
@@ -111,7 +111,7 @@ module.exports = function GlobalScope (runner) {
 
 		// evalFunc.parent = globalObject.getValue("Object");
 		// evalFunc.setProto(null);
-		globalObject.defineOwnProperty("eval", evalFunc, propertyConfig);
+		globalObject.define("eval", evalFunc);
 	}
 
 	// globalObject.setProto(globalObject.getValue("Object").proto);
