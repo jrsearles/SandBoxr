@@ -9,41 +9,51 @@ var args = require("yargs")
 	.alias("s", "strict")
 	.default("verbose", false)
 	.alias("v", "verbose")
+	.default("chapter", "")
+	.alias("ch", "chapter")
 	.argv;
 
 var SandBoxr = require("./src/sandboxr");
 var verbose = args.verbose;
 var stopOnFail = args.stopOnFail;
 var strictMode = args.strict;
+var chapter = args.chapter;
 
 var root = "test262/test/";
 var include = fs.readFileSync("test262-harness.js");
 
-var tests = [
-	// root + "suite/ch06/**/*.js", 	// passed!
-	// root + "suite/ch07/**/*.js",	// passed!
-	// root + "suite/ch08/**/*.js",	// passed! *
-	// root + "suite/ch09/**/*.js",	// passed!
-	// root + "suite/ch10/**/*.js",	// passed! *
-	// root + "suite/ch11/**/*.js",
-	// root + "suite/ch12/**/*.js"
-	// root + "suite/ch13/**/*.js",	// functions
-	// root + "suite/ch14/**/*.js",	// program	-- passed!
-	// root + "suite/ch15/15.1/**/*.js",	// global
-	// root + "suite/ch15/15.2/**/*.js",	// object
-	root + "suite/ch15/15.3/**/*.js",	// function
-	// root + "suite/ch15/15.4/15.4.4/15.4.4.19/**/*.js",	// array
-	// root + "suite/ch15/15.5/**/*.js",	// string 	-- passed
-	// root + "suite/ch15/15.6/**/*.js",	// boolean	-- passed
-	// root + "suite/ch15/15.7/**/*.js",	// number -- passed
-	// root + "suite/ch15/15.8/**/*.js",	// math
-	// root + "suite/ch15/15.9/**/*.js",	// date
-	// root + "suite/ch15/15.10/**/*.js",	// regex	-- passed
-	// root + "suite/ch15/15.11/**/*.js",	// error
-	// root + "suite/ch15/15.12/**/*.js",	// json
-	// root + "suite/annexB/**/*.js",	// passed
-	// root + "suite/bestPractice/**/*.js"
-];
+var tests;
+if (chapter) {
+	chapter = String(chapter);
+	chapter = chapter.length === 1 ? "0" + chapter : chapter;
+	tests = [root + "suite/ch" + chapter + "/**/*.js"];
+} else {
+	tests = [
+		root + "suite/ch06/**/*.js", 	// passed!
+		root + "suite/ch07/**/*.js",	// passed!
+		root + "suite/ch08/**/*.js",	// passed! *
+		root + "suite/ch09/**/*.js",	// passed!
+		root + "suite/ch10/**/*.js",	// passed! *
+		root + "suite/ch11/**/*.js",	// passed!
+		// root + "suite/ch12/12.6/12.6.2/**/*.js",
+		root + "suite/ch13/**/*.js",	// functions	-- passed!
+		root + "suite/ch14/**/*.js",	// program	-- passed!
+		// root + "suite/ch15/15.1/**/*.js",	// global
+		// root + "suite/ch15/15.2/**/*.js",	// object
+		// root + "suite/ch15/15.3/15.3.4/15.3.4.4/**/*.js",	// function
+		// root + "suite/ch15/15.4/15.4.4/15.4.4.19/**/*.js",	// array
+		root + "suite/ch15/15.5/**/*.js",	// string 	-- passed
+		root + "suite/ch15/15.6/**/*.js",	// boolean	-- passed
+		root + "suite/ch15/15.7/**/*.js",	// number -- passed
+		root + "suite/ch15/15.8/**/*.js",	// math	-- passed -1
+		root + "suite/ch15/15.9/**/*.js",	// date	-- passed with exceptions
+		root + "suite/ch15/15.10/**/*.js",	// regex	-- passed
+		// root + "suite/ch15/15.11/**/*.js",	// error
+		// root + "suite/ch15/15.12/**/*.js",	// json
+		// root + "suite/annexB/**/*.js",	// passed
+		// root + "suite/bestPractice/**/*.js"
+	];
+}
 
 var exclusions = [
 	/S15\.4\.4\.10_A3_T[1-2]\.js$/i,

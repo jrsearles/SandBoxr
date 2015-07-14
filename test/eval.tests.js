@@ -25,21 +25,21 @@ describe("Eval", function () {
 
 	describe("with Function constructor", function () {
 		it("should return a function instance", function () {
-			var runner = createRunner("typeof (new Function('1+2')) === 'function'");
+			var runner = createRunner("typeof (new Function('return 1+2')) === 'function'");
 			var result = runner.execute();
 
 			expect(result.result.value).to.be.true;
 		});
 
 		it("should execute parsed code when called", function () {
-			var runner = createRunner("(new Function('1+2'))() === 3;");
+			var runner = createRunner("(new Function('return 1+2'))() === 3;");
 			var result = runner.execute();
 
 			expect(result.result.value).to.be.true;
 		});
 
 		it("should allow arguments to be defined", function () {
-			var runner = createRunner("(new Function('a', 'b', 'a + b'))(1,2) === 3;");
+			var runner = createRunner("(new Function('a', 'b', 'return a + b'))(1,2) === 3;");
 			var result = runner.execute();
 
 			expect(result.result.value).to.be.true;
@@ -51,5 +51,12 @@ describe("Eval", function () {
 
 			expect(result.result.value).to.be.true;
 		});
-	})
+
+		it("should be able to call constructor with `call`", function () {
+			var runner = createRunner("(Function.call(this, 'return 1+2;'))() == 3;");
+			var result = runner.execute();
+
+			expect(result.result.value).to.be.true;
+		});
+	});
 });

@@ -1,15 +1,16 @@
 var PropertyReference = require("./property-reference");
 
-function ObjectEnvironment (parent, obj) {
+function ObjectEnvironment (parent, obj, env) {
 	this.parent = parent;
 	this.object = this.thisNode = obj;
+	this.env = env;
 }
 
 ObjectEnvironment.prototype = {
 	constructor: ObjectEnvironment,
 
 	createReference: function (name, strict) {
-		return new PropertyReference(name, this.object, strict);
+		return new PropertyReference(name, this.object, strict, this.env);
 	},
 
 	getValue: function (name) {

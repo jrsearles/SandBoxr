@@ -11,6 +11,6 @@ module.exports = function MemberExpression (context) {
 		name = context.node.property.name;
 	}
 
-	value = new PropertyReference(name, obj);
+	value = new PropertyReference(name, obj, false, context.env);
 	return context.result(value);
 };

@@ -20,7 +20,18 @@ FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: ctor || this });
-	this.setProto(proto, { configurable: true, enumerable: false, writable: true });
+	this.setProto(proto, { configurable: false, enumerable: false, writable: true });
+};
+
+FunctionType.prototype.getProperty = function (name) {
+	var prop = ObjectType.prototype.getProperty.apply(this, arguments);
+
+	// since function itself is a function, look at our own properties
+	if (!prop && name !== "prototype") {
+		return this.properties.prototype.getValue().properties[name];
+	}
+
+	return prop;
 };
 
 FunctionType.prototype.getOwnPropertyNames = function () {
@@ -58,6 +69,11 @@ FunctionType.prototype.hasInstance = function (obj) {
 	// if (obj.isPrimitive || obj === this) {
 	// 	return false;
 	// }
+
+	if (obj === this) {
+		// object obviously isn't an instance in this case
+		return false;
+	}
 
 	var visited = [];
 	var current = obj;

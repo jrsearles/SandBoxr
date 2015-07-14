@@ -1,5 +1,5 @@
 module.exports = function VariableDeclarator (context) {
-	var id = context.node.id.name;
+	var name = context.node.id.name;
 	var value;
 
 	if (context.node.init) {
@@ -8,8 +8,9 @@ module.exports = function VariableDeclarator (context) {
 
 	// variables have already been hoisted so we just need to initialize them if defined
 	if (value) {
-		context.env.putValue(id, value.getValue(), false, context);
+		context.env.putValue(name, value.getValue(), false, context);
 	}
 
-	return context.result(value, id);
+	return context.result(context.env.getReference(name));
+	// return context.result(value, id);
 };

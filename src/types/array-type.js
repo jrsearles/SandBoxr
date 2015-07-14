@@ -31,11 +31,7 @@ function setIndex (context, arr, name, descriptor, throwOnError) {
 function setLength (context, arr, name, descriptor, throwOnError) {
 	var newLengthValue = convert.toUInt32(context, descriptor.value);
 	if (newLengthValue !== convert.toNumber(context, descriptor.value)) {
-		if (throwOnError) {
-			throw new RangeError("Array length out of range");
-		}
-
-		return false;
+		throw new RangeError("Array length out of range");
 	}
 
 	descriptor.value = localObjectFactory.createPrimitive(newLengthValue);
@@ -87,6 +83,10 @@ function setLength (context, arr, name, descriptor, throwOnError) {
 	return succeeded;
 }
 
+function descriptorHasValue (descriptor) {
+	return descriptor && ("value" in descriptor || "getter" in descriptor);
+}
+
 function ArrayType () {
 	ObjectType.call(this);
 	this.className = "Array";
@@ -118,7 +118,7 @@ ArrayType.prototype.putValue = function (name, value, throwOnError, context) {
 };
 
 ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, context) {
-	if (types.isInteger(name) && "value" in descriptor) {
+	if (types.isInteger(name) && !this.hasOwnProperty(name)) {
 		return setIndex(context, this, name, descriptor, throwOnError);
 	}
 

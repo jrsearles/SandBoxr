@@ -13,12 +13,12 @@ ExecutionResult.prototype.isCancelled = function () {
 };
 
 ExecutionResult.prototype.shouldBreak = function (context, loop) {
-	if (!this.exit && !this.cancel && !this.skip) {
-		return false;
-	}
-
 	if (this.exit) {
 		return true;
+	}
+
+	if (!this.cancel && !this.skip) {
+		return false;
 	}
 
 	var breaking = true;

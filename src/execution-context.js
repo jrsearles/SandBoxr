@@ -6,6 +6,7 @@ function ExecutionContext (env, node, callee) {
 	this.env = env;
 
 	this.label = "";
+	this.value = null;
 	this.isNew = false;
 	this.strict = false;
 }
@@ -15,41 +16,45 @@ ExecutionContext.prototype.execute = function () {
 };
 
 ExecutionContext.prototype.create = function (node, callee, isNew) {
-	var context = new ExecutionContext(this.env, node, callee);
+	var context = new ExecutionContext(this.env, node, callee || this.callee);
+	context.value = this.value;
 	context.isNew = !!isNew;
 	return context;
 };
 
 ExecutionContext.prototype.createLabel = function (node, label) {
-	var context = new ExecutionContext(this.env, node);
+	var context = this.create(node);
 	context.label = label;
 	return context;
 };
 
 ExecutionContext.prototype.cancel = function (label) {
-	var result = new ExecutionResult(null, label);
+	var result = this.result(this.value, label);
 	result.cancel = true;
 	return result;
 };
 
 ExecutionContext.prototype.skip = function (label) {
-	var result = new ExecutionResult(null, label);
+	var result = this.result(this.value, label);
 	result.skip = true;
 	return result;
 };
 
 ExecutionContext.prototype.exit = function (value) {
-	var result = new ExecutionResult(value);
+	this.callee = null;
+
+	var result = this.result(value);
 	result.exit = true;
 	return result;
 };
 
 ExecutionContext.prototype.result = function (value, name, obj) {
+	this.value = value;
 	return new ExecutionResult(value, name, obj);
 };
 
 ExecutionContext.prototype.empty = function () {
-	return new ExecutionResult();
+	return this.result(undefined);
 };
 
 module.exports = ExecutionContext;

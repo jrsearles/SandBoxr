@@ -7,22 +7,30 @@ module.exports = function TryCatchStatement (context) {
 		if (context.node.handler) {
 			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
-			var scope = context.env.createScope();
-			scope.init(context.node.handler.body);
+			// var scope = context.env.createScope();
+			// scope.init(context.node.handler.body);
 
 			var errVar = context.node.handler.param.name;
+			var hasBinding = context.env.hasBinding(errVar);
 
-			context.env.createBinding(errVar);
+			if (!hasBinding) {
+				context.env.createBinding(errVar);
+			}
+
 			context.env.setBinding(errVar, caughtError);
 
 			try {
 				result = context.create(context.node.handler.body, context.node.handler).execute();
 			} catch (catchError) {
-				scope.exitScope();
+				// scope.exitScope();
 				throw catchError;
+			} finally {
+				if (!hasBinding) {
+					context.env.deleteBinding(errVar);
+				}
 			}
 
-			scope.exitScope();
+			// scope.exitScope();
 		} else {
 			throw err;
 		}

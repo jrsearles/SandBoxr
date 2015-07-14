@@ -6,6 +6,8 @@ function ObjectType () {
 	this.className = "Object";
 	this.properties = Object.create(null);
 	this.extensible = true;
+
+	this.primitiveHint = "number";
 }
 
 ObjectType.prototype = {

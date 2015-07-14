@@ -24,13 +24,12 @@ module.exports = function CallExpression (context) {
 	if (!isNew && fnMember instanceof Reference) {
 		if (fnMember.isPropertyReference) {
 			thisArg = fnMember.base;
-		} else {
-			// thisArg = fnMember.base.getThisValue();
 		}
 	}
 
 	var params = native ? [] : fn.node.params;
-	var callee = native ? fnMember : fn.node;
+	var callee = fnMember;
+	callee.identifier = fn.name;
 
 	return context.result(func.executeFunction(context, fn, params, args, thisArg, callee, isNew));
 };

@@ -10,10 +10,10 @@ var scopedBlocks = {
 	"WithStatement": true
 };
 
-function populateHoistedVariables (node, declarators) {
+function populateHoistedVariables (node, declarators, parent) {
 	if (Array.isArray(node)) {
 		node.forEach(function (child) {
-			populateHoistedVariables(child, declarators);
+			populateHoistedVariables(child, declarators, parent);
 		});
 
 		return;
@@ -25,24 +25,32 @@ function populateHoistedVariables (node, declarators) {
 
 	if (node.type) {
 		if (node.type === "VariableDeclaration") {
-			populateHoistedVariables(node.declarations, declarators);
+			populateHoistedVariables(node.declarations, declarators, node);
 			return;
 		}
 
 		if (node.type === "VariableDeclarator" || node.type === "FunctionDeclaration") {
-			declarators.push(node);
+			declarators.push({
+				decl: node,
+				parent: parent
+			});
+
 			return;
 		}
 
 		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
-			declarators.push(node.left);
+			declarators.push({
+				decl: node.left,
+				parent: node
+			});
+
 			// keep analyzing
 		}
 
 		if (node.type === "IfStatement") {
 			// cannot hoist variables within if
-			populateHoistedVariables(node.consequent, declarators);
-			populateHoistedVariables(node.alternate, declarators);
+			populateHoistedVariables(node.consequent, declarators, node);
+			populateHoistedVariables(node.alternate, declarators, node);
 			return;
 		}
 
@@ -55,7 +63,7 @@ function populateHoistedVariables (node, declarators) {
 	var prop;
 	for (prop in node) {
 		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
-			populateHoistedVariables(node[prop], declarators);
+			populateHoistedVariables(node[prop], declarators, "type" in node ? node : parent);
 		}
 	}
 }
@@ -91,7 +99,7 @@ Environment.prototype = {
 			scope = scope.parent;
 		}
 
-		return new Reference(name, undefined, strict, this.global);
+		return new Reference(name, undefined, strict, this);
 	},
 
 	getValue: function (name) {
@@ -118,13 +126,17 @@ Environment.prototype = {
 		this.current.setMutableBinding(name, value);
 	},
 
-	createScope: function (thisArg, isEval) {
-		var env = new DeclarativeEnvironment(this.current, thisArg, isEval);
+	deleteBinding: function (name) {
+		this.current.deleteBinding(name);
+	},
+
+	createScope: function (thisArg) {
+		var env = new DeclarativeEnvironment(this.current, thisArg, this);
 		return this.setScope(env);
 	},
 
 	createObjectScope: function (obj) {
-		var env = new ObjectEnvironment(this.current, obj);
+		var env = new ObjectEnvironment(this.current, obj, this);
 		return this.setScope(env);
 	},
 
@@ -135,9 +147,10 @@ Environment.prototype = {
 		var variables = [];
 		var name;
 
-		populateHoistedVariables(node, variables);
+		populateHoistedVariables(node, variables, node);
 
-		variables.forEach(function (decl) {
+		variables.forEach(function (obj) {
+			var decl = obj.decl;
 			name = decl.name || decl.id.name;
 
 			if (decl.type === "FunctionDeclaration") {

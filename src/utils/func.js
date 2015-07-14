@@ -54,11 +54,17 @@ module.exports = {
 				returnResult = fn.nativeFunction.apply(context.create(thisArg, callee, isNew), args) || returnResult;
 			} else {
 				var executionResult = context.create(fn.node.body, callee, isNew).execute();
-				if (isNew && executionResult && executionResult.exit && executionResult.result && !executionResult.result.isPrimitive) {
-					returnResult = executionResult.result;
-				} else {
-					returnResult = returnResult || (executionResult && executionResult.result);
+				if (executionResult && executionResult.exit && executionResult.result) {
+					if (!isNew || !executionResult.result.isPrimitive) {
+						returnResult = executionResult.result;
+					}
 				}
+				
+				// if (isNew && executionResult && executionResult.exit && executionResult.result && !executionResult.result.isPrimitive) {
+				// 	returnResult = executionResult.result;
+				// } else {
+				// 	returnResult = returnResult || (executionResult && executionResult.exit && executionResult.result);
+				// }
 			}
 		} catch (err) {
 			scope.exitScope();

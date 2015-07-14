@@ -1,11 +1,11 @@
 var convert = require("../utils/convert");
 var types = require("../utils/types");
 var func = require("../utils/func");
-
 var slice = Array.prototype.slice;
 
 module.exports = function (env, options) {
 	var globalObject = env.global;
+	var undef = env.global.getProperty("undefined").getValue();
 	var objectFactory = env.objectFactory;
 	// var proto = new ObjectType();
 	var functionClass = objectFactory.createFunction(function () {
@@ -14,7 +14,7 @@ module.exports = function (env, options) {
 
 		if (options.parser && arguments.length > 0) {
 			var args = slice.call(arguments).map(function (arg) { return types.isNullOrUndefined(arg) ? "" : convert.toPrimitive(context, arg, "string"); });
-			var ast = options.parser("(function () {" + args.pop() + "}).apply(this, arguments);");
+			var ast = options.parser("(function () { " + args.pop() + "}).apply(this, arguments);");
 
 			args = Array.prototype.concat.apply([], args.map(function (arg) { return arg.split(","); }));
 			var params = args.map(function (arg) {
@@ -30,7 +30,13 @@ module.exports = function (env, options) {
 				body: ast
 			};
 
-			funcInstance = objectFactory.createFunction(callee, env.globalScope);
+			var fn = objectFactory.createFunction(callee);
+			funcInstance = objectFactory.createFunction(function () {
+				// context, fn, params, args, thisArg, callee
+				// func.loadArguments(params, arguments, this.env, callee);
+				var executionResult = func.getFunctionResult(this, fn, params, arguments, globalObject, callee);
+				return executionResult && executionResult.result || undef;
+			}, env.globalScope);
 		} else {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
@@ -49,6 +55,10 @@ module.exports = function (env, options) {
 		// return objectFactory.createObject();
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 	functionClass.putValue("constructor", functionClass);
+	
+	// function itself is a function
+	functionClass.parent = functionClass;
+
 	globalObject.define("Function", functionClass);
 
 	var proto = functionClass.proto;
@@ -67,19 +77,13 @@ module.exports = function (env, options) {
 		return this.node;
 	}, 0, "Function.prototype.valueOf"));
 
-	proto.define("call", objectFactory.createFunction(function (thisArg) {
-		if (types.isNullOrUndefined(thisArg)) {
-			thisArg = globalObject;
-		} else {
-			thisArg = convert.toObject(thisArg, objectFactory);
-		}
-
+	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
 
-		return func.executeFunction(this, this.node, params, args, thisArg, callee);
-	}));
+		return func.executeFunction(this, this.node, params, args, thisArg || undef, callee);
+	}, 1, "Function.prototype.call"));
 
 	proto.define("apply", objectFactory.createFunction(function (thisArg, argsArray) {
 		if (argsArray) {

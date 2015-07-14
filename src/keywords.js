@@ -10,7 +10,7 @@ module.exports = {
 		"case",
 		"else",
 		"enum",
-		"eval",
+		// "eval",
 		"null",
 		"this",
 		"true",

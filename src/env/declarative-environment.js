@@ -1,18 +1,18 @@
 var Reference = require("./reference");
 var PropertyDescriptor = require("../types/property-descriptor");
 
-function DeclarativeEnvironment (parent, thisArg, isEval) {
+function DeclarativeEnvironment (parent, thisArg, env) {
 	this.bindings = Object.create(null);
 	this.parent = parent;
 	this.thisNode = thisArg;
-	this.isEval = isEval;
+	this.env = env;
 }
 
 DeclarativeEnvironment.prototype = {
 	constructor: DeclarativeEnvironment,
 
 	createReference: function (name, strict) {
-		return new Reference(name, this, strict);
+		return new Reference(name, this, strict, this.env);
 	},
 
 	hasBinding: function (name) {
@@ -23,7 +23,7 @@ DeclarativeEnvironment.prototype = {
 		if (!this.hasBinding(name)) {
 			this.bindings[name] = new PropertyDescriptor(this, {
 				value: undefined,
-				configurable: this.isEval,
+				configurable: false,
 				enumerable: true,
 				writable: true
 			});

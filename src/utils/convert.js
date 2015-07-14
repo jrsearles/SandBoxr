@@ -81,16 +81,16 @@ module.exports = {
 		return obj;
 	},
 
-	toArray: function (obj) {
+	toArray: function (obj, length) {
 		var arr = [];
 
 		if (obj) {
-			var ln = obj.getProperty("length").getValue().value;
+			var ln = length >= 0 ? length : obj.getProperty("length").getValue().value;
 			var i = 0;
 
 			while (i < ln) {
-				if (i in obj.properties) {
-					arr.push(obj.getProperty(i).getValue());
+				if (obj.hasProperty(i)) {
+					arr[i] = obj.getProperty(i).getValue();
 				}
 
 				i++;
@@ -98,10 +98,13 @@ module.exports = {
 		}
 
 		return arr;
-	},
+	}, 
 
 	toPrimitive: function (executionContext, obj, preferredType) {
 		preferredType = preferredType && preferredType.toLowerCase();
+		if (!preferredType && obj) {
+			preferredType = obj.primitiveHint;
+		}
 
 		if (preferredType === "string") {
 			return getString(executionContext, obj);

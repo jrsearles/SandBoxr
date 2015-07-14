@@ -1,6 +1,7 @@
 var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 var convert = require("../utils/convert");
+var types = require("../utils/types");
 var ArrayType = require("../types/array-type");
 
 function getStartIndex (index, length) {
@@ -19,8 +20,16 @@ function getEndIndex (index, length) {
 	return Math.min(index, length);
 }
 
+function getLength (executionContext, source) {
+	if (source.hasProperty("length")) {
+		return convert.toUInt32(executionContext, source.getProperty("length").getValue());
+	}
+
+	return 0;
+}
+
 function executeCallback (callback, thisArg, executionContext, index) {
-	var scope = executionContext.env.createScope(thisArg);
+	var scope = executionContext.env.createScope(thisArg || executionContext.env.global);
 	scope.init(callback.node.body);
 
 	var undef = executionContext.env.global.getProperty("undefined").getValue();
@@ -73,6 +82,7 @@ module.exports = function (env) {
 
 		if (arguments.length > 0) {
 			if (arguments.length === 1 && length.type === "number") {
+				contracts.assertIsValidArrayLength(arguments[0].value);
 				newArray.putValue("length", length, false, this);
 			} else {
 				for (var i = 0, ln = arguments.length; i < ln; i++) {
@@ -85,15 +95,16 @@ module.exports = function (env) {
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = arrayClass.proto;
+	proto.className = "Array";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
 	arrayClass.define("isArray", objectFactory.createFunction(function (obj) {
-		return objectFactory.createPrimitive(obj === proto || obj instanceof ArrayType);
+		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
+		// return objectFactory.createPrimitive(obj === proto || obj instanceof ArrayType);
 	}));
 
 	proto.define("push", objectFactory.createBuiltInFunction(function (arg) {
-		var start = convert.toUInt32(this, this.node.getProperty("length").getValue());
-
+		var start = getLength(this, this.node);
 		var i = 0;
 		var length = arguments.length;
 		for (; i < length; i++) {
@@ -101,30 +112,37 @@ module.exports = function (env) {
 		}
 
 		var newLength = objectFactory.createPrimitive(start + i);
-		this.node.putValue("length", newLength);
+		this.node.putValue("length", newLength, true);
 		return newLength;
 	}, 1, "Array.prototype.push"));
 
 	proto.define("pop", objectFactory.createBuiltInFunction(function () {
 		var obj;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
-		if (length) {
-			obj = this.node.getProperty(--length).getValue();
-			this.node.deleteProperty(length);
+		var i = getLength(this, this.node);
+
+		if (i > 0) {
+			i--;
+
+			if (this.node.hasProperty(i)) {
+				obj = this.node.getProperty(i).getValue();
+				this.node.deleteProperty(i, true);
+			}
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(length || 0));
+		this.node.putValue("length", objectFactory.createPrimitive(i));
 		return obj || undef;
 	}, 0, "Array.prototype.pop"));
 
 	proto.define("shift", objectFactory.createBuiltInFunction(function () {
 		var obj;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		var i = 0;
 
 		if (length > 0) {
-			obj = this.node.getProperty(i).getValue();
-			this.node.deleteProperty(i);
+			if (this.node.hasProperty(i)) {
+				obj = this.node.getProperty(i).getValue();
+				this.node.deleteProperty(i);
+			}
 
 			while (++i < length) {
 				if (this.node.hasProperty(i)) {
@@ -133,39 +151,45 @@ module.exports = function (env) {
 					this.node.deleteProperty(i);
 				}
 			}
+
+			this.node.deleteProperty(length - 1);
 		}
 
 		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length));
 		return obj || undef;
 	}, 0, "Array.prototype.shift"));
 
-	proto.define("unshift", objectFactory.createBuiltInFunction(function (elementN) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
-		var count = arguments.length;
-		var i = length || 0;
+	proto.define("unshift", objectFactory.createBuiltInFunction(function () {
+		var length = getLength(this, this.node);
+		var argCount = arguments.length;
+		var i = length;
+		var to, from;
 
 		while (i > 0) {
-			if (this.node.hasProperty(i - 1)) {
-				this.node.putValue(i + count - 1, this.node.getProperty(i - 1).getValue());
+			from = i - 1;
+			to = i + argCount - 1;
+
+			if (this.node.hasProperty(from)) {
+				this.node.putValue(to, this.node.getProperty(from).getValue(), true);
 			} else {
-				this.node.deleteProperty(i + count - 1);
+				this.node.deleteProperty(to, true);
 			}
 
 			i--;
 		}
 
-		for (; i < count; i++) {
-			this.node.putValue(i, arguments[i]);
+		for (i = 0; i < argCount; i++) {
+			this.node.putValue(i, arguments[i], true);
 		}
 
-		var newLength = objectFactory.createPrimitive(count + length);
-		this.node.putValue("length", newLength);
+		var newLength = objectFactory.createPrimitive(argCount + length);
+		this.node.putValue("length", newLength, true);
 		return newLength;
 	}, 1, "Array.prototype.unshift"));
 
 	proto.define("slice", objectFactory.createBuiltInFunction(function (begin, end) {
 		var source = this.node;
-		var length = convert.toUInt32(this, source.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		begin = begin ? convert.toInteger(this, begin) : 0;
 
 		if (!end || end.type === "undefined") {
@@ -188,7 +212,8 @@ module.exports = function (env) {
 	}, 2, "Array.prototype.slice"));
 
 	proto.define("splice", objectFactory.createBuiltInFunction(function (start, deleteCount) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
+
 		start = convert.toInteger(this, start);
 		if (start < 0) {
 			start = Math.max(length + start, 0);
@@ -196,7 +221,13 @@ module.exports = function (env) {
 			start = Math.min(start, length);
 		}
 
-		deleteCount = Math.min(Math.max(convert.toInteger(this, deleteCount), 0), length - start);
+		deleteCount = convert.toInteger(this, deleteCount);
+		if (deleteCount < 0) {
+			deleteCount = 0;
+		} else {
+			deleteCount = Math.min(Math.max(deleteCount, 0), length - start);
+		}
+
 		var removed = objectFactory.create("Array");
 
 		var k = 0;
@@ -263,18 +294,23 @@ module.exports = function (env) {
 
 			if (current instanceof ArrayType) {
 				for (i = 0, length = current.getProperty("length").getValue().value; i < length; i++) {
-					newArray.putValue(index++, current.getProperty(i).getValue());
+					if (current.hasProperty(i)) {
+						newArray.putValue(index, current.getProperty(i).getValue());
+					}
+
+					index++;
 				}
 			} else {
 				newArray.putValue(index++, current);
 			}
 		}
 
+		newArray.putValue("length", objectFactory.createPrimitive(index), true);
 		return newArray;
 	}, 1, "Array.prototype.concat"));
 
 	function join (separator) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		separator = arguments.length === 0 || separator === undef ? "," : convert.toPrimitive(this, separator, "string");
 		var stringValues = [];
 		var stringValue;
@@ -300,7 +336,7 @@ module.exports = function (env) {
 
 	proto.define("indexOf", objectFactory.createBuiltInFunction(function (searchElement, fromIndex) {
 		searchElement = searchElement || undef;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		var index = arguments.length === 1 ? 0 : convert.toInteger(this, fromIndex);
 		var notFound = objectFactory.createPrimitive(-1);
 
@@ -321,7 +357,7 @@ module.exports = function (env) {
 
 	proto.define("lastIndexOf", objectFactory.createBuiltInFunction(function (searchElement, fromIndex) {
 		searchElement = searchElement || undef;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		var index = arguments.length === 1 ? length - 1 : convert.toInteger(this, fromIndex);
 
 		if (index < 0) {
@@ -338,7 +374,7 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.lastIndexOf"));
 
 	proto.define("forEach", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -349,7 +385,7 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.forEach"));
 
 	proto.define("map", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.map");
 		contracts.assertIsFunction(callback);
 
@@ -367,7 +403,7 @@ module.exports = function (env) {
 
 	proto.define("filter", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.filter");
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		var newArray = objectFactory.create("Array");
@@ -384,7 +420,7 @@ module.exports = function (env) {
 
 	proto.define("every", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.every");
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -398,8 +434,7 @@ module.exports = function (env) {
 
 	proto.define("some", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.some");
-
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -412,7 +447,7 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.some"));
 
 	proto.define("reduce", objectFactory.createBuiltInFunction(function (callback, initialValue) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduce");
 		contracts.assertIsFunction(callback);
 
@@ -444,102 +479,170 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.reduce"));
 
 	proto.define("reduceRight", objectFactory.createBuiltInFunction(function (callback, initialValue) {
-		var index = convert.toUInt32(this, this.node.getProperty("length").getValue());
-
+		var length = getLength(this, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
 		contracts.assertIsFunction(callback);
 
-		index--;
-		var value;
+		// length--;
+		var accumulator;
 
+		if (length === 0 && arguments.length === 1) {
+			throw new TypeError("Reduce of empty array with no initial value");
+		}
+
+		var k = length - 1;
 		if (arguments.length >= 2) {
-			value = initialValue;
+			accumulator = initialValue;
 		} else {
 			// make sure array isn't empty
-			while (index >= 0 && !(this.node.hasProperty(index))) {
-				index--;
+			var hasElements = false;
+			while (k >= 0 && !hasElements) {
+				hasElements = this.node.hasProperty(k);
+				if (hasElements) {
+					accumulator = this.node.getProperty(k).getValue();
+				}
+
+				k--;
 			}
 
-			if (index <= 0) {
+			if (!hasElements) {
 				throw new TypeError("Reduce of empty array with no initial value");
 			}
-
-			value = this.node.getProperty(index--).getValue();
 		}
 
-		for (; index >= 0; index--) {
-			if (this.node.hasProperty(index)) {
-				value = executeAccumulator(callback, value, this, index);
+		while (k >= 0) {
+			if (this.node.hasProperty(k)) {
+				accumulator = executeAccumulator(callback, accumulator, this, k);
 			}
+
+			k--;
 		}
 
-		return value;
+		return accumulator;
 	}, 1, "Array.prototype.reduceRight"));
 
 	proto.define("reverse", objectFactory.createBuiltInFunction(function () {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
-		var temp;
+		var length = getLength(this, this.node);
+		var middle = Math.floor(length / 2);
+		var lower = 0;
+		var upper, upperValue, lowerValue;
 
-		for (var i = 0, ln = length / 2; i < ln; i++) {
-			temp = this.node.getProperty(length - i - 1).getValue();
-			this.node.putValue(length - i - 1, this.node.getProperty(i).getValue());
-			this.node.putValue(i, temp);
+		while (lower !== middle) {
+			upper = length - lower - 1;
+			lowerValue = this.node.hasProperty(lower) && this.node.getProperty(lower).getValue();
+			upperValue = this.node.hasProperty(upper) && this.node.getProperty(upper).getValue();
+
+			if (upperValue) {
+				this.node.putValue(lower, upperValue, true);
+			}
+
+			if (lowerValue) {
+				this.node.putValue(upper, lowerValue, true);
+			}
+
+			if (upperValue && !lowerValue) {
+				this.node.deleteProperty(upper);
+			} else if (lowerValue && !upperValue) {
+				this.node.deleteProperty(lower);
+			}
+
+			lower++;
 		}
 
 		return this.node;
 	}, 0, "Array.prototype.reverse"));
 
-	function defaultComparer (a, b) {
-		a = a.toString();
-		b = b.toString();
-
-		if (a < b) {
-			return -1;
-		}
-
-		if (a > b) {
-			return 1;
-		}
-
-		return 0;
-	}
-
 	proto.define("sort", objectFactory.createBuiltInFunction(function (compareFunction) {
 		var executionContext = this;
 		var arr = this.node;
+		var length = getLength(this, arr);
+		var i = 0;
 
-		var wrappedComparer = compareFunction && function (a, b) {
-			var scope = executionContext.env.createScope(arr);
-			func.loadArguments(compareFunction.node.params, [a, b], executionContext.env);
+		var comparer;
+		if (types.isNullOrUndefined(compareFunction)) {
+			comparer = function defaultComparer (a, b) {
+				a = convert.toString(executionContext, a);
+				b = convert.toString(executionContext, b);
 
-			try {
-				return executionContext.create(compareFunction.node.body, compareFunction.node).execute().result.getValue().value;
-			} catch (err) {
+				if (a < b) {
+					return -1;
+				}
+
+				if (a > b) {
+					return 1;
+				}
+
+				return 0;
+			};
+		} else {
+			comparer = function (a, b) {
+				var scope = executionContext.env.createScope(undef);
+				scope.init(compareFunction.node.body);
+
+				func.loadArguments(compareFunction.node.params, [a, b], executionContext.env);
+				var executionResult;
+
+				try {
+					executionResult = executionContext.create(compareFunction.node.body, compareFunction.node).execute();
+				} catch (err) {
+					scope.exitScope();
+					throw err;
+				}
+
 				scope.exitScope();
-				throw err;
-			}
 
-			scope.exitScope();
-		};
+				if (executionResult && executionResult.exit && executionResult.result) {
+					return executionResult.result.getValue().value;
+				}
+
+				return undefined;
+			};
+		}
 
 		// convert to array, run the wrapped comparer, then re-assign indexes
-		convert.toArray(arr)
-			.sort(wrappedComparer || defaultComparer)
-			.forEach(function (element, index) {
-				arr.putValue(index, element, false, this);
-			});
+		var sortedArray = convert.toArray(arr, length)
+			// undefined positions are handled by the underlying sort algorithm, so replace them with the raw primitive value
+			.map(function (el) { return el.isPrimitive && el.value === undefined ? undefined : el; })
+			.sort(comparer);
+
+		while (i < length) {
+			if (i in sortedArray) {
+				arr.putValue(i, sortedArray[i], false, this);
+			} else {
+				arr.deleteProperty(i, false);
+			}
+
+			i++;
+		}
+
+		// .forEach(function (element, index) {
+		// 	arr.putValue(index, element, false, this);
+		// });
 
 		return arr;
 	}, 1, "Array.prototype.sort"));
 
 	proto.define("toLocaleString", objectFactory.createBuiltInFunction(function () {
 		// todo: implement for reach
-		var values = convert.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
-		return objectFactory.createPrimitive(values.toLocaleString());
+		var length = getLength(this, this.node);
+		var arr = new Array(length);
+		var i = 0;
+
+		while (i < length) {
+			if (this.node.hasProperty(i)) {
+				// callMethod: function (obj, name, args, executionContext)
+				arr[i] = func.callMethod(this.node.getProperty(i).getValue(), "toLocaleString", [], this);
+			}
+
+			i++;
+		}
+
+		// var values = convert.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
+		return objectFactory.createPrimitive(arr.join());
 	}, 0, "Array.prototype.toLocaleString"));
 
 	// todo: this is a bit hacky - toString will call join if available per spec,
 	// but will call Object..toString if not
-	proto.define("toString", objectFactory.createBuiltInFunction(join, 1, "Array.prototype.toString"));
+	proto.define("toString", objectFactory.createBuiltInFunction(join, 0, "Array.prototype.toString"));
 	globalObject.define("Array", arrayClass);
 };

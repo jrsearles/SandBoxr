@@ -31,18 +31,18 @@ module.exports = SandBoxr;
 var Reference = require("./reference");
 var PropertyDescriptor = require("../types/property-descriptor");
 
-function DeclarativeEnvironment (parent, thisArg, isEval) {
+function DeclarativeEnvironment (parent, thisArg, env) {
 	this.bindings = Object.create(null);
 	this.parent = parent;
 	this.thisNode = thisArg;
-	this.isEval = isEval;
+	this.env = env;
 }
 
 DeclarativeEnvironment.prototype = {
 	constructor: DeclarativeEnvironment,
 
 	createReference: function (name, strict) {
-		return new Reference(name, this, strict);
+		return new Reference(name, this, strict, this.env);
 	},
 
 	hasBinding: function (name) {
@@ -53,7 +53,7 @@ DeclarativeEnvironment.prototype = {
 		if (!this.hasBinding(name)) {
 			this.bindings[name] = new PropertyDescriptor(this, {
 				value: undefined,
-				configurable: this.isEval,
+				configurable: false,
 				enumerable: true,
 				writable: true
 			});
@@ -132,10 +132,10 @@ var scopedBlocks = {
 	"WithStatement": true
 };
 
-function populateHoistedVariables (node, declarators) {
+function populateHoistedVariables (node, declarators, parent) {
 	if (Array.isArray(node)) {
 		node.forEach(function (child) {
-			populateHoistedVariables(child, declarators);
+			populateHoistedVariables(child, declarators, parent);
 		});
 
 		return;
@@ -147,24 +147,32 @@ function populateHoistedVariables (node, declarators) {
 
 	if (node.type) {
 		if (node.type === "VariableDeclaration") {
-			populateHoistedVariables(node.declarations, declarators);
+			populateHoistedVariables(node.declarations, declarators, node);
 			return;
 		}
 
 		if (node.type === "VariableDeclarator" || node.type === "FunctionDeclaration") {
-			declarators.push(node);
+			declarators.push({
+				decl: node,
+				parent: parent
+			});
+
 			return;
 		}
 
 		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
-			declarators.push(node.left);
+			declarators.push({
+				decl: node.left,
+				parent: node
+			});
+
 			// keep analyzing
 		}
 
 		if (node.type === "IfStatement") {
 			// cannot hoist variables within if
-			populateHoistedVariables(node.consequent, declarators);
-			populateHoistedVariables(node.alternate, declarators);
+			populateHoistedVariables(node.consequent, declarators, node);
+			populateHoistedVariables(node.alternate, declarators, node);
 			return;
 		}
 
@@ -177,7 +185,7 @@ function populateHoistedVariables (node, declarators) {
 	var prop;
 	for (prop in node) {
 		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
-			populateHoistedVariables(node[prop], declarators);
+			populateHoistedVariables(node[prop], declarators, "type" in node ? node : parent);
 		}
 	}
 }
@@ -213,7 +221,7 @@ Environment.prototype = {
 			scope = scope.parent;
 		}
 
-		return new Reference(name, undefined, strict, this.global);
+		return new Reference(name, undefined, strict, this);
 	},
 
 	getValue: function (name) {
@@ -240,13 +248,17 @@ Environment.prototype = {
 		this.current.setMutableBinding(name, value);
 	},
 
-	createScope: function (thisArg, isEval) {
-		var env = new DeclarativeEnvironment(this.current, thisArg, isEval);
+	deleteBinding: function (name) {
+		this.current.deleteBinding(name);
+	},
+
+	createScope: function (thisArg) {
+		var env = new DeclarativeEnvironment(this.current, thisArg, this);
 		return this.setScope(env);
 	},
 
 	createObjectScope: function (obj) {
-		var env = new ObjectEnvironment(this.current, obj);
+		var env = new ObjectEnvironment(this.current, obj, this);
 		return this.setScope(env);
 	},
 
@@ -257,9 +269,10 @@ Environment.prototype = {
 		var variables = [];
 		var name;
 
-		populateHoistedVariables(node, variables);
+		populateHoistedVariables(node, variables, node);
 
-		variables.forEach(function (decl) {
+		variables.forEach(function (obj) {
+			var decl = obj.decl;
 			name = decl.name || decl.id.name;
 
 			if (decl.type === "FunctionDeclaration") {
@@ -313,16 +326,17 @@ module.exports = Environment;
 "use strict";
 var PropertyReference = require("./property-reference");
 
-function ObjectEnvironment (parent, obj) {
+function ObjectEnvironment (parent, obj, env) {
 	this.parent = parent;
 	this.object = this.thisNode = obj;
+	this.env = env;
 }
 
 ObjectEnvironment.prototype = {
 	constructor: ObjectEnvironment,
 
 	createReference: function (name, strict) {
-		return new PropertyReference(name, this.object, strict);
+		return new PropertyReference(name, this.object, strict, this.env);
 	},
 
 	getValue: function (name) {
@@ -386,9 +400,10 @@ module.exports = ObjectEnvironment;
 var Reference = require("./reference");
 var PrimitiveType = require("../types/primitive-type");
 
-function PropertyReference (name, object, strict) {
+function PropertyReference (name, object, strict, env) {
 	Reference.apply(this, arguments);
 	this.isPropertyReference = true;
+	this.env = env;
 }
 
 PropertyReference.prototype = Object.create(Reference.prototype);
@@ -401,14 +416,14 @@ PropertyReference.prototype.getValue = function () {
 
 PropertyReference.prototype.putValue = function (value) {
 	if (this.base.hasProperty(this.name)) {
-		this.base.putValue(this.name, value, this.strict);
+		this.base.putValue(this.name, value, this.strict, this.env);
 	} else {
-		this.base.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, this.strict);
+		this.base.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, this.strict, this.env);
 	}
 };
 
 PropertyReference.prototype.deleteBinding = function (name) {
-	return this.base.deleteProperty(name);
+	return this.base.deleteProperty(name, true);
 };
 
 PropertyReference.prototype.isUnresolved = function () { return false; };
@@ -417,11 +432,11 @@ module.exports = PropertyReference;
 
 },{"../types/primitive-type":63,"./reference":6}],6:[function(require,module,exports){
 "use strict";
-function Reference (name, base, strict, global) {
+function Reference (name, base, strict, env) {
 	this.name = name;
 	this.base = base;
 	this.strict = strict;
-	this.global = global;
+	this.env = env;
 
 	this.isReference = true;
 }
@@ -429,15 +444,15 @@ function Reference (name, base, strict, global) {
 Reference.prototype = {
 	constructor: Reference,
 
-	putValue: function (value, throwOnError) {
-		if (this.base === undefined && throwOnError) {
+	putValue: function (value) {
+		if (this.base === undefined && this.strict) {
 			throw new ReferenceError(this.name + " is not defined");
 		}
 
 		if (this.base) {
-			this.base.setMutableBinding(this.name, value, throwOnError);
+			this.base.setMutableBinding(this.name, value, this.strict);
 		} else {
-			this.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
+			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
 		}
 	},
 
@@ -474,6 +489,7 @@ function ExecutionContext (env, node, callee) {
 	this.env = env;
 
 	this.label = "";
+	this.value = null;
 	this.isNew = false;
 	this.strict = false;
 }
@@ -483,41 +499,45 @@ ExecutionContext.prototype.execute = function () {
 };
 
 ExecutionContext.prototype.create = function (node, callee, isNew) {
-	var context = new ExecutionContext(this.env, node, callee);
+	var context = new ExecutionContext(this.env, node, callee || this.callee);
+	context.value = this.value;
 	context.isNew = !!isNew;
 	return context;
 };
 
 ExecutionContext.prototype.createLabel = function (node, label) {
-	var context = new ExecutionContext(this.env, node);
+	var context = this.create(node);
 	context.label = label;
 	return context;
 };
 
 ExecutionContext.prototype.cancel = function (label) {
-	var result = new ExecutionResult(null, label);
+	var result = this.result(this.value, label);
 	result.cancel = true;
 	return result;
 };
 
 ExecutionContext.prototype.skip = function (label) {
-	var result = new ExecutionResult(null, label);
+	var result = this.result(this.value, label);
 	result.skip = true;
 	return result;
 };
 
 ExecutionContext.prototype.exit = function (value) {
-	var result = new ExecutionResult(value);
+	this.callee = null;
+
+	var result = this.result(value);
 	result.exit = true;
 	return result;
 };
 
 ExecutionContext.prototype.result = function (value, name, obj) {
+	this.value = value;
 	return new ExecutionResult(value, name, obj);
 };
 
 ExecutionContext.prototype.empty = function () {
-	return new ExecutionResult();
+	return this.result(undefined);
 };
 
 module.exports = ExecutionContext;
@@ -539,12 +559,12 @@ ExecutionResult.prototype.isCancelled = function () {
 };
 
 ExecutionResult.prototype.shouldBreak = function (context, loop) {
-	if (!this.exit && !this.cancel && !this.skip) {
-		return false;
-	}
-
 	if (this.exit) {
 		return true;
+	}
+
+	if (!this.cancel && !this.skip) {
+		return false;
 	}
 
 	var breaking = true;
@@ -809,13 +829,12 @@ module.exports = function CallExpression (context) {
 	if (!isNew && fnMember instanceof Reference) {
 		if (fnMember.isPropertyReference) {
 			thisArg = fnMember.base;
-		} else {
-			// thisArg = fnMember.base.getThisValue();
 		}
 	}
 
 	var params = native ? [] : fn.node.params;
-	var callee = native ? fnMember : fn.node;
+	var callee = fnMember;
+	callee.identifier = fn.name;
 
 	return context.result(func.executeFunction(context, fn, params, args, thisArg, callee, isNew));
 };
@@ -827,7 +846,7 @@ module.exports = function DoWhileStatement (context) {
 	var passed = true;
 
 	if (context.node.type === "WhileStatement") {
-		passed = context.create(context.node.test).execute().result.toBoolean();
+		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
 	}
 
 	while (passed) {
@@ -837,7 +856,7 @@ module.exports = function DoWhileStatement (context) {
 			break;
 		}
 
-		passed = context.create(context.node.test).execute().result.toBoolean();
+		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
 	}
 
 	return result;
@@ -866,25 +885,36 @@ module.exports = function ForInStatement (context) {
 		// need to unwrap the declaration to get it
 		// todo: this is sloppy - need to revisit
 		context.node.left.declarations.forEach(function (decl) {
-			left = context.create(decl).execute();
+			left = context.create(decl).execute().result;
 		});
 	} else {
-		left = context.create(context.node.left).execute();
+		left = context.create(context.node.left).execute().result;
 	}
 
 	var obj = context.create(context.node.right).execute().result.getValue();
 	var result;
 
+	// track visited properties to prevent iterating over shadowed properties, regardless of enumerable flag
+	// 12.6.4 NOTE: a property of a prototype is not enumerated if it is “shadowed” because some previous
+	// object in the prototype chain has a property with the same name. The values of [[Enumerable]] attributes
+	// are not considered when determining if a property of a prototype object is shadowed by a previous object
+	// on the prototype chain.
+	var visited = Object.create(null);
+
 	while (obj) {
 		for (var prop in obj.properties) {
-			if (obj.properties[prop].enumerable) {
-				context.env.putValue(left.name, context.env.objectFactory.createPrimitive(prop), false, context);
+			if (obj.properties[prop].enumerable && !visited[prop]) {
+				left.putValue(context.env.objectFactory.createPrimitive(prop));
+
+				// context.env.putValue(left.name, context.env.objectFactory.createPrimitive(prop), false, context);
 				result = context.create(context.node.body).execute();
 
 				if (result && result.shouldBreak(context, true)) {
 					return result;
 				}
 			}
+
+			visited[prop] = true;
 		}
 
 		obj = obj.proto;
@@ -935,11 +965,12 @@ module.exports = function FunctionExpression (context) {
 	var ctor = context.env.global.getProperty("Function").getValue();
 	var objectFactory = context.env.objectFactory;
 	var proto = objectFactory.createObject();
-	var func = objectFactory.createFunction(context.node, context.env.current, proto, ctor);
+	var func = objectFactory.createFunction(context.node, context.env.current, proto);
 
 	// todo:
-	if (context.node.id /* && context.node.expression */) {
-		context.env.putValue(context.node.id.name, func);
+	if (context.node.id) {
+		func.name = context.node.id.name;
+		// context.env.putValue(context.node.id.name, func);
 	}
 
 	return context.result(func);
@@ -948,6 +979,12 @@ module.exports = function FunctionExpression (context) {
 },{}],21:[function(require,module,exports){
 "use strict";
 module.exports = function Identifier (context) {
+	var name = context.node.name;
+
+	if (context.callee && context.callee.identifier === name) {
+		return context.result(context.callee);
+	}
+	
 	return context.result(context.env.getReference(context.node.name));
 };
 
@@ -1061,7 +1098,7 @@ module.exports = function MemberExpression (context) {
 		name = context.node.property.name;
 	}
 
-	value = new PropertyReference(name, obj);
+	value = new PropertyReference(name, obj, false, context.env);
 	return context.result(value);
 };
 
@@ -1207,7 +1244,7 @@ module.exports = function ThrowStatement (context) {
 		throw arg.value;
 	}
 
-	var err = new Error(arg.getProperty("message").getValue().value);
+	var err = new Error();
 	err.wrappedError = arg;
 	throw err;
 };
@@ -1223,22 +1260,30 @@ module.exports = function TryCatchStatement (context) {
 		if (context.node.handler) {
 			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
-			var scope = context.env.createScope();
-			scope.init(context.node.handler.body);
+			// var scope = context.env.createScope();
+			// scope.init(context.node.handler.body);
 
 			var errVar = context.node.handler.param.name;
+			var hasBinding = context.env.hasBinding(errVar);
 
-			context.env.createBinding(errVar);
+			if (!hasBinding) {
+				context.env.createBinding(errVar);
+			}
+
 			context.env.setBinding(errVar, caughtError);
 
 			try {
 				result = context.create(context.node.handler.body, context.node.handler).execute();
 			} catch (catchError) {
-				scope.exitScope();
+				// scope.exitScope();
 				throw catchError;
+			} finally {
+				if (!hasBinding) {
+					context.env.deleteBinding(errVar);
+				}
 			}
 
-			scope.exitScope();
+			// scope.exitScope();
 		} else {
 			throw err;
 		}
@@ -1362,7 +1407,7 @@ module.exports = function VariableDeclaration (context) {
 },{}],39:[function(require,module,exports){
 "use strict";
 module.exports = function VariableDeclarator (context) {
-	var id = context.node.id.name;
+	var name = context.node.id.name;
 	var value;
 
 	if (context.node.init) {
@@ -1371,10 +1416,11 @@ module.exports = function VariableDeclarator (context) {
 
 	// variables have already been hoisted so we just need to initialize them if defined
 	if (value) {
-		context.env.putValue(id, value.getValue(), false, context);
+		context.env.putValue(name, value.getValue(), false, context);
 	}
 
-	return context.result(value, id);
+	return context.result(context.env.getReference(name));
+	// return context.result(value, id);
 };
 
 },{}],40:[function(require,module,exports){
@@ -1411,7 +1457,7 @@ module.exports = {
 		"case",
 		"else",
 		"enum",
-		"eval",
+		// "eval",
 		"null",
 		"this",
 		"true",
@@ -1470,6 +1516,7 @@ module.exports = {
 var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 var convert = require("../utils/convert");
+var types = require("../utils/types");
 var ArrayType = require("../types/array-type");
 
 function getStartIndex (index, length) {
@@ -1488,8 +1535,16 @@ function getEndIndex (index, length) {
 	return Math.min(index, length);
 }
 
+function getLength (executionContext, source) {
+	if (source.hasProperty("length")) {
+		return convert.toUInt32(executionContext, source.getProperty("length").getValue());
+	}
+
+	return 0;
+}
+
 function executeCallback (callback, thisArg, executionContext, index) {
-	var scope = executionContext.env.createScope(thisArg);
+	var scope = executionContext.env.createScope(thisArg || executionContext.env.global);
 	scope.init(callback.node.body);
 
 	var undef = executionContext.env.global.getProperty("undefined").getValue();
@@ -1542,6 +1597,7 @@ module.exports = function (env) {
 
 		if (arguments.length > 0) {
 			if (arguments.length === 1 && length.type === "number") {
+				contracts.assertIsValidArrayLength(arguments[0].value);
 				newArray.putValue("length", length, false, this);
 			} else {
 				for (var i = 0, ln = arguments.length; i < ln; i++) {
@@ -1554,15 +1610,16 @@ module.exports = function (env) {
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = arrayClass.proto;
+	proto.className = "Array";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
 	arrayClass.define("isArray", objectFactory.createFunction(function (obj) {
-		return objectFactory.createPrimitive(obj === proto || obj instanceof ArrayType);
+		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
+		// return objectFactory.createPrimitive(obj === proto || obj instanceof ArrayType);
 	}));
 
 	proto.define("push", objectFactory.createBuiltInFunction(function (arg) {
-		var start = convert.toUInt32(this, this.node.getProperty("length").getValue());
-
+		var start = getLength(this, this.node);
 		var i = 0;
 		var length = arguments.length;
 		for (; i < length; i++) {
@@ -1570,30 +1627,37 @@ module.exports = function (env) {
 		}
 
 		var newLength = objectFactory.createPrimitive(start + i);
-		this.node.putValue("length", newLength);
+		this.node.putValue("length", newLength, true);
 		return newLength;
 	}, 1, "Array.prototype.push"));
 
 	proto.define("pop", objectFactory.createBuiltInFunction(function () {
 		var obj;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
-		if (length) {
-			obj = this.node.getProperty(--length).getValue();
-			this.node.deleteProperty(length);
+		var i = getLength(this, this.node);
+
+		if (i > 0) {
+			i--;
+
+			if (this.node.hasProperty(i)) {
+				obj = this.node.getProperty(i).getValue();
+				this.node.deleteProperty(i, true);
+			}
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(length || 0));
+		this.node.putValue("length", objectFactory.createPrimitive(i));
 		return obj || undef;
 	}, 0, "Array.prototype.pop"));
 
 	proto.define("shift", objectFactory.createBuiltInFunction(function () {
 		var obj;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		var i = 0;
 
 		if (length > 0) {
-			obj = this.node.getProperty(i).getValue();
-			this.node.deleteProperty(i);
+			if (this.node.hasProperty(i)) {
+				obj = this.node.getProperty(i).getValue();
+				this.node.deleteProperty(i);
+			}
 
 			while (++i < length) {
 				if (this.node.hasProperty(i)) {
@@ -1602,39 +1666,45 @@ module.exports = function (env) {
 					this.node.deleteProperty(i);
 				}
 			}
+
+			this.node.deleteProperty(length - 1);
 		}
 
 		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length));
 		return obj || undef;
 	}, 0, "Array.prototype.shift"));
 
-	proto.define("unshift", objectFactory.createBuiltInFunction(function (elementN) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
-		var count = arguments.length;
-		var i = length || 0;
+	proto.define("unshift", objectFactory.createBuiltInFunction(function () {
+		var length = getLength(this, this.node);
+		var argCount = arguments.length;
+		var i = length;
+		var to, from;
 
 		while (i > 0) {
-			if (this.node.hasProperty(i - 1)) {
-				this.node.putValue(i + count - 1, this.node.getProperty(i - 1).getValue());
+			from = i - 1;
+			to = i + argCount - 1;
+
+			if (this.node.hasProperty(from)) {
+				this.node.putValue(to, this.node.getProperty(from).getValue(), true);
 			} else {
-				this.node.deleteProperty(i + count - 1);
+				this.node.deleteProperty(to, true);
 			}
 
 			i--;
 		}
 
-		for (; i < count; i++) {
-			this.node.putValue(i, arguments[i]);
+		for (i = 0; i < argCount; i++) {
+			this.node.putValue(i, arguments[i], true);
 		}
 
-		var newLength = objectFactory.createPrimitive(count + length);
-		this.node.putValue("length", newLength);
+		var newLength = objectFactory.createPrimitive(argCount + length);
+		this.node.putValue("length", newLength, true);
 		return newLength;
 	}, 1, "Array.prototype.unshift"));
 
 	proto.define("slice", objectFactory.createBuiltInFunction(function (begin, end) {
 		var source = this.node;
-		var length = convert.toUInt32(this, source.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		begin = begin ? convert.toInteger(this, begin) : 0;
 
 		if (!end || end.type === "undefined") {
@@ -1657,7 +1727,8 @@ module.exports = function (env) {
 	}, 2, "Array.prototype.slice"));
 
 	proto.define("splice", objectFactory.createBuiltInFunction(function (start, deleteCount) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
+
 		start = convert.toInteger(this, start);
 		if (start < 0) {
 			start = Math.max(length + start, 0);
@@ -1665,7 +1736,13 @@ module.exports = function (env) {
 			start = Math.min(start, length);
 		}
 
-		deleteCount = Math.min(Math.max(convert.toInteger(this, deleteCount), 0), length - start);
+		deleteCount = convert.toInteger(this, deleteCount);
+		if (deleteCount < 0) {
+			deleteCount = 0;
+		} else {
+			deleteCount = Math.min(Math.max(deleteCount, 0), length - start);
+		}
+
 		var removed = objectFactory.create("Array");
 
 		var k = 0;
@@ -1732,18 +1809,23 @@ module.exports = function (env) {
 
 			if (current instanceof ArrayType) {
 				for (i = 0, length = current.getProperty("length").getValue().value; i < length; i++) {
-					newArray.putValue(index++, current.getProperty(i).getValue());
+					if (current.hasProperty(i)) {
+						newArray.putValue(index, current.getProperty(i).getValue());
+					}
+
+					index++;
 				}
 			} else {
 				newArray.putValue(index++, current);
 			}
 		}
 
+		newArray.putValue("length", objectFactory.createPrimitive(index), true);
 		return newArray;
 	}, 1, "Array.prototype.concat"));
 
 	function join (separator) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		separator = arguments.length === 0 || separator === undef ? "," : convert.toPrimitive(this, separator, "string");
 		var stringValues = [];
 		var stringValue;
@@ -1769,7 +1851,7 @@ module.exports = function (env) {
 
 	proto.define("indexOf", objectFactory.createBuiltInFunction(function (searchElement, fromIndex) {
 		searchElement = searchElement || undef;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		var index = arguments.length === 1 ? 0 : convert.toInteger(this, fromIndex);
 		var notFound = objectFactory.createPrimitive(-1);
 
@@ -1790,7 +1872,7 @@ module.exports = function (env) {
 
 	proto.define("lastIndexOf", objectFactory.createBuiltInFunction(function (searchElement, fromIndex) {
 		searchElement = searchElement || undef;
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		var index = arguments.length === 1 ? length - 1 : convert.toInteger(this, fromIndex);
 
 		if (index < 0) {
@@ -1807,7 +1889,7 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.lastIndexOf"));
 
 	proto.define("forEach", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -1818,7 +1900,7 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.forEach"));
 
 	proto.define("map", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.map");
 		contracts.assertIsFunction(callback);
 
@@ -1836,7 +1918,7 @@ module.exports = function (env) {
 
 	proto.define("filter", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.filter");
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		var newArray = objectFactory.create("Array");
@@ -1853,7 +1935,7 @@ module.exports = function (env) {
 
 	proto.define("every", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.every");
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -1867,8 +1949,7 @@ module.exports = function (env) {
 
 	proto.define("some", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.some");
-
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
@@ -1881,7 +1962,7 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.some"));
 
 	proto.define("reduce", objectFactory.createBuiltInFunction(function (callback, initialValue) {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
+		var length = getLength(this, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduce");
 		contracts.assertIsFunction(callback);
 
@@ -1913,107 +1994,175 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.reduce"));
 
 	proto.define("reduceRight", objectFactory.createBuiltInFunction(function (callback, initialValue) {
-		var index = convert.toUInt32(this, this.node.getProperty("length").getValue());
-
+		var length = getLength(this, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
 		contracts.assertIsFunction(callback);
 
-		index--;
-		var value;
+		// length--;
+		var accumulator;
 
+		if (length === 0 && arguments.length === 1) {
+			throw new TypeError("Reduce of empty array with no initial value");
+		}
+
+		var k = length - 1;
 		if (arguments.length >= 2) {
-			value = initialValue;
+			accumulator = initialValue;
 		} else {
 			// make sure array isn't empty
-			while (index >= 0 && !(this.node.hasProperty(index))) {
-				index--;
+			var hasElements = false;
+			while (k >= 0 && !hasElements) {
+				hasElements = this.node.hasProperty(k);
+				if (hasElements) {
+					accumulator = this.node.getProperty(k).getValue();
+				}
+
+				k--;
 			}
 
-			if (index <= 0) {
+			if (!hasElements) {
 				throw new TypeError("Reduce of empty array with no initial value");
 			}
-
-			value = this.node.getProperty(index--).getValue();
 		}
 
-		for (; index >= 0; index--) {
-			if (this.node.hasProperty(index)) {
-				value = executeAccumulator(callback, value, this, index);
+		while (k >= 0) {
+			if (this.node.hasProperty(k)) {
+				accumulator = executeAccumulator(callback, accumulator, this, k);
 			}
+
+			k--;
 		}
 
-		return value;
+		return accumulator;
 	}, 1, "Array.prototype.reduceRight"));
 
 	proto.define("reverse", objectFactory.createBuiltInFunction(function () {
-		var length = convert.toUInt32(this, this.node.getProperty("length").getValue());
-		var temp;
+		var length = getLength(this, this.node);
+		var middle = Math.floor(length / 2);
+		var lower = 0;
+		var upper, upperValue, lowerValue;
 
-		for (var i = 0, ln = length / 2; i < ln; i++) {
-			temp = this.node.getProperty(length - i - 1).getValue();
-			this.node.putValue(length - i - 1, this.node.getProperty(i).getValue());
-			this.node.putValue(i, temp);
+		while (lower !== middle) {
+			upper = length - lower - 1;
+			lowerValue = this.node.hasProperty(lower) && this.node.getProperty(lower).getValue();
+			upperValue = this.node.hasProperty(upper) && this.node.getProperty(upper).getValue();
+
+			if (upperValue) {
+				this.node.putValue(lower, upperValue, true);
+			}
+
+			if (lowerValue) {
+				this.node.putValue(upper, lowerValue, true);
+			}
+
+			if (upperValue && !lowerValue) {
+				this.node.deleteProperty(upper);
+			} else if (lowerValue && !upperValue) {
+				this.node.deleteProperty(lower);
+			}
+
+			lower++;
 		}
 
 		return this.node;
 	}, 0, "Array.prototype.reverse"));
 
-	function defaultComparer (a, b) {
-		a = a.toString();
-		b = b.toString();
-
-		if (a < b) {
-			return -1;
-		}
-
-		if (a > b) {
-			return 1;
-		}
-
-		return 0;
-	}
-
 	proto.define("sort", objectFactory.createBuiltInFunction(function (compareFunction) {
 		var executionContext = this;
 		var arr = this.node;
+		var length = getLength(this, arr);
+		var i = 0;
 
-		var wrappedComparer = compareFunction && function (a, b) {
-			var scope = executionContext.env.createScope(arr);
-			func.loadArguments(compareFunction.node.params, [a, b], executionContext.env);
+		var comparer;
+		if (types.isNullOrUndefined(compareFunction)) {
+			comparer = function defaultComparer (a, b) {
+				a = convert.toString(executionContext, a);
+				b = convert.toString(executionContext, b);
 
-			try {
-				return executionContext.create(compareFunction.node.body, compareFunction.node).execute().result.getValue().value;
-			} catch (err) {
+				if (a < b) {
+					return -1;
+				}
+
+				if (a > b) {
+					return 1;
+				}
+
+				return 0;
+			};
+		} else {
+			comparer = function (a, b) {
+				var scope = executionContext.env.createScope(undef);
+				scope.init(compareFunction.node.body);
+
+				func.loadArguments(compareFunction.node.params, [a, b], executionContext.env);
+				var executionResult;
+
+				try {
+					executionResult = executionContext.create(compareFunction.node.body, compareFunction.node).execute();
+				} catch (err) {
+					scope.exitScope();
+					throw err;
+				}
+
 				scope.exitScope();
-				throw err;
-			}
 
-			scope.exitScope();
-		};
+				if (executionResult && executionResult.exit && executionResult.result) {
+					return executionResult.result.getValue().value;
+				}
+
+				return undefined;
+			};
+		}
 
 		// convert to array, run the wrapped comparer, then re-assign indexes
-		convert.toArray(arr)
-			.sort(wrappedComparer || defaultComparer)
-			.forEach(function (element, index) {
-				arr.putValue(index, element, false, this);
-			});
+		var sortedArray = convert.toArray(arr, length)
+			// undefined positions are handled by the underlying sort algorithm, so replace them with the raw primitive value
+			.map(function (el) { return el.isPrimitive && el.value === undefined ? undefined : el; })
+			.sort(comparer);
+
+		while (i < length) {
+			if (i in sortedArray) {
+				arr.putValue(i, sortedArray[i], false, this);
+			} else {
+				arr.deleteProperty(i, false);
+			}
+
+			i++;
+		}
+
+		// .forEach(function (element, index) {
+		// 	arr.putValue(index, element, false, this);
+		// });
 
 		return arr;
 	}, 1, "Array.prototype.sort"));
 
 	proto.define("toLocaleString", objectFactory.createBuiltInFunction(function () {
 		// todo: implement for reach
-		var values = convert.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
-		return objectFactory.createPrimitive(values.toLocaleString());
+		var length = getLength(this, this.node);
+		var arr = new Array(length);
+		var i = 0;
+
+		while (i < length) {
+			if (this.node.hasProperty(i)) {
+				// callMethod: function (obj, name, args, executionContext)
+				arr[i] = func.callMethod(this.node.getProperty(i).getValue(), "toLocaleString", [], this);
+			}
+
+			i++;
+		}
+
+		// var values = convert.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
+		return objectFactory.createPrimitive(arr.join());
 	}, 0, "Array.prototype.toLocaleString"));
 
 	// todo: this is a bit hacky - toString will call join if available per spec,
 	// but will call Object..toString if not
-	proto.define("toString", objectFactory.createBuiltInFunction(join, 1, "Array.prototype.toString"));
+	proto.define("toString", objectFactory.createBuiltInFunction(join, 0, "Array.prototype.toString"));
 	globalObject.define("Array", arrayClass);
 };
 
-},{"../types/array-type":56,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69}],43:[function(require,module,exports){
+},{"../types/array-type":56,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69,"../utils/types":70}],43:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
@@ -2221,11 +2370,11 @@ module.exports = function (env) {
 var convert = require("../utils/convert");
 var types = require("../utils/types");
 var func = require("../utils/func");
-
 var slice = Array.prototype.slice;
 
 module.exports = function (env, options) {
 	var globalObject = env.global;
+	var undef = env.global.getProperty("undefined").getValue();
 	var objectFactory = env.objectFactory;
 	// var proto = new ObjectType();
 	var functionClass = objectFactory.createFunction(function () {
@@ -2234,25 +2383,29 @@ module.exports = function (env, options) {
 
 		if (options.parser && arguments.length > 0) {
 			var args = slice.call(arguments).map(function (arg) { return types.isNullOrUndefined(arg) ? "" : convert.toPrimitive(context, arg, "string"); });
-			var ast = options.parser("(function () {" + args.pop() + "}).apply(this, arguments);");
+			var ast = options.parser("(function () { " + args.pop() + "}).apply(this, arguments);");
 
 			args = Array.prototype.concat.apply([], args.map(function (arg) { return arg.split(","); }));
+			var params = args.map(function (arg) {
+				return {
+					type: "Identifier",
+					name: arg.trim()
+				};
+			});
 
-			var fnNode = {
+			var callee = {
 				type: "FunctionDeclaration",
-				params: args.map(function (arg) {
-					return {
-						type: "Identifier",
-						name: arg.trim()
-					};
-				}),
-				body: {
-					type: "BlockStatement",
-					body: ast.body
-				}
+				params: params,
+				body: ast
 			};
 
-			funcInstance = objectFactory.createFunction(fnNode, env.globalScope);
+			var fn = objectFactory.createFunction(callee);
+			funcInstance = objectFactory.createFunction(function () {
+				// context, fn, params, args, thisArg, callee
+				// func.loadArguments(params, arguments, this.env, callee);
+				var executionResult = func.getFunctionResult(this, fn, params, arguments, globalObject, callee);
+				return executionResult && executionResult.result || undef;
+			}, env.globalScope);
 		} else {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
@@ -2271,6 +2424,10 @@ module.exports = function (env, options) {
 		// return objectFactory.createObject();
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 	functionClass.putValue("constructor", functionClass);
+	
+	// function itself is a function
+	functionClass.parent = functionClass;
+
 	globalObject.define("Function", functionClass);
 
 	var proto = functionClass.proto;
@@ -2289,19 +2446,13 @@ module.exports = function (env, options) {
 		return this.node;
 	}, 0, "Function.prototype.valueOf"));
 
-	proto.define("call", objectFactory.createFunction(function (thisArg) {
-		if (types.isNullOrUndefined(thisArg)) {
-			thisArg = globalObject;
-		} else {
-			thisArg = convert.toObject(thisArg, objectFactory);
-		}
-
+	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
 
-		return func.executeFunction(this, this.node, params, args, thisArg, callee);
-	}));
+		return func.executeFunction(this, this.node, params, args, thisArg || undef, callee);
+	}, 1, "Function.prototype.call"));
 
 	proto.define("apply", objectFactory.createFunction(function (thisArg, argsArray) {
 		if (argsArray) {
@@ -3393,6 +3544,10 @@ function setLength (context, arr, name, descriptor, throwOnError) {
 	return succeeded;
 }
 
+function descriptorHasValue (descriptor) {
+	return descriptor && ("value" in descriptor || "getter" in descriptor);
+}
+
 function ArrayType () {
 	ObjectType.call(this);
 	this.className = "Array";
@@ -3424,7 +3579,7 @@ ArrayType.prototype.putValue = function (name, value, throwOnError, context) {
 };
 
 ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, context) {
-	if (types.isInteger(name) && "value" in descriptor) {
+	if (types.isInteger(name) && !this.hasOwnProperty(name)) {
 		return setIndex(context, this, name, descriptor, throwOnError);
 	}
 
@@ -3451,6 +3606,11 @@ function DateType (value) {
 	this.value = value;
 	this.type = "object";
 	this.className = "Date";
+
+	// 11.6.1 Note 1
+	// All native ECMAScript objects except Date objects handle the absence of a hint as if the hint
+	// Number were given; Date objects handle the absence of a hint as if the hint String were given.
+	this.primitiveHint = "string";
 }
 
 DateType.prototype = Object.create(ObjectType.prototype);
@@ -3506,7 +3666,18 @@ FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: ctor || this });
-	this.setProto(proto, { configurable: true, enumerable: false, writable: true });
+	this.setProto(proto, { configurable: false, enumerable: false, writable: true });
+};
+
+FunctionType.prototype.getProperty = function (name) {
+	var prop = ObjectType.prototype.getProperty.apply(this, arguments);
+
+	// since function itself is a function, look at our own properties
+	if (!prop && name !== "prototype") {
+		return this.properties.prototype.getValue().properties[name];
+	}
+
+	return prop;
 };
 
 FunctionType.prototype.getOwnPropertyNames = function () {
@@ -3544,6 +3715,11 @@ FunctionType.prototype.hasInstance = function (obj) {
 	// if (obj.isPrimitive || obj === this) {
 	// 	return false;
 	// }
+
+	if (obj === this) {
+		// object obviously isn't an instance in this case
+		return false;
+	}
 
 	var visited = [];
 	var current = obj;
@@ -3800,6 +3976,8 @@ function ObjectType () {
 	this.className = "Object";
 	this.properties = Object.create(null);
 	this.extensible = true;
+
+	this.primitiveHint = "number";
 }
 
 ObjectType.prototype = {
@@ -4444,16 +4622,16 @@ module.exports = {
 		return obj;
 	},
 
-	toArray: function (obj) {
+	toArray: function (obj, length) {
 		var arr = [];
 
 		if (obj) {
-			var ln = obj.getProperty("length").getValue().value;
+			var ln = length >= 0 ? length : obj.getProperty("length").getValue().value;
 			var i = 0;
 
 			while (i < ln) {
-				if (i in obj.properties) {
-					arr.push(obj.getProperty(i).getValue());
+				if (obj.hasProperty(i)) {
+					arr[i] = obj.getProperty(i).getValue();
 				}
 
 				i++;
@@ -4461,10 +4639,13 @@ module.exports = {
 		}
 
 		return arr;
-	},
+	}, 
 
 	toPrimitive: function (executionContext, obj, preferredType) {
 		preferredType = preferredType && preferredType.toLowerCase();
+		if (!preferredType && obj) {
+			preferredType = obj.primitiveHint;
+		}
 
 		if (preferredType === "string") {
 			return getString(executionContext, obj);
@@ -4582,11 +4763,17 @@ module.exports = {
 				returnResult = fn.nativeFunction.apply(context.create(thisArg, callee, isNew), args) || returnResult;
 			} else {
 				var executionResult = context.create(fn.node.body, callee, isNew).execute();
-				if (isNew && executionResult && executionResult.exit && executionResult.result && !executionResult.result.isPrimitive) {
-					returnResult = executionResult.result;
-				} else {
-					returnResult = returnResult || (executionResult && executionResult.result);
+				if (executionResult && executionResult.exit && executionResult.result) {
+					if (!isNew || !executionResult.result.isPrimitive) {
+						returnResult = executionResult.result;
+					}
 				}
+				
+				// if (isNew && executionResult && executionResult.exit && executionResult.result && !executionResult.result.isPrimitive) {
+				// 	returnResult = executionResult.result;
+				// } else {
+				// 	returnResult = returnResult || (executionResult && executionResult.exit && executionResult.result);
+				// }
 			}
 		} catch (err) {
 			scope.exitScope();

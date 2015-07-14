@@ -3,7 +3,7 @@ module.exports = function DoWhileStatement (context) {
 	var passed = true;
 
 	if (context.node.type === "WhileStatement") {
-		passed = context.create(context.node.test).execute().result.toBoolean();
+		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
 	}
 
 	while (passed) {
@@ -13,7 +13,7 @@ module.exports = function DoWhileStatement (context) {
 			break;
 		}
 
-		passed = context.create(context.node.test).execute().result.toBoolean();
+		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
 	}
 
 	return result;
