@@ -6,7 +6,7 @@ module.exports = function MemberExpression (context) {
 	var name, value;
 
 	if (context.node.computed) {
-		name = convert.toString(context, context.create(context.node.property).execute().result.getValue());
+		name = convert.toString(context.env, context.create(context.node.property).execute().result.getValue());
 	} else {
 		name = context.node.property.name;
 	}

@@ -2,7 +2,7 @@ var Reference = require("./reference");
 var PropertyDescriptor = require("../types/property-descriptor");
 
 function DeclarativeEnvironment (parent, thisArg, env) {
-	this.bindings = Object.create(null);
+	this.properties = Object.create(null);
 	this.parent = parent;
 	this.thisNode = thisArg;
 	this.env = env;
@@ -16,18 +16,20 @@ DeclarativeEnvironment.prototype = {
 	},
 
 	hasBinding: function (name) {
-		return name in this.bindings;
+		return name in this.properties;
 	},
 
 	createMutableBinding: function (name) {
-		if (!this.hasBinding(name)) {
-			this.bindings[name] = new PropertyDescriptor(this, {
-				value: undefined,
-				configurable: false,
-				enumerable: true,
-				writable: true
-			});
+		if (this.hasBinding(name)) {
+			return this.properties[name];
 		}
+
+		return this.properties[name] = new PropertyDescriptor(this, {
+			value: undefined,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		});
 	},
 
 	createImmutableBinding: function (name) {
@@ -35,14 +37,14 @@ DeclarativeEnvironment.prototype = {
 	},
 
 	initializeImmutableBinding: function (name, value) {
-		if (this.hasBinding(name) && !this.bindings[name].value) {
-			this.bindings[name].setValue(value);
+		if (this.hasBinding(name) && !this.properties[name].value) {
+			this.properties[name].setValue(value);
 		}
 	},
 
 	setMutableBinding: function (name, value, throwOnError) {
 		if (this.hasBinding(name)) {
-			if (!this.bindings[name].writable) {
+			if (!this.properties[name].writable) {
 				if (throwOnError) {
 					throw new TypeError("Cannot write to immutable binding: " + name);
 				}
@@ -50,13 +52,13 @@ DeclarativeEnvironment.prototype = {
 				return;
 			}
 
-			this.bindings[name].setValue(value);
+			this.properties[name].setValue(value);
 		}
 	},
 
 	getBindingValue: function (name, throwOnError) {
 		if (this.hasBinding(name)) {
-			if (!this.bindings[name].value) {
+			if (!this.properties[name].value) {
 				if (throwOnError) {
 					throw new ReferenceError(name + " is not defined");
 				}
@@ -64,7 +66,7 @@ DeclarativeEnvironment.prototype = {
 				return undefined;
 			}
 
-			return this.bindings[name].getValue();
+			return this.properties[name].getValue();
 		}
 	},
 
@@ -73,11 +75,11 @@ DeclarativeEnvironment.prototype = {
 			return true;
 		}
 
-		if (!this.bindings[name].configurable) {
+		if (!this.properties[name].configurable) {
 			return false;
 		}
 
-		delete this.bindings[name];
+		delete this.properties[name];
 		return true;
 	},
 

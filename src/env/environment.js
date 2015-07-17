@@ -1,5 +1,6 @@
 var DeclarativeEnvironment = require("./declarative-environment");
 var ObjectEnvironment = require("./object-environment");
+var ExecutionContext = require("../execution-context");
 var Reference = require("./reference");
 var keywords = require("../keywords");
 
@@ -116,6 +117,10 @@ Environment.prototype = {
 		}
 
 		this.current.createMutableBinding(name, !immutable);
+	},
+
+	createExecutionContext: function (node, callee) {
+		return new ExecutionContext(this, node, callee);
 	},
 
 	hasBinding: function (name) {

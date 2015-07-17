@@ -1,6 +1,6 @@
 var convert = require("../utils/convert");
 
-function implicitEquals (a, b, context) {
+function implicitEquals (a, b, env) {
 	if (a.isPrimitive && b.isPrimitive) {
 		return a.value == b.value;
 	}
@@ -9,19 +9,19 @@ function implicitEquals (a, b, context) {
 		return a === b;
 	}
 
-	var primitiveA = convert.toPrimitive(context, a);
-	var primitiveB = convert.toPrimitive(context, b);
+	var primitiveA = convert.toPrimitive(env, a);
+	var primitiveB = convert.toPrimitive(env, b);
 
 	if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
 		return Number(primitiveA) === Number(primitiveB);
 	}
 
 	if (typeof primitiveA === "string") {
-		return primitiveA === convert.toPrimitive(context, b, "string");
+		return primitiveA === convert.toPrimitive(env, b, "string");
 	}
 
 	if (typeof primitiveB === "string") {
-		return convert.toPrimitive(context, a, "string") === primitiveB;
+		return convert.toPrimitive(env, a, "string") === primitiveB;
 	}
 
 	return primitiveA == primitiveB;
@@ -40,51 +40,51 @@ function strictEquals (a, b) {
 }
 
 function not (fn) {
-	return function (a, b, c) {
-		return !fn(a, b, c);
+	return function (a, b, e) {
+		return !fn(a, b, e);
 	};
 }
 
-function add (a, b, context) {
+function add (a, b, env) {
 	if (a.isPrimitive && b.isPrimitive) {
 		return a.value + b.value;
 	}
 
-	a = convert.toPrimitive(context, a);
-	b = convert.toPrimitive(context, b);
+	a = convert.toPrimitive(env, a);
+	b = convert.toPrimitive(env, b);
 	return a + b;
 }
 
-function toNumber (context, obj) {
+function toNumber (env, obj) {
 	if (obj.className === "Number") {
 		return obj.toNumber();
 	}
 
-	return convert.toPrimitive(context, obj, "number");
+	return convert.toPrimitive(env, obj, "number");
 }
 
 /* eslint eqeqeq:0 */
 var binaryOperators = {
 	"+": add,
-	"-": function (a, b, c) { return toNumber(c, a) - toNumber(c, b); },
-	"/": function (a, b, c) { return toNumber(c, a) / toNumber(c, b); },
-	"*": function (a, b, c) { return toNumber(c, a) * toNumber(c, b); },
+	"-": function (a, b, e) { return toNumber(e, a) - toNumber(e, b); },
+	"/": function (a, b, e) { return toNumber(e, a) / toNumber(e, b); },
+	"*": function (a, b, e) { return toNumber(e, a) * toNumber(e, b); },
 	"==": implicitEquals,
 	"!=": not(implicitEquals),
 	"===": strictEquals,
 	"!==": not(strictEquals),
-	"<": function (a, b, c) { return convert.toPrimitive(c, a) < convert.toPrimitive(c, b); },
-	"<=": function (a, b, c) { return convert.toPrimitive(c, a) <= convert.toPrimitive(c, b); },
-	">": function (a, b, c) { return convert.toPrimitive(c, a) > convert.toPrimitive(c, b); },
-	">=": function (a, b, c) { return convert.toPrimitive(c, a) >= convert.toPrimitive(c, b); },
-	"<<": function (a, b, c) { return convert.toPrimitive(c, a) << convert.toPrimitive(c, b); },
-	">>": function (a, b, c) { return convert.toPrimitive(c, a) >> convert.toPrimitive(c, b); },
-	">>>": function (a, b, c) { return convert.toPrimitive(c, a) >>> convert.toPrimitive(c, b); },
-	"%": function (a, b, c) { return convert.toPrimitive(c, a) % convert.toPrimitive(c, b); },
-	"|": function (a, b, c) { return convert.toInt32(c, a) | convert.toInt32(c, b); },
-	"^": function (a, b, c) { return convert.toInt32(c, a) ^ convert.toInt32(c, b); },
-	"&": function (a, b, c) { return convert.toInt32(c, a) & convert.toInt32(c, b); },
-	"in": function (a, b, c) {
+	"<": function (a, b, e) { return convert.toPrimitive(e, a) < convert.toPrimitive(e, b); },
+	"<=": function (a, b, e) { return convert.toPrimitive(e, a) <= convert.toPrimitive(e, b); },
+	">": function (a, b, e) { return convert.toPrimitive(e, a) > convert.toPrimitive(e, b); },
+	">=": function (a, b, e) { return convert.toPrimitive(e, a) >= convert.toPrimitive(e, b); },
+	"<<": function (a, b, e) { return convert.toPrimitive(e, a) << convert.toPrimitive(e, b); },
+	">>": function (a, b, e) { return convert.toPrimitive(e, a) >> convert.toPrimitive(e, b); },
+	">>>": function (a, b, e) { return convert.toPrimitive(e, a) >>> convert.toPrimitive(e, b); },
+	"%": function (a, b, e) { return convert.toPrimitive(e, a) % convert.toPrimitive(e, b); },
+	"|": function (a, b, e) { return convert.toInt32(e, a) | convert.toInt32(e, b); },
+	"^": function (a, b, e) { return convert.toInt32(e, a) ^ convert.toInt32(e, b); },
+	"&": function (a, b, e) { return convert.toInt32(e, a) & convert.toInt32(e, b); },
+	"in": function (a, b, e) {
 		a = a.toString();
 		if (b.isPrimitive) {
 			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + b.toString());
@@ -113,7 +113,7 @@ module.exports = function BinaryExpression (context) {
 	var right = context.create(context.node.right).execute().result;
 	var rightValue = right.getValue() || undef;
 
-	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context);
+	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context.env);
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));
 };

@@ -1,23 +1,23 @@
-function defineThis (scope, thisArg, isNew) {
-	if (!thisArg) {
-		return scope.global;
-	}
+// function defineThis (scope, thisArg, isNew) {
+// 	if (!thisArg) {
+// 		return scope.global;
+// 	}
 
-	if (isNew) {
-		return thisArg;
-	}
+// 	if (isNew) {
+// 		return thisArg;
+// 	}
 
-	if (thisArg.isPrimitive && thisArg.value != null) {
-		// call toObject on primitive 10.4.3
-		var obj = scope.objectFactory.createPrimitive(thisArg.value);
-		obj.isPrimitive = false;
-		obj.type = "object";
-		obj.toBoolean = function () { return true; };
-		return obj;
-	}
+// 	if (thisArg.isPrimitive && thisArg.value != null) {
+// 		// call toObject on primitive 10.4.3
+// 		var obj = scope.objectFactory.createPrimitive(thisArg.value);
+// 		obj.isPrimitive = false;
+// 		obj.type = "object";
+// 		obj.toBoolean = function () { return true; };
+// 		return obj;
+// 	}
 
-	return thisArg;
-}
+// 	return thisArg;
+// }
 
 function createArgumentProperty (scope, name) {
 	return {
@@ -26,12 +26,10 @@ function createArgumentProperty (scope, name) {
 		get: undefined,
 		getter: function () {
 			return scope.getBindingValue(name);
-			// return arg.getValue(scope);
 		},
 		set: undefined,
 		setter: function (value) {
 			scope.setMutableBinding(name, value);
-			// arg.setValue(scope, value);
 		},
 		writable: true
 	};
@@ -39,7 +37,7 @@ function createArgumentProperty (scope, name) {
 
 module.exports = {
 	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
-		thisArg = defineThis(context.env, thisArg, isNew);
+		// thisArg = defineThis(context.env, thisArg, isNew);
 		var scope = fn.createScope(context.env, thisArg, false);
 		var returnResult;
 
@@ -47,7 +45,7 @@ module.exports = {
 			returnResult = thisArg;
 		}
 
-		this.loadArguments(params, args, context.env, fn);
+		this.loadArguments(context.env, params, args, fn);
 
 		try {
 			if (fn.native) {
@@ -59,12 +57,6 @@ module.exports = {
 						returnResult = executionResult.result;
 					}
 				}
-				
-				// if (isNew && executionResult && executionResult.exit && executionResult.result && !executionResult.result.isPrimitive) {
-				// 	returnResult = executionResult.result;
-				// } else {
-				// 	returnResult = returnResult || (executionResult && executionResult.exit && executionResult.result);
-				// }
 			}
 		} catch (err) {
 			scope.exitScope();
@@ -76,10 +68,10 @@ module.exports = {
 	},
 
 	getFunctionResult: function (context, fn, params, args, thisArg, callee) {
-		thisArg = defineThis(context.env, thisArg);
+		// thisArg = defineThis(context.env, thisArg);
 		var scope = fn.createScope(context.env, thisArg, false);
 
-		this.loadArguments(params, args, context.env, fn);
+		this.loadArguments(context.env, params, args, fn);
 
 		var executionResult;
 		try {
@@ -97,7 +89,7 @@ module.exports = {
 		return executionResult;
 	},
 
-	loadArguments: function (params, args, env, callee) {
+	loadArguments: function (env, params, args, callee) {
 		var undef = env.global.getProperty("undefined").getValue();
 
 		var argumentList = env.objectFactory.createArguments(args, callee);
@@ -106,48 +98,49 @@ module.exports = {
 
 		params.forEach(function (param, index) {
 			if (!env.current.hasBinding(param.name)) {
-				env.current.createMutableBinding(param.name);
+				var descriptor = env.current.createMutableBinding(param.name);
+				if (args.length > index) {
+					argumentList.mapProperty(index, descriptor);
+				}
 			}
 
-			var argValue = args[index];
-			env.current.setMutableBinding(param.name, argValue || undef);
-			argumentList.defineOwnProperty(index, createArgumentProperty(env.current, param.name), false);
-			// if (argumentList.hasProperty(index)) {
-			// 	env.current.setMutableBinding(param.name, argumentList.getProperty(index).getValue() || undef);
-			// } else {
-			// 	env.current.setMutableBinding(param.name, undef);
-			// }
+			env.current.setMutableBinding(param.name, args[index] || undef);
 		});
 
 		// just set value if additional, unnamed arguments are passed in
-		var ln = args.length;
-		for (var i = params.length; i < ln; i++) {
-			argumentList.defineOwnProperty(i, { value: args[i], configurable: true, enumerable: true, writable: true });
+		var length = args.length;
+		for (var i = params.length; i < length; i++) {
+			argumentList.defineOwnProperty(i, {
+				value: args[i],
+				configurable: true,
+				enumerable: true,
+				writable: true
+			});
 		}
 
 		argumentList.defineOwnProperty("length", {
-			value: env.objectFactory.createPrimitive(ln),
+			value: env.objectFactory.createPrimitive(length),
 			configurable: true,
 			enumerable: false,
 			writable: true
 		});
 	},
 
-	callMethod: function (obj, name, args, executionContext) {
+	callMethod: function (env, obj, name, args) {
 		var fn = obj.getProperty(name).getValue();
-		var undef = executionContext.env.global.getProperty("undefined").getValue();
+		var undef = env.global.getProperty("undefined").getValue();
 
 		if (fn && fn.className === "Function") {
-			var scope = fn.createScope(executionContext.env, obj);
+			var scope = fn.createScope(env, obj);
 			var executionResult;
 
 			try {
 				if (fn.native) {
-					executionResult = fn.nativeFunction.apply(executionContext.create(obj, obj), args);
+					executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), args);
 				} else {
-					this.loadArguments(fn.node.params, args, executionContext.env);
+					this.loadArguments(env, fn.node.params, args);
 
-					executionResult = executionContext.create(fn.node.body, fn.node).execute();
+					executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
 					executionResult = executionResult && executionResult.result;
 				}
 			} catch (err) {

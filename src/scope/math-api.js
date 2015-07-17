@@ -14,7 +14,7 @@ module.exports = function (env) {
 	});
 
 	methods.forEach(function (name) {
-		mathClass.define(name, convert.toNativeFunction(objectFactory, Math[name], "Math." + name));
+		mathClass.define(name, convert.toNativeFunction(env, Math[name], "Math." + name));
 	});
 
 	globalObject.define("Math", mathClass);

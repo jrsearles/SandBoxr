@@ -3,8 +3,6 @@ function Reference (name, base, strict, env) {
 	this.base = base;
 	this.strict = strict;
 	this.env = env;
-
-	this.isReference = true;
 }
 
 Reference.prototype = {

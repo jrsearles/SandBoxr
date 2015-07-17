@@ -5,13 +5,13 @@ var convert = require("../utils/convert");
 
 var localObjectFactory;
 
-function setIndex (context, arr, name, descriptor, throwOnError) {
+function setIndex (env, arr, name, descriptor, throwOnError) {
 	var index = Number(name);
 	var lengthProperty = arr.getProperty("length");
 	var lengthValue = lengthProperty.getValue().value;
 
 	if ((!lengthProperty.canSetValue() && index >= lengthValue)
-		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, false, context)) {
+		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, false, env)) {
 
 		if (throwOnError) {
 			throw new TypeError("Cannot define property: " + name + ", object is not extensible.");
@@ -22,15 +22,15 @@ function setIndex (context, arr, name, descriptor, throwOnError) {
 
 	if (index >= lengthValue) {
 		var newLength = localObjectFactory.createPrimitive(index + 1);
-		arr.defineOwnProperty("length", { value: newLength }, false, context);
+		arr.defineOwnProperty("length", { value: newLength }, false, env);
 	}
 
 	return true;
 }
 
-function setLength (context, arr, name, descriptor, throwOnError) {
-	var newLengthValue = convert.toUInt32(context, descriptor.value);
-	if (newLengthValue !== convert.toNumber(context, descriptor.value)) {
+function setLength (env, arr, name, descriptor, throwOnError) {
+	var newLengthValue = convert.toUInt32(env, descriptor.value);
+	if (newLengthValue !== convert.toNumber(env, descriptor.value)) {
 		throw new RangeError("Array length out of range");
 	}
 
@@ -95,19 +95,19 @@ function ArrayType () {
 ArrayType.prototype = Object.create(ObjectType.prototype);
 ArrayType.prototype.constructor = ArrayType;
 
-ArrayType.prototype.putValue = function (name, value, throwOnError, context) {
+ArrayType.prototype.putValue = function (name, value, throwOnError, env) {
 	if (!this.hasOwnProperty(name)) {
 		this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
 		return;
 	}
 
 	// if (types.isInteger(name)) {
-	// 	setIndex(context, this, name, { value: value }, false);
+	// 	setIndex(env, this, name, { value: value }, false);
 	// 	return;
 	// }
 
 	if (name === "length") {
-		setLength(context, this, name, { value: value }, throwOnError);
+		setLength(env, this, name, { value: value }, throwOnError);
 		return;
 	}
 
@@ -117,13 +117,13 @@ ArrayType.prototype.putValue = function (name, value, throwOnError, context) {
 	// this.defineOwnProperty(name, null, { value: value }, false);
 };
 
-ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, context) {
-	if (types.isInteger(name) && !this.hasOwnProperty(name)) {
-		return setIndex(context, this, name, descriptor, throwOnError);
+ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, env) {
+	if (types.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
+		return setIndex(env, this, name, descriptor, throwOnError);
 	}
 
 	if (name === "length" && "length" in this.properties && descriptor && "value" in descriptor) {
-		return setLength(context, this, name, descriptor, throwOnError);
+		return setLength(env, this, name, descriptor, throwOnError);
 	}
 
 	return ObjectType.prototype.defineOwnProperty.apply(this, arguments);

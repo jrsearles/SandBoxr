@@ -3,17 +3,28 @@ var types = require("../utils/types");
 var func = require("../utils/func");
 var slice = Array.prototype.slice;
 
+function defineThis (env, fn, thisArg) {
+	if (fn.builtIn) {
+		return thisArg || env.global.getProperty("undefined").getValue();
+	}
+
+	if (types.isNullOrUndefined(thisArg)) {
+		return env.global;
+	}
+
+	return convert.toObject(env, thisArg);
+}
+
 module.exports = function (env, options) {
 	var globalObject = env.global;
 	var undef = env.global.getProperty("undefined").getValue();
 	var objectFactory = env.objectFactory;
-	// var proto = new ObjectType();
-	var functionClass = objectFactory.createFunction(function () {
-		var context = this;
+
+	var funcCtor = function () {
 		var funcInstance;
 
 		if (options.parser && arguments.length > 0) {
-			var args = slice.call(arguments).map(function (arg) { return types.isNullOrUndefined(arg) ? "" : convert.toPrimitive(context, arg, "string"); });
+			var args = slice.call(arguments).map(function (arg) { return types.isNullOrUndefined(arg) ? "" : convert.toPrimitive(env, arg, "string"); });
 			var ast = options.parser("(function () { " + args.pop() + "}).apply(this, arguments);");
 
 			args = Array.prototype.concat.apply([], args.map(function (arg) { return arg.split(","); }));
@@ -32,8 +43,6 @@ module.exports = function (env, options) {
 
 			var fn = objectFactory.createFunction(callee);
 			funcInstance = objectFactory.createFunction(function () {
-				// context, fn, params, args, thisArg, callee
-				// func.loadArguments(params, arguments, this.env, callee);
 				var executionResult = func.getFunctionResult(this, fn, params, arguments, globalObject, callee);
 				return executionResult && executionResult.result || undef;
 			}, env.globalScope);
@@ -43,19 +52,12 @@ module.exports = function (env, options) {
 
 		funcInstance.putValue("constructor", functionClass);
 		return funcInstance;
+	};
 
-		// if (this.isNew) {
-		// 	// todo: verify the behavior here
-		// 	this.node.putValue("constructor", functionClass, false, this);
-		// 	this.node.type = "function";
-		// 	this.node.className = "Function";
-		// 	return this.node;
-		// }
-
-		// return objectFactory.createObject();
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	funcCtor.nativeLength = 1;
+	var functionClass = objectFactory.createFunction(funcCtor, null, null, null, { configurable: false, enumerable: false, writable: false });
 	functionClass.putValue("constructor", functionClass);
-	
+
 	// function itself is a function
 	functionClass.parent = functionClass;
 
@@ -81,8 +83,9 @@ module.exports = function (env, options) {
 		var args = slice.call(arguments, 1);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
+		thisArg = defineThis(env, this.node, thisArg);
 
-		return func.executeFunction(this, this.node, params, args, thisArg || undef, callee);
+		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
 	proto.define("apply", objectFactory.createFunction(function (thisArg, argsArray) {
@@ -92,30 +95,20 @@ module.exports = function (env, options) {
 			}
 		}
 
-		if (types.isNullOrUndefined(thisArg)) {
-			thisArg = globalObject;
-		} else {
-			thisArg = convert.toObject(thisArg, objectFactory);
-		}
-
 		var args = convert.toArray(argsArray);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
+		thisArg = defineThis(env, this.node, thisArg);
 
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}));
 
 	proto.define("bind", objectFactory.createFunction(function (thisArg) {
-		if (types.isNullOrUndefined(thisArg)) {
-			thisArg = globalObject;
-		} else {
-			thisArg = convert.toObject(thisArg, objectFactory);
-		}
-		
 		var args = slice.call(arguments, 1);
 		var fn = this.node;
 		var params = fn.native ? [] : fn.node.params;
 		var callee = fn.native ? fn : fn.node;
+		thisArg = defineThis(env, this.node, thisArg);
 
 		var thrower = function () { throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them"); };
 		var throwProperties = {
@@ -130,19 +123,6 @@ module.exports = function (env, options) {
 		var nativeFunc = function () {
 			var mergedArgs = args.concat(slice.call(arguments));
 			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee);
-			// var scope = this.env.createScope(thisArg);
-			// scope.init(callee.node.body);
-
-			// func.loadArguments(callee.node.params, args.concat(slice.call(arguments)), env, callee);
-
-			// try {
-			// 	var result = this.create(callee.node.body, callee).execute().result;
-			// 	return result ? result.getValue() : undef;
-			// } catch (err) {
-			// 	scope.exitScope();
-			// }
-
-			// scope.exitScope();
 		};
 
 		nativeFunc.nativeLength = params.length - args.length;

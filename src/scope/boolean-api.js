@@ -8,7 +8,7 @@ module.exports = function (env) {
 
 		// called as new
 		if (this.isNew) {
-			return convert.primitiveToObject(booleanValue, objectFactory);
+			return convert.primitiveToObject(env, booleanValue);
 		}
 
 		return objectFactory.create("Boolean", booleanValue);

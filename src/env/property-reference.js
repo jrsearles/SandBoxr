@@ -4,7 +4,6 @@ var PrimitiveType = require("../types/primitive-type");
 function PropertyReference (name, object, strict, env) {
 	Reference.apply(this, arguments);
 	this.isPropertyReference = true;
-	this.env = env;
 }
 
 PropertyReference.prototype = Object.create(Reference.prototype);

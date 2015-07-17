@@ -17,7 +17,6 @@ var consoleAPI = require("./console-api");
 var convert = require("../utils/convert");
 var Reference = require("../env/reference");
 
-var globalFunctions = ["isNaN", "isFinite", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"];
 var frozen = { configurable: false, enumerable: false, writable: false };
 
 module.exports = function GlobalScope (runner) {
@@ -53,21 +52,23 @@ module.exports = function GlobalScope (runner) {
 	jsonAPI(env, config);
 	consoleAPI(env, config);
 
-	globalFunctions.forEach(function (name) {
-		globalObject.define(name, convert.toNativeFunction(objectFactory, global[name], name));
+	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(function (name) {
+		globalObject.define(name, objectFactory.createBuiltInFunction(function (value) {
+			var stringValue = convert.toString(env, value);
+			return objectFactory.createPrimitive(global[name](stringValue));
+		}, 1, name));
+	});
+
+	["isNaN", "isFinite"].forEach(function (name) {
+		globalObject.define(name, convert.toNativeFunction(env, global[name], name));
 	});
 
 	globalObject.define("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
-		var stringValue = convert.toPrimitive(this, value, "string");
-		radix = convert.toPrimitive(this, radix, "number");
+		var stringValue = convert.toString(env, value);
+		radix = convert.toPrimitive(env, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"));
-
-	globalObject.define("parseFloat", objectFactory.createBuiltInFunction(function (value) {
-		var stringValue = convert.toPrimitive(this, value, "string");
-		return objectFactory.createPrimitive(parseFloat(stringValue));
-	}, 2, "parseFloat"));
 
 	if (config.parser) {
 		var evalFunc = objectFactory.createBuiltInFunction(function (code) {
@@ -95,7 +96,7 @@ module.exports = function GlobalScope (runner) {
 
 			// use the same scope unless this is an "indirect" call
 			// in which case we use the global scope
-			var scope = this.env.setScope(indirect ? this.env.globalScope : this.env.current.parent);
+			var scope = env.setScope(indirect ? env.globalScope : env.current.parent);
 			var executionResult;
 
 			try {

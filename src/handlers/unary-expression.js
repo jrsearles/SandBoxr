@@ -21,12 +21,12 @@ module.exports = function UnaryExpression (context) {
 
 		case "-":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(-(convert.toNumber(context, value)));
+			newValue = objectFactory.createPrimitive(-(convert.toNumber(context.env, value)));
 			break;
 
 		case "+":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(+(convert.toNumber(context, value)));
+			newValue = objectFactory.createPrimitive(+(convert.toNumber(context.env, value)));
 			break;
 
 		case "!":
@@ -36,7 +36,7 @@ module.exports = function UnaryExpression (context) {
 
 		case "~":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(~(convert.toInt32(context, value)));
+			newValue = objectFactory.createPrimitive(~(convert.toInt32(context.env, value)));
 			break;
 
 		case "delete":

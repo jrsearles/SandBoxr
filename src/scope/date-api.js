@@ -10,7 +10,6 @@ module.exports = function (env) {
 	var objectFactory = env.objectFactory;
 
 	var dateClass = objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
-		var context = this;
 		var dateValue, args;
 
 		if (arguments.length === 0) {
@@ -19,15 +18,15 @@ module.exports = function (env) {
 			if (p1.isPrimitive) {
 				args = [p1.value];
 			} else {
-				var primitiveValue = convert.toPrimitive(this, p1);
+				var primitiveValue = convert.toPrimitive(env, p1);
 				if (typeof primitiveValue !== "string") {
-					primitiveValue = convert.toNumber(this, p1);
+					primitiveValue = convert.toNumber(env, p1);
 				}
 
 				args = [primitiveValue];
 			}
 		} else {
-			args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "number"); });
+			args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg, "number"); });
 		}
 
 		if (this.isNew) {
@@ -59,30 +58,29 @@ module.exports = function (env) {
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	dateClass.define("parse", objectFactory.createBuiltInFunction(function (value) {
-		var stringValue = convert.toPrimitive(this, value, "string");
+		var stringValue = convert.toPrimitive(env, value, "string");
 		var dateValue = Date.parse(stringValue);
 		return objectFactory.createPrimitive(dateValue);
 	}, 1, "Date.prototype.parse"));
 
 	dateClass.define("UTC", objectFactory.createBuiltInFunction(function (p1, p2, p3, p4, p5, p6, p7) {
-		var context = this;
-		var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(context, arg, "number"); });
+		var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, 7, "Date.prototype.UTC"));
 
 	var proto = dateClass.proto;
 
 	staticMethods.forEach(function (name) {
-		dateClass.define(name, convert.toNativeFunction(objectFactory, Date[name], "Date." + name));
+		dateClass.define(name, convert.toNativeFunction(env, Date[name], "Date." + name));
 	});
 
 	protoMethods.forEach(function (name) {
-		proto.define(name, convert.toNativeFunction(objectFactory, Date.prototype[name], "Date.prototype." + name));
+		proto.define(name, convert.toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
 	});
 
 	setters.forEach(function (name) {
 		function setter () {
-			var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(arg); });
+			var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg); });
 			Date.prototype[name].apply(this.node.value, args);
 		}
 

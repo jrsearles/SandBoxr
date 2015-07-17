@@ -98,14 +98,13 @@ ObjectFactory.prototype = {
 				break;
 
 			case "Error":
-				var message = "An unhandled exception has occurred";
+				instance = new ErrorType(value);
+
 				if (value) {
 					typeName = value.name || typeName;
-					message = value.message;
+					instance.putValue("message", this.createPrimitive(value.message));
 				}
 
-				instance = new ErrorType(value);
-				instance.putValue("message", this.createPrimitive(message));
 				instance.putValue("name", this.createPrimitive(typeName));
 				break;
 
@@ -178,6 +177,7 @@ ObjectFactory.prototype = {
 		});
 
 		instance.parent = this.env.getValue("Function");
+		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
 	}

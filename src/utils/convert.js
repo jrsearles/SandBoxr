@@ -7,21 +7,21 @@ function sign (value) {
 	return value < 0 ? -1 : 1;
 }
 
-function getString (executionContext, value) {
+function getString (env, value) {
 	if (!value) {
 		return "undefined";
 	}
 
-	if (value.isPrimitive /*|| "value" in value*/) {
+	if (value.isPrimitive) {
 		return value.toString();
 	}
 
-	var primitiveValue = func.callMethod(value, "toString", [], executionContext);
+	var primitiveValue = func.callMethod(env, value, "toString", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.toString();
 	}
 
-	primitiveValue = func.callMethod(value, "valueOf", [], executionContext);
+	primitiveValue = func.callMethod(env, value, "valueOf", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.toString();
 	}
@@ -29,21 +29,21 @@ function getString (executionContext, value) {
 	throw new TypeError("Cannot convert object to primitive value.");
 }
 
-function getPrimitive (executionContext, value) {
+function getPrimitive (env, value) {
 	if (!value) {
 		return 0;
 	}
 
-	if (value.isPrimitive /*|| "value" in value*/) {
+	if (value.isPrimitive) {
 		return value.value;
 	}
 
-	var primitiveValue = func.callMethod(value, "valueOf", [], executionContext);
+	var primitiveValue = func.callMethod(env, value, "valueOf", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.valueOf();
 	}
 
-	primitiveValue = func.callMethod(value, "toString", [], executionContext);
+	primitiveValue = func.callMethod(env, value, "toString", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.valueOf();
 	}
@@ -52,30 +52,30 @@ function getPrimitive (executionContext, value) {
 }
 
 
-function getValues (executionContext, args) {
+function getValues (env, args) {
 	var i = 0;
 	var ln = args.length;
 	var values = [];
 
 	for (; i < ln; i++) {
-		values.push(getPrimitive(executionContext, args[i]));
+		values.push(getPrimitive(env, args[i]));
 	}
 
 	return values;
 }
 
 module.exports = {
-	primitiveToObject: function (value, factory) {
-		var newValue = factory.createPrimitive(value);
+	primitiveToObject: function (env, value) {
+		var newValue = env.objectFactory.createPrimitive(value);
 		newValue.isPrimitive = false;
 		newValue.type = "object";
 		newValue.toBoolean = function () { return true; };
 		return newValue;
 	},
 
-	toObject: function (obj, factory) {
+	toObject: function (env, obj) {
 		if (obj.isPrimitive && obj.value != null && obj.type !== "object") {
-			return this.primitiveToObject(obj.value, factory);
+			return this.primitiveToObject(env, obj.value);
 		}
 
 		return obj;
@@ -98,36 +98,36 @@ module.exports = {
 		}
 
 		return arr;
-	}, 
+	},
 
-	toPrimitive: function (executionContext, obj, preferredType) {
+	toPrimitive: function (env, obj, preferredType) {
 		preferredType = preferredType && preferredType.toLowerCase();
 		if (!preferredType && obj) {
 			preferredType = obj.primitiveHint;
 		}
 
 		if (preferredType === "string") {
-			return getString(executionContext, obj);
+			return getString(env, obj);
 		}
 
 		// default case/number
-		return getPrimitive(executionContext, obj);
+		return getPrimitive(env, obj);
 	},
 
-	toString: function (executionContext, obj) {
-		return String(this.toPrimitive(executionContext, obj, "string"));
+	toString: function (env, obj) {
+		return String(this.toPrimitive(env, obj, "string"));
 	},
 
-	toNumber: function (executionContext, obj) {
+	toNumber: function (env, obj) {
 		if (!obj || obj.type === "undefined") {
 			return NaN;
 		}
 
-		return Number(this.toPrimitive(executionContext, obj, "number"));
+		return Number(this.toPrimitive(env, obj, "number"));
 	},
 
-	toInteger: function (executionContext, obj) {
-		var value = this.toNumber(executionContext, obj);
+	toInteger: function (env, obj) {
+		var value = this.toNumber(env, obj);
 		if (isNaN(value)) {
 			return 0;
 		}
@@ -139,8 +139,8 @@ module.exports = {
 		return sign(value) * floor(abs(value));
 	},
 
-	toInt32: function (executionContext, obj) {
-		var value = this.toNumber(executionContext, obj);
+	toInt32: function (env, obj) {
+		var value = this.toNumber(env, obj);
 		if (value === 0 || isNaN(value) || !isFinite(value)) {
 			return 0;
 		}
@@ -148,18 +148,18 @@ module.exports = {
 		return sign(value) * floor(abs(value));
 	},
 
-	toUInt32: function (executionContext, obj) {
-		var value = this.toInt32(executionContext, obj);
+	toUInt32: function (env, obj) {
+		var value = this.toInt32(env, obj);
 		return value >>> 0;
 	},
 
-	toNativeFunction: function (factory, fn, name) {
-		return factory.createBuiltInFunction(function () {
+	toNativeFunction: function (env, fn, name) {
+		return env.objectFactory.createBuiltInFunction(function () {
 			var scope = this && this.node && this.node.value;
-			var args = getValues(this, arguments);
+			var args = getValues(env, arguments);
 
 			var value = fn.apply(scope, args);
-			return factory.createPrimitive(value);
+			return env.objectFactory.createPrimitive(value);
 		}, fn.length, name);
 	}
 };

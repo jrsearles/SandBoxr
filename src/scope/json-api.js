@@ -9,7 +9,7 @@ module.exports = function (env) {
 	jsonClass.className = "JSON";
 
 	methods.forEach(function (name) {
-		jsonClass.define(name, convert.toNativeFunction(objectFactory, JSON[name], "JSON." + name));
+		jsonClass.define(name, convert.toNativeFunction(env, JSON[name], "JSON." + name));
 	});
 
 	globalObject.define("JSON", jsonClass);

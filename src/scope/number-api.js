@@ -21,10 +21,10 @@ module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var numberClass = objectFactory.createFunction(function (obj) {
-		var numberValue = Number(convert.toPrimitive(this, obj, "number"));
+		var numberValue = Number(convert.toPrimitive(env, obj, "number"));
 
 		if (this.isNew) {
-			return convert.primitiveToObject(numberValue, objectFactory);
+			return convert.primitiveToObject(env, numberValue);
 		}
 
 		return objectFactory.create("Number", numberValue);
@@ -40,7 +40,7 @@ module.exports = function (env) {
 
 		var radixValue = 10;
 		if (radix) {
-			radixValue = convert.toPrimitive(this, radix, "number");
+			radixValue = convert.toPrimitive(env, radix, "number");
 			if (radixValue < 2 || radixValue > 36) {
 				throw new RangeError("toString() radix argument must be between 2 and 36");
 			}
@@ -52,7 +52,7 @@ module.exports = function (env) {
 	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
 		var digits = 0;
 		if (fractionDigits) {
-			digits = convert.toPrimitive(this, fractionDigits, "number");
+			digits = convert.toPrimitive(env, fractionDigits, "number");
 		}
 
 		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
@@ -73,14 +73,14 @@ module.exports = function (env) {
 	protoMethods.forEach(function (name) {
 		var fn = Number.prototype[name] || polyfills[name];
 		if (fn) {
-			proto.define(name, convert.toNativeFunction(objectFactory, fn, "Number.prototype." + name));
+			proto.define(name, convert.toNativeFunction(env, fn, "Number.prototype." + name));
 		}
 	});
 
 	staticMethods.forEach(function (name) {
 		var fn = Number[name] || polyfills[name];
 		if (fn) {
-			numberClass.define(name, convert.toNativeFunction(objectFactory, fn, "Number." + name));
+			numberClass.define(name, convert.toNativeFunction(env, fn, "Number." + name));
 		}
 	});
 

@@ -9,7 +9,7 @@ module.exports = function (env) {
 
 	methods.forEach(function (name) {
 		consoleClass.define(name, objectFactory.createBuiltInFunction(function (message) {
-			var stringValue = convert.toString(this, message);
+			var stringValue = convert.toString(env, message);
 			console[name](stringValue);
 		}, 1, "console." + name));
 	});

@@ -37,6 +37,11 @@ describe("Functions", function () {
 		expect(result.value).to.be.true;
 	});
 
+	it("should not alter `this` when provided through apply for builtin", function () {
+		var result = runner.runBlock("Object.prototype.toString.apply(null, []) == '[object Null]';");
+		expect(result.value).to.be.true;
+	});
+
 	it("should be able to coercively compare functions", function () {
 		var result = runner.runBlock("var a = function(){};var b = a;a == b;");
 		expect(result.value).to.be.true;
