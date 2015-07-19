@@ -96,10 +96,6 @@ FunctionType.prototype.createScope = function (env, thisArg) {
 };
 
 FunctionType.prototype.hasInstance = function (obj) {
-	// if (obj.isPrimitive || obj === this) {
-	// 	return false;
-	// }
-
 	if (obj === this) {
 		// object obviously isn't an instance in this case
 		return false;
@@ -121,11 +117,6 @@ FunctionType.prototype.hasInstance = function (obj) {
 
 		visited.push(current);
 		current = current.getPrototype();
-		// if (current.parent && current.parent.proto === this.proto) {
-		// 	return true;
-		// }
-
-		// current = current.proto;
 	}
 
 	return false;

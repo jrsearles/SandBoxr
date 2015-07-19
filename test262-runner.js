@@ -29,8 +29,8 @@ if (chapter) {
 	tests = [root + "suite/ch" + chapter + "/**/*.js"];
 } else {
 	tests = [
-		root + "suite/ch06/**/*.js", 	// passed!
-		root + "suite/ch07/**/*.js",	// passed!
+		// root + "suite/ch06/**/*.js", 	// passed!
+		// root + "suite/ch07/**/*.js",	// passed!
 		root + "suite/ch08/**/*.js",	// passed! *
 		root + "suite/ch09/**/*.js",	// passed!
 		root + "suite/ch10/**/*.js",	// passed! *
@@ -38,7 +38,7 @@ if (chapter) {
 		// root + "suite/ch12/12.6/12.6.2/**/*.js",
 		root + "suite/ch13/**/*.js",	// functions	-- passed!
 		root + "suite/ch14/**/*.js",	// program	-- passed!
-		root + "suite/ch15/15.1/**/*.js",	// global	-- passed
+		// root + "suite/ch15/15.1/**/*.js",	// global	-- passed
 		root + "suite/ch15/15.2/**/*.js",	// object	-- passed
 		// root + "suite/ch15/15.3/15.3.4/15.3.4.4/**/*.js",	// function
 		root + "suite/ch15/15.4/**/*.js",	// array		-- passed - 1

@@ -157,21 +157,6 @@ module.exports = function (env) {
 			}
 
 			current = current.getPrototype();
-			// if (thisNode === current || thisNode === (current.parent && current.parent.proto)) {
-			// 	return objectFactory.createPrimitive(true);
-			// }
-
-			// if (!current.hasOwnProperty("prototype")) {
-			// 	break;
-			// }
-
-			// current = current.getProperty("prototype").getValue();
-
-			// if (current.parent && current.parent.proto === this.scope.thisNode) {
-			// 	return objectFactory.createPrimitive(true);
-			// }
-
-			// current = current.proto; // && current.parent.proto;
 		}
 
 		return objectFactory.createPrimitive(false);
@@ -195,8 +180,6 @@ module.exports = function (env) {
 		var obj = objectFactory.createObject();
 
 		if (parent) {
-			// obj.parent = parent;
-			// obj.setProto(parent);
 			obj.setPrototype(parent);
 		}
 
@@ -213,7 +196,7 @@ module.exports = function (env) {
 
 	objectClass.define("defineProperty", objectFactory.createBuiltInFunction(function (obj, prop, descriptor) {
 		contracts.assertIsObject(obj, "Object.defineProperty");
-		defineProperty(this, obj, convert.toPrimitive(env, prop, "string"), descriptor);
+		defineProperty(this, obj, convert.toString(env, prop), descriptor);
 		return obj;
 	}, 3, "Object.defineProperty"));
 
@@ -233,7 +216,7 @@ module.exports = function (env) {
 	objectClass.define("getOwnPropertyDescriptor", objectFactory.createBuiltInFunction(function (obj, prop) {
 		contracts.assertIsObject(obj, "Object.getOwnPropertyDescriptor");
 
-		prop = convert.toPrimitive(env, prop, "string");
+		prop = convert.toString(env, prop);
 
 		if (obj.hasOwnProperty(prop)) {
 			var descriptor = obj.getProperty(prop);
@@ -267,11 +250,6 @@ module.exports = function (env) {
 				arr.defineOwnProperty(index++, { configurable: true, enumerable: true, writable: true, value: objectFactory.createPrimitive(name) }, false, env);
 			}
 		}
-		// Object.keys(obj.properties).forEach(function (name) {
-		// 	if (obj.properties[name].enumerable) {
-		// 		arr.putValue(index++, objectFactory.createPrimitive(name), false, context);
-		// 	}
-		// });
 
 		return arr;
 	}, 1, "Object.keys"));
@@ -308,11 +286,11 @@ module.exports = function (env) {
 
 		if (!obj.extensible) {
 			for (var prop in obj.properties) {
-				if (obj.type === "function" || prop !== "prototype") {
-					if (obj.properties[prop].writable || obj.properties[prop].configurable) {
-						return objectFactory.createPrimitive(false);
-					}
+				// if (obj.type === "function" || prop !== "prototype") {
+				if (obj.properties[prop].writable || obj.properties[prop].configurable) {
+					return objectFactory.createPrimitive(false);
 				}
+				// }
 			}
 		}
 
@@ -341,11 +319,11 @@ module.exports = function (env) {
 
 		if (!obj.extensible) {
 			for (var prop in obj.properties) {
-				if (obj.type === "function" || prop !== "prototype") {
-					if (obj.properties[prop].configurable) {
-						return objectFactory.createPrimitive(false);
-					}
+				// if (obj.type === "function" || prop !== "prototype") {
+				if (obj.properties[prop].configurable) {
+					return objectFactory.createPrimitive(false);
 				}
+				// }
 			}
 		}
 

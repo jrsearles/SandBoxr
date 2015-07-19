@@ -57,17 +57,18 @@ ObjectType.prototype = {
 	},
 
 	getOwnPropertyNames: function () {
-		var props = [];
-		for (var prop in this.properties) {
-			// ignore prototype
-			if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
-				continue;
-			}
+		return Object.keys(this.properties);
+		// var props = [];
+		// for (var prop in this.properties) {
+		// 	// ignore prototype
+		// 	if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
+		// 		continue;
+		// 	}
 
-			props.push(prop);
-		}
+		// 	props.push(prop);
+		// }
 
-		return props;
+		// return props;
 	},
 
 	hasProperty: function (name) {
@@ -84,10 +85,6 @@ ObjectType.prototype = {
 		}
 
 		name = String(name);
-		// if (name === "prototype") {
-		// 	this.setProto(value);
-		// 	return;
-		// }
 
 		var descriptor = this.getProperty(name);
 		if (descriptor) {
