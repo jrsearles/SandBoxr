@@ -114,7 +114,7 @@ DeclarativeEnvironment.prototype = {
 	},
 
 	getThisBinding: function () {
-		return undefined;
+		return this.thisNode;
 	}
 };
 
@@ -258,6 +258,10 @@ Environment.prototype = {
 	deleteBinding: function (name) {
 		this.current.deleteBinding(name);
 	},
+	
+	getThisBinding: function () {
+		return this.current.getThisBinding() || this.global;
+	},
 
 	createScope: function (thisArg) {
 		var env = new DeclarativeEnvironment(this.current, thisArg, this);
@@ -393,11 +397,11 @@ ObjectEnvironment.prototype = {
 
 	deleteBinding: function (name) {
 		return this.object.deleteProperty(name, false);
-	}
+	},
 
-	// getThisBinding: function () {
-	// 	return undefined;
-	// }
+	getThisBinding: function () {
+		return this.object;
+	}
 };
 
 module.exports = ObjectEnvironment;
@@ -823,7 +827,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 		return convert.toObject(env, fnMember.base);
 	}
 
-	return env.global;
+	return null;
 }
 
 module.exports = function CallExpression (context) {
@@ -834,7 +838,7 @@ module.exports = function CallExpression (context) {
 	var fn = fnMember.getValue();
 	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result.getValue(); });
 
-	if (!(fn instanceof FunctionType)) {
+	if (!fn || fn.className !== "Function") {
 		throw new TypeError(fn.toString() + " not a function");
 	}
 
@@ -1239,7 +1243,7 @@ module.exports = function SwitchStatement (context) {
 },{}],33:[function(require,module,exports){
 "use strict";
 module.exports = function ThisExpression (context) {
-	return context.result(context.env.current.thisNode);
+	return context.result(context.env.getThisBinding());
 };
 
 },{}],34:[function(require,module,exports){
@@ -2397,8 +2401,10 @@ module.exports = function (env) {
 },{"../utils/convert":68,"../utils/types":70}],47:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
+var contracts = require("../utils/contracts");
 var types = require("../utils/types");
 var func = require("../utils/func");
+var NativeFunctionType = require("../types/native-function-type");
 var slice = Array.prototype.slice;
 
 function defineThis (env, fn, thisArg) {
@@ -2413,6 +2419,8 @@ function defineThis (env, fn, thisArg) {
 	return convert.toObject(env, thisArg);
 }
 
+var frozen = { configurable: false, enumerable: false, writable: false };
+
 module.exports = function (env, options) {
 	var globalObject = env.global;
 	var undef = env.global.getProperty("undefined").getValue();
@@ -2422,14 +2430,29 @@ module.exports = function (env, options) {
 		var funcInstance;
 
 		if (options.parser && arguments.length > 0) {
-			var args = slice.call(arguments).map(function (arg) { return types.isNullOrUndefined(arg) ? "" : convert.toPrimitive(env, arg, "string"); });
-			var ast = options.parser("(function () { " + args.pop() + "}).apply(this, arguments);");
-
-			args = Array.prototype.concat.apply([], args.map(function (arg) { return arg.split(","); }));
+			var args = slice.call(arguments);
+			var body = args.pop();
+			
+			if (args.length > 0) {
+				args = args.map(function (arg, index) {
+					if (types.isNull(arg)) {
+						throw new SyntaxError("Unexpected token null");
+					}
+					
+					return types.isUndefined(arg) ? "" : convert.toString(env, arg); 
+				})
+				// the spec allows parameters to be comma-delimited, so we will join and split again comma
+				.join(",").split(/\s*,\s*/g);
+			}
+			
+			var ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
 			var params = args.map(function (arg) {
+				arg = arg.trim();
+				contracts.assertIsValidParameterName(arg);
+				
 				return {
 					type: "Identifier",
-					name: arg.trim()
+					name: arg
 				};
 			});
 
@@ -2440,10 +2463,13 @@ module.exports = function (env, options) {
 			};
 
 			var fn = objectFactory.createFunction(callee);
-			funcInstance = objectFactory.createFunction(function () {
+			var wrappedFunc = function () {
 				var executionResult = func.getFunctionResult(this, fn, params, arguments, globalObject, callee);
 				return executionResult && executionResult.result || undef;
-			}, env.globalScope);
+			};
+			
+			wrappedFunc.nativeLength = callee.params.length;
+			funcInstance = objectFactory.createFunction(wrappedFunc, env.globalScope);
 		} else {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
@@ -2451,20 +2477,21 @@ module.exports = function (env, options) {
 		funcInstance.putValue("constructor", functionClass);
 		return funcInstance;
 	};
+	
+	// the prototype of a function is actually callable and evaluates as a function
+	var proto = new NativeFunctionType(function () {}, globalObject);
 
 	funcCtor.nativeLength = 1;
-	var functionClass = objectFactory.createFunction(funcCtor, null, null, null, { configurable: false, enumerable: false, writable: false });
+	var functionClass = objectFactory.createFunction(funcCtor, null, proto, null, frozen);
 	functionClass.putValue("constructor", functionClass);
-
-	// function itself is a function
-	// functionClass.parent = functionClass;
 
 	globalObject.define("Function", functionClass);
 
-	var proto = functionClass.getProperty("prototype").getValue();
-	proto.type = "function";
-	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: false });
+	// var proto = functionClass.getProperty("prototype").getValue();
+	// proto.className = "Function";
+	proto.define("length", objectFactory.createPrimitive(0), frozen);
 
+	// function itself is a function
 	functionClass.setPrototype(proto);
 	
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
@@ -2484,7 +2511,8 @@ module.exports = function (env, options) {
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
-
+		this.node.bindThis(thisArg);
+		
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
@@ -2499,7 +2527,8 @@ module.exports = function (env, options) {
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
-
+		this.node.bindThis(thisArg);
+		
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}));
 
@@ -2531,12 +2560,13 @@ module.exports = function (env, options) {
 		boundFunc.defineOwnProperty("caller", throwProperties);
 		boundFunc.defineOwnProperty("arguments", throwProperties);
 		boundFunc.defineOwnProperty("callee", throwProperties);
-
+		boundFunc.bindThis(thisArg);
+		
 		return boundFunc;
 	}));
 };
 
-},{"../utils/convert":68,"../utils/func":69,"../utils/types":70}],48:[function(require,module,exports){
+},{"../types/native-function-type":60,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69,"../utils/types":70}],48:[function(require,module,exports){
 (function (global){
 "use strict";
 var Environment = require("../env/environment");
@@ -2957,21 +2987,6 @@ module.exports = function (env) {
 			}
 
 			current = current.getPrototype();
-			// if (thisNode === current || thisNode === (current.parent && current.parent.proto)) {
-			// 	return objectFactory.createPrimitive(true);
-			// }
-
-			// if (!current.hasOwnProperty("prototype")) {
-			// 	break;
-			// }
-
-			// current = current.getProperty("prototype").getValue();
-
-			// if (current.parent && current.parent.proto === this.scope.thisNode) {
-			// 	return objectFactory.createPrimitive(true);
-			// }
-
-			// current = current.proto; // && current.parent.proto;
 		}
 
 		return objectFactory.createPrimitive(false);
@@ -2995,8 +3010,6 @@ module.exports = function (env) {
 		var obj = objectFactory.createObject();
 
 		if (parent) {
-			// obj.parent = parent;
-			// obj.setProto(parent);
 			obj.setPrototype(parent);
 		}
 
@@ -3013,7 +3026,7 @@ module.exports = function (env) {
 
 	objectClass.define("defineProperty", objectFactory.createBuiltInFunction(function (obj, prop, descriptor) {
 		contracts.assertIsObject(obj, "Object.defineProperty");
-		defineProperty(this, obj, convert.toPrimitive(env, prop, "string"), descriptor);
+		defineProperty(this, obj, convert.toString(env, prop), descriptor);
 		return obj;
 	}, 3, "Object.defineProperty"));
 
@@ -3033,7 +3046,7 @@ module.exports = function (env) {
 	objectClass.define("getOwnPropertyDescriptor", objectFactory.createBuiltInFunction(function (obj, prop) {
 		contracts.assertIsObject(obj, "Object.getOwnPropertyDescriptor");
 
-		prop = convert.toPrimitive(env, prop, "string");
+		prop = convert.toString(env, prop);
 
 		if (obj.hasOwnProperty(prop)) {
 			var descriptor = obj.getProperty(prop);
@@ -3067,11 +3080,6 @@ module.exports = function (env) {
 				arr.defineOwnProperty(index++, { configurable: true, enumerable: true, writable: true, value: objectFactory.createPrimitive(name) }, false, env);
 			}
 		}
-		// Object.keys(obj.properties).forEach(function (name) {
-		// 	if (obj.properties[name].enumerable) {
-		// 		arr.putValue(index++, objectFactory.createPrimitive(name), false, context);
-		// 	}
-		// });
 
 		return arr;
 	}, 1, "Object.keys"));
@@ -3108,11 +3116,11 @@ module.exports = function (env) {
 
 		if (!obj.extensible) {
 			for (var prop in obj.properties) {
-				if (obj.type === "function" || prop !== "prototype") {
-					if (obj.properties[prop].writable || obj.properties[prop].configurable) {
-						return objectFactory.createPrimitive(false);
-					}
+				// if (obj.type === "function" || prop !== "prototype") {
+				if (obj.properties[prop].writable || obj.properties[prop].configurable) {
+					return objectFactory.createPrimitive(false);
 				}
+				// }
 			}
 		}
 
@@ -3141,11 +3149,11 @@ module.exports = function (env) {
 
 		if (!obj.extensible) {
 			for (var prop in obj.properties) {
-				if (obj.type === "function" || prop !== "prototype") {
-					if (obj.properties[prop].configurable) {
-						return objectFactory.createPrimitive(false);
-					}
+				// if (obj.type === "function" || prop !== "prototype") {
+				if (obj.properties[prop].configurable) {
+					return objectFactory.createPrimitive(false);
 				}
+				// }
 			}
 		}
 
@@ -3710,6 +3718,7 @@ function FunctionType (node, parentScope) {
 	this.native = false;
 	this.node = node;
 	this.parentScope = parentScope;
+	this.boundThis = null;
 }
 
 FunctionType.prototype = Object.create(ObjectType.prototype);
@@ -3739,6 +3748,10 @@ FunctionType.prototype.getProperty = function (name) {
 	}
 
 	return prop;
+};
+
+FunctionType.prototype.bindThis = function (thisArg) {
+	this.boundThis = thisArg;
 };
 
 // FunctionType.prototype.defineOwnProperty = function (name, descriptor) {
@@ -3784,7 +3797,12 @@ FunctionType.prototype.createScope = function (env, thisArg) {
 		env.current = this.parentScope;
 	}
 
-	var scope = env.createScope.apply(env, Array.prototype.slice.call(arguments, 1));
+	var args = Array.prototype.slice.call(arguments, 1);
+	if (this.boundThis) {
+		args[0] = this.boundThis;
+	}
+	
+	var scope = env.createScope.apply(env, args);
 	if (!this.native) {
 		scope.init(this.node.body);
 	}
@@ -3798,10 +3816,6 @@ FunctionType.prototype.createScope = function (env, thisArg) {
 };
 
 FunctionType.prototype.hasInstance = function (obj) {
-	// if (obj.isPrimitive || obj === this) {
-	// 	return false;
-	// }
-
 	if (obj === this) {
 		// object obviously isn't an instance in this case
 		return false;
@@ -3816,18 +3830,13 @@ FunctionType.prototype.hasInstance = function (obj) {
 			return false;
 		}
 
-		// keep a stack to avoid circular reference
 		if (current === proto) {
 			return true;
 		}
 
+		// keep a stack to avoid circular reference
 		visited.push(current);
 		current = current.getPrototype();
-		// if (current.parent && current.parent.proto === this.proto) {
-		// 	return true;
-		// }
-
-		// current = current.proto;
 	}
 
 	return false;
@@ -4134,17 +4143,18 @@ ObjectType.prototype = {
 	},
 
 	getOwnPropertyNames: function () {
-		var props = [];
-		for (var prop in this.properties) {
-			// ignore prototype
-			if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
-				continue;
-			}
+		return Object.keys(this.properties);
+		// var props = [];
+		// for (var prop in this.properties) {
+		// 	// ignore prototype
+		// 	if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
+		// 		continue;
+		// 	}
 
-			props.push(prop);
-		}
+		// 	props.push(prop);
+		// }
 
-		return props;
+		// return props;
 	},
 
 	hasProperty: function (name) {
@@ -4161,10 +4171,6 @@ ObjectType.prototype = {
 		}
 
 		name = String(name);
-		// if (name === "prototype") {
-		// 	this.setProto(value);
-		// 	return;
-		// }
 
 		var descriptor = this.getProperty(name);
 		if (descriptor) {
@@ -4593,6 +4599,16 @@ module.exports = {
 			throw new RangeError("Invalid array length");
 		}
 	},
+	
+	assertIsValidParameterName: function (name) {
+		if (/^\d/.test(name)) {
+			throw new SyntaxError("Unexpected token " + name[0]);
+		}
+		
+		if (/;/.test(name)) {
+			throw new SyntaxError("Unexpected token ;");
+		}
+	},
 
 	isValidArrayLength: function (length) {
 		return types.isInteger(length) && length >= 0 && length < 4294967296;
@@ -4941,11 +4957,15 @@ module.exports = {
 	},
 
 	isNullOrUndefined: function (obj) {
-		return !obj || (obj.isPrimitive && obj.value == null);
+		return this.isUndefined(obj) || this.isNull(obj);
 	},
 
 	isUndefined: function (obj) {
 		return !obj || (obj.isPrimitive && obj.value === undefined);
+	},
+	
+	isNull: function (obj) {
+		return obj && obj.isPrimitive && obj.value === null;	
 	},
 
 	isInteger: function (value) {

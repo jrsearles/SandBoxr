@@ -14,7 +14,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 		return convert.toObject(env, fnMember.base);
 	}
 
-	return env.global;
+	return null;
 }
 
 module.exports = function CallExpression (context) {
@@ -25,7 +25,7 @@ module.exports = function CallExpression (context) {
 	var fn = fnMember.getValue();
 	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result.getValue(); });
 
-	if (!(fn instanceof FunctionType)) {
+	if (!fn || fn.className !== "Function") {
 		throw new TypeError(fn.toString() + " not a function");
 	}
 

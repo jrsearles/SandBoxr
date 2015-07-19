@@ -134,6 +134,10 @@ Environment.prototype = {
 	deleteBinding: function (name) {
 		this.current.deleteBinding(name);
 	},
+	
+	getThisBinding: function () {
+		return this.current.getThisBinding() || this.global;
+	},
 
 	createScope: function (thisArg) {
 		var env = new DeclarativeEnvironment(this.current, thisArg, this);

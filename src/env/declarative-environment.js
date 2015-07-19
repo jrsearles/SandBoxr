@@ -84,7 +84,7 @@ DeclarativeEnvironment.prototype = {
 	},
 
 	getThisBinding: function () {
-		return undefined;
+		return this.thisNode;
 	}
 };
 

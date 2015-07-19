@@ -8,21 +8,13 @@ function ObjectType () {
 	this.extensible = true;
 
 	this.primitiveHint = "number";
+	this.propertyCount = 0;
 }
 
 ObjectType.prototype = {
 	constructor: ObjectType,
 
 	init: function () { },
-
-	// setProto: function (proto, descriptor) {
-	// 	if ("prototype" in this.properties && !this.properties.prototype.canSetValue()) {
-	// 		return;
-	// 	}
-
-	// 	this.proto = proto;
-	// 	this.properties.prototype = new PropertyDescriptor(this, descriptor || { configurable: true, enumerable: false, writable: true }, proto);
-	// },
 
 	getPrototype: function () {
 		return this.proto;
@@ -35,12 +27,7 @@ ObjectType.prototype = {
 	getProperty: function (name) {
 		name = String(name);
 
-		// if (name === "prototype") {
-		// 	return this.getOwnProperty(name);
-		// }
-
 		var current = this;
-
 		while (current) {
 			if (name in current.properties) {
 				return current.properties[name].bind(this);
@@ -58,17 +45,6 @@ ObjectType.prototype = {
 
 	getOwnPropertyNames: function () {
 		return Object.keys(this.properties);
-		// var props = [];
-		// for (var prop in this.properties) {
-		// 	// ignore prototype
-		// 	if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
-		// 		continue;
-		// 	}
-
-		// 	props.push(prop);
-		// }
-
-		// return props;
 	},
 
 	hasProperty: function (name) {
@@ -97,6 +73,7 @@ ObjectType.prototype = {
 			}
 
 			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
+				this.propertyCount++;
 				this.properties[name] = new PropertyDescriptor(this, {
 					value: value,
 					configurable: descriptor.configurable,
@@ -140,6 +117,7 @@ ObjectType.prototype = {
 			return false;
 		}
 
+		this.propertyCount++;
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
 		return true;
 	},
@@ -163,6 +141,7 @@ ObjectType.prototype = {
 			return false;
 		}
 
+		this.propertyCount--;
 		return delete this.properties[name];
 	},
 
@@ -188,6 +167,11 @@ ObjectType.prototype = {
 		}
 
 		this.preventExtensions();
+	},
+	
+	getDensity: function (length) {
+		// -1 to exclude length
+		return this.propertyCount - 1 / length;
 	},
 
 	toBoolean: function () {

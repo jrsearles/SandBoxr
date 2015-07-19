@@ -36,6 +36,12 @@ module.exports = {
 			throw new RangeError("Invalid array length");
 		}
 	},
+	
+	assertIsValidParameterName: function (name) {
+		if (/^\d|;,\(\)"'/.test(name)) {
+			throw new SyntaxError("Unexpected token in " + name);
+		}
+	},
 
 	isValidArrayLength: function (length) {
 		return types.isInteger(length) && length >= 0 && length < 4294967296;

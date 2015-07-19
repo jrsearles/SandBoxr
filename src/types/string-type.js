@@ -36,6 +36,10 @@ StringType.prototype.getProperty = function (name) {
 	return PrimitiveType.prototype.getProperty.apply(this, arguments);
 };
 
+StringType.prototype.getDensity = function () {
+	return 100;	
+};
+
 StringType.prototype.getOwnPropertyNames = function () {
 	var props = [];
 	var ln, i;

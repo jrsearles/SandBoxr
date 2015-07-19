@@ -8,6 +8,7 @@ function FunctionType (node, parentScope) {
 	this.native = false;
 	this.node = node;
 	this.parentScope = parentScope;
+	this.boundThis = null;
 }
 
 FunctionType.prototype = Object.create(ObjectType.prototype);
@@ -37,6 +38,10 @@ FunctionType.prototype.getProperty = function (name) {
 	}
 
 	return prop;
+};
+
+FunctionType.prototype.bindThis = function (thisArg) {
+	this.boundThis = thisArg;
 };
 
 // FunctionType.prototype.defineOwnProperty = function (name, descriptor) {
@@ -82,7 +87,12 @@ FunctionType.prototype.createScope = function (env, thisArg) {
 		env.current = this.parentScope;
 	}
 
-	var scope = env.createScope.apply(env, Array.prototype.slice.call(arguments, 1));
+	var args = Array.prototype.slice.call(arguments, 1);
+	if (this.boundThis) {
+		args[0] = this.boundThis;
+	}
+	
+	var scope = env.createScope.apply(env, args);
 	if (!this.native) {
 		scope.init(this.node.body);
 	}
@@ -110,11 +120,11 @@ FunctionType.prototype.hasInstance = function (obj) {
 			return false;
 		}
 
-		// keep a stack to avoid circular reference
 		if (current === proto) {
 			return true;
 		}
 
+		// keep a stack to avoid circular reference
 		visited.push(current);
 		current = current.getPrototype();
 	}

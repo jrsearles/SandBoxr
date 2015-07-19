@@ -330,6 +330,7 @@ module.exports = function (env) {
 		return objectFactory.createPrimitive(!obj.extensible);
 	}, 1, "Object.isSealed"));
 
-	// globalObject.getProperty("Function").getValue().setPrototype(proto);
+	// function is an object - make sure that it is in the prototype chain
+	globalObject.getProperty("Function").getValue().getPrototype().setPrototype(proto);
 	globalObject.define("Object", objectClass);
 };

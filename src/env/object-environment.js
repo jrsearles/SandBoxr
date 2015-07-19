@@ -60,11 +60,11 @@ ObjectEnvironment.prototype = {
 
 	deleteBinding: function (name) {
 		return this.object.deleteProperty(name, false);
-	}
+	},
 
-	// getThisBinding: function () {
-	// 	return undefined;
-	// }
+	getThisBinding: function () {
+		return this.object;
+	}
 };
 
 module.exports = ObjectEnvironment;

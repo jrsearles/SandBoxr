@@ -56,6 +56,11 @@ describe("Functions", function () {
 		var result = runner.runBlock("(function (a) { a++;return a===arguments[0]; })(1)==true;");
 		expect(result.value).to.be.true;
 	});
+	
+	it("should allow function prototype to be called", function () {
+		var result = runner.runBlock("Function.prototype()===undefined;");
+		expect(result.value).to.be.true;
+	});
 
 	describe("Function.prototype.bind", function () {
 		it("should return a function", function () {

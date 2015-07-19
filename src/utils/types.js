@@ -7,11 +7,15 @@ module.exports = {
 	},
 
 	isNullOrUndefined: function (obj) {
-		return !obj || (obj.isPrimitive && obj.value == null);
+		return this.isUndefined(obj) || this.isNull(obj);
 	},
 
 	isUndefined: function (obj) {
 		return !obj || (obj.isPrimitive && obj.value === undefined);
+	},
+	
+	isNull: function (obj) {
+		return obj && obj.isPrimitive && obj.value === null;	
 	},
 
 	isInteger: function (value) {
