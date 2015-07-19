@@ -11,7 +11,7 @@ function getCharacter (source, position) {
 		// todo: need to set length
 		var character = new StringType(source.value[position]);
 		character.parent = source.parent;
-		character.setProto(source.proto);
+		// character.setProto(source.proto);
 		return character;
 	}
 

@@ -1,10 +1,14 @@
 {
-  "name": "interpreter",
-  "version": "1.0.0",
+  "name": "SandBoxr",
+  "version": "0.5.0",
   "description": "",
-  "main": "src/sand-boxer.js",
+  "main": "src/sandboxr.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jrsearles/SandBoxr.git"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +23,6 @@
     "gulp-mocha": "^2.1.1",
     "mocha": "^2.2.4",
     "strictify": "^0.2.0",
-    "test262-harness": "^1.5.3",
     "vinyl-source-stream": "^1.1.0",
     "yargs": "^3.10.0"
   }

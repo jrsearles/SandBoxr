@@ -17,11 +17,25 @@ NativeFunctionType.prototype.init = function (objectFactory, proto, ctor, descri
 		length = this.nativeFunction.nativeLength;
 	}
 
-	this.defineOwnProperty("length", { value: objectFactory.createPrimitive(length), configurable: false, enumerable: false, writable: false });
+	this.defineOwnProperty("length", {
+		value: objectFactory.createPrimitive(length),
+		configurable: false,
+		enumerable: false,
+		writable: false
+	});
 
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
-	this.setProto(proto, descriptor || { configurable: false, enumerable: false, writable: true });
+
+	descriptor = descriptor || { configurable: false, enumerable: false, writable: true };
+	var protoDescriptor = {
+		value: proto,
+		configurable: descriptor.configurable,
+		enumerable: descriptor.enumerable,
+		writable: descriptor.writable
+	};
+
+	this.defineOwnProperty("prototype", protoDescriptor);
 };
 
 module.exports = NativeFunctionType;

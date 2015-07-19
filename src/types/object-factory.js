@@ -25,8 +25,8 @@ function setOrphans (scope) {
 		parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
-				child.parent = parent;
-				child.setProto(parent.proto);
+				child.setPrototype(parent.getProperty("prototype").getValue());
+				// child.setProto(parent.proto);
 			});
 
 			delete orphans[typeName];
@@ -43,8 +43,9 @@ function setProto (typeName, instance, env) {
 
 	var parent = env.getReference(typeName);
 	if (!parent.isUnresolved()) {
-		instance.parent = parent.getValue();
-		instance.setProto(instance.parent.proto);
+		instance.setPrototype(parent.getValue().getProperty("prototype").getValue());
+		// instance.parent = parent.getValue();
+		// instance.setProto(instance.parent.proto);
 		return;
 	}
 
@@ -121,9 +122,11 @@ ObjectFactory.prototype = {
 		var instance = new ObjectType();
 		if (parent !== null) {
 			if (parent) {
-				instance.parent = parent;
-				instance.setProto(parent.proto);
+				instance.setPrototype(parent && parent.getProperty("prototype").getValue());
+				// instance.parent = parent;
+				// instance.setProto(parent.proto);
 			} else {
+				// instance.parent = this.env.global.getProperty("Object").getValue();
 				setProto("Object", instance, this.env);
 			}
 		}
@@ -137,8 +140,9 @@ ObjectFactory.prototype = {
 		var objectClass = this.env.global.getProperty("Object").getValue();
 
 		instance.init(this, objectClass, objectClass.proto);
-		instance.parent = objectClass;
-
+		// instance.parent = objectClass;
+		instance.setPrototype(objectClass.getProperty("prototype").getValue());
+		
 		// for (var i = 0, ln = args.length; i < ln; i++) {
 		// 	instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true }, false);
 		// }
@@ -161,7 +165,8 @@ ObjectFactory.prototype = {
 		instance.init(this, proto, ctor, descriptor);
 		var functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
-			instance.parent = functionClass.getValue();
+			// instance.parent = functionClass.getValue();
+			instance.setPrototype(functionClass.getValue().getProperty("prototype").getValue());
 		}
 
 		return instance;
@@ -176,7 +181,7 @@ ObjectFactory.prototype = {
 			return fn.apply(this, arguments);
 		});
 
-		instance.parent = this.env.getValue("Function");
+		instance.setPrototype(this.env.getValue("Function").getProperty("prototype").getValue());
 		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;

@@ -74,6 +74,15 @@ function executeAccumulator (callback, priorValue, executionContext, index) {
 	scope.exitScope();
 }
 
+function createIndexProperty (value) {
+	return {
+		value: value,
+		configurable: true,
+		enumerable: true,
+		writable: true
+	};
+}
+
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
@@ -88,7 +97,7 @@ module.exports = function (env) {
 				newArray.putValue("length", length, false, this);
 			} else {
 				for (var i = 0, ln = arguments.length; i < ln; i++) {
-					newArray.putValue(i, arguments[i], false, this);
+					newArray.defineOwnProperty(i, createIndexProperty(arguments[i]), false, env);
 				}
 			}
 		}
@@ -96,13 +105,12 @@ module.exports = function (env) {
 		return newArray;
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = arrayClass.proto;
+	var proto = arrayClass.getProperty("prototype").getValue();
 	proto.className = "Array";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
 	arrayClass.define("isArray", objectFactory.createFunction(function (obj) {
 		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
-		// return objectFactory.createPrimitive(obj === proto || obj instanceof ArrayType);
 	}));
 
 	proto.define("push", objectFactory.createBuiltInFunction(function (arg) {
@@ -110,7 +118,7 @@ module.exports = function (env) {
 		var i = 0;
 		var length = arguments.length;
 		for (; i < length; i++) {
-			this.node.putValue(start + i, arguments[i]);
+			this.node.defineOwnProperty(start + i, createIndexProperty(arguments[i]), true, env);
 		}
 
 		var newLength = objectFactory.createPrimitive(start + i);
@@ -207,7 +215,7 @@ module.exports = function (env) {
 		end = getEndIndex(end, length);
 
 		for (var i = begin; i < end; i++) {
-			arr.putValue(index++, source.getProperty(i).getValue());
+			arr.defineOwnProperty(index++, createIndexProperty(source.getProperty(i).getValue()), true, env);
 		}
 
 		return arr;
@@ -235,7 +243,7 @@ module.exports = function (env) {
 		var k = 0;
 		while (k < deleteCount) {
 			if (this.node.hasProperty(k + start)) {
-				removed.putValue(k, this.node.getProperty(k + start).getValue());
+				removed.defineOwnProperty(k, createIndexProperty(this.node.getProperty(k + start).getValue()), true, env);
 			}
 
 			k++;
@@ -297,13 +305,13 @@ module.exports = function (env) {
 			if (current instanceof ArrayType) {
 				for (i = 0, length = current.getProperty("length").getValue().value; i < length; i++) {
 					if (current.hasProperty(i)) {
-						newArray.putValue(index, current.getProperty(i).getValue());
+						newArray.defineOwnProperty(index, createIndexProperty(current.getProperty(i).getValue()), true, env);
 					}
 
 					index++;
 				}
 			} else {
-				newArray.putValue(index++, current);
+				newArray.defineOwnProperty(index++, createIndexProperty(current), true, env);
 			}
 		}
 
@@ -396,7 +404,7 @@ module.exports = function (env) {
 
 		for (var i = 0; i < length; i++) {
 			if (this.node.hasProperty(i)) {
-				newArray.putValue(i, executeCallback(callback, thisArg, this, i));
+				newArray.defineOwnProperty(i, createIndexProperty(executeCallback(callback, thisArg, this, i)), true, env);
 			}
 		}
 
@@ -413,7 +421,7 @@ module.exports = function (env) {
 
 		for (var i = 0; i < length; i++) {
 			if (this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i).toBoolean()) {
-				newArray.putValue(index++, this.node.getProperty(i).getValue());
+				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
 			}
 		}
 

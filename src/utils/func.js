@@ -1,43 +1,5 @@
-// function defineThis (scope, thisArg, isNew) {
-// 	if (!thisArg) {
-// 		return scope.global;
-// 	}
-
-// 	if (isNew) {
-// 		return thisArg;
-// 	}
-
-// 	if (thisArg.isPrimitive && thisArg.value != null) {
-// 		// call toObject on primitive 10.4.3
-// 		var obj = scope.objectFactory.createPrimitive(thisArg.value);
-// 		obj.isPrimitive = false;
-// 		obj.type = "object";
-// 		obj.toBoolean = function () { return true; };
-// 		return obj;
-// 	}
-
-// 	return thisArg;
-// }
-
-function createArgumentProperty (scope, name) {
-	return {
-		configurable: true,
-		enumerable: true,
-		get: undefined,
-		getter: function () {
-			return scope.getBindingValue(name);
-		},
-		set: undefined,
-		setter: function (value) {
-			scope.setMutableBinding(name, value);
-		},
-		writable: true
-	};
-}
-
 module.exports = {
 	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
-		// thisArg = defineThis(context.env, thisArg, isNew);
 		var scope = fn.createScope(context.env, thisArg, false);
 		var returnResult;
 
@@ -68,9 +30,7 @@ module.exports = {
 	},
 
 	getFunctionResult: function (context, fn, params, args, thisArg, callee) {
-		// thisArg = defineThis(context.env, thisArg);
 		var scope = fn.createScope(context.env, thisArg, false);
-
 		this.loadArguments(context.env, params, args, fn);
 
 		var executionResult;

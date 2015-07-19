@@ -30,7 +30,7 @@ module.exports = function (env) {
 		return objectFactory.create("Number", numberValue);
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = numberClass.proto;
+	var proto = numberClass.getProperty("prototype").getValue();
 	proto.className = "Number";
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {

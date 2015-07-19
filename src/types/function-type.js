@@ -15,33 +15,63 @@ FunctionType.prototype.constructor = FunctionType;
 
 FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
 	// set length property from the number of parameters
-	this.defineOwnProperty("length", { value: objectFactory.createPrimitive(this.node.params.length), configurable: false, enumerable: false, writable: false });
+	this.defineOwnProperty("length", {
+		value: objectFactory.createPrimitive(this.node.params.length),
+		configurable: false,
+		enumerable: false,
+		writable: false
+	});
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
 	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: ctor || this });
-	this.setProto(proto, { configurable: false, enumerable: false, writable: true });
+	this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
 };
 
 FunctionType.prototype.getProperty = function (name) {
 	var prop = ObjectType.prototype.getProperty.apply(this, arguments);
-
-	// since function itself is a function, look at our own properties
 	if (!prop && name !== "prototype") {
-		return this.properties.prototype.getValue().properties[name];
+		// since a function instance is itself a function look at our own prototype
+		var proto = this.getProperty("prototype");
+		return proto && proto.getValue().getProperty(name);
 	}
 
 	return prop;
 };
 
-FunctionType.prototype.getOwnPropertyNames = function () {
-	var props = ObjectType.prototype.getOwnPropertyNames.call(this);
-	if ("prototype" in this.properties) {
-		props.push("prototype");
-	}
+// FunctionType.prototype.defineOwnProperty = function (name, descriptor) {
+// 	var allowed = ObjectType.prototype.defineOwnProperty.apply(this, arguments);
+// 	if (allowed && name === "prototype" && "value" in descriptor) {
+// 		this.proto = descriptor.value;
+// 	}
+// };
 
-	return props;
-};
+// FunctionType.prototype.putValue = function (name, value) {
+// 	ObjectType.prototype.putValue.apply(this, arguments);
+// 	if (name === "prototype") {
+// 		this.proto = value;
+// 	}
+// };
+
+// FunctionType.prototype.getProperty = function (name) {
+// 	var prop = ObjectType.prototype.getProperty.apply(this, arguments);
+
+// 	// since function itself is a function, look at our own properties
+// 	if (!prop && name !== "prototype") {
+// 		return this.properties.prototype.getValue().properties[name];
+// 	}
+
+// 	return prop;
+// };
+
+// FunctionType.prototype.getOwnPropertyNames = function () {
+// 	var props = ObjectType.prototype.getOwnPropertyNames.call(this);
+// 	if ("prototype" in this.properties) {
+// 		props.push("prototype");
+// 	}
+
+// 	return props;
+// };
 
 FunctionType.prototype.createScope = function (env, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
@@ -77,6 +107,7 @@ FunctionType.prototype.hasInstance = function (obj) {
 
 	var visited = [];
 	var current = obj;
+	var proto = this.getProperty("prototype").getValue();
 
 	while (current) {
 		if (visited.indexOf(current) >= 0) {
@@ -84,16 +115,17 @@ FunctionType.prototype.hasInstance = function (obj) {
 		}
 
 		// keep a stack to avoid circular reference
+		if (current === proto) {
+			return true;
+		}
+
 		visited.push(current);
-		if (current === this.proto) {
-			return true;
-		}
+		current = current.getPrototype();
+		// if (current.parent && current.parent.proto === this.proto) {
+		// 	return true;
+		// }
 
-		if (current.parent && current.parent.proto === this.proto) {
-			return true;
-		}
-
-		current = current.proto;
+		// current = current.proto;
 	}
 
 	return false;

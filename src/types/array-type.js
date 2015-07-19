@@ -3,6 +3,7 @@ var types = require("../utils/types");
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 
+// todo: this is hacky - remove this for passed in environment
 var localObjectFactory;
 
 function setIndex (env, arr, name, descriptor, throwOnError) {
@@ -96,25 +97,12 @@ ArrayType.prototype = Object.create(ObjectType.prototype);
 ArrayType.prototype.constructor = ArrayType;
 
 ArrayType.prototype.putValue = function (name, value, throwOnError, env) {
-	if (!this.hasOwnProperty(name)) {
-		this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
-		return;
-	}
-
-	// if (types.isInteger(name)) {
-	// 	setIndex(env, this, name, { value: value }, false);
-	// 	return;
-	// }
-
 	if (name === "length") {
 		setLength(env, this, name, { value: value }, throwOnError);
 		return;
 	}
 
-	// resizeArray(this, name);
-	// setLength(this, name, value);
 	ObjectType.prototype.putValue.apply(this, arguments);
-	// this.defineOwnProperty(name, null, { value: value }, false);
 };
 
 ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, env) {

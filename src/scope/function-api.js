@@ -59,14 +59,16 @@ module.exports = function (env, options) {
 	functionClass.putValue("constructor", functionClass);
 
 	// function itself is a function
-	functionClass.parent = functionClass;
+	// functionClass.parent = functionClass;
 
 	globalObject.define("Function", functionClass);
 
-	var proto = functionClass.proto;
+	var proto = functionClass.getProperty("prototype").getValue();
 	proto.type = "function";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: false });
 
+	functionClass.setPrototype(proto);
+	
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.native) {
 			return objectFactory.createPrimitive("function () { [native code] }");

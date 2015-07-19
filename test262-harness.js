@@ -17,7 +17,7 @@ function $FAIL (message) {
 }
 
 function $PRINT (message) {
-    console.log(message);
+    // console.log(message);
 }
 
 function $INCLUDE() {}

@@ -15,21 +15,29 @@ ObjectType.prototype = {
 
 	init: function () { },
 
-	setProto: function (proto, descriptor) {
-		if ("prototype" in this.properties && !this.properties.prototype.canSetValue()) {
-			return;
-		}
+	// setProto: function (proto, descriptor) {
+	// 	if ("prototype" in this.properties && !this.properties.prototype.canSetValue()) {
+	// 		return;
+	// 	}
 
+	// 	this.proto = proto;
+	// 	this.properties.prototype = new PropertyDescriptor(this, descriptor || { configurable: true, enumerable: false, writable: true }, proto);
+	// },
+
+	getPrototype: function () {
+		return this.proto;
+	},
+
+	setPrototype: function (proto) {
 		this.proto = proto;
-		this.properties.prototype = new PropertyDescriptor(this, descriptor || { configurable: true, enumerable: false, writable: true }, proto);
 	},
 
 	getProperty: function (name) {
 		name = String(name);
 
-		if (name === "prototype") {
-			return this.getOwnProperty(name);
-		}
+		// if (name === "prototype") {
+		// 	return this.getOwnProperty(name);
+		// }
 
 		var current = this;
 
@@ -38,7 +46,7 @@ ObjectType.prototype = {
 				return current.properties[name].bind(this);
 			}
 
-			current = current.parent && current.parent.proto;
+			current = current.getPrototype();
 		}
 
 		return undefined;
@@ -76,10 +84,10 @@ ObjectType.prototype = {
 		}
 
 		name = String(name);
-		if (name === "prototype") {
-			this.setProto(value);
-			return;
-		}
+		// if (name === "prototype") {
+		// 	this.setProto(value);
+		// 	return;
+		// }
 
 		var descriptor = this.getProperty(name);
 		if (descriptor) {

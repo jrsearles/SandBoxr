@@ -21,7 +21,7 @@ module.exports = function (env) {
 		return objectFactory.createPrimitive(stringValue);
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = stringClass.proto;
+	var proto = stringClass.getProperty("prototype").getValue();
 
 	// prototype can be coerced into an empty string
 	proto.value = "";

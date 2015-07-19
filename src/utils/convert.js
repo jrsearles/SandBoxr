@@ -13,17 +13,17 @@ function getString (env, value) {
 	}
 
 	if (value.isPrimitive) {
-		return value.toString();
+		return String(value.value);
 	}
 
 	var primitiveValue = func.callMethod(env, value, "toString", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.toString();
+		return String(primitiveValue.value);
 	}
 
 	primitiveValue = func.callMethod(env, value, "valueOf", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.toString();
+		return String(primitiveValue.value);
 	}
 
 	throw new TypeError("Cannot convert object to primitive value.");
@@ -40,12 +40,12 @@ function getPrimitive (env, value) {
 
 	var primitiveValue = func.callMethod(env, value, "valueOf", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.valueOf();
+		return primitiveValue.value;
 	}
 
 	primitiveValue = func.callMethod(env, value, "toString", []);
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.valueOf();
+		return primitiveValue.value;
 	}
 
 	throw new TypeError("Cannot convert object to primitive");

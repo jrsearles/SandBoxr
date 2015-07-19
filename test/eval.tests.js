@@ -53,7 +53,7 @@ describe("Eval", function () {
 		});
 
 		it("should be able to call constructor with `call`", function () {
-			var runner = createRunner("(Function.call(this, 'return 1+2;'))() == 3;");
+			var runner = createRunner("(Function.call(this, 'return 1+2;'))()==3;");
 			var result = runner.execute();
 
 			expect(result.result.value).to.be.true;

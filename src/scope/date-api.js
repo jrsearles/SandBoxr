@@ -68,7 +68,7 @@ module.exports = function (env) {
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, 7, "Date.prototype.UTC"));
 
-	var proto = dateClass.proto;
+	var proto = dateClass.getProperty("prototype").getValue();
 
 	staticMethods.forEach(function (name) {
 		dateClass.define(name, convert.toNativeFunction(env, Date[name], "Date." + name));

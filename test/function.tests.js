@@ -2,6 +2,11 @@ var runner = require("./test-runner");
 var expect = require("chai").expect;
 
 describe("Functions", function () {
+	it("Function should have a prototype of function", function () {
+		var result = runner.runBlock("Object.getPrototypeOf(Function)===Function.prototype;");
+		expect(result.value).to.be.true;	
+	});
+	
 	it("should return a value from a named function", function () {
 		var result = runner.runBlock("function a() { return 50; }\na()==50;");
 		expect(result.value).to.be.true;

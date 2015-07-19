@@ -16,11 +16,12 @@ module.exports = function (env) {
 		return obj;
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	errorClass.proto.className = "Error";
-	errorClass.proto.define("name", objectFactory.createPrimitive("Error"));
-	errorClass.proto.define("message", objectFactory.createPrimitive(""));
+	var proto = errorClass.getProperty("prototype").getValue();
+	proto.className = "Error";
+	proto.define("name", objectFactory.createPrimitive("Error"));
+	proto.define("message", objectFactory.createPrimitive(""));
 
-	errorClass.proto.define("toString", objectFactory.createFunction(function () {
+	proto.define("toString", objectFactory.createFunction(function () {
 		var name = this.node.getProperty("name").getValue();
 		var msg;
 
@@ -46,7 +47,7 @@ module.exports = function (env) {
 			return err;
 		}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-		errClass.proto.parent = errorClass;
+		// errClass.setPrototype(proto);
 		globalObject.define(type, errClass);
 	});
 };

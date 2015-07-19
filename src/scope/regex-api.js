@@ -19,7 +19,7 @@ module.exports = function (env) {
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = regexClass.proto;
+	var proto = regexClass.getProperty("prototype").getValue();
 	proto.className = "RegExp";
 
 	proto.define("test", objectFactory.createBuiltInFunction(function (str) {

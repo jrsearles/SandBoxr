@@ -14,8 +14,9 @@ module.exports = function (env) {
 		return objectFactory.create("Boolean", booleanValue);
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-	booleanClass.proto.className = "Boolean";
-	booleanClass.proto.define("toString", objectFactory.createFunction(function () {
+	var proto = booleanClass.getProperty("prototype").getValue();
+	proto.className = "Boolean";
+	proto.define("toString", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
 		}
@@ -23,7 +24,7 @@ module.exports = function (env) {
 		return objectFactory.createPrimitive(this.node.value ? this.node.value.toString() : "false");
 	}));
 
-	booleanClass.proto.define("valueOf", objectFactory.createFunction(function () {
+	proto.define("valueOf", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.valueOf is not generic.");
 		}
