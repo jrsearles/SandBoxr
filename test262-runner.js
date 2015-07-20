@@ -49,7 +49,7 @@ if (chapter) {
 		root + "suite/ch15/15.9/**/*.js",	// date	-- passed with exceptions
 		root + "suite/ch15/15.10/**/*.js",	// regex	-- passed
 		root + "suite/ch15/15.11/**/*.js",	// error	-- passed
-		// root + "suite/ch15/15.12/**/*.js",	// json
+		root + "suite/ch15/15.12/**/*.js",	// json		-- passed
 		root + "suite/annexB/**/*.js",	// passed
 		// root + "suite/bestPractice/**/*.js"
 	];
@@ -158,8 +158,6 @@ function testPassed (name, desc) {
 
 function testFailed (name, desc, err) {
 	console.log(colors.red("failed: ") + name + " (" + desc + ")");
-	//console.error(err);
-
 	failedCount++;
 }
 

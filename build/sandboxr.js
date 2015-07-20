@@ -2715,7 +2715,6 @@ var convert = require("../utils/convert");
 var func = require("../utils/func");
 var types = require("../utils/types");
 
-var methods = ["parse"];
 var primitives = {
 	"String": true,
 	"Number": true,
@@ -2724,7 +2723,23 @@ var primitives = {
 };
 
 function repeat (what, count) {
-	return Array(count).join(what);
+	return Array(count + 1).join(what);
+}
+
+function formatValues (values, gap, depth) {
+	if (values.length === 0) {
+		return "";
+	}
+	
+	if (!gap) {
+		return values.join(",");
+	}
+	
+	var indent = "\n" + repeat(gap, depth);
+	var joinedValues = values.join(indent + ",");
+	
+	// remove indent on closing
+	return indent + joinedValues + "\n" + repeat(gap, depth - 1);
 }
 
 function serialize (env, stack, obj, replacer, gap, depth) {
@@ -2765,9 +2780,9 @@ function serialize (env, stack, obj, replacer, gap, depth) {
 }
 
 function serializeObject (env, stack, obj, replacer, gap, depth) {
+	var colon = gap ? ": " : ":";
 	var values = [];
 	var value;
-	var colon = gap ? ": " : ":";
 	
 	for (var prop in obj.properties) {
 		if (obj.properties[prop].enumerable) {
@@ -2778,28 +2793,10 @@ function serializeObject (env, stack, obj, replacer, gap, depth) {
 		}
 	}
 	
-	var indent = "";
-	if (gap) {
-		indent = "\n" + repeat(gap, depth);
-	}
-	
-	var result = "{";
-	
-	if (gap && values.length > 0) {
-		result += indent;
-	}
-
-	result += values.join(indent + ",");
-	
-	// remove indent for closing
-	if (gap) {
-		result += "\n" + repeat(gap, depth - 1);
-	}
-	
-	return result + "}";
+	return "{" + formatValues(values, gap, depth, gap, depth) + "}";
 }
 
-function serializeArray (env, stack, arr, replacer) {
+function serializeArray (env, stack, arr, replacer, gap, depth) {
 	var length = arr.getProperty("length").getValue().value;
 	var values = [];
 	var value;
@@ -2818,7 +2815,7 @@ function serializeArray (env, stack, arr, replacer) {
 		}
 	}
 
-	return "[" + values.join(",") + "]";
+	return "[" + formatValues(values, gap, depth) + "]";
 }
 
 function serializePrimitive (value) {
@@ -2864,39 +2861,112 @@ function createReplacer (context, replacer) {
 	return function (holder, key, value) { return value; };
 }
 
+function getSpacer (env, spacer) {
+	if (spacer) {
+		if (spacer.className === "Number") {
+			var count = Math.floor(convert.toNumber(env, spacer));
+			count = Math.max(Math.min(10, count), 0);
+			
+			if (count > 0) {
+				return repeat(" ", count);
+			}
+			
+			return "";
+		}
+		
+		if (spacer.className === "String") {
+			var gap = convert.toString(env, spacer);
+			return gap.substr(0, 10);
+		}
+	}
+	
+	return "";
+}
+
+function deserialize (objectFactory, value, reviver) {
+	var valueType = types.getType(value);
+	switch (valueType) {
+		// these are the only types supported by JSON.parse - sad face...
+		case "Undefined":
+		case "Null":
+		case "String":
+		case "Number":
+		case "Boolean":
+			return objectFactory.create(valueType, value);
+			
+		case "Array":
+			var arr = objectFactory.create("Array");
+			value.forEach(function (element, index) {
+				var elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
+				if (!types.isUndefined(elementValue)) {
+					arr.defineOwnProperty(index, { value: deserialize(objectFactory, element), configurable: true, enumerable: true, writable: true });
+				}
+			});
+			
+			return arr;
+			
+		default:
+			var obj = objectFactory.createObject();
+			var propValue;
+			
+			for (var prop in value) {
+				if (value.hasOwnProperty(prop)) {
+					propValue = reviver(obj, prop, deserialize(objectFactory, value[prop], reviver));
+					if (!types.isUndefined(propValue)) {
+						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
+					}
+				}
+			}
+			
+			return obj;
+	}
+}
+
+function createReviver (context, reviver) {
+	if (reviver && reviver.className === "Function") {
+		return function (holder, key, value) {
+			var args = [context.env.objectFactory.createPrimitive(key), value];
+			var params = reviver.native ? [] : reviver.node.params;
+			var callee = reviver.native ? reviver : reviver.node;
+			
+			return func.executeFunction(context, reviver, params, args, holder, callee);
+		};
+	}
+	
+	return function (holder, key, value) { return value; };
+}
+
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+	var undef = env.global.getProperty("undefined").getValue();
 	var jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
 	jsonClass.define("stringify", objectFactory.createBuiltInFunction(function (obj, replacer, spacer) {
 		replacer = createReplacer(this, replacer);
+		spacer = getSpacer(env, spacer);
 		
 		// run at the top value
 		obj = replacer(obj, "", obj);
 		if (types.isUndefined(obj)) {
-			return env.global.getProperty("undefined").getValue();
-		}
-		
-		var gap = false;
-		if (spacer && spacer.className === "Number") {
-			var count = convert.toNumber(env, spacer);
-			count = Math.max(Math.min(10, count), 0);
-			
-			if (count > 0) {
-				gap = repeat(" ", count);
-			}
+			return undef;
 		}
 		
 		var stack = [];
-		return objectFactory.createPrimitive(serialize(env, stack, obj, replacer, gap, 0));
+		return objectFactory.createPrimitive(serialize(env, stack, obj, replacer, spacer, 0));
 	}, 3, "JSON.stringify"));
-	
-	methods.forEach(function (name) {
-		jsonClass.define(name, convert.toNativeFunction(env, JSON[name], "JSON." + name));
-	});
 
+	jsonClass.define("parse", objectFactory.createBuiltInFunction(function (str, reviver) {
+		reviver = createReviver(this, reviver);
+		
+		var stringValue = convert.toString(env, str);
+		var parsedObject = JSON.parse(stringValue);
+		var deserializedObject = deserialize(objectFactory, parsedObject, reviver);
+		
+		return reviver(deserializedObject, "", deserializedObject) || undef;
+	}, 2, "JSON.parse"));
+	
 	globalObject.define("JSON", jsonClass);
 };
 

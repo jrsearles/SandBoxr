@@ -2,7 +2,6 @@ var convert = require("../utils/convert");
 var func = require("../utils/func");
 var types = require("../utils/types");
 
-var methods = ["parse"];
 var primitives = {
 	"String": true,
 	"Number": true,
@@ -171,9 +170,63 @@ function getSpacer (env, spacer) {
 	return "";
 }
 
+function deserialize (objectFactory, value, reviver) {
+	var valueType = types.getType(value);
+	switch (valueType) {
+		// these are the only types supported by JSON.parse - sad face...
+		case "Undefined":
+		case "Null":
+		case "String":
+		case "Number":
+		case "Boolean":
+			return objectFactory.create(valueType, value);
+			
+		case "Array":
+			var arr = objectFactory.create("Array");
+			value.forEach(function (element, index) {
+				var elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
+				if (!types.isUndefined(elementValue)) {
+					arr.defineOwnProperty(index, { value: deserialize(objectFactory, element), configurable: true, enumerable: true, writable: true });
+				}
+			});
+			
+			return arr;
+			
+		default:
+			var obj = objectFactory.createObject();
+			var propValue;
+			
+			for (var prop in value) {
+				if (value.hasOwnProperty(prop)) {
+					propValue = reviver(obj, prop, deserialize(objectFactory, value[prop], reviver));
+					if (!types.isUndefined(propValue)) {
+						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
+					}
+				}
+			}
+			
+			return obj;
+	}
+}
+
+function createReviver (context, reviver) {
+	if (reviver && reviver.className === "Function") {
+		return function (holder, key, value) {
+			var args = [context.env.objectFactory.createPrimitive(key), value];
+			var params = reviver.native ? [] : reviver.node.params;
+			var callee = reviver.native ? reviver : reviver.node;
+			
+			return func.executeFunction(context, reviver, params, args, holder, callee);
+		};
+	}
+	
+	return function (holder, key, value) { return value; };
+}
+
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+	var undef = env.global.getProperty("undefined").getValue();
 	var jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
@@ -184,16 +237,22 @@ module.exports = function (env) {
 		// run at the top value
 		obj = replacer(obj, "", obj);
 		if (types.isUndefined(obj)) {
-			return env.global.getProperty("undefined").getValue();
+			return undef;
 		}
 		
 		var stack = [];
 		return objectFactory.createPrimitive(serialize(env, stack, obj, replacer, spacer, 0));
 	}, 3, "JSON.stringify"));
-	
-	methods.forEach(function (name) {
-		jsonClass.define(name, convert.toNativeFunction(env, JSON[name], "JSON." + name));
-	});
 
+	jsonClass.define("parse", objectFactory.createBuiltInFunction(function (str, reviver) {
+		reviver = createReviver(this, reviver);
+		
+		var stringValue = convert.toString(env, str);
+		var parsedObject = JSON.parse(stringValue);
+		var deserializedObject = deserialize(objectFactory, parsedObject, reviver);
+		
+		return reviver(deserializedObject, "", deserializedObject) || undef;
+	}, 2, "JSON.parse"));
+	
 	globalObject.define("JSON", jsonClass);
 };
