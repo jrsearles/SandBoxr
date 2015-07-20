@@ -87,7 +87,12 @@ module.exports = {
 	},
 
 	callMethod: function (env, obj, name, args) {
-		var fn = obj.getProperty(name).getValue();
+		var fn = obj.getProperty(name);
+		if (!fn) {
+			return null;
+		}
+		
+		fn = fn.getValue();
 		var undef = env.global.getProperty("undefined").getValue();
 
 		if (fn && fn.className === "Function") {

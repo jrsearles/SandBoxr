@@ -2349,17 +2349,26 @@ var types = require("../utils/types");
 
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
+function createError (objectFactory, message, name) {
+	var options = null;
+	if (name) {
+		options = { name: name };
+	}
+	
+	var obj = objectFactory.create("Error", options);
+
+	if (!types.isNullOrUndefined(message)) {
+		obj.defineOwnProperty("message", { value: message, configurable: true, enumerable: false, writable: true }, false);
+	}
+
+	return obj;
+}
+
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var errorClass = objectFactory.createFunction(function (message) {
-		var obj = objectFactory.create("Error");
-
-		if (!types.isNullOrUndefined(message)) {
-			obj.putValue("message", message, false);
-		}
-
-		return obj;
+		return createError(objectFactory, message);
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = errorClass.getProperty("prototype").getValue();
@@ -2387,13 +2396,11 @@ module.exports = function (env) {
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
-			var err = objectFactory.create("Error", { name: type });
-			err.putValue("message", message, false, this);
-			err.putValue("name", objectFactory.createPrimitive(type), false, this);
-			return err;
+			return createError(objectFactory, message, type);
 		}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-		// errClass.setPrototype(proto);
+		var typeProto = errClass.getProperty("prototype").getValue();
+		typeProto.define("name", objectFactory.createPrimitive(type));
 		globalObject.define(type, errClass);
 	});
 };
@@ -2705,8 +2712,157 @@ module.exports = function GlobalScope (runner) {
 },{"../env/environment":3,"../env/reference":6,"../types/object-factory":61,"../types/primitive-type":63,"../utils/convert":68,"./array-api":42,"./boolean-api":43,"./console-api":44,"./date-api":45,"./error-api":46,"./function-api":47,"./json-api":49,"./math-api":50,"./number-api":51,"./object-api":52,"./regex-api":53,"./string-api":54}],49:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
+var func = require("../utils/func");
+var types = require("../utils/types");
 
-var methods = ["parse", "stringify"];
+var methods = ["parse"];
+var primitives = {
+	"String": true,
+	"Number": true,
+	"Boolean": true,
+	"Date": true
+};
+
+function repeat (what, count) {
+	return Array(count).join(what);
+}
+
+function serialize (env, stack, obj, replacer, gap, depth) {
+	if (!obj) {
+		return serializePrimitive();
+	}
+	
+	if (obj.isPrimitive || obj.className in primitives) {
+		return serializePrimitive(obj.value);
+	}
+	
+	if (obj.className === "Function") {
+		return undefined;
+	}
+	
+	var jsonString = func.callMethod(env, obj, "toJSON", []);		
+	if (jsonString) {
+		return serializePrimitive(jsonString.value);
+	}
+	
+	if (stack.indexOf(obj) >= 0) {
+		throw new TypeError("Converting circular structure to JSON");
+	}
+	
+	depth++;
+	stack.push(obj);
+	
+	var jsonResult;
+	if (obj.className === "Array") {
+		jsonResult = serializeArray(env, stack, obj, replacer);
+	} else {
+		jsonResult = serializeObject(env, stack, obj, replacer, gap, depth);
+	}
+	
+	depth--;
+	stack.pop();
+	return jsonResult;
+}
+
+function serializeObject (env, stack, obj, replacer, gap, depth) {
+	var values = [];
+	var value;
+	var colon = gap ? ": " : ":";
+	
+	for (var prop in obj.properties) {
+		if (obj.properties[prop].enumerable) {
+			value = replacer(obj, prop, obj.getProperty(prop).getValue());
+			if (!types.isNullOrUndefined(value)) {
+				values.push(serializePrimitive(prop) + colon + serialize(env, stack, value, replacer, gap, depth));
+			}
+		}
+	}
+	
+	var indent = "";
+	if (gap) {
+		indent = "\n" + repeat(gap, depth);
+	}
+	
+	var result = "{";
+	
+	if (gap && values.length > 0) {
+		result += indent;
+	}
+
+	result += values.join(indent + ",");
+	
+	// remove indent for closing
+	if (gap) {
+		result += "\n" + repeat(gap, depth - 1);
+	}
+	
+	return result + "}";
+}
+
+function serializeArray (env, stack, arr, replacer) {
+	var length = arr.getProperty("length").getValue().value;
+	var values = [];
+	var value;
+
+	for (var i = 0; i < length; i++) {
+		value = undefined;
+		if (arr.hasProperty(i)) {
+			value = replacer(arr, String(i), arr.getProperty(i).getValue());
+		}
+		
+		if (types.isNullOrUndefined(value)) {
+			// undefined positions are replaced with null
+			values.push("null");
+		} else {
+			values.push(serialize(env, stack, value, replacer));	
+		}
+	}
+
+	return "[" + values.join(",") + "]";
+}
+
+function serializePrimitive (value) {
+	return JSON.stringify(value);
+}
+
+function createReplacer (context, replacer) {
+	if (replacer) {
+		if (replacer.className === "Function") {
+			return function (holder, key, value) {
+				var args = [context.env.objectFactory.createPrimitive(key), value];
+				var params = replacer.native ? [] : replacer.node.params;
+				var callee = replacer.native ? replacer : replacer.node;
+				
+				return func.executeFunction(context, replacer, params, args, holder, callee);
+			};
+		}
+		
+		if (replacer.className === "Array") {
+			var keys = convert.toArray(replacer).map(function (arg) {
+				if (arg.className === "String") {
+					return convert.toString(context.env, arg);
+				}
+				
+				if (arg.className === "Number") {
+					return String(convert.toNumber(context.env, arg));
+				}
+				
+				return undefined;
+			});
+			
+			return function (holder, key, value) {
+				// allow empty key - this will be from the root
+				if (!key || keys.indexOf(key) >= 0) {
+					return value;
+				}
+				
+				return undefined;
+			};
+		}
+	}
+	
+	return function (holder, key, value) { return value; };
+}
 
 module.exports = function (env) {
 	var globalObject = env.global;
@@ -2714,6 +2870,29 @@ module.exports = function (env) {
 	var jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
+	jsonClass.define("stringify", objectFactory.createBuiltInFunction(function (obj, replacer, spacer) {
+		replacer = createReplacer(this, replacer);
+		
+		// run at the top value
+		obj = replacer(obj, "", obj);
+		if (types.isUndefined(obj)) {
+			return env.global.getProperty("undefined").getValue();
+		}
+		
+		var gap = false;
+		if (spacer && spacer.className === "Number") {
+			var count = convert.toNumber(env, spacer);
+			count = Math.max(Math.min(10, count), 0);
+			
+			if (count > 0) {
+				gap = repeat(" ", count);
+			}
+		}
+		
+		var stack = [];
+		return objectFactory.createPrimitive(serialize(env, stack, obj, replacer, gap, 0));
+	}, 3, "JSON.stringify"));
+	
 	methods.forEach(function (name) {
 		jsonClass.define(name, convert.toNativeFunction(env, JSON[name], "JSON." + name));
 	});
@@ -2721,7 +2900,7 @@ module.exports = function (env) {
 	globalObject.define("JSON", jsonClass);
 };
 
-},{"../utils/convert":68}],50:[function(require,module,exports){
+},{"../utils/convert":68,"../utils/func":69,"../utils/types":70}],50:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
@@ -4012,10 +4191,15 @@ ObjectFactory.prototype = {
 
 				if (value) {
 					typeName = value.name || typeName;
-					instance.putValue("message", this.createPrimitive(value.message));
+					instance.defineOwnProperty("message", {
+						value: this.createPrimitive(value.message),
+						configurable: true,
+						enumerable: false,
+						writable: true
+					});
 				}
 
-				instance.putValue("name", this.createPrimitive(typeName));
+				// instance.putValue("name", this.createPrimitive(typeName));
 				break;
 
 			default:
@@ -4918,7 +5102,12 @@ module.exports = {
 	},
 
 	callMethod: function (env, obj, name, args) {
-		var fn = obj.getProperty(name).getValue();
+		var fn = obj.getProperty(name);
+		if (!fn) {
+			return null;
+		}
+		
+		fn = fn.getValue();
 		var undef = env.global.getProperty("undefined").getValue();
 
 		if (fn && fn.className === "Function") {

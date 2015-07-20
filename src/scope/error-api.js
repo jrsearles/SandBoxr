@@ -3,17 +3,26 @@ var types = require("../utils/types");
 
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
+function createError (objectFactory, message, name) {
+	var options = null;
+	if (name) {
+		options = { name: name };
+	}
+	
+	var obj = objectFactory.create("Error", options);
+
+	if (!types.isNullOrUndefined(message)) {
+		obj.defineOwnProperty("message", { value: message, configurable: true, enumerable: false, writable: true }, false);
+	}
+
+	return obj;
+}
+
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var errorClass = objectFactory.createFunction(function (message) {
-		var obj = objectFactory.create("Error");
-
-		if (!types.isNullOrUndefined(message)) {
-			obj.putValue("message", message, false);
-		}
-
-		return obj;
+		return createError(objectFactory, message);
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = errorClass.getProperty("prototype").getValue();
@@ -41,13 +50,11 @@ module.exports = function (env) {
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
-			var err = objectFactory.create("Error", { name: type });
-			err.putValue("message", message, false, this);
-			err.putValue("name", objectFactory.createPrimitive(type), false, this);
-			return err;
+			return createError(objectFactory, message, type);
 		}, null, null, null, { configurable: false, enumerable: false, writable: false });
 
-		// errClass.setPrototype(proto);
+		var typeProto = errClass.getProperty("prototype").getValue();
+		typeProto.define("name", objectFactory.createPrimitive(type));
 		globalObject.define(type, errClass);
 	});
 };

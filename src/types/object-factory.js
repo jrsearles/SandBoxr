@@ -103,10 +103,15 @@ ObjectFactory.prototype = {
 
 				if (value) {
 					typeName = value.name || typeName;
-					instance.putValue("message", this.createPrimitive(value.message));
+					instance.defineOwnProperty("message", {
+						value: this.createPrimitive(value.message),
+						configurable: true,
+						enumerable: false,
+						writable: true
+					});
 				}
 
-				instance.putValue("name", this.createPrimitive(typeName));
+				// instance.putValue("name", this.createPrimitive(typeName));
 				break;
 
 			default:
