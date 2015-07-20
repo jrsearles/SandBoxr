@@ -38,7 +38,7 @@ module.exports = {
 	},
 	
 	assertIsValidParameterName: function (name) {
-		if (/^\d|;,\(\)"'/.test(name)) {
+		if (/^\d|[;\(\)"']/.test(name)) {
 			throw new SyntaxError("Unexpected token in " + name);
 		}
 	},

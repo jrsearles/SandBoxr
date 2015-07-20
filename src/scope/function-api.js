@@ -62,7 +62,17 @@ module.exports = function (env, options) {
 
 			var fn = objectFactory.createFunction(callee);
 			var wrappedFunc = function () {
-				var executionResult = func.getFunctionResult(this, fn, params, arguments, globalObject, callee);
+				var thisArg = this.node || globalObject;
+				if (this.isNew) {
+					thisArg = objectFactory.createObject(funcInstance);
+				}
+				
+				var executionResult = func.getFunctionResult(this, fn, params, arguments, thisArg, callee);
+				
+				if (this.isNew) {
+					return thisArg;
+				}
+				
 				return executionResult && executionResult.result || undef;
 			};
 			
@@ -100,9 +110,9 @@ module.exports = function (env, options) {
 		return objectFactory.createPrimitive("function () { [user code] }");
 	}, 0, "Function.prototype.toString"));
 
-	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-		return this.node;
-	}, 0, "Function.prototype.valueOf"));
+	// proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
+	// 	return this.node;
+	// }, 0, "Function.prototype.valueOf"));
 
 	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
@@ -114,7 +124,7 @@ module.exports = function (env, options) {
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
-	proto.define("apply", objectFactory.createFunction(function (thisArg, argsArray) {
+	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
 		if (argsArray) {
 			if (argsArray.className !== "Arguments" && argsArray.className !== "Array") {
 				throw new TypeError("Arguments list was wrong type");
@@ -128,7 +138,7 @@ module.exports = function (env, options) {
 		this.node.bindThis(thisArg);
 		
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
-	}));
+	}, 2, "Function.prototype.apply"));
 
 	proto.define("bind", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
@@ -149,10 +159,10 @@ module.exports = function (env, options) {
 
 		var nativeFunc = function () {
 			var mergedArgs = args.concat(slice.call(arguments));
-			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee);
+			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
-		nativeFunc.nativeLength = params.length - args.length;
+		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
 		var boundFunc = objectFactory.createFunction(nativeFunc, this.env.current);
 
 		boundFunc.defineOwnProperty("caller", throwProperties);

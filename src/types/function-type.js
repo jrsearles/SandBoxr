@@ -1,5 +1,7 @@
 var ObjectType = require("./object-type");
 var PropertyDescriptor = require("./property-descriptor");
+var contracts = require("../utils/contracts");
+var types = require("../utils/types");
 
 function FunctionType (node, parentScope) {
 	ObjectType.call(this);
@@ -113,7 +115,11 @@ FunctionType.prototype.hasInstance = function (obj) {
 
 	var visited = [];
 	var current = obj;
+
 	var proto = this.getProperty("prototype").getValue();
+	if (types.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
+		throw new TypeError("Function has non-object prototype in instanceof check");
+	}
 
 	while (current) {
 		if (visited.indexOf(current) >= 0) {

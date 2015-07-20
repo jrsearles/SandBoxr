@@ -2464,7 +2464,17 @@ module.exports = function (env, options) {
 
 			var fn = objectFactory.createFunction(callee);
 			var wrappedFunc = function () {
-				var executionResult = func.getFunctionResult(this, fn, params, arguments, globalObject, callee);
+				var thisArg = this.node || globalObject;
+				if (this.isNew) {
+					thisArg = objectFactory.createObject(funcInstance);
+				}
+				
+				var executionResult = func.getFunctionResult(this, fn, params, arguments, thisArg, callee);
+				
+				if (this.isNew) {
+					return thisArg;
+				}
+				
 				return executionResult && executionResult.result || undef;
 			};
 			
@@ -2479,7 +2489,7 @@ module.exports = function (env, options) {
 	};
 	
 	// the prototype of a function is actually callable and evaluates as a function
-	var proto = new NativeFunctionType(function () {}, globalObject);
+	var proto = new NativeFunctionType(function () {});
 
 	funcCtor.nativeLength = 1;
 	var functionClass = objectFactory.createFunction(funcCtor, null, proto, null, frozen);
@@ -2502,9 +2512,9 @@ module.exports = function (env, options) {
 		return objectFactory.createPrimitive("function () { [user code] }");
 	}, 0, "Function.prototype.toString"));
 
-	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-		return this.node;
-	}, 0, "Function.prototype.valueOf"));
+	// proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
+	// 	return this.node;
+	// }, 0, "Function.prototype.valueOf"));
 
 	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
@@ -2516,7 +2526,7 @@ module.exports = function (env, options) {
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
-	proto.define("apply", objectFactory.createFunction(function (thisArg, argsArray) {
+	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
 		if (argsArray) {
 			if (argsArray.className !== "Arguments" && argsArray.className !== "Array") {
 				throw new TypeError("Arguments list was wrong type");
@@ -2530,7 +2540,7 @@ module.exports = function (env, options) {
 		this.node.bindThis(thisArg);
 		
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
-	}));
+	}, 2, "Function.prototype.apply"));
 
 	proto.define("bind", objectFactory.createFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
@@ -2551,10 +2561,10 @@ module.exports = function (env, options) {
 
 		var nativeFunc = function () {
 			var mergedArgs = args.concat(slice.call(arguments));
-			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee);
+			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
-		nativeFunc.nativeLength = params.length - args.length;
+		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
 		var boundFunc = objectFactory.createFunction(nativeFunc, this.env.current);
 
 		boundFunc.defineOwnProperty("caller", throwProperties);
@@ -3160,7 +3170,8 @@ module.exports = function (env) {
 		return objectFactory.createPrimitive(!obj.extensible);
 	}, 1, "Object.isSealed"));
 
-	// globalObject.getProperty("Function").getValue().setPrototype(proto);
+	// function is an object - make sure that it is in the prototype chain
+	globalObject.getProperty("Function").getValue().getPrototype().setPrototype(proto);
 	globalObject.define("Object", objectClass);
 };
 
@@ -3710,6 +3721,8 @@ module.exports = ErrorType;
 "use strict";
 var ObjectType = require("./object-type");
 var PropertyDescriptor = require("./property-descriptor");
+var contracts = require("../utils/contracts");
+var types = require("../utils/types");
 
 function FunctionType (node, parentScope) {
 	ObjectType.call(this);
@@ -3823,7 +3836,11 @@ FunctionType.prototype.hasInstance = function (obj) {
 
 	var visited = [];
 	var current = obj;
+
 	var proto = this.getProperty("prototype").getValue();
+	if (types.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
+		throw new TypeError("Function has non-object prototype in instanceof check");
+	}
 
 	while (current) {
 		if (visited.indexOf(current) >= 0) {
@@ -3844,7 +3861,7 @@ FunctionType.prototype.hasInstance = function (obj) {
 
 module.exports = FunctionType;
 
-},{"./object-type":62,"./property-descriptor":64}],60:[function(require,module,exports){
+},{"../utils/contracts":67,"../utils/types":70,"./object-type":62,"./property-descriptor":64}],60:[function(require,module,exports){
 "use strict";
 var FunctionType = require("./function-type");
 var PropertyDescriptor = require("./property-descriptor");
@@ -4094,21 +4111,13 @@ function ObjectType () {
 	this.extensible = true;
 
 	this.primitiveHint = "number";
+	this.propertyCount = 0;
 }
 
 ObjectType.prototype = {
 	constructor: ObjectType,
 
 	init: function () { },
-
-	// setProto: function (proto, descriptor) {
-	// 	if ("prototype" in this.properties && !this.properties.prototype.canSetValue()) {
-	// 		return;
-	// 	}
-
-	// 	this.proto = proto;
-	// 	this.properties.prototype = new PropertyDescriptor(this, descriptor || { configurable: true, enumerable: false, writable: true }, proto);
-	// },
 
 	getPrototype: function () {
 		return this.proto;
@@ -4121,12 +4130,7 @@ ObjectType.prototype = {
 	getProperty: function (name) {
 		name = String(name);
 
-		// if (name === "prototype") {
-		// 	return this.getOwnProperty(name);
-		// }
-
 		var current = this;
-
 		while (current) {
 			if (name in current.properties) {
 				return current.properties[name].bind(this);
@@ -4144,17 +4148,6 @@ ObjectType.prototype = {
 
 	getOwnPropertyNames: function () {
 		return Object.keys(this.properties);
-		// var props = [];
-		// for (var prop in this.properties) {
-		// 	// ignore prototype
-		// 	if (prop === "prototype" && this.properties[prop].getValue() === this.proto) {
-		// 		continue;
-		// 	}
-
-		// 	props.push(prop);
-		// }
-
-		// return props;
 	},
 
 	hasProperty: function (name) {
@@ -4183,6 +4176,7 @@ ObjectType.prototype = {
 			}
 
 			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
+				this.propertyCount++;
 				this.properties[name] = new PropertyDescriptor(this, {
 					value: value,
 					configurable: descriptor.configurable,
@@ -4226,6 +4220,7 @@ ObjectType.prototype = {
 			return false;
 		}
 
+		this.propertyCount++;
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
 		return true;
 	},
@@ -4249,6 +4244,7 @@ ObjectType.prototype = {
 			return false;
 		}
 
+		this.propertyCount--;
 		return delete this.properties[name];
 	},
 
@@ -4274,6 +4270,11 @@ ObjectType.prototype = {
 		}
 
 		this.preventExtensions();
+	},
+	
+	getDensity: function (length) {
+		// -1 to exclude length
+		return this.propertyCount - 1 / length;
 	},
 
 	toBoolean: function () {
@@ -4530,6 +4531,10 @@ StringType.prototype.getProperty = function (name) {
 	return PrimitiveType.prototype.getProperty.apply(this, arguments);
 };
 
+StringType.prototype.getDensity = function () {
+	return 100;	
+};
+
 StringType.prototype.getOwnPropertyNames = function () {
 	var props = [];
 	var ln, i;
@@ -4601,12 +4606,8 @@ module.exports = {
 	},
 	
 	assertIsValidParameterName: function (name) {
-		if (/^\d/.test(name)) {
-			throw new SyntaxError("Unexpected token " + name[0]);
-		}
-		
-		if (/;/.test(name)) {
-			throw new SyntaxError("Unexpected token ;");
+		if (/^\d|[;\(\)"']/.test(name)) {
+			throw new SyntaxError("Unexpected token in " + name);
 		}
 	},
 
