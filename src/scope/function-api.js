@@ -95,8 +95,6 @@ module.exports = function (env, options) {
 
 	globalObject.define("Function", functionClass);
 
-	// var proto = functionClass.getProperty("prototype").getValue();
-	// proto.className = "Function";
 	proto.define("length", objectFactory.createPrimitive(0), frozen);
 
 	// function itself is a function
@@ -109,10 +107,6 @@ module.exports = function (env, options) {
 
 		return objectFactory.createPrimitive("function () { [user code] }");
 	}, 0, "Function.prototype.toString"));
-
-	// proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-	// 	return this.node;
-	// }, 0, "Function.prototype.valueOf"));
 
 	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
