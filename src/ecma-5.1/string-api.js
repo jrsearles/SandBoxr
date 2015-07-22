@@ -1,7 +1,6 @@
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 var func = require("../utils/func");
-var RegexType = require("../types/regex-type");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
 var slice = Array.prototype.slice;

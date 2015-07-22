@@ -71,7 +71,7 @@ module.exports = function (env) {
 	var proto = dateClass.getProperty("prototype").getValue();
 	proto.className = "Date";
 	proto.value = new Date(Date.prototype);
-	
+
 	staticMethods.forEach(function (name) {
 		dateClass.define(name, convert.toNativeFunction(env, Date[name], "Date." + name));
 	});

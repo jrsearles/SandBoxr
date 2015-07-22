@@ -706,6 +706,8 @@ module.exports = function (env) {
 
 	var proto = booleanClass.getProperty("prototype").getValue();
 	proto.className = "Boolean";
+	proto.value = false;
+
 	proto.define("toString", objectFactory.createFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
@@ -819,6 +821,8 @@ module.exports = function (env) {
 	}, 7, "Date.prototype.UTC"));
 
 	var proto = dateClass.getProperty("prototype").getValue();
+	proto.className = "Date";
+	proto.value = new Date(Date.prototype);
 
 	staticMethods.forEach(function (name) {
 		dateClass.define(name, convert.toNativeFunction(env, Date[name], "Date." + name));
@@ -1517,7 +1521,7 @@ module.exports = function (env) {
 	var proto = numberClass.getProperty("prototype").getValue();
 	proto.className = "Number";
 	proto.value = 0;
-	
+
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
@@ -1985,7 +1989,6 @@ module.exports = function (env) {
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 var func = require("../utils/func");
-var RegexType = require("../types/regex-type");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
 var slice = Array.prototype.slice;
@@ -2175,7 +2178,7 @@ module.exports = function (env) {
 	globalObject.define("String", stringClass);
 };
 
-},{"../types/regex-type":66,"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],15:[function(require,module,exports){
+},{"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],15:[function(require,module,exports){
 "use strict";
 var Reference = require("./reference");
 var PropertyDescriptor = require("../types/property-descriptor");

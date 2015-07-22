@@ -19,7 +19,7 @@ module.exports = function (env) {
 	var proto = numberClass.getProperty("prototype").getValue();
 	proto.className = "Number";
 	proto.value = 0;
-	
+
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
