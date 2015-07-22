@@ -1,1 +1,1 @@
-module.exports = require("esprima");
+module.exports = require("acorn");
