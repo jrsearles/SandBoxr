@@ -1,4 +1,4 @@
-var acorn = require("acorn");
+var parser = require("./ast-parser");
 var SandBoxer = require("../src/sandboxr");
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
 	},
 
 	getRunner: function (code) {
-		var ast = acorn.parse(code);
+		var ast = parser.parse(code);
 		return new SandBoxer(ast);
 	},
 

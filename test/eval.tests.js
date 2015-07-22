@@ -1,23 +1,23 @@
 var expect = require("chai").expect;
-var acorn = require("acorn");
+var parser = require("./ast-parser");
 var SandBoxr = require("../src/sandboxr");
 
 function createRunner (text) {
-	return new SandBoxr(acorn.parse(text), { parser: acorn.parse });
+	return new SandBoxr(parser.parse(text), { parser: parser.parse });
 }
 
 describe("Eval", function () {
 	it("should eval expression if parser is defined", function () {
-		var ast = acorn.parse("eval('1 + 1')===2;");
-		var runner = new SandBoxr(ast, { parser: acorn.parse });
+		var ast = parser.parse("eval('1 + 1')===2;");
+		var runner = new SandBoxr(ast, { parser: parser.parse });
 		var result = runner.execute();
 
 		expect(result.result.value).to.be.true;
 	});
 
 	it("should be able to add variables to current scope", function () {
-		var ast = acorn.parse("eval('var i = 2;');i==2;");
-		var runner = new SandBoxr(ast, { parser: acorn.parse });
+		var ast = parser.parse("eval('var i = 2;');i==2;");
+		var runner = new SandBoxr(ast, { parser: parser.parse });
 		var result = runner.execute();
 
 		expect(result.result.value).to.be.true;

@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<title>SandBoxer demo</title>
 	<script type="text/javascript" src="../node_modules/acorn/dist/acorn.js"></script>
+	<script type="text/javascript" src="../node_modules/esprima/esprima.js"></script>
 	<script type="text/javascript" src="../build/sandboxr.js"></script>
 </head>
 <body>
@@ -15,31 +16,32 @@ function $ERROR (msg) {
 
 result;
 </textarea>
-<button id="execButton">Exec</button>
-<button id="interpretButton">Interpret</button>
+<button id="acornExec">Exec (Acorn)</button>
+<button id="esprimaExec">Exec (Esprima)</button>
 <fieldset><legend>Result</legend><pre id="result"></pre></fieldset>
 <fieldset><legend>Tree</legend><pre id="tree"></pre></fieldset>
 
 <script type="text/javascript">
-	document.getElementById("execButton").onclick = function () {
+	document.getElementById("acornExec").onclick = function () {
+		executeAst(acorn.parse);
+	};
+	
+	document.getElementById("esprimaExec").onclick = function () {
+		executeAst(esprima.parse);
+	};
+	
+	function executeAst (parser) {
 		var code = document.getElementById("codeArea").value;
-		var ast = acorn.parse(code);
+		var ast = parser(code);
 
 		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
 
 		debugger;
-		var runner = new SandBoxr(ast, { parser: acorn.parse });
+		var runner = new SandBoxr(ast, { parser: parser });
 		var value = runner.execute();
 
 		document.getElementById("result").innerHTML = JSON.stringify(value && value.result && value.result.getValue().value);
-	};
-
-	document.getElementById("interpretButton").onclick = function () {
-		var code = document.getElementById("codeArea").value;
-		var runner = new Interpreter(code);
-
-		runner.run();
-	};
+	}
 </script>
 </body>
 </html>

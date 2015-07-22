@@ -7,7 +7,7 @@
 - Finish implementation - getting close!
 - Finalize API, including extension points
 - Strict mode (may end up in next version)
-- Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)
+- ~~Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)~~
 - Add some sensible detection of infinite loops
 - Improve try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward.)
 - Docs
@@ -33,7 +33,7 @@ Upon discovering the [Test 262 conformance suite](https://github.com/tc39/test26
 - **"Fix" JavaScript.** All those quirks you love to hate are kept intact. (To come will be extension points so that you can, if you so chose, alter aspects of JavaScript's implementation, for example for equality.)
 - **Run "safe" code.** This library does not protect you from writing bad code. If you write a circular loop, expect a stack overflow. "Dangerous" code is still allowed through "eval" and other means, though you must supply a parsing function for this support.
 - **Verify syntax.** This library expects a valid syntax tree. The syntax should be verified when parsed.
-- **Parse JavaScript** This library expects an abstract syntax tree compliant with [ESTree](https://github.com/estree/estree). Parser's supported include [Acorn](https://github.com/marijnh/acorn) and [Esprima](https://github.com/jquery/esprima) *(to be verified)*.
+- **Parse JavaScript** This library expects an abstract syntax tree compliant with [ESTree](https://github.com/estree/estree). Parser's supported include [Acorn](https://github.com/marijnh/acorn) and [Esprima](https://github.com/jquery/esprima).
 - **Alter HTML** This library does not have access to the browser environment - `document` does not exist. This is a *feature*.
 
 ### Notes on running the 262 test suite:

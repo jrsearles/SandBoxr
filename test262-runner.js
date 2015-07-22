@@ -2,7 +2,7 @@ var fs = require("fs");
 var util = require("util");
 var glob = require("glob");
 var colors = require("colors");
-var acorn = require("acorn");
+var parser = require("./test/ast-parser");
 var args = require("yargs")
 	.default("stopOnFail", false)
 	.alias("f", "stopOnFail")
@@ -112,8 +112,8 @@ for (var i = 0; running && i < tests.length; i++) {
 		try {
 			testStarting(file, description);
 
-			var ast = acorn.parse(include + contents);
-			var runner = new SandBoxr(ast, { parser: acorn.parse });
+			var ast = parser.parse(include + contents);
+			var runner = new SandBoxr(ast, { parser: parser.parse });
 
 			runner.execute();
 		} catch (err) {
