@@ -57,10 +57,10 @@ function add (a, b, env) {
 
 function toNumber (env, obj) {
 	if (obj.className === "Number") {
-		return obj.toNumber();
+		return obj.value;
 	}
 
-	return convert.toPrimitive(env, obj, "number");
+	return convert.toNumber(env, obj);
 }
 
 /* eslint eqeqeq:0 */
@@ -85,9 +85,9 @@ var binaryOperators = {
 	"^": function (a, b, e) { return convert.toInt32(e, a) ^ convert.toInt32(e, b); },
 	"&": function (a, b, e) { return convert.toInt32(e, a) & convert.toInt32(e, b); },
 	"in": function (a, b, e) {
-		a = a.toString();
+		a = convert.toString(e, a);
 		if (b.isPrimitive) {
-			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + b.toString());
+			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + convert.toString(e, b));
 		}
 
 		return b.hasProperty(a);

@@ -1,7 +1,6 @@
 var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 var convert = require("../utils/convert");
-var types = require("../utils/types");
 var ArrayType = require("../types/array-type");
 
 function getStartIndex (index, length) {
@@ -329,10 +328,10 @@ module.exports = function (env) {
 			stringValue = "";
 			if (this.node.hasProperty(i)) {
 				stringValue = this.node.getProperty(i).getValue();
-				if (stringValue.isPrimitive) {
-					stringValue = stringValue.value == null ? "" : stringValue.toString();
+				if (contracts.isNullOrUndefined(stringValue)) {
+					stringValue = "";
 				} else {
-					stringValue = convert.toPrimitive(env, stringValue, "string");
+					stringValue = convert.toString(env, stringValue);
 				}
 			}
 
@@ -420,7 +419,7 @@ module.exports = function (env) {
 		var index = 0;
 
 		for (var i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i).toBoolean()) {
+			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
 				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
 			}
 		}
@@ -434,7 +433,7 @@ module.exports = function (env) {
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && !executeCallback(callback, thisArg, this, i).toBoolean()) {
+			if (this.node.hasProperty(i) && !convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(false);
 			}
 		}
@@ -448,7 +447,7 @@ module.exports = function (env) {
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i).toBoolean()) {
+			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(true);
 			}
 		}
@@ -569,7 +568,7 @@ module.exports = function (env) {
 		var i = 0;
 
 		var comparer;
-		if (types.isNullOrUndefined(compareFunction)) {
+		if (contracts.isNullOrUndefined(compareFunction)) {
 			comparer = function defaultComparer (a, b) {
 				a = convert.toString(env, a);
 				b = convert.toString(env, b);
@@ -629,7 +628,6 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.sort"));
 
 	proto.define("toLocaleString", objectFactory.createBuiltInFunction(function () {
-		// todo: implement for reach
 		var length = getLength(env, this.node);
 		var arr = new Array(length);
 		var i = 0;
@@ -639,17 +637,16 @@ module.exports = function (env) {
 			if (this.node.hasProperty(i)) {
 				current = this.node.getProperty(i).getValue();
 
-				if (types.isNullOrUndefined(current)) {
+				if (contracts.isNullOrUndefined(current)) {
 					arr[i] = "";
 				} else {
-					arr[i] = convert.toString(env, func.callMethod(env, current, "toLocaleString", []));
+					arr[i] = convert.toString(env, func.tryCallMethod(env, current, "toLocaleString"));
 				}
 			}
 
 			i++;
 		}
 
-		// var values = convert.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
 		return objectFactory.createPrimitive(arr.join());
 	}, 0, "Array.prototype.toLocaleString"));
 

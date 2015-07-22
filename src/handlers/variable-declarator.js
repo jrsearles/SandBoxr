@@ -12,5 +12,4 @@ module.exports = function VariableDeclarator (context) {
 	}
 
 	return context.result(context.env.getReference(name));
-	// return context.result(value, id);
 };

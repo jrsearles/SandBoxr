@@ -1,4 +1,5 @@
-var types = require("./types");
+var objectRgx = /\[object (\w+)\]/;
+var integerRgx = /^-?\d+$/;
 
 module.exports = {
 	assertIsObject: function (obj, methodName, message) {
@@ -8,13 +9,13 @@ module.exports = {
 	},
 
 	assertIsNotNullOrUndefined: function (value, methodName) {
-		if (types.isNullOrUndefined(value)) {
+		if (this.isNullOrUndefined(value)) {
 			throw new TypeError(methodName + " called on null or undefined");
 		}
 	},
 
 	assertArgIsNotNullOrUndefined: function (obj) {
-		if (types.isNullOrUndefined(obj)) {
+		if (this.isNullOrUndefined(obj)) {
 			throw new TypeError("Cannot convert null or undefined to object");
 		}
 	},
@@ -36,7 +37,7 @@ module.exports = {
 			throw new RangeError("Invalid array length");
 		}
 	},
-	
+
 	assertIsValidParameterName: function (name) {
 		if (/^\d|[;\(\)"']/.test(name)) {
 			throw new SyntaxError("Unexpected token in " + name);
@@ -44,7 +45,7 @@ module.exports = {
 	},
 
 	isValidArrayLength: function (length) {
-		return types.isInteger(length) && length >= 0 && length < 4294967296;
+		return this.isInteger(length) && length >= 0 && length < 4294967296;
 	},
 
 	isObject: function (obj) {
@@ -88,5 +89,33 @@ module.exports = {
 		}
 
 		return a === b;
+	},
+
+	getType: function (obj) {
+		return objectRgx.exec(Object.prototype.toString.call(obj))[1];
+	},
+
+	isNullOrUndefined: function (obj) {
+		return this.isUndefined(obj) || this.isNull(obj);
+	},
+
+	isUndefined: function (obj) {
+		return !obj || (obj.isPrimitive && obj.value === undefined);
+	},
+
+	isNull: function (obj) {
+		return obj && obj.isPrimitive && obj.value === null;
+	},
+
+	isInteger: function (value) {
+		if (typeof value === "string") {
+			return integerRgx.test(value);
+		}
+
+		if (typeof value === "number") {
+			return isFinite(value) && Math.floor(value) === value;
+		}
+
+		return false;
 	}
 };

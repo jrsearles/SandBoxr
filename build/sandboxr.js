@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.SandBoxr = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 var handlers = require("./handlers");
-var globalScope = require("./scope/global-scope");
+var api = require("./ecma-5.1");
 var ExecutionContext = require("./execution-context");
 
 function SandBoxr (ast, config) {
@@ -11,7 +11,7 @@ function SandBoxr (ast, config) {
 }
 
 SandBoxr.prototype.execute = function (context) {
-	context = context || new ExecutionContext(this.env || this.createScope(), this.ast);
+	context = context || new ExecutionContext(this.env || this.createEnvironment(), this.ast);
 
 	if (!(context.node.type in handlers)) {
 		throw new TypeError("No handler defined for: " + context.node.type);
@@ -20,1512 +20,17 @@ SandBoxr.prototype.execute = function (context) {
 	return handlers[context.node.type](context);
 };
 
-SandBoxr.prototype.createScope = function () {
-	return (this.env = globalScope(this));
+SandBoxr.prototype.createEnvironment = function () {
+	return (this.env = api(this));
 };
 
 module.exports = SandBoxr;
 
-},{"./execution-context":7,"./handlers":23,"./scope/global-scope":48}],2:[function(require,module,exports){
-"use strict";
-var Reference = require("./reference");
-var PropertyDescriptor = require("../types/property-descriptor");
-
-function DeclarativeEnvironment (parent, thisArg, env) {
-	this.properties = Object.create(null);
-	this.parent = parent;
-	this.thisNode = thisArg;
-	this.env = env;
-}
-
-DeclarativeEnvironment.prototype = {
-	constructor: DeclarativeEnvironment,
-
-	createReference: function (name, strict) {
-		return new Reference(name, this, strict, this.env);
-	},
-
-	hasBinding: function (name) {
-		return name in this.properties;
-	},
-
-	createMutableBinding: function (name) {
-		if (this.hasBinding(name)) {
-			return this.properties[name];
-		}
-
-		return this.properties[name] = new PropertyDescriptor(this, {
-			value: undefined,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		});
-	},
-
-	createImmutableBinding: function (name) {
-		this.createMutableBinding(name, false);
-	},
-
-	initializeImmutableBinding: function (name, value) {
-		if (this.hasBinding(name) && !this.properties[name].value) {
-			this.properties[name].setValue(value);
-		}
-	},
-
-	setMutableBinding: function (name, value, throwOnError) {
-		if (this.hasBinding(name)) {
-			if (!this.properties[name].writable) {
-				if (throwOnError) {
-					throw new TypeError("Cannot write to immutable binding: " + name);
-				}
-
-				return;
-			}
-
-			this.properties[name].setValue(value);
-		}
-	},
-
-	getBindingValue: function (name, throwOnError) {
-		if (this.hasBinding(name)) {
-			if (!this.properties[name].value) {
-				if (throwOnError) {
-					throw new ReferenceError(name + " is not defined");
-				}
-
-				return undefined;
-			}
-
-			return this.properties[name].getValue();
-		}
-	},
-
-	deleteBinding: function (name) {
-		if (!this.hasBinding(name)) {
-			return true;
-		}
-
-		if (!this.properties[name].configurable) {
-			return false;
-		}
-
-		delete this.properties[name];
-		return true;
-	},
-
-	getThisBinding: function () {
-		return this.thisNode;
-	}
-};
-
-module.exports = DeclarativeEnvironment;
-
-},{"../types/property-descriptor":64,"./reference":6}],3:[function(require,module,exports){
-"use strict";
-var DeclarativeEnvironment = require("./declarative-environment");
-var ObjectEnvironment = require("./object-environment");
-var ExecutionContext = require("../execution-context");
-var Reference = require("./reference");
-var keywords = require("../keywords");
-
-var scopedBlocks = {
-	"CallExpression": true,
-	"NewExpression": true,
-	"FunctionExpression": true,
-	"WithStatement": true
-};
-
-function populateHoistedVariables (node, declarators, parent) {
-	if (Array.isArray(node)) {
-		node.forEach(function (child) {
-			populateHoistedVariables(child, declarators, parent);
-		});
-
-		return;
-	}
-
-	if (!node || !(typeof node === "object")) {
-		return;
-	}
-
-	if (node.type) {
-		if (node.type === "VariableDeclaration") {
-			populateHoistedVariables(node.declarations, declarators, node);
-			return;
-		}
-
-		if (node.type === "VariableDeclarator" || node.type === "FunctionDeclaration") {
-			declarators.push({
-				decl: node,
-				parent: parent
-			});
-
-			return;
-		}
-
-		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
-			declarators.push({
-				decl: node.left,
-				parent: node
-			});
-
-			// keep analyzing
-		}
-
-		if (node.type === "IfStatement") {
-			// cannot hoist variables within if
-			populateHoistedVariables(node.consequent, declarators, node);
-			populateHoistedVariables(node.alternate, declarators, node);
-			return;
-		}
-
-		if (scopedBlocks[node.type]) {
-			return;
-		}
-	}
-
-	// todo: we could be smarter about this by being more descerning about what nodes we traverse
-	var prop;
-	for (prop in node) {
-		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
-			populateHoistedVariables(node[prop], declarators, "type" in node ? node : parent);
-		}
-	}
-}
-
-function isStrictMode (node) {
-	if (Array.isArray(node)) {
-		return isStrictMode(node[0]);
-	}
-
-	return node
-		&& node.type === "ExpressionStatement"
-		&& node.expression.type === "Literal"
-		&& node.expression.value === "use strict";
-}
-
-
-function Environment (runner) {
-	this.runner = runner;
-	this.current = null;
-	this.globalScope = null;
-}
-
-Environment.prototype = {
-	constructor: Environment,
-
-	getReference: function (name, strict) {
-		var scope = this.current;
-		while (scope) {
-			if (scope.hasBinding(name)) {
-				return scope.createReference(name, strict);
-			}
-
-			scope = scope.parent;
-		}
-
-		return new Reference(name, undefined, strict, this);
-	},
-
-	getValue: function (name) {
-		return this.getReference(name).getValue();
-	},
-
-	putValue: function (name, value, strict) {
-		this.current.setMutableBinding(name, value, strict);
-	},
-
-	createBinding: function (name, immutable) {
-		if (keywords.isReserved(name)) {
-			throw new SyntaxError("Illegal use of reserved keyword: " + name);
-		}
-
-		this.current.createMutableBinding(name, !immutable);
-	},
-
-	createExecutionContext: function (node, callee) {
-		return new ExecutionContext(this, node, callee);
-	},
-
-	hasBinding: function (name) {
-		return this.current.hasBinding(name);
-	},
-
-	setBinding: function (name, value, strict) {
-		this.current.setMutableBinding(name, value);
-	},
-
-	deleteBinding: function (name) {
-		this.current.deleteBinding(name);
-	},
-	
-	getThisBinding: function () {
-		return this.current.getThisBinding() || this.global;
-	},
-
-	createScope: function (thisArg) {
-		var env = new DeclarativeEnvironment(this.current, thisArg, this);
-		return this.setScope(env);
-	},
-
-	createObjectScope: function (obj) {
-		var env = new ObjectEnvironment(this.current, obj, this);
-		return this.setScope(env);
-	},
-
-	initScope: function (node) {
-		var env = this;
-		var strict = isStrictMode(node);
-		var undef = this.global.getProperty("undefined").getValue();
-		var variables = [];
-		var name;
-
-		populateHoistedVariables(node, variables, node);
-
-		variables.forEach(function (obj) {
-			var decl = obj.decl;
-			name = decl.name || decl.id.name;
-
-			if (decl.type === "FunctionDeclaration") {
-				// functions can be used before they are defined
-				var func = env.objectFactory.createFunction(decl, env.current);
-				env.createBinding(name, true);
-				env.setBinding(name, func, strict);
-				// note: since the function name may collide with a variable we need to test for existence
-
-				// if (env.hasBinding(name)) {
-				// 	env.putValue(name, func);
-				// } else {
-				// 	env.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
-				// }
-			} else {
-				if (env.hasBinding(name)) {
-					env.setBinding(name, undef, strict);
-				} else {
-					env.createBinding(name, true);
-				}
-			}
-		});
-	},
-
-	setScope: function (scope) {
-		this.globalScope = this.globalScope || scope;
-
-		var env = this;
-		var priorScope = this.current || this.globalScope;
-		this.current = scope;
-
-		return {
-			init: function (node) {
-				if (!node) {
-					return;
-				}
-
-				env.initScope(node);
-			},
-
-			exitScope: function () {
-				env.setScope(priorScope);
-			}
-		};
-	}
-};
-
-module.exports = Environment;
-
-},{"../execution-context":7,"../keywords":41,"./declarative-environment":2,"./object-environment":4,"./reference":6}],4:[function(require,module,exports){
-"use strict";
-var PropertyReference = require("./property-reference");
-
-function ObjectEnvironment (parent, obj, env) {
-	this.parent = parent;
-	this.object = this.thisNode = obj;
-	this.env = env;
-}
-
-ObjectEnvironment.prototype = {
-	constructor: ObjectEnvironment,
-
-	createReference: function (name, strict) {
-		return new PropertyReference(name, this.object, strict, this.env);
-	},
-
-	getValue: function (name) {
-		return this.object.getValue(name);
-	},
-
-	hasBinding: function (name) {
-		return this.object.hasProperty(name);
-	},
-
-	createMutableBinding: function (name, immutable) {
-		if (this.parent) {
-			this.parent.createMutableBinding.apply(this.parent, arguments);
-		} else {
-			this.object.defineOwnProperty(name, {
-				value: undefined,
-				configurable: immutable,
-				enumerable: true,
-				writable: true
-			}, true);
-		}
-	},
-
-	createImmutableBinding: function (name) {
-		this.createMutableBinding(name, false);
-	},
-
-	setMutableBinding: function (name, value, throwOnError) {
-		if (this.parent && !this.object.hasProperty(name)) {
-			this.parent.setMutableBinding.apply(this.parent, arguments);
-		} else {
-			this.object.putValue(name, value, throwOnError);
-		}
-	},
-
-	getBindingValue: function (name, throwOnError) {
-		if (!this.hasBinding(name)) {
-			if (throwOnError) {
-				throw new ReferenceError(name + " is not defined.");
-			}
-
-			return undefined;
-		}
-
-		return this.object.getProperty(name).getValue();
-	},
-
-	deleteBinding: function (name) {
-		return this.object.deleteProperty(name, false);
-	},
-
-	getThisBinding: function () {
-		return this.object;
-	}
-};
-
-module.exports = ObjectEnvironment;
-
-},{"./property-reference":5}],5:[function(require,module,exports){
-"use strict";
-var Reference = require("./reference");
-var PrimitiveType = require("../types/primitive-type");
-
-function PropertyReference (name, object, strict, env) {
-	Reference.apply(this, arguments);
-	this.isPropertyReference = true;
-}
-
-PropertyReference.prototype = Object.create(Reference.prototype);
-PropertyReference.prototype.constructor = PropertyReference;
-
-PropertyReference.prototype.getValue = function () {
-	var prop = this.base.getProperty(this.name);
-	return prop && prop.getValue() || new PrimitiveType(undefined);
-};
-
-PropertyReference.prototype.putValue = function (value) {
-	if (this.base.hasProperty(this.name)) {
-		this.base.putValue(this.name, value, this.strict, this.env);
-	} else {
-		this.base.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, this.strict, this.env);
-	}
-};
-
-PropertyReference.prototype.deleteBinding = function (name) {
-	return this.base.deleteProperty(name, true);
-};
-
-PropertyReference.prototype.isUnresolved = function () { return false; };
-
-module.exports = PropertyReference;
-
-},{"../types/primitive-type":63,"./reference":6}],6:[function(require,module,exports){
-"use strict";
-function Reference (name, base, strict, env) {
-	this.name = name;
-	this.base = base;
-	this.strict = strict;
-	this.env = env;
-}
-
-Reference.prototype = {
-	constructor: Reference,
-
-	putValue: function (value) {
-		if (this.base === undefined && this.strict) {
-			throw new ReferenceError(this.name + " is not defined");
-		}
-
-		if (this.base) {
-			this.base.setMutableBinding(this.name, value, this.strict);
-		} else {
-			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
-		}
-	},
-
-	getValue: function () {
-		if (!this.base) {
-			throw new ReferenceError(this.name + " is not defined");
-		}
-
-		return this.base.getBindingValue(this.name);
-	},
-
-	deleteBinding: function (name) {
-		if (this.base) {
-			return this.base.deleteBinding(name);
-		}
-
-		return true;
-	},
-
-	isUnresolved: function () {
-		return !this.base;
-	}
-};
-
-module.exports = Reference;
-
-},{}],7:[function(require,module,exports){
-"use strict";
-var ExecutionResult = require("./execution-result");
-
-function ExecutionContext (env, node, callee) {
-	this.node = node;
-	this.callee = callee;
-	this.env = env;
-
-	this.label = "";
-	this.value = null;
-	this.isNew = false;
-	this.strict = false;
-}
-
-ExecutionContext.prototype.execute = function () {
-	return this.env.runner.execute(this);
-};
-
-ExecutionContext.prototype.create = function (node, callee, isNew) {
-	var context = new ExecutionContext(this.env, node, callee || this.callee);
-	context.value = this.value;
-	context.isNew = !!isNew;
-	return context;
-};
-
-ExecutionContext.prototype.createLabel = function (node, label) {
-	var context = this.create(node);
-	context.label = label;
-	return context;
-};
-
-ExecutionContext.prototype.cancel = function (label) {
-	var result = this.result(this.value, label);
-	result.cancel = true;
-	return result;
-};
-
-ExecutionContext.prototype.skip = function (label) {
-	var result = this.result(this.value, label);
-	result.skip = true;
-	return result;
-};
-
-ExecutionContext.prototype.exit = function (value) {
-	this.callee = null;
-
-	var result = this.result(value);
-	result.exit = true;
-	return result;
-};
-
-ExecutionContext.prototype.result = function (value, name, obj) {
-	this.value = value;
-	return new ExecutionResult(value, name, obj);
-};
-
-ExecutionContext.prototype.empty = function () {
-	return this.result(undefined);
-};
-
-module.exports = ExecutionContext;
-
-},{"./execution-result":8}],8:[function(require,module,exports){
-"use strict";
-function ExecutionResult (value, name, obj) {
-	this.result = value;
-	this.name = name;
-	this.object = obj;
-
-	this.cancel = false;
-	this.exit = false;
-	this.skip = false;
-}
-
-ExecutionResult.prototype.isCancelled = function () {
-	return this.cancel || this.exit;
-};
-
-ExecutionResult.prototype.shouldBreak = function (context, loop) {
-	if (this.exit) {
-		return true;
-	}
-
-	if (!this.cancel && !this.skip) {
-		return false;
-	}
-
-	var breaking = true;
-	if (this.name && this.name === context.label) {
-		breaking = this.cancel;
-		this.cancel = this.skip = false;
-		return breaking;
-	}
-
-	if (loop && !this.name) {
-		breaking = this.cancel;
-		this.cancel = this.skip = false;
-	}
-
-	return breaking;
-};
-
-module.exports = ExecutionResult;
-
-},{}],9:[function(require,module,exports){
-"use strict";
-module.exports = function ArrayExpression (context) {
-	var objectFactory = context.env.objectFactory;
-	var arr = objectFactory.create("Array");
-
-	if (context.node.elements) {
-		var i = 0;
-		var ln = context.node.elements.length;
-
-		while (i < ln) {
-			if (context.node.elements[i]) {
-				var item = context.create(context.node.elements[i]).execute().result.getValue();
-				arr.defineOwnProperty(i, { value: item, configurable: true, enumerable: true, writable: true });
-			}
-
-			i++;
-		}
-
-		// todo: can we remove this?
-		arr.putValue("length", objectFactory.createPrimitive(ln), false, context);
-	}
-
-	return context.result(arr);
-};
-
-},{}],10:[function(require,module,exports){
-"use strict";
-var Reference = require("../env/reference");
-
-var assignOperators = {
-	"+=": function (a, b) { return a.value + b.value; },
-	"-=": function (a, b) { return a.value - b.value; },
-	"*=": function (a, b) { return a.value * b.value; },
-	"/=": function (a, b) { return a.value / b.value; },
-	"%=": function (a, b) { return a.value % b.value; },
-	"<<=": function (a, b) { return a.value << b.value; },
-	">>=": function (a, b) { return a.value >> b.value; },
-	">>>=": function (a, b) { return a.value >>> b.value; },
-	"|=": function (a, b) { return a.value | b.value; },
-	"^=": function (a, b) { return a.value ^ b.value; },
-	"&=": function (a, b) { return a.value & b.value; }
-};
-
-module.exports = function AssignmentExpression (context) {
-	var assignment = context.node.operator === "=";
-	var right = context.create(context.node.right).execute().result;
-
-	var left = context.create(context.node.left).execute().result;
-	if (!(left instanceof Reference)) {
-		throw new ReferenceError("Invalid left-hand side in assignment");
-	}
-
-	var newValue;
-	if (assignment) {
-		newValue = right.getValue();
-	} else {
-		var rawValue = assignOperators[context.node.operator](left.getValue(), right.getValue());
-		newValue = context.env.objectFactory.createPrimitive(rawValue);
-	}
-
-	left.putValue(newValue);
-	// var obj = left.object || context.env;
-	// var name = left.name;
-
-
-	// if (obj.hasProperty(name)) {
-	// 	obj.putValue(name, newValue, context.strict, context);
-	// } else {
-	// 	var descriptor = { value: newValue, configurable: true, enumerable: true, writable: true };
-	// 	obj.defineOwnProperty(name, null, descriptor, context.strict, context);
-	// }
-
-	return context.result(newValue);
-};
-
-},{"../env/reference":6}],11:[function(require,module,exports){
-"use strict";
-var convert = require("../utils/convert");
-
-function implicitEquals (a, b, env) {
-	if (a.isPrimitive && b.isPrimitive) {
-		return a.value == b.value;
-	}
-
-	if ((a.type === "object" && b.type === "object") || (a.type === "function" && b.type === "function")) {
-		return a === b;
-	}
-
-	var primitiveA = convert.toPrimitive(env, a);
-	var primitiveB = convert.toPrimitive(env, b);
-
-	if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
-		return Number(primitiveA) === Number(primitiveB);
-	}
-
-	if (typeof primitiveA === "string") {
-		return primitiveA === convert.toPrimitive(env, b, "string");
-	}
-
-	if (typeof primitiveB === "string") {
-		return convert.toPrimitive(env, a, "string") === primitiveB;
-	}
-
-	return primitiveA == primitiveB;
-}
-
-function strictEquals (a, b) {
-	if (a.isPrimitive && b.isPrimitive) {
-		return a.value === b.value;
-	}
-
-	if (a.isPrimitive || b.isPrimitive) {
-		return false;
-	}
-
-	return a === b;
-}
-
-function not (fn) {
-	return function (a, b, e) {
-		return !fn(a, b, e);
-	};
-}
-
-function add (a, b, env) {
-	if (a.isPrimitive && b.isPrimitive) {
-		return a.value + b.value;
-	}
-
-	a = convert.toPrimitive(env, a);
-	b = convert.toPrimitive(env, b);
-	return a + b;
-}
-
-function toNumber (env, obj) {
-	if (obj.className === "Number") {
-		return obj.toNumber();
-	}
-
-	return convert.toPrimitive(env, obj, "number");
-}
-
-/* eslint eqeqeq:0 */
-var binaryOperators = {
-	"+": add,
-	"-": function (a, b, e) { return toNumber(e, a) - toNumber(e, b); },
-	"/": function (a, b, e) { return toNumber(e, a) / toNumber(e, b); },
-	"*": function (a, b, e) { return toNumber(e, a) * toNumber(e, b); },
-	"==": implicitEquals,
-	"!=": not(implicitEquals),
-	"===": strictEquals,
-	"!==": not(strictEquals),
-	"<": function (a, b, e) { return convert.toPrimitive(e, a) < convert.toPrimitive(e, b); },
-	"<=": function (a, b, e) { return convert.toPrimitive(e, a) <= convert.toPrimitive(e, b); },
-	">": function (a, b, e) { return convert.toPrimitive(e, a) > convert.toPrimitive(e, b); },
-	">=": function (a, b, e) { return convert.toPrimitive(e, a) >= convert.toPrimitive(e, b); },
-	"<<": function (a, b, e) { return convert.toPrimitive(e, a) << convert.toPrimitive(e, b); },
-	">>": function (a, b, e) { return convert.toPrimitive(e, a) >> convert.toPrimitive(e, b); },
-	">>>": function (a, b, e) { return convert.toPrimitive(e, a) >>> convert.toPrimitive(e, b); },
-	"%": function (a, b, e) { return convert.toPrimitive(e, a) % convert.toPrimitive(e, b); },
-	"|": function (a, b, e) { return convert.toInt32(e, a) | convert.toInt32(e, b); },
-	"^": function (a, b, e) { return convert.toInt32(e, a) ^ convert.toInt32(e, b); },
-	"&": function (a, b, e) { return convert.toInt32(e, a) & convert.toInt32(e, b); },
-	"in": function (a, b, e) {
-		a = a.toString();
-		if (b.isPrimitive) {
-			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + b.toString());
-		}
-
-		return b.hasProperty(a);
-	},
-	"instanceof": function (a, b) {
-		if (b.type !== "function") {
-			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
-		}
-
-		if (a.isPrimitive) {
-			return false;
-		}
-
-		return b.hasInstance(a);
-	}
-};
-
-module.exports = function BinaryExpression (context) {
-	var undef = context.env.global.getProperty("undefined").getValue();
-	var left = context.create(context.node.left).execute().result;
-	var leftValue = left.getValue() || undef;
-
-	var right = context.create(context.node.right).execute().result;
-	var rightValue = right.getValue() || undef;
-
-	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context.env);
-
-	return context.result(context.env.objectFactory.createPrimitive(newValue));
-};
-
-},{"../utils/convert":68}],12:[function(require,module,exports){
-"use strict";
-module.exports = function BlockStatement (context) {
-	var result;
-
-	if (context.node.type === "Program") {
-		context.env.initScope(context.node.body);
-	}
-
-	for (var i = 0, ln = context.node.body.length; i < ln; i++) {
-		result = context.create(context.node.body[i]).execute();
-		if (result && result.shouldBreak(context)) {
-			break;
-		}
-	}
-
-	return result;
-};
-
-},{}],13:[function(require,module,exports){
-"use strict";
-var FunctionType = require("../types/function-type");
-var Reference = require("../env/reference");
-var func = require("../utils/func");
-var convert = require("../utils/convert");
-
-function assignThis (env, fnMember, fn, isNew, native) {
-	if (isNew) {
-		// if this is a native contructor we don't are about this
-		// otherwise create a new object
-		return native ? null : env.objectFactory.createObject(fn);
-	}
-
-	if (fnMember instanceof Reference && fnMember.isPropertyReference) {
-		return convert.toObject(env, fnMember.base);
-	}
-
-	return null;
-}
-
-module.exports = function CallExpression (context) {
-	var node = context.node;
-	var isNew = context.node.type === "NewExpression";
-
-	var fnMember = context.create(node.callee).execute().result;
-	var fn = fnMember.getValue();
-	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result.getValue(); });
-
-	if (!fn || fn.className !== "Function") {
-		throw new TypeError(fn.toString() + " not a function");
-	}
-
-	var native = fn.native;
-	var thisArg = assignThis(context.env, fnMember, fn, isNew, native);
-	var params = native ? [] : fn.node.params;
-	var callee = fnMember;
-
-	callee.identifier = fn.name;
-	return context.result(func.executeFunction(context, fn, params, args, thisArg, callee, isNew));
-};
-
-},{"../env/reference":6,"../types/function-type":59,"../utils/convert":68,"../utils/func":69}],14:[function(require,module,exports){
-"use strict";
-module.exports = function DoWhileStatement (context) {
-	var result;
-	var passed = true;
-
-	if (context.node.type === "WhileStatement") {
-		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
-	}
-
-	while (passed) {
-		result = context.create(context.node.body).execute();
-
-		if (result && result.shouldBreak(context, true)) {
-			break;
-		}
-
-		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
-	}
-
-	return result;
-};
-
-},{}],15:[function(require,module,exports){
-"use strict";
-module.exports = function EmptyStatement (context) {
-	return context.empty();
-};
-
-},{}],16:[function(require,module,exports){
-"use strict";
-module.exports = 	function ExpressionStatement (context) {
-	var executionResult = context.create(context.node.expression).execute();
-	var executionValue = executionResult && executionResult.result && executionResult.result.getValue();
-	return context.result(executionValue || context.env.global.getProperty("undefined").getValue());
-};
-
-},{}],17:[function(require,module,exports){
-"use strict";
-module.exports = function ForInStatement (context) {
-	var left;
-	if (context.node.left.type === "VariableDeclaration") {
-		// should only be one, but
-		// need to unwrap the declaration to get it
-		// todo: this is sloppy - need to revisit
-		context.node.left.declarations.forEach(function (decl) {
-			left = context.create(decl).execute().result;
-		});
-	} else {
-		left = context.create(context.node.left).execute().result;
-	}
-
-	var obj = context.create(context.node.right).execute().result.getValue();
-	var result;
-
-	// track visited properties to prevent iterating over shadowed properties, regardless of enumerable flag
-	// 12.6.4 NOTE: a property of a prototype is not enumerated if it is “shadowed” because some previous
-	// object in the prototype chain has a property with the same name. The values of [[Enumerable]] attributes
-	// are not considered when determining if a property of a prototype object is shadowed by a previous object
-	// on the prototype chain.
-	var visited = Object.create(null);
-
-	while (obj) {
-		for (var prop in obj.properties) {
-			if (obj.properties[prop].enumerable && !visited[prop]) {
-				left.putValue(context.env.objectFactory.createPrimitive(prop));
-
-				// context.env.putValue(left.name, context.env.objectFactory.createPrimitive(prop), false, context);
-				result = context.create(context.node.body).execute();
-
-				if (result && result.shouldBreak(context, true)) {
-					return result;
-				}
-			}
-
-			visited[prop] = true;
-		}
-
-		obj = obj.proto;
-	}
-
-	return result;
-};
-
-},{}],18:[function(require,module,exports){
-"use strict";
-function shouldContinue (context) {
-	if (!context.node.test) {
-		return true;
-	}
-
-	return context.create(context.node.test).execute().result.getValue().toBoolean();
-}
-
-module.exports = function ForStatement (context) {
-	if (context.node.init) {
-		context.create(context.node.init).execute();
-	}
-
-	var result;
-	while (shouldContinue(context)) {
-		result = context.create(context.node.body).execute();
-		if (result && result.shouldBreak(context, true)) {
-			break;
-		}
-
-		if (context.node.update) {
-			context.create(context.node.update).execute();
-		}
-	}
-
-	return result;
-};
-
-},{}],19:[function(require,module,exports){
-"use strict";
-module.exports = function FunctionDeclaration (context) {
-	return context.result(context.env.getValue(context.node.id.name));
-};
-
-},{}],20:[function(require,module,exports){
-"use strict";
-module.exports = function FunctionExpression (context) {
-	var ctor = context.env.global.getProperty("Function").getValue();
-	var objectFactory = context.env.objectFactory;
-	var proto = objectFactory.createObject();
-	var func = objectFactory.createFunction(context.node, context.env.current, proto);
-
-	// todo:
-	if (context.node.id) {
-		func.name = context.node.id.name;
-		// context.env.putValue(context.node.id.name, func);
-	}
-
-	return context.result(func);
-};
-
-},{}],21:[function(require,module,exports){
-"use strict";
-module.exports = function Identifier (context) {
-	var name = context.node.name;
-
-	if (context.callee && context.callee.identifier === name) {
-		return context.result(context.callee);
-	}
-	
-	return context.result(context.env.getReference(context.node.name));
-};
-
-},{}],22:[function(require,module,exports){
-"use strict";
-module.exports = function IfStatement (context) {
-	var testValue = context.create(context.node.test).execute().result.getValue();
-	if (testValue.toBoolean()) {
-		return context.create(context.node.consequent).execute();
-	}
-
-	if (context.node.alternate) {
-		return context.create(context.node.alternate).execute();
-	}
-};
-
-},{}],23:[function(require,module,exports){
-"use strict";
-var handlers = {};
-
-handlers.ArrayExpression = require("./array-expression");
-handlers.AssignmentExpression = require("./assignment-expression");
-handlers.BinaryExpression = require("./binary-expression");
-handlers.BreakStatement = handlers.ContinueStatement = require("./interrupt-statement");
-handlers.CallExpression = handlers.NewExpression = require("./call-expression");
-handlers.ConditionalExpression = handlers.IfStatement = require("./if-statement");
-handlers.DoWhileStatement = handlers.WhileStatement = require("./do-while-statement.js");
-handlers.EmptyStatement = require("./empty-statement");
-handlers.ExpressionStatement = require("./expression-statement");
-handlers.ForStatement = require("./for-statement");
-handlers.ForInStatement = require("./for-in-statement");
-handlers.FunctionDeclaration = require("./function-declaration");
-handlers.FunctionExpression = require("./function-expression");
-handlers.Identifier = require("./identifier");
-handlers.LabeledStatement = require("./labeled-statement");
-handlers.Literal = require("./literal");
-handlers.LogicalExpression = require("./logical-expression");
-handlers.MemberExpression = require("./member-expression");
-handlers.ObjectExpression = require("./object-expression");
-handlers.Program = handlers.BlockStatement = require("./block-statement");
-handlers.ReturnStatement = require("./return-statement");
-handlers.SequenceExpression = require("./sequence-expression");
-handlers.SwitchStatement = require("./switch-statement");
-handlers.ThisExpression = require("./this-expression");
-handlers.ThrowStatement = require("./throw-statement");
-handlers.TryStatement = require("./try-statement");
-handlers.UnaryExpression = require("./unary-expression");
-handlers.UpdateExpression = require("./update-expression");
-handlers.VariableDeclaration = require("./variable-declaration");
-handlers.VariableDeclarator = require("./variable-declarator");
-handlers.WithStatement = require("./with-statement");
-
-module.exports = handlers;
-
-},{"./array-expression":9,"./assignment-expression":10,"./binary-expression":11,"./block-statement":12,"./call-expression":13,"./do-while-statement.js":14,"./empty-statement":15,"./expression-statement":16,"./for-in-statement":17,"./for-statement":18,"./function-declaration":19,"./function-expression":20,"./identifier":21,"./if-statement":22,"./interrupt-statement":24,"./labeled-statement":25,"./literal":26,"./logical-expression":27,"./member-expression":28,"./object-expression":29,"./return-statement":30,"./sequence-expression":31,"./switch-statement":32,"./this-expression":33,"./throw-statement":34,"./try-statement":35,"./unary-expression":36,"./update-expression":37,"./variable-declaration":38,"./variable-declarator":39,"./with-statement":40}],24:[function(require,module,exports){
-"use strict";
-module.exports = function InterruptStatement (context) {
-	var label;
-	if (context.node.label) {
-		label = context.node.label.name;
-	}
-
-	if (context.node.type === "BreakStatement") {
-		return context.cancel(label);
-	}
-
-	return context.skip(label);
-};
-
-},{}],25:[function(require,module,exports){
-"use strict";
-module.exports = function LabeledStatement (context) {
-	return context.createLabel(context.node.body, context.node.label.name).execute();
-};
-
-},{}],26:[function(require,module,exports){
-"use strict";
-module.exports = function Literal (context) {
-	return context.result(context.env.objectFactory.createPrimitive(context.node.value));
-};
-
-},{}],27:[function(require,module,exports){
-"use strict";
-module.exports = function LogicalExpression (context) {
-	var left = context.create(context.node.left).execute();
-	var passed = left.result.getValue().toBoolean();
-
-	if (passed && context.node.operator === "||") {
-		return left;
-	}
-
-	if (!passed && context.node.operator === "&&") {
-		return left;
-	}
-
-	return context.create(context.node.right).execute();
-};
-
-},{}],28:[function(require,module,exports){
-"use strict";
-var convert = require("../utils/convert");
-var PropertyReference = require("../env/property-reference");
-
-module.exports = function MemberExpression (context) {
-	var obj = context.create(context.node.object).execute().result.getValue();
-	var name, value;
-
-	if (context.node.computed) {
-		name = convert.toString(context.env, context.create(context.node.property).execute().result.getValue());
-	} else {
-		name = context.node.property.name;
-	}
-
-	value = new PropertyReference(name, obj, false, context.env);
-	return context.result(value);
-};
-
-},{"../env/property-reference":5,"../utils/convert":68}],29:[function(require,module,exports){
-"use strict";
-var func = require("../utils/func");
-
-function setDescriptor (context, obj, name, descriptor) {
-	// var currentScope = context.env.current;
-
-	if (descriptor.get) {
-		descriptor.getter = function () {
-			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
-		};
-	}
-
-	if (descriptor.set) {
-		descriptor.setter = function () {
-			func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
-		};
-	}
-
-	obj.defineOwnProperty(name, descriptor);
-}
-
-function createDescriptor (value) {
-	return { value: value, configurable: true, enumerable: true, writable: true };
-}
-
-module.exports = function ObjectExpression (context) {
-	var obj = context.env.objectFactory.createObject();
-	var descriptors = Object.create(null);
-
-	context.node.properties.forEach(function (property) {
-		var value = context.create(property.value).execute().result.getValue();
-		var name = property.key.name || property.key.value;
-
-		switch (property.kind) {
-			case "get":
-			case "set":
-				descriptors[name] = descriptors[name] || createDescriptor();
-				descriptors[name][property.kind] = value;
-				break;
-
-			default:
-				obj.defineOwnProperty(name, createDescriptor(value));
-				break;
-		}
-	});
-
-	for (var prop in descriptors) {
-		setDescriptor(context, obj, prop, descriptors[prop]);
-	}
-
-	return context.result(obj);
-};
-
-},{"../utils/func":69}],30:[function(require,module,exports){
-"use strict";
-module.exports = function ReturnStatement (context) {
-	if (context.node.argument) {
-		return context.exit(context.create(context.node.argument).execute().result.getValue());
-	}
-
-	return context.exit(context.env.global.getProperty("undefined").getValue());
-};
-
-},{}],31:[function(require,module,exports){
-"use strict";
-module.exports = function SequenceExpression (context) {
-	var value;
-
-	context.node.expressions.forEach(function (expr) {
-		value = context.create(expr).execute().result.getValue();
-	});
-
-	return context.result(value);
-};
-
-},{}],32:[function(require,module,exports){
-"use strict";
-function executeStatements (context, statements) {
-	var result;
-	for (var i = 0, ln = statements.length; i < ln; i++) {
-		result = context.create(statements[i]).execute();
-		if (result && result.isCancelled()) {
-			return result;
-		}
-	}
-
-	return result;
-}
-
-module.exports = function SwitchStatement (context) {
-	var testValue = context.create(context.node.discriminant).execute().result.getValue();
-	var passed = false;
-	var caseValue, value, defaultCase;
-
-	for (var i = 0, ln = context.node.cases.length; i < ln; i++) {
-		if (!passed) {
-			if (context.node.cases[i].test) {
-				caseValue = context.create(context.node.cases[i].test).execute().result.getValue();
-				if (!caseValue.equals(testValue)) {
-					continue;
-				}
-			} else {
-				// default might not be the last case
-				defaultCase = context.node.cases[i];
-				continue;
-			}
-		}
-
-		passed = true;
-		value = executeStatements(context, context.node.cases[i].consequent);
-		if (value && value.isCancelled()) {
-			value.cancel = false;
-			return value;
-		}
-	}
-
-	if (!passed && defaultCase && defaultCase.consequent) {
-		value = executeStatements(context, defaultCase.consequent);
-		value.cancel = false;
-		return value;
-	}
-
-	return value;
-};
-
-},{}],33:[function(require,module,exports){
-"use strict";
-module.exports = function ThisExpression (context) {
-	return context.result(context.env.getThisBinding());
-};
-
-},{}],34:[function(require,module,exports){
-"use strict";
-module.exports = function ThrowStatement (context) {
-	// todo: handle more specific errors
-	var arg = context.create(context.node.argument).execute().result.getValue();
-
-	if (arg.isPrimitive) {
-		throw arg.value;
-	}
-
-	var err = new Error();
-	err.wrappedError = arg;
-	throw err;
-};
-
-},{}],35:[function(require,module,exports){
-"use strict";
-module.exports = function TryCatchStatement (context) {
-	var result;
-
-	try {
-		result = context.create(context.node.block).execute();
-	} catch (err) {
-		if (context.node.handler) {
-			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
-
-			// var scope = context.env.createScope();
-			// scope.init(context.node.handler.body);
-
-			var errVar = context.node.handler.param.name;
-			var hasBinding = context.env.hasBinding(errVar);
-
-			if (!hasBinding) {
-				context.env.createBinding(errVar);
-			}
-
-			context.env.setBinding(errVar, caughtError);
-
-			try {
-				result = context.create(context.node.handler.body, context.node.handler).execute();
-			} catch (catchError) {
-				// scope.exitScope();
-				throw catchError;
-			} finally {
-				if (!hasBinding) {
-					context.env.deleteBinding(errVar);
-				}
-			}
-
-			// scope.exitScope();
-		} else {
-			throw err;
-		}
-	} finally {
-		if (context.node.finalizer) {
-			var finalResult = context.create(context.node.finalizer).execute();
-			if (finalResult && finalResult.shouldBreak(context)) {
-				return finalResult;
-			}
-		}
-	}
-
-	return result;
-};
-
-},{}],36:[function(require,module,exports){
-"use strict";
-var Reference = require("../env/reference");
-var convert = require("../utils/convert");
-
-module.exports = function UnaryExpression (context) {
-	var result = context.create(context.node.argument).execute().result;
-	var objectFactory = context.env.objectFactory;
-	var value, newValue;
-
-	switch (context.node.operator) {
-		case "typeof":
-			var type;
-			if (result instanceof Reference && result.isUnresolved()) {
-				type = "undefined";
-			} else {
-				value = result.getValue();
-				type = value ? value.type : "undefined";
-			}
-
-			newValue = objectFactory.createPrimitive(type);
-			break;
-
-		case "-":
-			value = result.getValue();
-			newValue = objectFactory.createPrimitive(-(convert.toNumber(context.env, value)));
-			break;
-
-		case "+":
-			value = result.getValue();
-			newValue = objectFactory.createPrimitive(+(convert.toNumber(context.env, value)));
-			break;
-
-		case "!":
-			value = result.getValue();
-			newValue = objectFactory.createPrimitive(!(value.isPrimitive ? value.toBoolean() : true));
-			break;
-
-		case "~":
-			value = result.getValue();
-			newValue = objectFactory.createPrimitive(~(convert.toInt32(context.env, value)));
-			break;
-
-		case "delete":
-			var deleted = true;
-			if (result && result instanceof Reference) {
-				if (!result.isUnresolved()) {
-					deleted = result.deleteBinding(result.name);
-				}
-			} else if (context.node.argument.object) {
-				throw new ReferenceError(context.node.argument.object.name + " is not defined");
-			}
-
-			newValue = objectFactory.createPrimitive(deleted);
-			break;
-
-		case "void":
-			newValue = objectFactory.createPrimitive(undefined);
-			break;
-
-		default:
-			throw new SyntaxError("Unknown unary operator: " + context.node.operator);
-	}
-
-	return context.result(newValue);
-};
-
-},{"../env/reference":6,"../utils/convert":68}],37:[function(require,module,exports){
-"use strict";
-var convert = require("../utils/convert");
-
-module.exports = function UpdateExpression (context) {
-	var objectFactory = context.env.objectFactory;
-	var ref = context.create(context.node.argument).execute().result;
-	var originalValue = convert.toNumber(context.env, ref.getValue());
-	var newValue = originalValue;
-
-	if (context.node.operator === "++") {
-		newValue++;
-	} else {
-		newValue--;
-	}
-
-	newValue = objectFactory.createPrimitive(newValue);
-	originalValue = objectFactory.createPrimitive(originalValue);
-
-	var returnValue = context.node.prefix ? newValue : originalValue;
-
-	ref.putValue(newValue);
-	return context.result(returnValue);
-};
-
-},{"../utils/convert":68}],38:[function(require,module,exports){
-"use strict";
-module.exports = function VariableDeclaration (context) {
-	context.node.declarations.forEach(function (decl) {
-		context.create(decl).execute();
-	});
-
-	return context.empty();
-};
-
-},{}],39:[function(require,module,exports){
-"use strict";
-module.exports = function VariableDeclarator (context) {
-	var name = context.node.id.name;
-	var value;
-
-	if (context.node.init) {
-		value = context.create(context.node.init).execute().result;
-	}
-
-	// variables have already been hoisted so we just need to initialize them if defined
-	if (value) {
-		context.env.putValue(name, value.getValue(), false, context);
-	}
-
-	return context.result(context.env.getReference(name));
-	// return context.result(value, id);
-};
-
-},{}],40:[function(require,module,exports){
-"use strict";
-module.exports = function WithStatement (context) {
-	var obj = context.create(context.node.object).execute().result.getValue();
-	var scope = context.env.createObjectScope(obj);
-	var result;
-
-	scope.init(context.node.body);
-
-	try {
-		result = context.create(context.node.body).execute();
-	} catch (err) {
-		scope.exitScope();
-		throw err;
-	}
-
-	scope.exitScope();
-	return result;
-};
-
-},{}],41:[function(require,module,exports){
-"use strict";
-module.exports = {
-	"es5": [
-		"do",
-		"if",
-		"in",
-		"for",
-		"new",
-		"try",
-		"var",
-		"case",
-		"else",
-		"enum",
-		// "eval",
-		"null",
-		"this",
-		"true",
-		"void",
-		"with",
-		"break",
-		"catch",
-		"class",
-		"const",
-		"false",
-		"super",
-		"throw",
-		"while",
-		"delete",
-		"export",
-		"import",
-		"return",
-		"switch",
-		"typeof",
-		"default",
-		"extends",
-		"finally",
-		"continue",
-		"debugger",
-		"function",
-		// "arguments",
-		"instanceof"],
-
-	"es5-strict": [
-		"implements",
-		"let",
-		"private",
-		"public",
-		"interface",
-		"package",
-		"protected",
-		"static",
-		"yield"],
-
-	isReserved: function (name, scope) {
-		return this.es5.indexOf(name) >= 0;
-		// if (this[scope.version].indexOf(name) >= 0) {
-		// 	return true;
-		// }
-
-		// if (scope.strict && this[scope.version + "-strict"].indexOf >= 0) {
-		// 	return true;
-		// }
-
-		// return false;
-	}
-};
-
-},{}],42:[function(require,module,exports){
+},{"./ecma-5.1":8,"./execution-context":20,"./handlers":37}],2:[function(require,module,exports){
 "use strict";
 var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 var convert = require("../utils/convert");
-var types = require("../utils/types");
 var ArrayType = require("../types/array-type");
 
 function getStartIndex (index, length) {
@@ -1853,10 +358,10 @@ module.exports = function (env) {
 			stringValue = "";
 			if (this.node.hasProperty(i)) {
 				stringValue = this.node.getProperty(i).getValue();
-				if (stringValue.isPrimitive) {
-					stringValue = stringValue.value == null ? "" : stringValue.toString();
+				if (contracts.isNullOrUndefined(stringValue)) {
+					stringValue = "";
 				} else {
-					stringValue = convert.toPrimitive(env, stringValue, "string");
+					stringValue = convert.toString(env, stringValue);
 				}
 			}
 
@@ -1944,7 +449,7 @@ module.exports = function (env) {
 		var index = 0;
 
 		for (var i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i).toBoolean()) {
+			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
 				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
 			}
 		}
@@ -1958,7 +463,7 @@ module.exports = function (env) {
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && !executeCallback(callback, thisArg, this, i).toBoolean()) {
+			if (this.node.hasProperty(i) && !convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(false);
 			}
 		}
@@ -1972,7 +477,7 @@ module.exports = function (env) {
 		contracts.assertIsFunction(callback);
 
 		for (var i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i).toBoolean()) {
+			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(true);
 			}
 		}
@@ -2093,7 +598,7 @@ module.exports = function (env) {
 		var i = 0;
 
 		var comparer;
-		if (types.isNullOrUndefined(compareFunction)) {
+		if (contracts.isNullOrUndefined(compareFunction)) {
 			comparer = function defaultComparer (a, b) {
 				a = convert.toString(env, a);
 				b = convert.toString(env, b);
@@ -2153,7 +658,6 @@ module.exports = function (env) {
 	}, 1, "Array.prototype.sort"));
 
 	proto.define("toLocaleString", objectFactory.createBuiltInFunction(function () {
-		// todo: implement for reach
 		var length = getLength(env, this.node);
 		var arr = new Array(length);
 		var i = 0;
@@ -2163,17 +667,16 @@ module.exports = function (env) {
 			if (this.node.hasProperty(i)) {
 				current = this.node.getProperty(i).getValue();
 
-				if (types.isNullOrUndefined(current)) {
+				if (contracts.isNullOrUndefined(current)) {
 					arr[i] = "";
 				} else {
-					arr[i] = convert.toString(env, func.callMethod(env, current, "toLocaleString", []));
+					arr[i] = convert.toString(env, func.tryCallMethod(env, current, "toLocaleString"));
 				}
 			}
 
 			i++;
 		}
 
-		// var values = convert.toArray(this.node).map(function (arg) { return arg.value.toLocaleString(); });
 		return objectFactory.createPrimitive(arr.join());
 	}, 0, "Array.prototype.toLocaleString"));
 
@@ -2183,7 +686,7 @@ module.exports = function (env) {
 	globalObject.define("Array", arrayClass);
 };
 
-},{"../types/array-type":56,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69,"../utils/types":70}],43:[function(require,module,exports){
+},{"../types/array-type":57,"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],3:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
@@ -2191,7 +694,7 @@ module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var booleanClass = objectFactory.createFunction(function (obj) {
-		var booleanValue = obj && obj.isPrimitive ? obj.toBoolean() : !!obj;
+		var booleanValue = convert.toBoolean(obj);
 
 		// called as new
 		if (this.isNew) {
@@ -2208,7 +711,7 @@ module.exports = function (env) {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
 		}
 
-		return objectFactory.createPrimitive(this.node.value ? this.node.value.toString() : "false");
+		return objectFactory.createPrimitive(String(this.node.value));
 	}));
 
 	proto.define("valueOf", objectFactory.createFunction(function () {
@@ -2216,13 +719,13 @@ module.exports = function (env) {
 			throw new TypeError("Boolean.prototype.valueOf is not generic.");
 		}
 
-		return objectFactory.createPrimitive(this.node.value || false);
+		return objectFactory.createPrimitive(this.node.value);
 	}));
 
 	globalObject.define("Boolean", booleanClass);
 };
 
-},{"../utils/convert":68}],44:[function(require,module,exports){
+},{"../utils/convert":69}],4:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
@@ -2243,7 +746,7 @@ module.exports = function (env) {
 	globalObject.define("console", consoleClass);
 };
 
-},{"../utils/convert":68}],45:[function(require,module,exports){
+},{"../utils/convert":69}],5:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
@@ -2342,10 +845,10 @@ module.exports = function (env) {
 	globalObject.define("Date", dateClass);
 };
 
-},{"../utils/convert":68}],46:[function(require,module,exports){
+},{"../utils/convert":69}],6:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
@@ -2354,10 +857,10 @@ function createError (objectFactory, message, name) {
 	if (name) {
 		options = { name: name };
 	}
-	
+
 	var obj = objectFactory.create("Error", options);
 
-	if (!types.isNullOrUndefined(message)) {
+	if (!contracts.isNullOrUndefined(message)) {
 		obj.defineOwnProperty("message", { value: message, configurable: true, enumerable: false, writable: true }, false);
 	}
 
@@ -2384,7 +887,7 @@ module.exports = function (env) {
 			msg = convert.toString(env, this.node.getProperty("message").getValue());
 		}
 
-		name = name && name.toString();
+		name = name && convert.toString(env, name);
 		if (name && msg) {
 			return objectFactory.create("String", name + ": " + msg);
 		}
@@ -2401,15 +904,18 @@ module.exports = function (env) {
 
 		var typeProto = errClass.getProperty("prototype").getValue();
 		typeProto.define("name", objectFactory.createPrimitive(type));
+
+		// add to prototype chain to represent inheritance
+		typeProto.setPrototype(proto);
+
 		globalObject.define(type, errClass);
 	});
 };
 
-},{"../utils/convert":68,"../utils/types":70}],47:[function(require,module,exports){
+},{"../utils/contracts":68,"../utils/convert":69}],7:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 var contracts = require("../utils/contracts");
-var types = require("../utils/types");
 var func = require("../utils/func");
 var NativeFunctionType = require("../types/native-function-type");
 var slice = Array.prototype.slice;
@@ -2419,7 +925,7 @@ function defineThis (env, fn, thisArg) {
 		return thisArg || env.global.getProperty("undefined").getValue();
 	}
 
-	if (types.isNullOrUndefined(thisArg)) {
+	if (contracts.isNullOrUndefined(thisArg)) {
 		return env.global;
 	}
 
@@ -2439,24 +945,24 @@ module.exports = function (env, options) {
 		if (options.parser && arguments.length > 0) {
 			var args = slice.call(arguments);
 			var body = args.pop();
-			
+
 			if (args.length > 0) {
 				args = args.map(function (arg, index) {
-					if (types.isNull(arg)) {
+					if (contracts.isNull(arg)) {
 						throw new SyntaxError("Unexpected token null");
 					}
-					
-					return types.isUndefined(arg) ? "" : convert.toString(env, arg); 
+
+					return contracts.isUndefined(arg) ? "" : convert.toString(env, arg);
 				})
 				// the spec allows parameters to be comma-delimited, so we will join and split again comma
 				.join(",").split(/\s*,\s*/g);
 			}
-			
+
 			var ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
 			var params = args.map(function (arg) {
 				arg = arg.trim();
 				contracts.assertIsValidParameterName(arg);
-				
+
 				return {
 					type: "Identifier",
 					name: arg
@@ -2475,16 +981,16 @@ module.exports = function (env, options) {
 				if (this.isNew) {
 					thisArg = objectFactory.createObject(funcInstance);
 				}
-				
+
 				var executionResult = func.getFunctionResult(this, fn, params, arguments, thisArg, callee);
-				
+
 				if (this.isNew) {
 					return thisArg;
 				}
-				
+
 				return executionResult && executionResult.result || undef;
 			};
-			
+
 			wrappedFunc.nativeLength = callee.params.length;
 			funcInstance = objectFactory.createFunction(wrappedFunc, env.globalScope);
 		} else {
@@ -2494,7 +1000,7 @@ module.exports = function (env, options) {
 		funcInstance.putValue("constructor", functionClass);
 		return funcInstance;
 	};
-	
+
 	// the prototype of a function is actually callable and evaluates as a function
 	var proto = new NativeFunctionType(function () {});
 
@@ -2504,13 +1010,11 @@ module.exports = function (env, options) {
 
 	globalObject.define("Function", functionClass);
 
-	// var proto = functionClass.getProperty("prototype").getValue();
-	// proto.className = "Function";
 	proto.define("length", objectFactory.createPrimitive(0), frozen);
 
 	// function itself is a function
 	functionClass.setPrototype(proto);
-	
+
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.native) {
 			return objectFactory.createPrimitive("function () { [native code] }");
@@ -2519,17 +1023,13 @@ module.exports = function (env, options) {
 		return objectFactory.createPrimitive("function () { [user code] }");
 	}, 0, "Function.prototype.toString"));
 
-	// proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-	// 	return this.node;
-	// }, 0, "Function.prototype.valueOf"));
-
 	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
-		
+
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
@@ -2545,7 +1045,7 @@ module.exports = function (env, options) {
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
-		
+
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
@@ -2578,12 +1078,12 @@ module.exports = function (env, options) {
 		boundFunc.defineOwnProperty("arguments", throwProperties);
 		boundFunc.defineOwnProperty("callee", throwProperties);
 		boundFunc.bindThis(thisArg);
-		
+
 		return boundFunc;
 	}));
 };
 
-},{"../types/native-function-type":60,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69,"../utils/types":70}],48:[function(require,module,exports){
+},{"../types/native-function-type":61,"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],8:[function(require,module,exports){
 (function (global){
 "use strict";
 var Environment = require("../env/environment");
@@ -2709,11 +1209,11 @@ module.exports = function GlobalScope (runner) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../env/environment":3,"../env/reference":6,"../types/object-factory":61,"../types/primitive-type":63,"../utils/convert":68,"./array-api":42,"./boolean-api":43,"./console-api":44,"./date-api":45,"./error-api":46,"./function-api":47,"./json-api":49,"./math-api":50,"./number-api":51,"./object-api":52,"./regex-api":53,"./string-api":54}],49:[function(require,module,exports){
+},{"../env/environment":16,"../env/reference":19,"../types/object-factory":62,"../types/primitive-type":64,"../utils/convert":69,"./array-api":2,"./boolean-api":3,"./console-api":4,"./date-api":5,"./error-api":6,"./function-api":7,"./json-api":9,"./math-api":10,"./number-api":11,"./object-api":12,"./regex-api":13,"./string-api":14}],9:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 var func = require("../utils/func");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 var primitives = {
 	"String": true,
@@ -2730,69 +1230,36 @@ function formatValues (values, gap, depth) {
 	if (values.length === 0) {
 		return "";
 	}
-	
+
 	if (!gap) {
 		return values.join(",");
 	}
-	
+
 	var indent = "\n" + repeat(gap, depth);
 	var joinedValues = values.join(indent + ",");
-	
+
 	// remove indent on closing
 	return indent + joinedValues + "\n" + repeat(gap, depth - 1);
 }
 
-function serialize (env, stack, obj, replacer, gap, depth) {
-	if (!obj) {
-		return serializePrimitive();
-	}
-	
-	if (obj.isPrimitive || obj.className in primitives) {
-		return serializePrimitive(obj.value);
-	}
-	
-	if (obj.className === "Function") {
-		return undefined;
-	}
-	
-	var jsonString = func.callMethod(env, obj, "toJSON", []);		
-	if (jsonString) {
-		return serializePrimitive(jsonString.value);
-	}
-	
-	if (stack.indexOf(obj) >= 0) {
-		throw new TypeError("Converting circular structure to JSON");
-	}
-	
-	depth++;
-	stack.push(obj);
-	
-	var jsonResult;
-	if (obj.className === "Array") {
-		jsonResult = serializeArray(env, stack, obj, replacer);
-	} else {
-		jsonResult = serializeObject(env, stack, obj, replacer, gap, depth);
-	}
-	
-	depth--;
-	stack.pop();
-	return jsonResult;
+function serializePrimitive (value) {
+	return JSON.stringify(value);
 }
 
 function serializeObject (env, stack, obj, replacer, gap, depth) {
 	var colon = gap ? ": " : ":";
 	var values = [];
 	var value;
-	
+
 	for (var prop in obj.properties) {
 		if (obj.properties[prop].enumerable) {
 			value = replacer(obj, prop, obj.getProperty(prop).getValue());
-			if (!types.isNullOrUndefined(value)) {
+			if (!contracts.isNullOrUndefined(value)) {
 				values.push(serializePrimitive(prop) + colon + serialize(env, stack, value, replacer, gap, depth));
 			}
 		}
 	}
-	
+
 	return "{" + formatValues(values, gap, depth, gap, depth) + "}";
 }
 
@@ -2806,8 +1273,8 @@ function serializeArray (env, stack, arr, replacer, gap, depth) {
 		if (arr.hasProperty(i)) {
 			value = replacer(arr, String(i), arr.getProperty(i).getValue());
 		}
-		
-		if (types.isNullOrUndefined(value)) {
+
+		if (contracts.isNullOrUndefined(value)) {
 			// undefined positions are replaced with null
 			values.push("null");
 		} else {
@@ -2818,8 +1285,41 @@ function serializeArray (env, stack, arr, replacer, gap, depth) {
 	return "[" + formatValues(values, gap, depth) + "]";
 }
 
-function serializePrimitive (value) {
-	return JSON.stringify(value);
+function serialize (env, stack, obj, replacer, gap, depth) {
+	if (!obj) {
+		return serializePrimitive();
+	}
+
+	if (obj.isPrimitive || obj.className in primitives) {
+		return serializePrimitive(obj.value);
+	}
+
+	if (obj.className === "Function") {
+		return undefined;
+	}
+
+	var jsonString = func.tryCallMethod(env, obj, "toJSON");
+	if (jsonString) {
+		return serializePrimitive(jsonString.value);
+	}
+
+	if (stack.indexOf(obj) >= 0) {
+		throw new TypeError("Converting circular structure to JSON");
+	}
+
+	depth++;
+	stack.push(obj);
+
+	var jsonResult;
+	if (obj.className === "Array") {
+		jsonResult = serializeArray(env, stack, obj, replacer);
+	} else {
+		jsonResult = serializeObject(env, stack, obj, replacer, gap, depth);
+	}
+
+	depth--;
+	stack.pop();
+	return jsonResult;
 }
 
 function createReplacer (context, replacer) {
@@ -2829,35 +1329,35 @@ function createReplacer (context, replacer) {
 				var args = [context.env.objectFactory.createPrimitive(key), value];
 				var params = replacer.native ? [] : replacer.node.params;
 				var callee = replacer.native ? replacer : replacer.node;
-				
+
 				return func.executeFunction(context, replacer, params, args, holder, callee);
 			};
 		}
-		
+
 		if (replacer.className === "Array") {
 			var keys = convert.toArray(replacer).map(function (arg) {
 				if (arg.className === "String") {
 					return convert.toString(context.env, arg);
 				}
-				
+
 				if (arg.className === "Number") {
 					return String(convert.toNumber(context.env, arg));
 				}
-				
+
 				return undefined;
 			});
-			
+
 			return function (holder, key, value) {
 				// allow empty key - this will be from the root
 				if (!key || keys.indexOf(key) >= 0) {
 					return value;
 				}
-				
+
 				return undefined;
 			};
 		}
 	}
-	
+
 	return function (holder, key, value) { return value; };
 }
 
@@ -2866,25 +1366,25 @@ function getSpacer (env, spacer) {
 		if (spacer.className === "Number") {
 			var count = Math.floor(convert.toNumber(env, spacer));
 			count = Math.max(Math.min(10, count), 0);
-			
+
 			if (count > 0) {
 				return repeat(" ", count);
 			}
-			
+
 			return "";
 		}
-		
+
 		if (spacer.className === "String") {
 			var gap = convert.toString(env, spacer);
 			return gap.substr(0, 10);
 		}
 	}
-	
+
 	return "";
 }
 
 function deserialize (objectFactory, value, reviver) {
-	var valueType = types.getType(value);
+	var valueType = contracts.getType(value);
 	switch (valueType) {
 		// these are the only types supported by JSON.parse - sad face...
 		case "Undefined":
@@ -2893,31 +1393,31 @@ function deserialize (objectFactory, value, reviver) {
 		case "Number":
 		case "Boolean":
 			return objectFactory.create(valueType, value);
-			
+
 		case "Array":
 			var arr = objectFactory.create("Array");
 			value.forEach(function (element, index) {
 				var elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
-				if (!types.isUndefined(elementValue)) {
+				if (!contracts.isUndefined(elementValue)) {
 					arr.defineOwnProperty(index, { value: deserialize(objectFactory, element), configurable: true, enumerable: true, writable: true });
 				}
 			});
-			
+
 			return arr;
-			
+
 		default:
 			var obj = objectFactory.createObject();
 			var propValue;
-			
+
 			for (var prop in value) {
 				if (value.hasOwnProperty(prop)) {
 					propValue = reviver(obj, prop, deserialize(objectFactory, value[prop], reviver));
-					if (!types.isUndefined(propValue)) {
+					if (!contracts.isUndefined(propValue)) {
 						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
 					}
 				}
 			}
-			
+
 			return obj;
 	}
 }
@@ -2928,11 +1428,11 @@ function createReviver (context, reviver) {
 			var args = [context.env.objectFactory.createPrimitive(key), value];
 			var params = reviver.native ? [] : reviver.node.params;
 			var callee = reviver.native ? reviver : reviver.node;
-			
+
 			return func.executeFunction(context, reviver, params, args, holder, callee);
 		};
 	}
-	
+
 	return function (holder, key, value) { return value; };
 }
 
@@ -2946,31 +1446,31 @@ module.exports = function (env) {
 	jsonClass.define("stringify", objectFactory.createBuiltInFunction(function (obj, replacer, spacer) {
 		replacer = createReplacer(this, replacer);
 		spacer = getSpacer(env, spacer);
-		
+
 		// run at the top value
 		obj = replacer(obj, "", obj);
-		if (types.isUndefined(obj)) {
+		if (contracts.isUndefined(obj)) {
 			return undef;
 		}
-		
+
 		var stack = [];
 		return objectFactory.createPrimitive(serialize(env, stack, obj, replacer, spacer, 0));
 	}, 3, "JSON.stringify"));
 
 	jsonClass.define("parse", objectFactory.createBuiltInFunction(function (str, reviver) {
 		reviver = createReviver(this, reviver);
-		
+
 		var stringValue = convert.toString(env, str);
 		var parsedObject = JSON.parse(stringValue);
 		var deserializedObject = deserialize(objectFactory, parsedObject, reviver);
-		
+
 		return reviver(deserializedObject, "", deserializedObject) || undef;
 	}, 2, "JSON.parse"));
-	
+
 	globalObject.define("JSON", jsonClass);
 };
 
-},{"../utils/convert":68,"../utils/func":69,"../utils/types":70}],50:[function(require,module,exports){
+},{"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],10:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
@@ -2994,26 +1494,12 @@ module.exports = function (env) {
 	globalObject.define("Math", mathClass);
 };
 
-},{"../utils/convert":68}],51:[function(require,module,exports){
+},{"../utils/convert":69}],11:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
-var staticMethods = ["isNaN", "isFinite", "parseFloat", "parseInt"];
-
-var polyfills = {
-	"isNaN": function (value) {
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
-		return typeof value === "number" && value !== value;
-	},
-	"isFinite": function (value) {
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite
-		return typeof value === "number" && isFinite(value);
-	},
-	"parseFloat": parseFloat,
-	"parseInt": parseInt
-};
 
 module.exports = function (env) {
 	var globalObject = env.global;
@@ -3030,7 +1516,8 @@ module.exports = function (env) {
 
 	var proto = numberClass.getProperty("prototype").getValue();
 	proto.className = "Number";
-
+	proto.value = 0;
+	
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
@@ -3050,10 +1537,10 @@ module.exports = function (env) {
 	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
 		var digits = 0;
 		if (fractionDigits) {
-			digits = convert.toPrimitive(env, fractionDigits, "number");
+			digits = convert.toNumber(env, fractionDigits);
 		}
 
-		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
+		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.value, digits));
 	}, 1, "Number.prototype.toFixed"));
 
 	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
@@ -3069,23 +1556,16 @@ module.exports = function (env) {
 	});
 
 	protoMethods.forEach(function (name) {
-		var fn = Number.prototype[name] || polyfills[name];
+		var fn = Number.prototype[name];
 		if (fn) {
 			proto.define(name, convert.toNativeFunction(env, fn, "Number.prototype." + name));
-		}
-	});
-
-	staticMethods.forEach(function (name) {
-		var fn = Number[name] || polyfills[name];
-		if (fn) {
-			numberClass.define(name, convert.toNativeFunction(env, fn, "Number." + name));
 		}
 	});
 
 	globalObject.define("Number", numberClass);
 };
 
-},{"../utils/convert":68}],52:[function(require,module,exports){
+},{"../utils/convert":69}],12:[function(require,module,exports){
 "use strict";
 var ObjectType = require("../types/object-type");
 var convert = require("../utils/convert");
@@ -3106,7 +1586,7 @@ function isObject (obj) {
 
 function defineProperty (context, obj, name, descriptor) {
 	if (!isObject(descriptor)) {
-		throw new TypeError("Property description must be an object: " + (descriptor ? descriptor.toString() : "undefined"));
+		throw new TypeError("Property description must be an object: " + convert.toString(context.env, descriptor));
 	}
 
 	var undef = context.env.global.getProperty("undefined").getValue();
@@ -3124,7 +1604,7 @@ function defineProperty (context, obj, name, descriptor) {
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
 			if (descriptor.hasProperty(prop)) {
 				var attrValue = descriptor.getProperty(prop).getValue();
-				options[prop] = !!(attrValue && attrValue.toBoolean());
+				options[prop] = convert.toBoolean(attrValue);
 			}
 		});
 
@@ -3137,7 +1617,7 @@ function defineProperty (context, obj, name, descriptor) {
 				options.get = options.getter = undefined;
 			} else {
 				if (getter.className !== "Function") {
-					throw new TypeError("Getter must be a function: " + getter.toString());
+					throw new TypeError("Getter must be a function: " + convert.toString(context.env, getter));
 				}
 
 				options.get = getter;
@@ -3163,7 +1643,7 @@ function defineProperty (context, obj, name, descriptor) {
 				options.set = options.setter = undefined;
 			} else {
 				if (setter.className !== "Function") {
-					throw new TypeError("Setter must be a function: " + setter.toString());
+					throw new TypeError("Setter must be a function: " + convert.toString(context.env, setter));
 				}
 
 				options.set = setter;
@@ -3207,7 +1687,6 @@ module.exports = function (env) {
 				var objectWrapper = objectFactory.createPrimitive(value.value);
 				objectWrapper.type = "object";
 				objectWrapper.isPrimitive = false;
-				objectWrapper.toBoolean = function () { return true; };
 				return objectWrapper;
 			}
 
@@ -3259,7 +1738,7 @@ module.exports = function (env) {
 
 	objectClass.define("create", objectFactory.createBuiltInFunction(function (parent, descriptors) {
 		if (parent && parent.isPrimitive && parent.value !== null) {
-			throw new TypeError("Object prototype may only be an Object or null:" + parent.toString());
+			throw new TypeError("Object prototype may only be an Object or null:" + convert.toString(env, parent));
 		}
 
 		if (descriptors && descriptors.isPrimitive && descriptors.value === null) {
@@ -3333,7 +1812,7 @@ module.exports = function (env) {
 
 		var arr = objectFactory.create("Array");
 		var index = 0;
-		
+
 		for (var name in obj.properties) {
 			if (obj.properties[name].enumerable) {
 				arr.defineOwnProperty(index++, { configurable: true, enumerable: true, writable: true, value: objectFactory.createPrimitive(name) }, false, env);
@@ -3356,8 +1835,8 @@ module.exports = function (env) {
 
 	objectClass.define("getPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
-		var proto = obj.getPrototype();
-		return proto || env.global.getProperty("null").getValue();
+		var objProto = obj.getPrototype();
+		return objProto || env.global.getProperty("null").getValue();
 	}, 1, "Object.getPrototypeOf"));
 
 	objectClass.define("freeze", objectFactory.createBuiltInFunction(function (obj) {
@@ -3424,25 +1903,25 @@ module.exports = function (env) {
 	globalObject.define("Object", objectClass);
 };
 
-},{"../types/object-type":62,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69}],53:[function(require,module,exports){
+},{"../types/object-type":63,"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],13:[function(require,module,exports){
 "use strict";
 var convert = require("../utils/convert");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var regexClass = objectFactory.createFunction(function (pattern, flags) {
 		if (pattern && pattern.className === "RegExp") {
-			if (!types.isUndefined(flags)) {
+			if (!contracts.isUndefined(flags)) {
 				throw new TypeError("Cannot supply flags when constructing one RegExp from another");
 			}
 
 			return pattern;
 		}
 
-		var patternString = types.isUndefined(pattern) ? "" : convert.toString(env, pattern);
-		flags = types.isUndefined(flags) ? "" : convert.toString(env, flags);
+		var patternString = contracts.isUndefined(pattern) ? "" : convert.toString(env, pattern);
+		flags = contracts.isUndefined(flags) ? "" : convert.toString(env, flags);
 
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
@@ -3488,23 +1967,7 @@ module.exports = function (env) {
 	}, 1, "RegExp.prototype.exec"));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		var str = "/";
-		str += this.node.getProperty("source").getValue().toString();
-		str += "/";
-
-		if (this.node.getProperty("global").getValue().toBoolean()) {
-			str += "g";
-		}
-
-		if (this.node.getProperty("ignoreCase").getValue().toBoolean()) {
-			str += "i";
-		}
-
-		if (this.node.getProperty("multiline").getValue().toBoolean()) {
-			return str += "m";
-		}
-
-		return objectFactory.create("String", str);
+		return objectFactory.createPrimitive(String(this.node.source));
 	}, 0, "RegExp.prototype.toString"));
 
 	proto.define("compile", convert.toNativeFunction(env, RegExp.prototype.compile, "RegExp.prototype.compile"));
@@ -3517,12 +1980,11 @@ module.exports = function (env) {
 	globalObject.define("RegExp", regexClass);
 };
 
-},{"../utils/convert":68,"../utils/types":70}],54:[function(require,module,exports){
+},{"../utils/contracts":68,"../utils/convert":69}],14:[function(require,module,exports){
 "use strict";
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 var func = require("../utils/func");
-var types = require("../utils/types");
 var RegexType = require("../types/regex-type");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
@@ -3571,7 +2033,7 @@ module.exports = function (env) {
 		var length = value.length;
 
 		start = convert.toInteger(env, start);
-		end = types.isNullOrUndefined(end) ? length : convert.toInteger(env, end);
+		end = contracts.isNullOrUndefined(end) ? length : convert.toInteger(env, end);
 
 		return objectFactory.createPrimitive(value.substring(start, end));
 	}, 2, "String.prototype.substring"));
@@ -3597,7 +2059,7 @@ module.exports = function (env) {
 		var startValue = convert.toInteger(env, start);
 		var endValue;
 
-		if (!types.isNullOrUndefined(end)) {
+		if (!contracts.isNullOrUndefined(end)) {
 			endValue = convert.toInteger(env, end);
 		}
 
@@ -3608,10 +2070,10 @@ module.exports = function (env) {
 		var stringValue = convert.toString(env, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
-		var limitValue = types.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
+		var limitValue = contracts.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
 
 		var arr = objectFactory.create("Array");
-		if (types.isUndefined(separator)) {
+		if (contracts.isUndefined(separator)) {
 			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, this);
 		} else {
 			var separatorValue;
@@ -3664,7 +2126,7 @@ module.exports = function (env) {
 		var stringValue = convert.toString(env, this.node);
 		var actualRegex;
 
-		if (regex && regex instanceof RegexType) {
+		if (regex && regex.className === "RegExp") {
 			actualRegex = regex.source;
 		} else if (regex) {
 			actualRegex = new RegExp(convert.toPrimitive(env, regex));
@@ -3713,7 +2175,1486 @@ module.exports = function (env) {
 	globalObject.define("String", stringClass);
 };
 
-},{"../types/regex-type":65,"../utils/contracts":67,"../utils/convert":68,"../utils/func":69,"../utils/types":70}],55:[function(require,module,exports){
+},{"../types/regex-type":66,"../utils/contracts":68,"../utils/convert":69,"../utils/func":70}],15:[function(require,module,exports){
+"use strict";
+var Reference = require("./reference");
+var PropertyDescriptor = require("../types/property-descriptor");
+
+function DeclarativeEnvironment (parent, thisArg, env) {
+	this.properties = Object.create(null);
+	this.parent = parent;
+	this.thisNode = thisArg;
+	this.env = env;
+}
+
+DeclarativeEnvironment.prototype = {
+	constructor: DeclarativeEnvironment,
+
+	createReference: function (name, strict) {
+		return new Reference(name, this, strict, this.env);
+	},
+
+	hasBinding: function (name) {
+		return name in this.properties;
+	},
+
+	createMutableBinding: function (name) {
+		if (this.hasBinding(name)) {
+			return this.properties[name];
+		}
+
+		return this.properties[name] = new PropertyDescriptor(this, {
+			value: undefined,
+			configurable: false,
+			enumerable: true,
+			writable: true
+		});
+	},
+
+	createImmutableBinding: function (name) {
+		this.createMutableBinding(name, false);
+	},
+
+	initializeImmutableBinding: function (name, value) {
+		if (this.hasBinding(name) && !this.properties[name].value) {
+			this.properties[name].setValue(value);
+		}
+	},
+
+	setMutableBinding: function (name, value, throwOnError) {
+		if (this.hasBinding(name)) {
+			if (!this.properties[name].writable) {
+				if (throwOnError) {
+					throw new TypeError("Cannot write to immutable binding: " + name);
+				}
+
+				return;
+			}
+
+			this.properties[name].setValue(value);
+		}
+	},
+
+	getBindingValue: function (name, throwOnError) {
+		if (this.hasBinding(name)) {
+			if (!this.properties[name].value) {
+				if (throwOnError) {
+					throw new ReferenceError(name + " is not defined");
+				}
+
+				return undefined;
+			}
+
+			return this.properties[name].getValue();
+		}
+	},
+
+	deleteBinding: function (name) {
+		if (!this.hasBinding(name)) {
+			return true;
+		}
+
+		if (!this.properties[name].configurable) {
+			return false;
+		}
+
+		delete this.properties[name];
+		return true;
+	},
+
+	getThisBinding: function () {
+		return this.thisNode;
+	}
+};
+
+module.exports = DeclarativeEnvironment;
+
+},{"../types/property-descriptor":65,"./reference":19}],16:[function(require,module,exports){
+"use strict";
+var DeclarativeEnvironment = require("./declarative-environment");
+var ObjectEnvironment = require("./object-environment");
+var ExecutionContext = require("../execution-context");
+var Reference = require("./reference");
+var keywords = require("../keywords");
+
+var scopedBlocks = {
+	"CallExpression": true,
+	"NewExpression": true,
+	"FunctionExpression": true,
+	"WithStatement": true
+};
+
+function populateHoistedVariables (node, declarators, parent) {
+	if (Array.isArray(node)) {
+		node.forEach(function (child) {
+			populateHoistedVariables(child, declarators, parent);
+		});
+
+		return;
+	}
+
+	if (!node || !(typeof node === "object")) {
+		return;
+	}
+
+	if (node.type) {
+		if (node.type === "VariableDeclaration") {
+			populateHoistedVariables(node.declarations, declarators, node);
+			return;
+		}
+
+		if (node.type === "VariableDeclarator" || node.type === "FunctionDeclaration") {
+			declarators.push({
+				decl: node,
+				parent: parent
+			});
+
+			return;
+		}
+
+		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
+			declarators.push({
+				decl: node.left,
+				parent: node
+			});
+
+			// keep analyzing
+		}
+
+		if (node.type === "IfStatement") {
+			// cannot hoist variables within if
+			populateHoistedVariables(node.consequent, declarators, node);
+			populateHoistedVariables(node.alternate, declarators, node);
+			return;
+		}
+
+		if (scopedBlocks[node.type]) {
+			return;
+		}
+	}
+
+	// todo: we could be smarter about this by being more descerning about what nodes we traverse
+	var prop;
+	for (prop in node) {
+		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
+			populateHoistedVariables(node[prop], declarators, "type" in node ? node : parent);
+		}
+	}
+}
+
+function isStrictMode (node) {
+	if (Array.isArray(node)) {
+		return isStrictMode(node[0]);
+	}
+
+	return node
+		&& node.type === "ExpressionStatement"
+		&& node.expression.type === "Literal"
+		&& node.expression.value === "use strict";
+}
+
+
+function Environment (runner) {
+	this.runner = runner;
+	this.current = null;
+	this.globalScope = null;
+}
+
+Environment.prototype = {
+	constructor: Environment,
+
+	getReference: function (name, strict) {
+		var scope = this.current;
+		while (scope) {
+			if (scope.hasBinding(name)) {
+				return scope.createReference(name, strict);
+			}
+
+			scope = scope.parent;
+		}
+
+		return new Reference(name, undefined, strict, this);
+	},
+
+	getValue: function (name) {
+		return this.getReference(name).getValue();
+	},
+
+	putValue: function (name, value, strict) {
+		this.current.setMutableBinding(name, value, strict);
+	},
+
+	createBinding: function (name, immutable) {
+		if (keywords.isReserved(name)) {
+			throw new SyntaxError("Illegal use of reserved keyword: " + name);
+		}
+
+		this.current.createMutableBinding(name, !immutable);
+	},
+
+	createExecutionContext: function (node, callee) {
+		return new ExecutionContext(this, node, callee);
+	},
+
+	hasBinding: function (name) {
+		return this.current.hasBinding(name);
+	},
+
+	setBinding: function (name, value, strict) {
+		this.current.setMutableBinding(name, value);
+	},
+
+	deleteBinding: function (name) {
+		this.current.deleteBinding(name);
+	},
+
+	getThisBinding: function () {
+		return this.current.getThisBinding() || this.global;
+	},
+
+	createScope: function (thisArg) {
+		var env = new DeclarativeEnvironment(this.current, thisArg, this);
+		return this.setScope(env);
+	},
+
+	createObjectScope: function (obj) {
+		var env = new ObjectEnvironment(this.current, obj, this);
+		return this.setScope(env);
+	},
+
+	initScope: function (node) {
+		var env = this;
+		var strict = isStrictMode(node);
+		var undef = this.global.getProperty("undefined").getValue();
+		var variables = [];
+		var name;
+
+		populateHoistedVariables(node, variables, node);
+
+		variables.forEach(function (obj) {
+			var decl = obj.decl;
+			name = decl.name || decl.id.name;
+
+			if (decl.type === "FunctionDeclaration") {
+				// functions can be used before they are defined
+				var func = env.objectFactory.createFunction(decl, env.current);
+				env.createBinding(name, true);
+				env.setBinding(name, func, strict);
+				// note: since the function name may collide with a variable we need to test for existence
+
+				// if (env.hasBinding(name)) {
+				// 	env.putValue(name, func);
+				// } else {
+				// 	env.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
+				// }
+			} else {
+				if (env.hasBinding(name)) {
+					env.setBinding(name, undef, strict);
+				} else {
+					env.createBinding(name, true);
+				}
+			}
+		});
+	},
+
+	setScope: function (scope) {
+		this.globalScope = this.globalScope || scope;
+
+		var env = this;
+		var priorScope = this.current || this.globalScope;
+		this.current = scope;
+
+		return {
+			init: function (node) {
+				if (!node) {
+					return;
+				}
+
+				env.initScope(node);
+			},
+
+			exitScope: function () {
+				env.setScope(priorScope);
+			}
+		};
+	}
+};
+
+module.exports = Environment;
+
+},{"../execution-context":20,"../keywords":55,"./declarative-environment":15,"./object-environment":17,"./reference":19}],17:[function(require,module,exports){
+"use strict";
+var PropertyReference = require("./property-reference");
+
+function ObjectEnvironment (parent, obj, env) {
+	this.parent = parent;
+	this.object = this.thisNode = obj;
+	this.env = env;
+}
+
+ObjectEnvironment.prototype = {
+	constructor: ObjectEnvironment,
+
+	createReference: function (name, strict) {
+		return new PropertyReference(name, this.object, strict, this.env);
+	},
+
+	getValue: function (name) {
+		return this.object.getValue(name);
+	},
+
+	hasBinding: function (name) {
+		return this.object.hasProperty(name);
+	},
+
+	createMutableBinding: function (name, immutable) {
+		if (this.parent) {
+			this.parent.createMutableBinding.apply(this.parent, arguments);
+		} else {
+			this.object.defineOwnProperty(name, {
+				value: undefined,
+				configurable: immutable,
+				enumerable: true,
+				writable: true
+			}, true);
+		}
+	},
+
+	createImmutableBinding: function (name) {
+		this.createMutableBinding(name, false);
+	},
+
+	setMutableBinding: function (name, value, throwOnError) {
+		if (this.parent && !this.object.hasProperty(name)) {
+			this.parent.setMutableBinding.apply(this.parent, arguments);
+		} else {
+			this.object.putValue(name, value, throwOnError);
+		}
+	},
+
+	getBindingValue: function (name, throwOnError) {
+		if (!this.hasBinding(name)) {
+			if (throwOnError) {
+				throw new ReferenceError(name + " is not defined.");
+			}
+
+			return undefined;
+		}
+
+		return this.object.getProperty(name).getValue();
+	},
+
+	deleteBinding: function (name) {
+		return this.object.deleteProperty(name, false);
+	},
+
+	getThisBinding: function () {
+		return this.object;
+	}
+};
+
+module.exports = ObjectEnvironment;
+
+},{"./property-reference":18}],18:[function(require,module,exports){
+"use strict";
+var Reference = require("./reference");
+var PrimitiveType = require("../types/primitive-type");
+
+function PropertyReference (name, object, strict, env) {
+	Reference.apply(this, arguments);
+	this.isPropertyReference = true;
+}
+
+PropertyReference.prototype = Object.create(Reference.prototype);
+PropertyReference.prototype.constructor = PropertyReference;
+
+PropertyReference.prototype.getValue = function () {
+	var prop = this.base.getProperty(this.name);
+	return prop && prop.getValue() || new PrimitiveType(undefined);
+};
+
+PropertyReference.prototype.putValue = function (value) {
+	if (this.base.hasProperty(this.name)) {
+		this.base.putValue(this.name, value, this.strict, this.env);
+	} else {
+		this.base.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, this.strict, this.env);
+	}
+};
+
+PropertyReference.prototype.deleteBinding = function (name) {
+	return this.base.deleteProperty(name, true);
+};
+
+PropertyReference.prototype.isUnresolved = function () { return false; };
+
+module.exports = PropertyReference;
+
+},{"../types/primitive-type":64,"./reference":19}],19:[function(require,module,exports){
+"use strict";
+function Reference (name, base, strict, env) {
+	this.name = name;
+	this.base = base;
+	this.strict = strict;
+	this.env = env;
+}
+
+Reference.prototype = {
+	constructor: Reference,
+
+	putValue: function (value) {
+		if (this.base === undefined && this.strict) {
+			throw new ReferenceError(this.name + " is not defined");
+		}
+
+		if (this.base) {
+			this.base.setMutableBinding(this.name, value, this.strict);
+		} else {
+			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
+		}
+	},
+
+	getValue: function () {
+		if (!this.base) {
+			throw new ReferenceError(this.name + " is not defined");
+		}
+
+		return this.base.getBindingValue(this.name);
+	},
+
+	deleteBinding: function (name) {
+		if (this.base) {
+			return this.base.deleteBinding(name);
+		}
+
+		return true;
+	},
+
+	isUnresolved: function () {
+		return !this.base;
+	}
+};
+
+module.exports = Reference;
+
+},{}],20:[function(require,module,exports){
+"use strict";
+var ExecutionResult = require("./execution-result");
+
+function ExecutionContext (env, node, callee) {
+	this.node = node;
+	this.callee = callee;
+	this.env = env;
+
+	this.label = "";
+	this.value = null;
+	this.isNew = false;
+	this.strict = false;
+}
+
+ExecutionContext.prototype.execute = function () {
+	return this.env.runner.execute(this);
+};
+
+ExecutionContext.prototype.create = function (node, callee, isNew) {
+	var context = new ExecutionContext(this.env, node, callee || this.callee);
+	context.value = this.value;
+	context.isNew = !!isNew;
+	return context;
+};
+
+ExecutionContext.prototype.createLabel = function (node, label) {
+	var context = this.create(node);
+	context.label = label;
+	return context;
+};
+
+ExecutionContext.prototype.cancel = function (label) {
+	var result = this.result(this.value, label);
+	result.cancel = true;
+	return result;
+};
+
+ExecutionContext.prototype.skip = function (label) {
+	var result = this.result(this.value, label);
+	result.skip = true;
+	return result;
+};
+
+ExecutionContext.prototype.exit = function (value) {
+	this.callee = null;
+
+	var result = this.result(value);
+	result.exit = true;
+	return result;
+};
+
+ExecutionContext.prototype.result = function (value, name, obj) {
+	this.value = value;
+	return new ExecutionResult(value, name, obj);
+};
+
+ExecutionContext.prototype.empty = function () {
+	return this.result();
+};
+
+module.exports = ExecutionContext;
+
+},{"./execution-result":21}],21:[function(require,module,exports){
+"use strict";
+function ExecutionResult (value, name, obj) {
+	this.result = value;
+	this.name = name;
+	this.object = obj;
+
+	this.cancel = false;
+	this.exit = false;
+	this.skip = false;
+}
+
+ExecutionResult.prototype.isCancelled = function () {
+	return this.cancel || this.exit;
+};
+
+ExecutionResult.prototype.shouldBreak = function (context, loop) {
+	if (this.exit) {
+		return true;
+	}
+
+	if (!this.cancel && !this.skip) {
+		return false;
+	}
+
+	var breaking = true;
+	if (this.name && this.name === context.label) {
+		breaking = this.cancel;
+		this.cancel = this.skip = false;
+		return breaking;
+	}
+
+	if (loop && !this.name) {
+		breaking = this.cancel;
+		this.cancel = this.skip = false;
+	}
+
+	return breaking;
+};
+
+module.exports = ExecutionResult;
+
+},{}],22:[function(require,module,exports){
+"use strict";
+module.exports = function ArrayExpression (context) {
+	var objectFactory = context.env.objectFactory;
+	var arr = objectFactory.create("Array");
+
+	if (context.node.elements) {
+		var i = 0;
+		var ln = context.node.elements.length;
+
+		while (i < ln) {
+			if (context.node.elements[i]) {
+				var item = context.create(context.node.elements[i]).execute().result.getValue();
+				arr.defineOwnProperty(i, { value: item, configurable: true, enumerable: true, writable: true }, true, context.env);
+			}
+
+			i++;
+		}
+
+		// todo: can we remove this?
+		arr.putValue("length", objectFactory.createPrimitive(ln), false, context);
+	}
+
+	return context.result(arr);
+};
+
+},{}],23:[function(require,module,exports){
+"use strict";
+var Reference = require("../env/reference");
+
+var assignOperators = {
+	"+=": function (a, b) { return a.value + b.value; },
+	"-=": function (a, b) { return a.value - b.value; },
+	"*=": function (a, b) { return a.value * b.value; },
+	"/=": function (a, b) { return a.value / b.value; },
+	"%=": function (a, b) { return a.value % b.value; },
+	"<<=": function (a, b) { return a.value << b.value; },
+	">>=": function (a, b) { return a.value >> b.value; },
+	">>>=": function (a, b) { return a.value >>> b.value; },
+	"|=": function (a, b) { return a.value | b.value; },
+	"^=": function (a, b) { return a.value ^ b.value; },
+	"&=": function (a, b) { return a.value & b.value; }
+};
+
+module.exports = function AssignmentExpression (context) {
+	var assignment = context.node.operator === "=";
+	var right = context.create(context.node.right).execute().result;
+
+	var left = context.create(context.node.left).execute().result;
+	if (!(left instanceof Reference)) {
+		throw new ReferenceError("Invalid left-hand side in assignment");
+	}
+
+	var newValue;
+	if (assignment) {
+		newValue = right.getValue();
+	} else {
+		var rawValue = assignOperators[context.node.operator](left.getValue(), right.getValue());
+		newValue = context.env.objectFactory.createPrimitive(rawValue);
+	}
+
+	left.putValue(newValue);
+	return context.result(newValue);
+};
+
+},{"../env/reference":19}],24:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+
+function implicitEquals (a, b, env) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value == b.value;
+	}
+
+	if ((a.type === "object" && b.type === "object") || (a.type === "function" && b.type === "function")) {
+		return a === b;
+	}
+
+	var primitiveA = convert.toPrimitive(env, a);
+	var primitiveB = convert.toPrimitive(env, b);
+
+	if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
+		return Number(primitiveA) === Number(primitiveB);
+	}
+
+	if (typeof primitiveA === "string") {
+		return primitiveA === convert.toPrimitive(env, b, "string");
+	}
+
+	if (typeof primitiveB === "string") {
+		return convert.toPrimitive(env, a, "string") === primitiveB;
+	}
+
+	return primitiveA == primitiveB;
+}
+
+function strictEquals (a, b) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value === b.value;
+	}
+
+	if (a.isPrimitive || b.isPrimitive) {
+		return false;
+	}
+
+	return a === b;
+}
+
+function not (fn) {
+	return function (a, b, e) {
+		return !fn(a, b, e);
+	};
+}
+
+function add (a, b, env) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value + b.value;
+	}
+
+	a = convert.toPrimitive(env, a);
+	b = convert.toPrimitive(env, b);
+	return a + b;
+}
+
+function toNumber (env, obj) {
+	if (obj.className === "Number") {
+		return obj.value;
+	}
+
+	return convert.toNumber(env, obj);
+}
+
+/* eslint eqeqeq:0 */
+var binaryOperators = {
+	"+": add,
+	"-": function (a, b, e) { return toNumber(e, a) - toNumber(e, b); },
+	"/": function (a, b, e) { return toNumber(e, a) / toNumber(e, b); },
+	"*": function (a, b, e) { return toNumber(e, a) * toNumber(e, b); },
+	"==": implicitEquals,
+	"!=": not(implicitEquals),
+	"===": strictEquals,
+	"!==": not(strictEquals),
+	"<": function (a, b, e) { return convert.toPrimitive(e, a) < convert.toPrimitive(e, b); },
+	"<=": function (a, b, e) { return convert.toPrimitive(e, a) <= convert.toPrimitive(e, b); },
+	">": function (a, b, e) { return convert.toPrimitive(e, a) > convert.toPrimitive(e, b); },
+	">=": function (a, b, e) { return convert.toPrimitive(e, a) >= convert.toPrimitive(e, b); },
+	"<<": function (a, b, e) { return convert.toPrimitive(e, a) << convert.toPrimitive(e, b); },
+	">>": function (a, b, e) { return convert.toPrimitive(e, a) >> convert.toPrimitive(e, b); },
+	">>>": function (a, b, e) { return convert.toPrimitive(e, a) >>> convert.toPrimitive(e, b); },
+	"%": function (a, b, e) { return convert.toPrimitive(e, a) % convert.toPrimitive(e, b); },
+	"|": function (a, b, e) { return convert.toInt32(e, a) | convert.toInt32(e, b); },
+	"^": function (a, b, e) { return convert.toInt32(e, a) ^ convert.toInt32(e, b); },
+	"&": function (a, b, e) { return convert.toInt32(e, a) & convert.toInt32(e, b); },
+	"in": function (a, b, e) {
+		a = convert.toString(e, a);
+		if (b.isPrimitive) {
+			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + convert.toString(e, b));
+		}
+
+		return b.hasProperty(a);
+	},
+	"instanceof": function (a, b) {
+		if (b.type !== "function") {
+			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
+		}
+
+		if (a.isPrimitive) {
+			return false;
+		}
+
+		return b.hasInstance(a);
+	}
+};
+
+module.exports = function BinaryExpression (context) {
+	var undef = context.env.global.getProperty("undefined").getValue();
+	var left = context.create(context.node.left).execute().result;
+	var leftValue = left.getValue() || undef;
+
+	var right = context.create(context.node.right).execute().result;
+	var rightValue = right.getValue() || undef;
+
+	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context.env);
+
+	return context.result(context.env.objectFactory.createPrimitive(newValue));
+};
+
+},{"../utils/convert":69}],25:[function(require,module,exports){
+"use strict";
+module.exports = function BlockStatement (context) {
+	var result;
+
+	if (context.node.type === "Program") {
+		context.env.initScope(context.node.body);
+	}
+
+	for (var i = 0, ln = context.node.body.length; i < ln; i++) {
+		result = context.create(context.node.body[i]).execute();
+		if (result && result.shouldBreak(context)) {
+			break;
+		}
+	}
+
+	return result;
+};
+
+},{}],26:[function(require,module,exports){
+"use strict";
+var Reference = require("../env/reference");
+var func = require("../utils/func");
+var convert = require("../utils/convert");
+
+function assignThis (env, fnMember, fn, isNew, native) {
+	if (isNew) {
+		// if this is a native contructor we don't are about this
+		// otherwise create a new object
+		return native ? null : env.objectFactory.createObject(fn);
+	}
+
+	if (fnMember instanceof Reference && fnMember.isPropertyReference) {
+		return convert.toObject(env, fnMember.base);
+	}
+
+	return null;
+}
+
+module.exports = function CallExpression (context) {
+	var node = context.node;
+	var isNew = context.node.type === "NewExpression";
+
+	var fnMember = context.create(node.callee).execute().result;
+	var fn = fnMember.getValue();
+	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result.getValue(); });
+
+	if (!fn || fn.className !== "Function") {
+		throw new TypeError(fn.toString() + " not a function");
+	}
+
+	var native = fn.native;
+	var thisArg = assignThis(context.env, fnMember, fn, isNew, native);
+	var params = native ? [] : fn.node.params;
+	var callee = fnMember;
+
+	callee.identifier = fn.name;
+	return context.result(func.executeFunction(context, fn, params, args, thisArg, callee, isNew));
+};
+
+},{"../env/reference":19,"../utils/convert":69,"../utils/func":70}],27:[function(require,module,exports){
+"use strict";
+module.exports = function DebuggerStatement (context) {
+	return context.empty();
+};
+
+},{}],28:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+
+module.exports = function DoWhileStatement (context) {
+	var result;
+	var passed = true;
+
+	if (context.node.type === "WhileStatement") {
+		passed = convert.toBoolean(context.create(context.node.test).execute().result.getValue());
+	}
+
+	while (passed) {
+		result = context.create(context.node.body).execute();
+
+		if (result && result.shouldBreak(context, true)) {
+			break;
+		}
+
+		passed = convert.toBoolean(context.create(context.node.test).execute().result.getValue());
+	}
+
+	return result;
+};
+
+},{"../utils/convert":69}],29:[function(require,module,exports){
+"use strict";
+module.exports = function EmptyStatement (context) {
+	return context.empty();
+};
+
+},{}],30:[function(require,module,exports){
+"use strict";
+module.exports = 	function ExpressionStatement (context) {
+	var executionResult = context.create(context.node.expression).execute();
+	var executionValue = executionResult && executionResult.result && executionResult.result.getValue();
+	return context.result(executionValue || context.env.global.getProperty("undefined").getValue());
+};
+
+},{}],31:[function(require,module,exports){
+"use strict";
+module.exports = function ForInStatement (context) {
+	var left;
+	if (context.node.left.type === "VariableDeclaration") {
+		// should only be one, but
+		// need to unwrap the declaration to get it
+		// todo: this is sloppy - need to revisit
+		context.node.left.declarations.forEach(function (decl) {
+			left = context.create(decl).execute().result;
+		});
+	} else {
+		left = context.create(context.node.left).execute().result;
+	}
+
+	var obj = context.create(context.node.right).execute().result.getValue();
+	var result;
+
+	// track visited properties to prevent iterating over shadowed properties, regardless of enumerable flag
+	// 12.6.4 NOTE: a property of a prototype is not enumerated if it is “shadowed” because some previous
+	// object in the prototype chain has a property with the same name. The values of [[Enumerable]] attributes
+	// are not considered when determining if a property of a prototype object is shadowed by a previous object
+	// on the prototype chain.
+	var visited = Object.create(null);
+
+	while (obj) {
+		for (var prop in obj.properties) {
+			if (obj.properties[prop].enumerable && !visited[prop]) {
+				left.putValue(context.env.objectFactory.createPrimitive(prop));
+
+				result = context.create(context.node.body).execute();
+
+				if (result && result.shouldBreak(context, true)) {
+					return result;
+				}
+			}
+
+			visited[prop] = true;
+		}
+
+		obj = obj.proto;
+	}
+
+	return result;
+};
+
+},{}],32:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+
+function shouldContinue (context) {
+	if (!context.node.test) {
+		return true;
+	}
+
+	return convert.toBoolean(context.create(context.node.test).execute().result.getValue());
+}
+
+module.exports = function ForStatement (context) {
+	if (context.node.init) {
+		context.create(context.node.init).execute();
+	}
+
+	var result;
+	while (shouldContinue(context)) {
+		result = context.create(context.node.body).execute();
+		if (result && result.shouldBreak(context, true)) {
+			break;
+		}
+
+		if (context.node.update) {
+			context.create(context.node.update).execute();
+		}
+	}
+
+	return result;
+};
+
+},{"../utils/convert":69}],33:[function(require,module,exports){
+"use strict";
+module.exports = function FunctionDeclaration (context) {
+	return context.result(context.env.getValue(context.node.id.name));
+};
+
+},{}],34:[function(require,module,exports){
+"use strict";
+module.exports = function FunctionExpression (context) {
+	var objectFactory = context.env.objectFactory;
+	var proto = objectFactory.createObject();
+	var func = objectFactory.createFunction(context.node, context.env.current, proto);
+
+	if (context.node.id) {
+		func.name = context.node.id.name;
+	}
+
+	return context.result(func);
+};
+
+},{}],35:[function(require,module,exports){
+"use strict";
+module.exports = function Identifier (context) {
+	var name = context.node.name;
+
+	if (context.callee && context.callee.identifier === name) {
+		return context.result(context.callee);
+	}
+
+	return context.result(context.env.getReference(context.node.name));
+};
+
+},{}],36:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+
+module.exports = function IfStatement (context) {
+	var testValue = context.create(context.node.test).execute().result.getValue();
+	if (convert.toBoolean(testValue)) {
+		return context.create(context.node.consequent).execute();
+	}
+
+	if (context.node.alternate) {
+		return context.create(context.node.alternate).execute();
+	}
+};
+
+},{"../utils/convert":69}],37:[function(require,module,exports){
+"use strict";
+var handlers = {};
+
+handlers.ArrayExpression = require("./array-expression");
+handlers.AssignmentExpression = require("./assignment-expression");
+handlers.BinaryExpression = require("./binary-expression");
+handlers.BreakStatement = handlers.ContinueStatement = require("./interrupt-statement");
+handlers.CallExpression = handlers.NewExpression = require("./call-expression");
+handlers.ConditionalExpression = handlers.IfStatement = require("./if-statement");
+handlers.DebuggerStatement = require("./debugger-statement");
+handlers.DoWhileStatement = handlers.WhileStatement = require("./do-while-statement.js");
+handlers.EmptyStatement = require("./empty-statement");
+handlers.ExpressionStatement = require("./expression-statement");
+handlers.ForStatement = require("./for-statement");
+handlers.ForInStatement = require("./for-in-statement");
+handlers.FunctionDeclaration = require("./function-declaration");
+handlers.FunctionExpression = require("./function-expression");
+handlers.Identifier = require("./identifier");
+handlers.LabeledStatement = require("./labeled-statement");
+handlers.Literal = require("./literal");
+handlers.LogicalExpression = require("./logical-expression");
+handlers.MemberExpression = require("./member-expression");
+handlers.ObjectExpression = require("./object-expression");
+handlers.Program = handlers.BlockStatement = require("./block-statement");
+handlers.ReturnStatement = require("./return-statement");
+handlers.SequenceExpression = require("./sequence-expression");
+handlers.SwitchStatement = require("./switch-statement");
+handlers.ThisExpression = require("./this-expression");
+handlers.ThrowStatement = require("./throw-statement");
+handlers.TryStatement = require("./try-statement");
+handlers.UnaryExpression = require("./unary-expression");
+handlers.UpdateExpression = require("./update-expression");
+handlers.VariableDeclaration = require("./variable-declaration");
+handlers.VariableDeclarator = require("./variable-declarator");
+handlers.WithStatement = require("./with-statement");
+
+module.exports = handlers;
+
+},{"./array-expression":22,"./assignment-expression":23,"./binary-expression":24,"./block-statement":25,"./call-expression":26,"./debugger-statement":27,"./do-while-statement.js":28,"./empty-statement":29,"./expression-statement":30,"./for-in-statement":31,"./for-statement":32,"./function-declaration":33,"./function-expression":34,"./identifier":35,"./if-statement":36,"./interrupt-statement":38,"./labeled-statement":39,"./literal":40,"./logical-expression":41,"./member-expression":42,"./object-expression":43,"./return-statement":44,"./sequence-expression":45,"./switch-statement":46,"./this-expression":47,"./throw-statement":48,"./try-statement":49,"./unary-expression":50,"./update-expression":51,"./variable-declaration":52,"./variable-declarator":53,"./with-statement":54}],38:[function(require,module,exports){
+"use strict";
+module.exports = function InterruptStatement (context) {
+	var label;
+	if (context.node.label) {
+		label = context.node.label.name;
+	}
+
+	if (context.node.type === "BreakStatement") {
+		return context.cancel(label);
+	}
+
+	return context.skip(label);
+};
+
+},{}],39:[function(require,module,exports){
+"use strict";
+module.exports = function LabeledStatement (context) {
+	return context.createLabel(context.node.body, context.node.label.name).execute();
+};
+
+},{}],40:[function(require,module,exports){
+"use strict";
+module.exports = function Literal (context) {
+	return context.result(context.env.objectFactory.createPrimitive(context.node.value));
+};
+
+},{}],41:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+
+module.exports = function LogicalExpression (context) {
+	var left = context.create(context.node.left).execute();
+	var passed = convert.toBoolean(left.result.getValue());
+
+	if (passed && context.node.operator === "||") {
+		return left;
+	}
+
+	if (!passed && context.node.operator === "&&") {
+		return left;
+	}
+
+	return context.create(context.node.right).execute();
+};
+
+},{"../utils/convert":69}],42:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+var PropertyReference = require("../env/property-reference");
+
+module.exports = function MemberExpression (context) {
+	var obj = context.create(context.node.object).execute().result.getValue();
+	var name, value;
+
+	if (context.node.computed) {
+		name = convert.toString(context.env, context.create(context.node.property).execute().result.getValue());
+	} else {
+		name = context.node.property.name;
+	}
+
+	value = new PropertyReference(name, obj, false, context.env);
+	return context.result(value);
+};
+
+},{"../env/property-reference":18,"../utils/convert":69}],43:[function(require,module,exports){
+"use strict";
+var func = require("../utils/func");
+
+function setDescriptor (context, obj, name, descriptor) {
+	if (descriptor.get) {
+		descriptor.getter = function () {
+			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
+		};
+	}
+
+	if (descriptor.set) {
+		descriptor.setter = function () {
+			func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
+		};
+	}
+
+	obj.defineOwnProperty(name, descriptor);
+}
+
+function createDescriptor (value) {
+	return { value: value, configurable: true, enumerable: true, writable: true };
+}
+
+module.exports = function ObjectExpression (context) {
+	var obj = context.env.objectFactory.createObject();
+	var descriptors = Object.create(null);
+
+	context.node.properties.forEach(function (property) {
+		var value = context.create(property.value).execute().result.getValue();
+		var name = property.key.name || property.key.value;
+
+		switch (property.kind) {
+			case "get":
+			case "set":
+				descriptors[name] = descriptors[name] || createDescriptor();
+				descriptors[name][property.kind] = value;
+				break;
+
+			default:
+				obj.defineOwnProperty(name, createDescriptor(value));
+				break;
+		}
+	});
+
+	for (var prop in descriptors) {
+		setDescriptor(context, obj, prop, descriptors[prop]);
+	}
+
+	return context.result(obj);
+};
+
+},{"../utils/func":70}],44:[function(require,module,exports){
+"use strict";
+module.exports = function ReturnStatement (context) {
+	if (context.node.argument) {
+		return context.exit(context.create(context.node.argument).execute().result.getValue());
+	}
+
+	return context.exit(context.env.global.getProperty("undefined").getValue());
+};
+
+},{}],45:[function(require,module,exports){
+"use strict";
+module.exports = function SequenceExpression (context) {
+	var value;
+
+	context.node.expressions.forEach(function (expr) {
+		value = context.create(expr).execute().result.getValue();
+	});
+
+	return context.result(value);
+};
+
+},{}],46:[function(require,module,exports){
+"use strict";
+function executeStatements (context, statements) {
+	var result;
+	for (var i = 0, ln = statements.length; i < ln; i++) {
+		result = context.create(statements[i]).execute();
+		if (result && result.isCancelled()) {
+			return result;
+		}
+	}
+
+	return result;
+}
+
+module.exports = function SwitchStatement (context) {
+	var testValue = context.create(context.node.discriminant).execute().result.getValue();
+	var passed = false;
+	var caseValue, value, defaultCase;
+
+	for (var i = 0, ln = context.node.cases.length; i < ln; i++) {
+		if (!passed) {
+			if (context.node.cases[i].test) {
+				caseValue = context.create(context.node.cases[i].test).execute().result.getValue();
+				if (!caseValue.equals(testValue)) {
+					continue;
+				}
+			} else {
+				// default might not be the last case
+				defaultCase = context.node.cases[i];
+				continue;
+			}
+		}
+
+		passed = true;
+		value = executeStatements(context, context.node.cases[i].consequent);
+		if (value && value.isCancelled()) {
+			value.cancel = false;
+			return value;
+		}
+	}
+
+	if (!passed && defaultCase && defaultCase.consequent) {
+		value = executeStatements(context, defaultCase.consequent);
+		value.cancel = false;
+		return value;
+	}
+
+	return value;
+};
+
+},{}],47:[function(require,module,exports){
+"use strict";
+module.exports = function ThisExpression (context) {
+	return context.result(context.env.getThisBinding());
+};
+
+},{}],48:[function(require,module,exports){
+"use strict";
+module.exports = function ThrowStatement (context) {
+	// todo: handle more specific errors
+	var arg = context.create(context.node.argument).execute().result.getValue();
+
+	if (arg.isPrimitive) {
+		throw arg.value;
+	}
+
+	var err = new Error();
+	err.wrappedError = arg;
+	throw err;
+};
+
+},{}],49:[function(require,module,exports){
+"use strict";
+module.exports = function TryCatchStatement (context) {
+	var result;
+
+	try {
+		result = context.create(context.node.block).execute();
+	} catch (err) {
+		if (context.node.handler) {
+			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
+
+			// var scope = context.env.createScope();
+			// scope.init(context.node.handler.body);
+
+			var errVar = context.node.handler.param.name;
+			var hasBinding = context.env.hasBinding(errVar);
+
+			if (!hasBinding) {
+				context.env.createBinding(errVar);
+			}
+
+			context.env.setBinding(errVar, caughtError);
+
+			try {
+				result = context.create(context.node.handler.body, context.node.handler).execute();
+			} catch (catchError) {
+				// scope.exitScope();
+				throw catchError;
+			} finally {
+				if (!hasBinding) {
+					context.env.deleteBinding(errVar);
+				}
+			}
+
+			// scope.exitScope();
+		} else {
+			throw err;
+		}
+	} finally {
+		if (context.node.finalizer) {
+			var finalResult = context.create(context.node.finalizer).execute();
+			if (finalResult && finalResult.shouldBreak(context)) {
+				return finalResult;
+			}
+		}
+	}
+
+	return result;
+};
+
+},{}],50:[function(require,module,exports){
+"use strict";
+var Reference = require("../env/reference");
+var convert = require("../utils/convert");
+
+module.exports = function UnaryExpression (context) {
+	var result = context.create(context.node.argument).execute().result;
+	var objectFactory = context.env.objectFactory;
+	var value, newValue;
+
+	switch (context.node.operator) {
+		case "typeof":
+			var type;
+			if (result instanceof Reference && result.isUnresolved()) {
+				type = "undefined";
+			} else {
+				value = result.getValue();
+				type = value ? value.type : "undefined";
+			}
+
+			newValue = objectFactory.createPrimitive(type);
+			break;
+
+		case "-":
+			value = result.getValue();
+			newValue = objectFactory.createPrimitive(-(convert.toNumber(context.env, value)));
+			break;
+
+		case "+":
+			value = result.getValue();
+			newValue = objectFactory.createPrimitive(+(convert.toNumber(context.env, value)));
+			break;
+
+		case "!":
+			value = result.getValue();
+			newValue = objectFactory.createPrimitive(!(convert.toBoolean(value)));
+			break;
+
+		case "~":
+			value = result.getValue();
+			newValue = objectFactory.createPrimitive(~(convert.toInt32(context.env, value)));
+			break;
+
+		case "delete":
+			var deleted = true;
+			if (result && result instanceof Reference) {
+				if (!result.isUnresolved()) {
+					deleted = result.deleteBinding(result.name);
+				}
+			} else if (context.node.argument.object) {
+				throw new ReferenceError(context.node.argument.object.name + " is not defined");
+			}
+
+			newValue = objectFactory.createPrimitive(deleted);
+			break;
+
+		case "void":
+			newValue = objectFactory.createPrimitive(undefined);
+			break;
+
+		default:
+			throw new SyntaxError("Unknown unary operator: " + context.node.operator);
+	}
+
+	return context.result(newValue);
+};
+
+},{"../env/reference":19,"../utils/convert":69}],51:[function(require,module,exports){
+"use strict";
+var convert = require("../utils/convert");
+
+module.exports = function UpdateExpression (context) {
+	var objectFactory = context.env.objectFactory;
+	var ref = context.create(context.node.argument).execute().result;
+	var originalValue = convert.toNumber(context.env, ref.getValue());
+	var newValue = originalValue;
+
+	if (context.node.operator === "++") {
+		newValue++;
+	} else {
+		newValue--;
+	}
+
+	newValue = objectFactory.createPrimitive(newValue);
+	originalValue = objectFactory.createPrimitive(originalValue);
+
+	var returnValue = context.node.prefix ? newValue : originalValue;
+
+	ref.putValue(newValue);
+	return context.result(returnValue);
+};
+
+},{"../utils/convert":69}],52:[function(require,module,exports){
+"use strict";
+module.exports = function VariableDeclaration (context) {
+	context.node.declarations.forEach(function (decl) {
+		context.create(decl).execute();
+	});
+
+	return context.empty();
+};
+
+},{}],53:[function(require,module,exports){
+"use strict";
+module.exports = function VariableDeclarator (context) {
+	var name = context.node.id.name;
+	var value;
+
+	if (context.node.init) {
+		value = context.create(context.node.init).execute().result;
+	}
+
+	// variables have already been hoisted so we just need to initialize them if defined
+	if (value) {
+		context.env.putValue(name, value.getValue(), false, context);
+	}
+
+	return context.result(context.env.getReference(name));
+};
+
+},{}],54:[function(require,module,exports){
+"use strict";
+module.exports = function WithStatement (context) {
+	var obj = context.create(context.node.object).execute().result.getValue();
+	var scope = context.env.createObjectScope(obj);
+	var result;
+
+	scope.init(context.node.body);
+
+	try {
+		result = context.create(context.node.body).execute();
+	} catch (err) {
+		scope.exitScope();
+		throw err;
+	}
+
+	scope.exitScope();
+	return result;
+};
+
+},{}],55:[function(require,module,exports){
+"use strict";
+module.exports = {
+	"es5": [
+		"do",
+		"if",
+		"in",
+		"for",
+		"new",
+		"try",
+		"var",
+		"case",
+		"else",
+		"enum",
+		"null",
+		"this",
+		"true",
+		"void",
+		"with",
+		"break",
+		"catch",
+		"class",
+		"const",
+		"false",
+		"super",
+		"throw",
+		"while",
+		"delete",
+		"export",
+		"import",
+		"return",
+		"switch",
+		"typeof",
+		"default",
+		"extends",
+		"finally",
+		"continue",
+		"debugger",
+		"function",
+		"instanceof"],
+
+	"es5-strict": [
+		"implements",
+		"let",
+		"private",
+		"public",
+		"interface",
+		"package",
+		"protected",
+		"static",
+		"yield"],
+
+	isReserved: function (name, scope) {
+		return this.es5.indexOf(name) >= 0;
+	}
+};
+
+},{}],56:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -3793,10 +3734,9 @@ ArgumentType.prototype.deleteProperty = function (name, throwOnError) {
 
 module.exports = ArgumentType;
 
-},{"./object-type":62}],56:[function(require,module,exports){
+},{"./object-type":63}],57:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
-var types = require("../utils/types");
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 
@@ -3881,10 +3821,6 @@ function setLength (env, arr, name, descriptor, throwOnError) {
 	return succeeded;
 }
 
-function descriptorHasValue (descriptor) {
-	return descriptor && ("value" in descriptor || "getter" in descriptor);
-}
-
 function ArrayType () {
 	ObjectType.call(this);
 	this.className = "Array";
@@ -3903,7 +3839,7 @@ ArrayType.prototype.putValue = function (name, value, throwOnError, env) {
 };
 
 ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, env) {
-	if (types.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
+	if (contracts.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
 		return setIndex(env, this, name, descriptor, throwOnError);
 	}
 
@@ -3921,7 +3857,7 @@ ArrayType.prototype.init = function (objectFactory) {
 
 module.exports = ArrayType;
 
-},{"../utils/contracts":67,"../utils/convert":68,"../utils/types":70,"./object-type":62}],57:[function(require,module,exports){
+},{"../utils/contracts":68,"../utils/convert":69,"./object-type":63}],58:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -3940,14 +3876,13 @@ function DateType (value) {
 DateType.prototype = Object.create(ObjectType.prototype);
 DateType.prototype.constructor = DateType;
 
-DateType.prototype.toBoolean = function () { return Boolean(this.value); };
 DateType.prototype.toNumber = function () { return Number(this.value); };
 DateType.prototype.toString = function () { return String(this.value); };
 DateType.prototype.valueOf = function () { return this.value; };
 
 module.exports = DateType;
 
-},{"./object-type":62}],58:[function(require,module,exports){
+},{"./object-type":63}],59:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -3966,12 +3901,11 @@ ErrorType.prototype.toString = function () {
 
 module.exports = ErrorType;
 
-},{"./object-type":62}],59:[function(require,module,exports){
+},{"./object-type":63}],60:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 var PropertyDescriptor = require("./property-descriptor");
 var contracts = require("../utils/contracts");
-var types = require("../utils/types");
 
 function FunctionType (node, parentScope) {
 	ObjectType.call(this);
@@ -4016,40 +3950,6 @@ FunctionType.prototype.bindThis = function (thisArg) {
 	this.boundThis = thisArg;
 };
 
-// FunctionType.prototype.defineOwnProperty = function (name, descriptor) {
-// 	var allowed = ObjectType.prototype.defineOwnProperty.apply(this, arguments);
-// 	if (allowed && name === "prototype" && "value" in descriptor) {
-// 		this.proto = descriptor.value;
-// 	}
-// };
-
-// FunctionType.prototype.putValue = function (name, value) {
-// 	ObjectType.prototype.putValue.apply(this, arguments);
-// 	if (name === "prototype") {
-// 		this.proto = value;
-// 	}
-// };
-
-// FunctionType.prototype.getProperty = function (name) {
-// 	var prop = ObjectType.prototype.getProperty.apply(this, arguments);
-
-// 	// since function itself is a function, look at our own properties
-// 	if (!prop && name !== "prototype") {
-// 		return this.properties.prototype.getValue().properties[name];
-// 	}
-
-// 	return prop;
-// };
-
-// FunctionType.prototype.getOwnPropertyNames = function () {
-// 	var props = ObjectType.prototype.getOwnPropertyNames.call(this);
-// 	if ("prototype" in this.properties) {
-// 		props.push("prototype");
-// 	}
-
-// 	return props;
-// };
-
 FunctionType.prototype.createScope = function (env, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
 	// return (this.parentScope || currentScope).createScope(thisArg);
@@ -4063,7 +3963,7 @@ FunctionType.prototype.createScope = function (env, thisArg) {
 	if (this.boundThis) {
 		args[0] = this.boundThis;
 	}
-	
+
 	var scope = env.createScope.apply(env, args);
 	if (!this.native) {
 		scope.init(this.node.body);
@@ -4087,7 +3987,7 @@ FunctionType.prototype.hasInstance = function (obj) {
 	var current = obj;
 
 	var proto = this.getProperty("prototype").getValue();
-	if (types.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
+	if (contracts.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
 		throw new TypeError("Function has non-object prototype in instanceof check");
 	}
 
@@ -4110,7 +4010,7 @@ FunctionType.prototype.hasInstance = function (obj) {
 
 module.exports = FunctionType;
 
-},{"../utils/contracts":67,"../utils/types":70,"./object-type":62,"./property-descriptor":64}],60:[function(require,module,exports){
+},{"../utils/contracts":68,"./object-type":63,"./property-descriptor":65}],61:[function(require,module,exports){
 "use strict";
 var FunctionType = require("./function-type");
 var PropertyDescriptor = require("./property-descriptor");
@@ -4154,7 +4054,7 @@ NativeFunctionType.prototype.init = function (objectFactory, proto, ctor, descri
 
 module.exports = NativeFunctionType;
 
-},{"./function-type":59,"./property-descriptor":64}],61:[function(require,module,exports){
+},{"./function-type":60,"./property-descriptor":65}],62:[function(require,module,exports){
 "use strict";
 var PrimitiveType = require("./primitive-type");
 var FunctionType = require("./function-type");
@@ -4166,7 +4066,7 @@ var StringType = require("./string-type");
 var DateType = require("./date-type");
 var ErrorType = require("./error-type");
 var ArgumentType = require("./argument-type");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 var parentless = {
 	"Undefined": true,
@@ -4226,7 +4126,7 @@ ObjectFactory.prototype = {
 	},
 
 	createPrimitive: function (value) {
-		return this.create(types.getType(value), value);
+		return this.create(contracts.getType(value), value);
 	},
 
 	create: function (typeName, value) {
@@ -4303,14 +4203,7 @@ ObjectFactory.prototype = {
 		var objectClass = this.env.global.getProperty("Object").getValue();
 
 		instance.init(this, objectClass, objectClass.proto);
-		// instance.parent = objectClass;
 		instance.setPrototype(objectClass.getProperty("prototype").getValue());
-		
-		// for (var i = 0, ln = args.length; i < ln; i++) {
-		// 	instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true }, false);
-		// }
-
-		// instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: true, enumerable: false, writable: true }, false);
 		instance.defineOwnProperty("callee", { value: callee, configurable: true, enumerable: false, writable: true });
 		return instance;
 	},
@@ -4353,7 +4246,7 @@ ObjectFactory.prototype = {
 
 module.exports = ObjectFactory;
 
-},{"../utils/types":70,"./argument-type":55,"./array-type":56,"./date-type":57,"./error-type":58,"./function-type":59,"./native-function-type":60,"./object-type":62,"./primitive-type":63,"./regex-type":65,"./string-type":66}],62:[function(require,module,exports){
+},{"../utils/contracts":68,"./argument-type":56,"./array-type":57,"./date-type":58,"./error-type":59,"./function-type":60,"./native-function-type":61,"./object-type":63,"./primitive-type":64,"./regex-type":66,"./string-type":67}],63:[function(require,module,exports){
 "use strict";
 var PropertyDescriptor = require("./property-descriptor");
 
@@ -4368,7 +4261,7 @@ function ObjectType () {
 	this.propertyCount = 0;
 }
 
-ObjectType.prototype = {
+ObjectType.prototype = ObjectType.fn = {
 	constructor: ObjectType,
 
 	init: function () { },
@@ -4482,7 +4375,12 @@ ObjectType.prototype = {
 	define: function (name, value, descriptor) {
 		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
 		descriptor.value = value;
-		return this.defineOwnProperty(name, descriptor, false);
+
+		if (!(name in this.properties)) {
+			this.propertyCount++;
+		}
+
+		this.properties[name] = new PropertyDescriptor(this, descriptor);
 	},
 
 	getValue: function () {
@@ -4494,11 +4392,14 @@ ObjectType.prototype = {
 			return false;
 		}
 
-		if (this.properties[name] && !this.properties[name].configurable) {
-			return false;
+		if (name in this.properties) {
+			if (!this.properties[name].configurable) {
+				return false;
+			}
+
+			this.propertyCount--;
 		}
 
-		this.propertyCount--;
 		return delete this.properties[name];
 	},
 
@@ -4525,26 +4426,14 @@ ObjectType.prototype = {
 
 		this.preventExtensions();
 	},
-	
+
 	getDensity: function (length) {
 		// -1 to exclude length
 		return this.propertyCount - 1 / length;
 	},
 
-	toBoolean: function () {
-		return true;
-	},
-
-	toNumber: function () {
-		return 0;
-	},
-
 	toString: function () {
 		return "[" + this.type + "]";
-	},
-
-	valueOf: function () {
-		return this;
 	},
 
 	equals: function (obj) {
@@ -4558,24 +4447,24 @@ ObjectType.prototype = {
 
 module.exports = ObjectType;
 
-},{"./property-descriptor":64}],63:[function(require,module,exports){
+},{"./property-descriptor":65}],64:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 function PrimitiveType (value) {
 	ObjectType.call(this);
 	this.isPrimitive = true;
 	this.value = value;
 	this.type = typeof value;
-	this.className = types.getType(value);
+	this.className = contracts.getType(value);
 }
 
 PrimitiveType.prototype = Object.create(ObjectType.prototype);
 PrimitiveType.prototype.constructor = PrimitiveType;
 
 PrimitiveType.prototype.getProperty = function (name) {
-	// can't read properties off null/undefined
+	// can't read properties of null/undefined
 	if (this.value == null) {
 		throw new TypeError("Cannot read property '" + name + "' of " + this.type);
 	}
@@ -4584,14 +4473,11 @@ PrimitiveType.prototype.getProperty = function (name) {
 };
 
 // overwrite object methods
-PrimitiveType.prototype.toBoolean = function () { return Boolean(this.value); };
-PrimitiveType.prototype.toNumber = function () { return Number(this.value); };
 PrimitiveType.prototype.toString = function () { return String(this.value); };
-PrimitiveType.prototype.valueOf = function () { return this.value; };
 
 module.exports = PrimitiveType;
 
-},{"../utils/types":70,"./object-type":62}],64:[function(require,module,exports){
+},{"../utils/contracts":68,"./object-type":63}],65:[function(require,module,exports){
 "use strict";
 var contracts = require("../utils/contracts");
 
@@ -4721,7 +4607,7 @@ PropertyDescriptor.prototype = {
 
 module.exports = PropertyDescriptor;
 
-},{"../utils/contracts":67}],65:[function(require,module,exports){
+},{"../utils/contracts":68}],66:[function(require,module,exports){
 "use strict";
 var ObjectType = require("./object-type");
 
@@ -4745,11 +4631,11 @@ RegexType.prototype.init = function (objectFactory) {
 
 module.exports = RegexType;
 
-},{"./object-type":62}],66:[function(require,module,exports){
+},{"./object-type":63}],67:[function(require,module,exports){
 "use strict";
 var PrimitiveType = require("./primitive-type");
 var PropertyDescriptor = require("./property-descriptor");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 function StringType (value) {
 	PrimitiveType.call(this, value);
@@ -4775,7 +4661,7 @@ StringType.prototype.init = function (objectFactory) {
 };
 
 StringType.prototype.getProperty = function (name) {
-	if (types.isInteger(name)) {
+	if (contracts.isInteger(name)) {
 		var position = Number(name);
 		if (position < this.value.length) {
 			return new PropertyDescriptor(this, { configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
@@ -4786,7 +4672,7 @@ StringType.prototype.getProperty = function (name) {
 };
 
 StringType.prototype.getDensity = function () {
-	return 100;	
+	return 100;
 };
 
 StringType.prototype.getOwnPropertyNames = function () {
@@ -4800,27 +4686,19 @@ StringType.prototype.getOwnPropertyNames = function () {
 };
 
 StringType.prototype.hasOwnProperty = function (name) {
-	if (types.isInteger(name)) {
+	if (contracts.isInteger(name)) {
 		return name < this.value.length;
 	}
 
 	return PrimitiveType.prototype.hasOwnProperty.apply(this, arguments);
 };
 
-StringType.prototype.getValue = function (name) {
-	return this;
-	// if (types.isInteger(name)) {
-	// 	return getCharacter(this, Number(name));
-	// }
-
-	// return PrimitiveType.prototype.getValue.call(this, name);
-};
-
 module.exports = StringType;
 
-},{"../utils/types":70,"./primitive-type":63,"./property-descriptor":64}],67:[function(require,module,exports){
+},{"../utils/contracts":68,"./primitive-type":64,"./property-descriptor":65}],68:[function(require,module,exports){
 "use strict";
-var types = require("./types");
+var objectRgx = /\[object (\w+)\]/;
+var integerRgx = /^-?\d+$/;
 
 module.exports = {
 	assertIsObject: function (obj, methodName, message) {
@@ -4830,13 +4708,13 @@ module.exports = {
 	},
 
 	assertIsNotNullOrUndefined: function (value, methodName) {
-		if (types.isNullOrUndefined(value)) {
+		if (this.isNullOrUndefined(value)) {
 			throw new TypeError(methodName + " called on null or undefined");
 		}
 	},
 
 	assertArgIsNotNullOrUndefined: function (obj) {
-		if (types.isNullOrUndefined(obj)) {
+		if (this.isNullOrUndefined(obj)) {
 			throw new TypeError("Cannot convert null or undefined to object");
 		}
 	},
@@ -4858,7 +4736,7 @@ module.exports = {
 			throw new RangeError("Invalid array length");
 		}
 	},
-	
+
 	assertIsValidParameterName: function (name) {
 		if (/^\d|[;\(\)"']/.test(name)) {
 			throw new SyntaxError("Unexpected token in " + name);
@@ -4866,7 +4744,7 @@ module.exports = {
 	},
 
 	isValidArrayLength: function (length) {
-		return types.isInteger(length) && length >= 0 && length < 4294967296;
+		return this.isInteger(length) && length >= 0 && length < 4294967296;
 	},
 
 	isObject: function (obj) {
@@ -4910,10 +4788,38 @@ module.exports = {
 		}
 
 		return a === b;
+	},
+
+	getType: function (obj) {
+		return objectRgx.exec(Object.prototype.toString.call(obj))[1];
+	},
+
+	isNullOrUndefined: function (obj) {
+		return this.isUndefined(obj) || this.isNull(obj);
+	},
+
+	isUndefined: function (obj) {
+		return !obj || (obj.isPrimitive && obj.value === undefined);
+	},
+
+	isNull: function (obj) {
+		return obj && obj.isPrimitive && obj.value === null;
+	},
+
+	isInteger: function (value) {
+		if (typeof value === "string") {
+			return integerRgx.test(value);
+		}
+
+		if (typeof value === "number") {
+			return isFinite(value) && Math.floor(value) === value;
+		}
+
+		return false;
 	}
 };
 
-},{"./types":70}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 var func = require("./func");
 
@@ -4933,12 +4839,12 @@ function getString (env, value) {
 		return String(value.value);
 	}
 
-	var primitiveValue = func.callMethod(env, value, "toString", []);
+	var primitiveValue = func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
 
-	primitiveValue = func.callMethod(env, value, "valueOf", []);
+	primitiveValue = func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
@@ -4955,12 +4861,12 @@ function getPrimitive (env, value) {
 		return value.value;
 	}
 
-	var primitiveValue = func.callMethod(env, value, "valueOf", []);
+	var primitiveValue = func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.value;
 	}
 
-	primitiveValue = func.callMethod(env, value, "toString", []);
+	primitiveValue = func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.value;
 	}
@@ -4986,7 +4892,6 @@ module.exports = {
 		var newValue = env.objectFactory.createPrimitive(value);
 		newValue.isPrimitive = false;
 		newValue.type = "object";
-		newValue.toBoolean = function () { return true; };
 		return newValue;
 	},
 
@@ -5070,6 +4975,18 @@ module.exports = {
 		return value >>> 0;
 	},
 
+	toBoolean: function (obj) {
+		if (!obj) {
+			return false;
+		}
+
+		if (obj.isPrimitive) {
+			return Boolean(obj.value);
+		}
+
+		return true;
+	},
+
 	toNativeFunction: function (env, fn, name) {
 		return env.objectFactory.createBuiltInFunction(function () {
 			var scope = this && this.node && this.node.value;
@@ -5081,7 +4998,7 @@ module.exports = {
 	}
 };
 
-},{"./func":69}],69:[function(require,module,exports){
+},{"./func":70}],70:[function(require,module,exports){
 "use strict";
 module.exports = {
 	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
@@ -5171,12 +5088,12 @@ module.exports = {
 		});
 	},
 
-	callMethod: function (env, obj, name, args) {
+	tryCallMethod: function (env, obj, name) {
 		var fn = obj.getProperty(name);
 		if (!fn) {
-			return null;
+			return false;
 		}
-		
+
 		fn = fn.getValue();
 		var undef = env.global.getProperty("undefined").getValue();
 
@@ -5186,9 +5103,9 @@ module.exports = {
 
 			try {
 				if (fn.native) {
-					executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), args);
+					executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
 				} else {
-					this.loadArguments(env, fn.node.params, args);
+					this.loadArguments(env, fn.node.params, []);
 
 					executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
 					executionResult = executionResult && executionResult.result;
@@ -5200,41 +5117,6 @@ module.exports = {
 
 			scope.exitScope();
 			return executionResult ? executionResult.getValue() : undef;
-		}
-
-		return null;
-	}
-};
-
-},{}],70:[function(require,module,exports){
-"use strict";
-var objectRgx = /\[object (\w+)\]/;
-var integerRgx = /^-?\d+$/;
-
-module.exports = {
-	getType: function (obj) {
-		return objectRgx.exec(Object.prototype.toString.call(obj))[1];
-	},
-
-	isNullOrUndefined: function (obj) {
-		return this.isUndefined(obj) || this.isNull(obj);
-	},
-
-	isUndefined: function (obj) {
-		return !obj || (obj.isPrimitive && obj.value === undefined);
-	},
-	
-	isNull: function (obj) {
-		return obj && obj.isPrimitive && obj.value === null;	
-	},
-
-	isInteger: function (value) {
-		if (typeof value === "string") {
-			return integerRgx.test(value);
-		}
-
-		if (typeof value === "number") {
-			return isFinite(value) && Math.floor(value) === value;
 		}
 
 		return false;

@@ -134,7 +134,7 @@ Environment.prototype = {
 	deleteBinding: function (name) {
 		this.current.deleteBinding(name);
 	},
-	
+
 	getThisBinding: function () {
 		return this.current.getThisBinding() || this.global;
 	},

@@ -1,6 +1,6 @@
 var PrimitiveType = require("./primitive-type");
 var PropertyDescriptor = require("./property-descriptor");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 function StringType (value) {
 	PrimitiveType.call(this, value);
@@ -26,7 +26,7 @@ StringType.prototype.init = function (objectFactory) {
 };
 
 StringType.prototype.getProperty = function (name) {
-	if (types.isInteger(name)) {
+	if (contracts.isInteger(name)) {
 		var position = Number(name);
 		if (position < this.value.length) {
 			return new PropertyDescriptor(this, { configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
@@ -37,7 +37,7 @@ StringType.prototype.getProperty = function (name) {
 };
 
 StringType.prototype.getDensity = function () {
-	return 100;	
+	return 100;
 };
 
 StringType.prototype.getOwnPropertyNames = function () {
@@ -51,20 +51,11 @@ StringType.prototype.getOwnPropertyNames = function () {
 };
 
 StringType.prototype.hasOwnProperty = function (name) {
-	if (types.isInteger(name)) {
+	if (contracts.isInteger(name)) {
 		return name < this.value.length;
 	}
 
 	return PrimitiveType.prototype.hasOwnProperty.apply(this, arguments);
-};
-
-StringType.prototype.getValue = function (name) {
-	return this;
-	// if (types.isInteger(name)) {
-	// 	return getCharacter(this, Number(name));
-	// }
-
-	// return PrimitiveType.prototype.getValue.call(this, name);
 };
 
 module.exports = StringType;

@@ -1,5 +1,5 @@
 var convert = require("../utils/convert");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
@@ -8,10 +8,10 @@ function createError (objectFactory, message, name) {
 	if (name) {
 		options = { name: name };
 	}
-	
+
 	var obj = objectFactory.create("Error", options);
 
-	if (!types.isNullOrUndefined(message)) {
+	if (!contracts.isNullOrUndefined(message)) {
 		obj.defineOwnProperty("message", { value: message, configurable: true, enumerable: false, writable: true }, false);
 	}
 
@@ -38,7 +38,7 @@ module.exports = function (env) {
 			msg = convert.toString(env, this.node.getProperty("message").getValue());
 		}
 
-		name = name && name.toString();
+		name = name && convert.toString(env, name);
 		if (name && msg) {
 			return objectFactory.create("String", name + ": " + msg);
 		}
@@ -55,6 +55,10 @@ module.exports = function (env) {
 
 		var typeProto = errClass.getProperty("prototype").getValue();
 		typeProto.define("name", objectFactory.createPrimitive(type));
+
+		// add to prototype chain to represent inheritance
+		typeProto.setPrototype(proto);
+
 		globalObject.define(type, errClass);
 	});
 };

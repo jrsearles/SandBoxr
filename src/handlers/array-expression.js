@@ -9,7 +9,7 @@ module.exports = function ArrayExpression (context) {
 		while (i < ln) {
 			if (context.node.elements[i]) {
 				var item = context.create(context.node.elements[i]).execute().result.getValue();
-				arr.defineOwnProperty(i, { value: item, configurable: true, enumerable: true, writable: true });
+				arr.defineOwnProperty(i, { value: item, configurable: true, enumerable: true, writable: true }, true, context.env);
 			}
 
 			i++;

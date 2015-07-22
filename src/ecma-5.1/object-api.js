@@ -17,7 +17,7 @@ function isObject (obj) {
 
 function defineProperty (context, obj, name, descriptor) {
 	if (!isObject(descriptor)) {
-		throw new TypeError("Property description must be an object: " + (descriptor ? descriptor.toString() : "undefined"));
+		throw new TypeError("Property description must be an object: " + convert.toString(context.env, descriptor));
 	}
 
 	var undef = context.env.global.getProperty("undefined").getValue();
@@ -35,7 +35,7 @@ function defineProperty (context, obj, name, descriptor) {
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
 			if (descriptor.hasProperty(prop)) {
 				var attrValue = descriptor.getProperty(prop).getValue();
-				options[prop] = !!(attrValue && attrValue.toBoolean());
+				options[prop] = convert.toBoolean(attrValue);
 			}
 		});
 
@@ -48,7 +48,7 @@ function defineProperty (context, obj, name, descriptor) {
 				options.get = options.getter = undefined;
 			} else {
 				if (getter.className !== "Function") {
-					throw new TypeError("Getter must be a function: " + getter.toString());
+					throw new TypeError("Getter must be a function: " + convert.toString(context.env, getter));
 				}
 
 				options.get = getter;
@@ -74,7 +74,7 @@ function defineProperty (context, obj, name, descriptor) {
 				options.set = options.setter = undefined;
 			} else {
 				if (setter.className !== "Function") {
-					throw new TypeError("Setter must be a function: " + setter.toString());
+					throw new TypeError("Setter must be a function: " + convert.toString(context.env, setter));
 				}
 
 				options.set = setter;
@@ -118,7 +118,6 @@ module.exports = function (env) {
 				var objectWrapper = objectFactory.createPrimitive(value.value);
 				objectWrapper.type = "object";
 				objectWrapper.isPrimitive = false;
-				objectWrapper.toBoolean = function () { return true; };
 				return objectWrapper;
 			}
 
@@ -170,7 +169,7 @@ module.exports = function (env) {
 
 	objectClass.define("create", objectFactory.createBuiltInFunction(function (parent, descriptors) {
 		if (parent && parent.isPrimitive && parent.value !== null) {
-			throw new TypeError("Object prototype may only be an Object or null:" + parent.toString());
+			throw new TypeError("Object prototype may only be an Object or null:" + convert.toString(env, parent));
 		}
 
 		if (descriptors && descriptors.isPrimitive && descriptors.value === null) {
@@ -244,7 +243,7 @@ module.exports = function (env) {
 
 		var arr = objectFactory.create("Array");
 		var index = 0;
-		
+
 		for (var name in obj.properties) {
 			if (obj.properties[name].enumerable) {
 				arr.defineOwnProperty(index++, { configurable: true, enumerable: true, writable: true, value: objectFactory.createPrimitive(name) }, false, env);
@@ -267,8 +266,8 @@ module.exports = function (env) {
 
 	objectClass.define("getPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
-		var proto = obj.getPrototype();
-		return proto || env.global.getProperty("null").getValue();
+		var objProto = obj.getPrototype();
+		return objProto || env.global.getProperty("null").getValue();
 	}, 1, "Object.getPrototypeOf"));
 
 	objectClass.define("freeze", objectFactory.createBuiltInFunction(function (obj) {

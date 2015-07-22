@@ -1,9 +1,11 @@
+var convert = require("../utils/convert");
+
 module.exports = function DoWhileStatement (context) {
 	var result;
 	var passed = true;
 
 	if (context.node.type === "WhileStatement") {
-		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
+		passed = convert.toBoolean(context.create(context.node.test).execute().result.getValue());
 	}
 
 	while (passed) {
@@ -13,7 +15,7 @@ module.exports = function DoWhileStatement (context) {
 			break;
 		}
 
-		passed = context.create(context.node.test).execute().result.getValue().toBoolean();
+		passed = convert.toBoolean(context.create(context.node.test).execute().result.getValue());
 	}
 
 	return result;

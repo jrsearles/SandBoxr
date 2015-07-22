@@ -1,4 +1,5 @@
 var fs = require("fs");
+var util = require("util");
 var glob = require("glob");
 var colors = require("colors");
 var acorn = require("acorn");
@@ -38,7 +39,7 @@ if (chapter) {
 		// root + "suite/ch12/12.6/12.6.2/**/*.js",
 		root + "suite/ch13/**/*.js",	// functions	-- passed!
 		root + "suite/ch14/**/*.js",	// program	-- passed!
-		root + "suite/ch15/15.1/**/*.js",	// global	-- passed
+		// root + "suite/ch15/15.1/**/*.js",	// global	-- passed
 		root + "suite/ch15/15.2/**/*.js",	// object	-- passed
 		root + "suite/ch15/15.3/**/*.js",	// function	-- passed
 		root + "suite/ch15/15.4/**/*.js",	// array		-- passed - 1
@@ -144,26 +145,26 @@ if (skippedCount) {
 
 function testStarting (name, desc) {
 	if (verbose) {
-		console.log(colors.blue("starting: ") + name + " (" + desc + ")");
+		console.log(colors.blue("starting: ") + util.format("%s (%s)", name, desc));
 	}
 }
 
 function testPassed (name, desc) {
 	if (verbose) {
-		console.log(colors.green("passed: ") + name + " (" + desc + ")");
+		console.log(colors.green("passed: ") + util.format("%s (%s)", name, desc));
 	}
 
 	passedCount++;
 }
 
 function testFailed (name, desc, err) {
-	console.log(colors.red("failed: ") + name + " (" + desc + ")");
+	console.log(colors.red("failed: ") + util.format("%s (%s)", name, desc));
 	failedCount++;
 }
 
 function testSkipped (name, reason) {
 	if (verbose) {
-		console.log(colors.blue("skipped: ") + name + " (" + reason + ")");
+		console.log(colors.blue("skipped: ") + util.format("%s (%s)", name, reason));
 	}
 
 	skippedCount++;

@@ -1,7 +1,6 @@
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 var func = require("../utils/func");
-var types = require("../utils/types");
 var RegexType = require("../types/regex-type");
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
@@ -50,7 +49,7 @@ module.exports = function (env) {
 		var length = value.length;
 
 		start = convert.toInteger(env, start);
-		end = types.isNullOrUndefined(end) ? length : convert.toInteger(env, end);
+		end = contracts.isNullOrUndefined(end) ? length : convert.toInteger(env, end);
 
 		return objectFactory.createPrimitive(value.substring(start, end));
 	}, 2, "String.prototype.substring"));
@@ -76,7 +75,7 @@ module.exports = function (env) {
 		var startValue = convert.toInteger(env, start);
 		var endValue;
 
-		if (!types.isNullOrUndefined(end)) {
+		if (!contracts.isNullOrUndefined(end)) {
 			endValue = convert.toInteger(env, end);
 		}
 
@@ -87,10 +86,10 @@ module.exports = function (env) {
 		var stringValue = convert.toString(env, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
-		var limitValue = types.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
+		var limitValue = contracts.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
 
 		var arr = objectFactory.create("Array");
-		if (types.isUndefined(separator)) {
+		if (contracts.isUndefined(separator)) {
 			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, this);
 		} else {
 			var separatorValue;
@@ -143,7 +142,7 @@ module.exports = function (env) {
 		var stringValue = convert.toString(env, this.node);
 		var actualRegex;
 
-		if (regex && regex instanceof RegexType) {
+		if (regex && regex.className === "RegExp") {
 			actualRegex = regex.source;
 		} else if (regex) {
 			actualRegex = new RegExp(convert.toPrimitive(env, regex));

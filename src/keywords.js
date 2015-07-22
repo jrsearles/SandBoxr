@@ -10,7 +10,6 @@ module.exports = {
 		"case",
 		"else",
 		"enum",
-		// "eval",
 		"null",
 		"this",
 		"true",
@@ -36,7 +35,6 @@ module.exports = {
 		"continue",
 		"debugger",
 		"function",
-		// "arguments",
 		"instanceof"],
 
 	"es5-strict": [
@@ -52,14 +50,5 @@ module.exports = {
 
 	isReserved: function (name, scope) {
 		return this.es5.indexOf(name) >= 0;
-		// if (this[scope.version].indexOf(name) >= 0) {
-		// 	return true;
-		// }
-
-		// if (scope.strict && this[scope.version + "-strict"].indexOf >= 0) {
-		// 	return true;
-		// }
-
-		// return false;
 	}
 };

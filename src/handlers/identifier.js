@@ -4,6 +4,6 @@ module.exports = function Identifier (context) {
 	if (context.callee && context.callee.identifier === name) {
 		return context.result(context.callee);
 	}
-	
+
 	return context.result(context.env.getReference(context.node.name));
 };

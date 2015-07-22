@@ -1,2 +1,4 @@
 node_modules
 test262/
+typings/
+jsconfig.json

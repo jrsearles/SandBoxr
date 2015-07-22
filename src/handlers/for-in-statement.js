@@ -26,7 +26,6 @@ module.exports = function ForInStatement (context) {
 			if (obj.properties[prop].enumerable && !visited[prop]) {
 				left.putValue(context.env.objectFactory.createPrimitive(prop));
 
-				// context.env.putValue(left.name, context.env.objectFactory.createPrimitive(prop), false, context);
 				result = context.create(context.node.body).execute();
 
 				if (result && result.shouldBreak(context, true)) {

@@ -31,7 +31,7 @@ module.exports = function UnaryExpression (context) {
 
 		case "!":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(!(value.isPrimitive ? value.toBoolean() : true));
+			newValue = objectFactory.createPrimitive(!(convert.toBoolean(value)));
 			break;
 
 		case "~":

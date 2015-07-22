@@ -2,20 +2,6 @@ var convert = require("../utils/convert");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
-var staticMethods = ["isNaN", "isFinite", "parseFloat", "parseInt"];
-
-var polyfills = {
-	"isNaN": function (value) {
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
-		return typeof value === "number" && value !== value;
-	},
-	"isFinite": function (value) {
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isFinite
-		return typeof value === "number" && isFinite(value);
-	},
-	"parseFloat": parseFloat,
-	"parseInt": parseInt
-};
 
 module.exports = function (env) {
 	var globalObject = env.global;
@@ -32,7 +18,8 @@ module.exports = function (env) {
 
 	var proto = numberClass.getProperty("prototype").getValue();
 	proto.className = "Number";
-
+	proto.value = 0;
+	
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
 		if (this.node.className !== "Number") {
 			throw new TypeError("Number.prototype.toString is not generic");
@@ -52,10 +39,10 @@ module.exports = function (env) {
 	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
 		var digits = 0;
 		if (fractionDigits) {
-			digits = convert.toPrimitive(env, fractionDigits, "number");
+			digits = convert.toNumber(env, fractionDigits);
 		}
 
-		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.toNumber(), digits));
+		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.value, digits));
 	}, 1, "Number.prototype.toFixed"));
 
 	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
@@ -71,16 +58,9 @@ module.exports = function (env) {
 	});
 
 	protoMethods.forEach(function (name) {
-		var fn = Number.prototype[name] || polyfills[name];
+		var fn = Number.prototype[name];
 		if (fn) {
 			proto.define(name, convert.toNativeFunction(env, fn, "Number.prototype." + name));
-		}
-	});
-
-	staticMethods.forEach(function (name) {
-		var fn = Number[name] || polyfills[name];
-		if (fn) {
-			numberClass.define(name, convert.toNativeFunction(env, fn, "Number." + name));
 		}
 	});
 

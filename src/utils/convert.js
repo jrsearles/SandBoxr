@@ -16,12 +16,12 @@ function getString (env, value) {
 		return String(value.value);
 	}
 
-	var primitiveValue = func.callMethod(env, value, "toString", []);
+	var primitiveValue = func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
 
-	primitiveValue = func.callMethod(env, value, "valueOf", []);
+	primitiveValue = func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
@@ -38,12 +38,12 @@ function getPrimitive (env, value) {
 		return value.value;
 	}
 
-	var primitiveValue = func.callMethod(env, value, "valueOf", []);
+	var primitiveValue = func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.value;
 	}
 
-	primitiveValue = func.callMethod(env, value, "toString", []);
+	primitiveValue = func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.value;
 	}
@@ -69,7 +69,6 @@ module.exports = {
 		var newValue = env.objectFactory.createPrimitive(value);
 		newValue.isPrimitive = false;
 		newValue.type = "object";
-		newValue.toBoolean = function () { return true; };
 		return newValue;
 	},
 
@@ -151,6 +150,18 @@ module.exports = {
 	toUInt32: function (env, obj) {
 		var value = this.toInt32(env, obj);
 		return value >>> 0;
+	},
+
+	toBoolean: function (obj) {
+		if (!obj) {
+			return false;
+		}
+
+		if (obj.isPrimitive) {
+			return Boolean(obj.value);
+		}
+
+		return true;
 	},
 
 	toNativeFunction: function (env, fn, name) {

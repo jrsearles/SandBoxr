@@ -86,12 +86,12 @@ module.exports = {
 		});
 	},
 
-	callMethod: function (env, obj, name, args) {
+	tryCallMethod: function (env, obj, name) {
 		var fn = obj.getProperty(name);
 		if (!fn) {
-			return null;
+			return false;
 		}
-		
+
 		fn = fn.getValue();
 		var undef = env.global.getProperty("undefined").getValue();
 
@@ -101,9 +101,9 @@ module.exports = {
 
 			try {
 				if (fn.native) {
-					executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), args);
+					executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
 				} else {
-					this.loadArguments(env, fn.node.params, args);
+					this.loadArguments(env, fn.node.params, []);
 
 					executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
 					executionResult = executionResult && executionResult.result;
@@ -117,6 +117,6 @@ module.exports = {
 			return executionResult ? executionResult.getValue() : undef;
 		}
 
-		return null;
+		return false;
 	}
 };

@@ -1,6 +1,8 @@
+var convert = require("../utils/convert");
+
 module.exports = function IfStatement (context) {
 	var testValue = context.create(context.node.test).execute().result.getValue();
-	if (testValue.toBoolean()) {
+	if (convert.toBoolean(testValue)) {
 		return context.create(context.node.consequent).execute();
 	}
 

@@ -1,4 +1,3 @@
-/// <reference path="../typings/mocha/mocha.d.ts"/>
 var runner = require("./test-runner");
 var expect = require("chai").expect;
 

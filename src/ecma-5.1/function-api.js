@@ -1,6 +1,5 @@
 var convert = require("../utils/convert");
 var contracts = require("../utils/contracts");
-var types = require("../utils/types");
 var func = require("../utils/func");
 var NativeFunctionType = require("../types/native-function-type");
 var slice = Array.prototype.slice;
@@ -10,7 +9,7 @@ function defineThis (env, fn, thisArg) {
 		return thisArg || env.global.getProperty("undefined").getValue();
 	}
 
-	if (types.isNullOrUndefined(thisArg)) {
+	if (contracts.isNullOrUndefined(thisArg)) {
 		return env.global;
 	}
 
@@ -30,24 +29,24 @@ module.exports = function (env, options) {
 		if (options.parser && arguments.length > 0) {
 			var args = slice.call(arguments);
 			var body = args.pop();
-			
+
 			if (args.length > 0) {
 				args = args.map(function (arg, index) {
-					if (types.isNull(arg)) {
+					if (contracts.isNull(arg)) {
 						throw new SyntaxError("Unexpected token null");
 					}
-					
-					return types.isUndefined(arg) ? "" : convert.toString(env, arg); 
+
+					return contracts.isUndefined(arg) ? "" : convert.toString(env, arg);
 				})
 				// the spec allows parameters to be comma-delimited, so we will join and split again comma
 				.join(",").split(/\s*,\s*/g);
 			}
-			
+
 			var ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
 			var params = args.map(function (arg) {
 				arg = arg.trim();
 				contracts.assertIsValidParameterName(arg);
-				
+
 				return {
 					type: "Identifier",
 					name: arg
@@ -66,16 +65,16 @@ module.exports = function (env, options) {
 				if (this.isNew) {
 					thisArg = objectFactory.createObject(funcInstance);
 				}
-				
+
 				var executionResult = func.getFunctionResult(this, fn, params, arguments, thisArg, callee);
-				
+
 				if (this.isNew) {
 					return thisArg;
 				}
-				
+
 				return executionResult && executionResult.result || undef;
 			};
-			
+
 			wrappedFunc.nativeLength = callee.params.length;
 			funcInstance = objectFactory.createFunction(wrappedFunc, env.globalScope);
 		} else {
@@ -85,7 +84,7 @@ module.exports = function (env, options) {
 		funcInstance.putValue("constructor", functionClass);
 		return funcInstance;
 	};
-	
+
 	// the prototype of a function is actually callable and evaluates as a function
 	var proto = new NativeFunctionType(function () {});
 
@@ -99,7 +98,7 @@ module.exports = function (env, options) {
 
 	// function itself is a function
 	functionClass.setPrototype(proto);
-	
+
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.native) {
 			return objectFactory.createPrimitive("function () { [native code] }");
@@ -114,7 +113,7 @@ module.exports = function (env, options) {
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
-		
+
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
@@ -130,7 +129,7 @@ module.exports = function (env, options) {
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
-		
+
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
@@ -163,7 +162,7 @@ module.exports = function (env, options) {
 		boundFunc.defineOwnProperty("arguments", throwProperties);
 		boundFunc.defineOwnProperty("callee", throwProperties);
 		boundFunc.bindThis(thisArg);
-		
+
 		return boundFunc;
 	}));
 };

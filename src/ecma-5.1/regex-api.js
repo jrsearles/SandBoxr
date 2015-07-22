@@ -1,20 +1,20 @@
 var convert = require("../utils/convert");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 module.exports = function (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var regexClass = objectFactory.createFunction(function (pattern, flags) {
 		if (pattern && pattern.className === "RegExp") {
-			if (!types.isUndefined(flags)) {
+			if (!contracts.isUndefined(flags)) {
 				throw new TypeError("Cannot supply flags when constructing one RegExp from another");
 			}
 
 			return pattern;
 		}
 
-		var patternString = types.isUndefined(pattern) ? "" : convert.toString(env, pattern);
-		flags = types.isUndefined(flags) ? "" : convert.toString(env, flags);
+		var patternString = contracts.isUndefined(pattern) ? "" : convert.toString(env, pattern);
+		flags = contracts.isUndefined(flags) ? "" : convert.toString(env, flags);
 
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, null, null, { configurable: false, enumerable: false, writable: false });
@@ -60,23 +60,7 @@ module.exports = function (env) {
 	}, 1, "RegExp.prototype.exec"));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		var str = "/";
-		str += this.node.getProperty("source").getValue().toString();
-		str += "/";
-
-		if (this.node.getProperty("global").getValue().toBoolean()) {
-			str += "g";
-		}
-
-		if (this.node.getProperty("ignoreCase").getValue().toBoolean()) {
-			str += "i";
-		}
-
-		if (this.node.getProperty("multiline").getValue().toBoolean()) {
-			return str += "m";
-		}
-
-		return objectFactory.create("String", str);
+		return objectFactory.createPrimitive(String(this.node.source));
 	}, 0, "RegExp.prototype.toString"));
 
 	proto.define("compile", convert.toNativeFunction(env, RegExp.prototype.compile, "RegExp.prototype.compile"));

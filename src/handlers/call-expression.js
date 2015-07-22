@@ -1,4 +1,3 @@
-var FunctionType = require("../types/function-type");
 var Reference = require("../env/reference");
 var func = require("../utils/func");
 var convert = require("../utils/convert");

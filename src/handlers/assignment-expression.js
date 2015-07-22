@@ -32,16 +32,5 @@ module.exports = function AssignmentExpression (context) {
 	}
 
 	left.putValue(newValue);
-	// var obj = left.object || context.env;
-	// var name = left.name;
-
-
-	// if (obj.hasProperty(name)) {
-	// 	obj.putValue(name, newValue, context.strict, context);
-	// } else {
-	// 	var descriptor = { value: newValue, configurable: true, enumerable: true, writable: true };
-	// 	obj.defineOwnProperty(name, null, descriptor, context.strict, context);
-	// }
-
 	return context.result(newValue);
 };

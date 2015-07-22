@@ -1,7 +1,6 @@
 var ObjectType = require("./object-type");
 var PropertyDescriptor = require("./property-descriptor");
 var contracts = require("../utils/contracts");
-var types = require("../utils/types");
 
 function FunctionType (node, parentScope) {
 	ObjectType.call(this);
@@ -46,40 +45,6 @@ FunctionType.prototype.bindThis = function (thisArg) {
 	this.boundThis = thisArg;
 };
 
-// FunctionType.prototype.defineOwnProperty = function (name, descriptor) {
-// 	var allowed = ObjectType.prototype.defineOwnProperty.apply(this, arguments);
-// 	if (allowed && name === "prototype" && "value" in descriptor) {
-// 		this.proto = descriptor.value;
-// 	}
-// };
-
-// FunctionType.prototype.putValue = function (name, value) {
-// 	ObjectType.prototype.putValue.apply(this, arguments);
-// 	if (name === "prototype") {
-// 		this.proto = value;
-// 	}
-// };
-
-// FunctionType.prototype.getProperty = function (name) {
-// 	var prop = ObjectType.prototype.getProperty.apply(this, arguments);
-
-// 	// since function itself is a function, look at our own properties
-// 	if (!prop && name !== "prototype") {
-// 		return this.properties.prototype.getValue().properties[name];
-// 	}
-
-// 	return prop;
-// };
-
-// FunctionType.prototype.getOwnPropertyNames = function () {
-// 	var props = ObjectType.prototype.getOwnPropertyNames.call(this);
-// 	if ("prototype" in this.properties) {
-// 		props.push("prototype");
-// 	}
-
-// 	return props;
-// };
-
 FunctionType.prototype.createScope = function (env, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
 	// return (this.parentScope || currentScope).createScope(thisArg);
@@ -93,7 +58,7 @@ FunctionType.prototype.createScope = function (env, thisArg) {
 	if (this.boundThis) {
 		args[0] = this.boundThis;
 	}
-	
+
 	var scope = env.createScope.apply(env, args);
 	if (!this.native) {
 		scope.init(this.node.body);
@@ -117,7 +82,7 @@ FunctionType.prototype.hasInstance = function (obj) {
 	var current = obj;
 
 	var proto = this.getProperty("prototype").getValue();
-	if (types.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
+	if (contracts.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
 		throw new TypeError("Function has non-object prototype in instanceof check");
 	}
 

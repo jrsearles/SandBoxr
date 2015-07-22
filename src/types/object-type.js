@@ -11,7 +11,7 @@ function ObjectType () {
 	this.propertyCount = 0;
 }
 
-ObjectType.prototype = {
+ObjectType.prototype = ObjectType.fn = {
 	constructor: ObjectType,
 
 	init: function () { },
@@ -125,7 +125,12 @@ ObjectType.prototype = {
 	define: function (name, value, descriptor) {
 		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
 		descriptor.value = value;
-		return this.defineOwnProperty(name, descriptor, false);
+
+		if (!(name in this.properties)) {
+			this.propertyCount++;
+		}
+
+		this.properties[name] = new PropertyDescriptor(this, descriptor);
 	},
 
 	getValue: function () {
@@ -137,11 +142,14 @@ ObjectType.prototype = {
 			return false;
 		}
 
-		if (this.properties[name] && !this.properties[name].configurable) {
-			return false;
+		if (name in this.properties) {
+			if (!this.properties[name].configurable) {
+				return false;
+			}
+
+			this.propertyCount--;
 		}
 
-		this.propertyCount--;
 		return delete this.properties[name];
 	},
 
@@ -168,26 +176,14 @@ ObjectType.prototype = {
 
 		this.preventExtensions();
 	},
-	
+
 	getDensity: function (length) {
 		// -1 to exclude length
 		return this.propertyCount - 1 / length;
 	},
 
-	toBoolean: function () {
-		return true;
-	},
-
-	toNumber: function () {
-		return 0;
-	},
-
 	toString: function () {
 		return "[" + this.type + "]";
-	},
-
-	valueOf: function () {
-		return this;
 	},
 
 	equals: function (obj) {

@@ -54,7 +54,7 @@ ExecutionContext.prototype.result = function (value, name, obj) {
 };
 
 ExecutionContext.prototype.empty = function () {
-	return this.result(undefined);
+	return this.result();
 };
 
 module.exports = ExecutionContext;

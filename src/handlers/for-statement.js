@@ -1,9 +1,11 @@
+var convert = require("../utils/convert");
+
 function shouldContinue (context) {
 	if (!context.node.test) {
 		return true;
 	}
 
-	return context.create(context.node.test).execute().result.getValue().toBoolean();
+	return convert.toBoolean(context.create(context.node.test).execute().result.getValue());
 }
 
 module.exports = function ForStatement (context) {

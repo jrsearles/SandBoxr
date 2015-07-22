@@ -1,8 +1,6 @@
 var func = require("../utils/func");
 
 function setDescriptor (context, obj, name, descriptor) {
-	// var currentScope = context.env.current;
-
 	if (descriptor.get) {
 		descriptor.getter = function () {
 			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);

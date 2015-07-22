@@ -6,6 +6,7 @@ handlers.BinaryExpression = require("./binary-expression");
 handlers.BreakStatement = handlers.ContinueStatement = require("./interrupt-statement");
 handlers.CallExpression = handlers.NewExpression = require("./call-expression");
 handlers.ConditionalExpression = handlers.IfStatement = require("./if-statement");
+handlers.DebuggerStatement = require("./debugger-statement");
 handlers.DoWhileStatement = handlers.WhileStatement = require("./do-while-statement.js");
 handlers.EmptyStatement = require("./empty-statement");
 handlers.ExpressionStatement = require("./expression-statement");

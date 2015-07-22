@@ -1,5 +1,5 @@
 var handlers = require("./handlers");
-var globalScope = require("./scope/global-scope");
+var api = require("./ecma-5.1");
 var ExecutionContext = require("./execution-context");
 
 function SandBoxr (ast, config) {
@@ -9,7 +9,7 @@ function SandBoxr (ast, config) {
 }
 
 SandBoxr.prototype.execute = function (context) {
-	context = context || new ExecutionContext(this.env || this.createScope(), this.ast);
+	context = context || new ExecutionContext(this.env || this.createEnvironment(), this.ast);
 
 	if (!(context.node.type in handlers)) {
 		throw new TypeError("No handler defined for: " + context.node.type);
@@ -18,8 +18,8 @@ SandBoxr.prototype.execute = function (context) {
 	return handlers[context.node.type](context);
 };
 
-SandBoxr.prototype.createScope = function () {
-	return (this.env = globalScope(this));
+SandBoxr.prototype.createEnvironment = function () {
+	return (this.env = api(this));
 };
 
 module.exports = SandBoxr;

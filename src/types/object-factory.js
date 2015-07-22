@@ -8,7 +8,7 @@ var StringType = require("./string-type");
 var DateType = require("./date-type");
 var ErrorType = require("./error-type");
 var ArgumentType = require("./argument-type");
-var types = require("../utils/types");
+var contracts = require("../utils/contracts");
 
 var parentless = {
 	"Undefined": true,
@@ -68,7 +68,7 @@ ObjectFactory.prototype = {
 	},
 
 	createPrimitive: function (value) {
-		return this.create(types.getType(value), value);
+		return this.create(contracts.getType(value), value);
 	},
 
 	create: function (typeName, value) {
@@ -145,14 +145,7 @@ ObjectFactory.prototype = {
 		var objectClass = this.env.global.getProperty("Object").getValue();
 
 		instance.init(this, objectClass, objectClass.proto);
-		// instance.parent = objectClass;
 		instance.setPrototype(objectClass.getProperty("prototype").getValue());
-		
-		// for (var i = 0, ln = args.length; i < ln; i++) {
-		// 	instance.defineOwnProperty(i, args[i], { configurable: true, enumerable: true, writable: true }, false);
-		// }
-
-		// instance.defineOwnProperty("length", this.createPrimitive(ln), { configurable: true, enumerable: false, writable: true }, false);
 		instance.defineOwnProperty("callee", { value: callee, configurable: true, enumerable: false, writable: true });
 		return instance;
 	},

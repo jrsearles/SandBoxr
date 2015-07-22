@@ -1,5 +1,4 @@
 var ObjectType = require("./object-type");
-var types = require("../utils/types");
 var contracts = require("../utils/contracts");
 var convert = require("../utils/convert");
 
@@ -84,10 +83,6 @@ function setLength (env, arr, name, descriptor, throwOnError) {
 	return succeeded;
 }
 
-function descriptorHasValue (descriptor) {
-	return descriptor && ("value" in descriptor || "getter" in descriptor);
-}
-
 function ArrayType () {
 	ObjectType.call(this);
 	this.className = "Array";
@@ -106,7 +101,7 @@ ArrayType.prototype.putValue = function (name, value, throwOnError, env) {
 };
 
 ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, env) {
-	if (types.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
+	if (contracts.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
 		return setIndex(env, this, name, descriptor, throwOnError);
 	}
 

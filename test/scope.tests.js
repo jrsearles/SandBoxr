@@ -50,5 +50,10 @@ describe("Scope", function () {
 			var result = runner.runBlock("function f() { var x;return x;function x() {}\n}\ntypeof f() === 'function'");
 			expect(result.value).to.be.true;
 		});
+		
+		it("should ignore debugger statements", function () {
+			var result = runner.runBlock("debugger;1==1;");
+			expect(result.value).to.be.true;
+		});
 	});
 });
