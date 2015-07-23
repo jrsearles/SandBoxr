@@ -12,27 +12,27 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.create("Boolean", booleanValue);
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	}, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = booleanClass.getProperty("prototype").getValue();
 	proto.className = "Boolean";
 	proto.value = false;
 
-	proto.define("toString", objectFactory.createFunction(function () {
+	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.toString is not generic.");
 		}
 
 		return objectFactory.createPrimitive(String(this.node.value));
-	}));
+	}, 0, "Boolean.prototype.toString"));
 
-	proto.define("valueOf", objectFactory.createFunction(function () {
+	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
 		if (this.node.className !== "Boolean") {
 			throw new TypeError("Boolean.prototype.valueOf is not generic.");
 		}
 
 		return objectFactory.createPrimitive(this.node.value);
-	}));
+	}, 0, "Boolean.prototype.valueOf"));
 
 	globalObject.define("Boolean", booleanClass);
 };

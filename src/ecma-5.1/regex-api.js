@@ -17,7 +17,7 @@ module.exports = function (env) {
 		flags = contracts.isUndefined(flags) ? "" : convert.toString(env, flags);
 
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	}, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = regexClass.getProperty("prototype").getValue();
 	proto.className = "RegExp";

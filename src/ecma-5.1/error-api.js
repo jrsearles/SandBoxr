@@ -23,14 +23,14 @@ module.exports = function (env) {
 	var objectFactory = env.objectFactory;
 	var errorClass = objectFactory.createFunction(function (message) {
 		return createError(objectFactory, message);
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	}, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = errorClass.getProperty("prototype").getValue();
 	proto.className = "Error";
 	proto.define("name", objectFactory.createPrimitive("Error"));
 	proto.define("message", objectFactory.createPrimitive(""));
 
-	proto.define("toString", objectFactory.createFunction(function () {
+	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		var name = this.node.getProperty("name").getValue();
 		var msg;
 
@@ -44,14 +44,14 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.create("String", name || msg);
-	}));
+	}, 0, "Error.prototype.toString"));
 
 	globalObject.define("Error", errorClass);
 
 	errorTypes.forEach(function (type) {
 		var errClass = objectFactory.createFunction(function (message) {
 			return createError(objectFactory, message, type);
-		}, null, null, null, { configurable: false, enumerable: false, writable: false });
+		}, null, { configurable: false, enumerable: false, writable: false });
 
 		var typeProto = errClass.getProperty("prototype").getValue();
 		typeProto.define("name", objectFactory.createPrimitive(type));

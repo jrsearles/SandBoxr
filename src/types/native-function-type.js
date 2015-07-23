@@ -1,8 +1,8 @@
 var FunctionType = require("./function-type");
 var PropertyDescriptor = require("./property-descriptor");
 
-function NativeFunctionType (fn, parentScope) {
-	FunctionType.call(this, null, parentScope);
+function NativeFunctionType (fn) {
+	FunctionType.call(this);
 	this.type = "function";
 	this.native = true;
 	this.nativeFunction = fn;
@@ -11,7 +11,7 @@ function NativeFunctionType (fn, parentScope) {
 NativeFunctionType.prototype = Object.create(FunctionType.prototype);
 NativeFunctionType.prototype.constructor = NativeFunctionType;
 
-NativeFunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
+NativeFunctionType.prototype.init = function (objectFactory, proto, descriptor) {
 	var length = this.nativeFunction.length;
 	if ("nativeLength" in this.nativeFunction) {
 		length = this.nativeFunction.nativeLength;

@@ -160,7 +160,9 @@ Environment.prototype = {
 
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
-				var func = env.objectFactory.createFunction(decl, env.current);
+				var func = env.objectFactory.createFunction(decl);
+				func.bindScope(env.current);
+				
 				env.createVariable(name, true);
 				env.putValue(name, func, strict);
 			} else {

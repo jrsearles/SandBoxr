@@ -126,7 +126,7 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createObject();
-	}, null, proto, null, { configurable: false, enumerable: false, writable: false });
+	}, proto, { configurable: false, enumerable: false, writable: false });
 
 	// var proto = objectClass.proto;
 	proto.define("hasOwnProperty", objectFactory.createBuiltInFunction(function (name) {

@@ -17,7 +17,7 @@ module.exports = function (env) {
 		}
 
 		return objectFactory.createPrimitive(stringValue);
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	}, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = stringClass.getProperty("prototype").getValue();
 

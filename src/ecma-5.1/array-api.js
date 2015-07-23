@@ -102,15 +102,15 @@ module.exports = function (env) {
 		}
 
 		return newArray;
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	}, null, { configurable: false, enumerable: false, writable: false });
 
 	var proto = arrayClass.getProperty("prototype").getValue();
 	proto.className = "Array";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
-	arrayClass.define("isArray", objectFactory.createFunction(function (obj) {
+	arrayClass.define("isArray", objectFactory.createBuiltInFunction(function (obj) {
 		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
-	}));
+	}, 0, "Array.isArray"));
 
 	proto.define("push", objectFactory.createBuiltInFunction(function (arg) {
 		var start = getLength(env, this.node);

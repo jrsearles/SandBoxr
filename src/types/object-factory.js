@@ -144,17 +144,17 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createFunction: function (fnOrNode, parentScope, proto, ctor, descriptor) {
-		// todo: need to verify that prototype arg is needed
+	createFunction: function (fnOrNode, proto, descriptor) {
 		var instance;
 
 		if (typeof fnOrNode === "function") {
-			instance = new NativeFunctionType(fnOrNode, parentScope);
+			instance = new NativeFunctionType(fnOrNode);
 		} else {
-			instance = new FunctionType(fnOrNode, parentScope);
+			instance = new FunctionType(fnOrNode);
 		}
 
-		instance.init(this, proto, ctor, descriptor);
+		instance.init(this, proto, descriptor);
+
 		var functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
 			instance.setPrototype(functionClass.getValue().getProperty("prototype").getValue());

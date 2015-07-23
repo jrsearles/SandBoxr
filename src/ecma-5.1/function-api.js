@@ -76,7 +76,8 @@ module.exports = function (env, options) {
 			};
 
 			wrappedFunc.nativeLength = callee.params.length;
-			funcInstance = objectFactory.createFunction(wrappedFunc, env.globalScope);
+			funcInstance = objectFactory.createFunction(wrappedFunc);
+			funcInstance.bindScope(env.globalScope);
 		} else {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
@@ -89,7 +90,7 @@ module.exports = function (env, options) {
 	var proto = new NativeFunctionType(function () {});
 
 	funcCtor.nativeLength = 1;
-	var functionClass = objectFactory.createFunction(funcCtor, null, proto, null, frozen);
+	var functionClass = objectFactory.createFunction(funcCtor, proto, frozen);
 	functionClass.putValue("constructor", functionClass);
 
 	globalObject.define("Function", functionClass);
@@ -133,7 +134,7 @@ module.exports = function (env, options) {
 		return func.executeFunction(this, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
-	proto.define("bind", objectFactory.createFunction(function (thisArg) {
+	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg) {
 		var args = slice.call(arguments, 1);
 		var fn = this.node;
 		var params = fn.native ? [] : fn.node.params;
@@ -156,13 +157,14 @@ module.exports = function (env, options) {
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
-		var boundFunc = objectFactory.createFunction(nativeFunc, this.env.current);
+		var boundFunc = objectFactory.createFunction(nativeFunc);
 
 		boundFunc.defineOwnProperty("caller", throwProperties);
 		boundFunc.defineOwnProperty("arguments", throwProperties);
 		boundFunc.defineOwnProperty("callee", throwProperties);
+		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
 
 		return boundFunc;
-	}));
+	}, 1, "Function.prototype.bind"));
 };

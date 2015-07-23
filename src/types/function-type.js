@@ -2,20 +2,21 @@ var ObjectType = require("./object-type");
 var PropertyDescriptor = require("./property-descriptor");
 var contracts = require("../utils/contracts");
 
-function FunctionType (node, parentScope) {
+function FunctionType (node) {
 	ObjectType.call(this);
 	this.type = "function";
 	this.className = "Function";
 	this.native = false;
 	this.node = node;
-	this.parentScope = parentScope;
+
+	this.parentScope = null;
 	this.boundThis = null;
 }
 
 FunctionType.prototype = Object.create(ObjectType.prototype);
 FunctionType.prototype.constructor = FunctionType;
 
-FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) {
+FunctionType.prototype.init = function (objectFactory, proto, descriptor) {
 	// set length property from the number of parameters
 	this.defineOwnProperty("length", {
 		value: objectFactory.createPrimitive(this.node.params.length),
@@ -26,7 +27,7 @@ FunctionType.prototype.init = function (objectFactory, proto, ctor, descriptor) 
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: ctor || this });
+	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value:  this });
 	this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
 };
 
@@ -43,6 +44,10 @@ FunctionType.prototype.getProperty = function (name) {
 
 FunctionType.prototype.bindThis = function (thisArg) {
 	this.boundThis = thisArg;
+};
+
+FunctionType.prototype.bindScope = function (scope) {
+	this.parentScope = scope;
 };
 
 FunctionType.prototype.createScope = function (env, thisArg) {

@@ -55,7 +55,7 @@ module.exports = function (env) {
 
 		dateValue = Date.apply(null, args);
 		return objectFactory.createPrimitive(dateValue);
-	}, null, null, null, { configurable: false, enumerable: false, writable: false });
+	}, null, { configurable: false, enumerable: false, writable: false });
 
 	dateClass.define("parse", objectFactory.createBuiltInFunction(function (value) {
 		var stringValue = convert.toPrimitive(env, value, "string");
@@ -86,13 +86,12 @@ module.exports = function (env) {
 			Date.prototype[name].apply(this.node.value, args);
 		}
 
-		setter.nativeLength = Date.prototype[name].length;
-		proto.define(name, objectFactory.createFunction(setter));
+		proto.define(name, objectFactory.createBuiltInFunction(setter, Date.prototype[name].length, "Date.prototype." + name));
 	});
 
-	proto.define("valueOf", objectFactory.createFunction(function () {
+	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
 		return objectFactory.createPrimitive(this.node.value.valueOf());
-	}));
+	}, 0, "Date.prototype.valueOf"));
 
 	globalObject.define("Date", dateClass);
 };
