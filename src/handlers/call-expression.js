@@ -25,7 +25,7 @@ module.exports = function CallExpression (context) {
 	var args = node.arguments.map(function (arg) { return context.create(arg).execute().result.getValue(); });
 
 	if (!fn || fn.className !== "Function") {
-		throw new TypeError(fn.toString() + " not a function");
+		throw new TypeError(convert.toString(context.env, fn) + " not a function");
 	}
 
 	var native = fn.native;

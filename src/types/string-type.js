@@ -10,8 +10,7 @@ function getCharacter (source, position) {
 	if (position < source.value.length) {
 		// todo: need to set length
 		var character = new StringType(source.value[position]);
-		character.parent = source.parent;
-		// character.setProto(source.proto);
+		character.setPrototype(source.getPrototype());
 		return character;
 	}
 
@@ -22,7 +21,12 @@ StringType.prototype = Object.create(PrimitiveType.prototype);
 StringType.prototype.constructor = StringType;
 
 StringType.prototype.init = function (objectFactory) {
-	this.properties.length = new PropertyDescriptor(this, { configurable: false, enumerable: false, writable: false, value: objectFactory.createPrimitive(this.value.length) });
+	this.properties.length = new PropertyDescriptor(this, {
+		configurable: false,
+		enumerable: false,
+		writable: false,
+		value: objectFactory.createPrimitive(this.value.length)
+	});
 };
 
 StringType.prototype.getProperty = function (name) {
@@ -34,10 +38,6 @@ StringType.prototype.getProperty = function (name) {
 	}
 
 	return PrimitiveType.prototype.getProperty.apply(this, arguments);
-};
-
-StringType.prototype.getDensity = function () {
-	return 100;
 };
 
 StringType.prototype.getOwnPropertyNames = function () {

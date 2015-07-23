@@ -47,8 +47,6 @@ FunctionType.prototype.bindThis = function (thisArg) {
 
 FunctionType.prototype.createScope = function (env, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
-	// return (this.parentScope || currentScope).createScope(thisArg);
-
 	var priorScope = env.current;
 	if (this.parentScope) {
 		env.current = this.parentScope;

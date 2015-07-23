@@ -8,7 +8,6 @@ function ObjectType () {
 	this.extensible = true;
 
 	this.primitiveHint = "number";
-	this.propertyCount = 0;
 }
 
 ObjectType.prototype = ObjectType.fn = {
@@ -66,14 +65,13 @@ ObjectType.prototype = ObjectType.fn = {
 		if (descriptor) {
 			if (!descriptor.canSetValue()) {
 				if (throwOnError) {
-					throw new TypeError("Cannot assign to read only property '" + name + "' of " + this.toString());
+					throw new TypeError("Cannot assign to read only property '" + name + "' of %s");
 				}
 
 				return;
 			}
 
 			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
-				this.propertyCount++;
 				this.properties[name] = new PropertyDescriptor(this, {
 					value: value,
 					configurable: descriptor.configurable,
@@ -117,7 +115,6 @@ ObjectType.prototype = ObjectType.fn = {
 			return false;
 		}
 
-		this.propertyCount++;
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
 		return true;
 	},
@@ -126,11 +123,11 @@ ObjectType.prototype = ObjectType.fn = {
 		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
 		descriptor.value = value;
 
-		if (!(name in this.properties)) {
-			this.propertyCount++;
-		}
-
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
+	},
+
+	remove: function (name) {
+		delete this.properties[name];
 	},
 
 	getValue: function () {
@@ -146,8 +143,6 @@ ObjectType.prototype = ObjectType.fn = {
 			if (!this.properties[name].configurable) {
 				return false;
 			}
-
-			this.propertyCount--;
 		}
 
 		return delete this.properties[name];
@@ -175,15 +170,6 @@ ObjectType.prototype = ObjectType.fn = {
 		}
 
 		this.preventExtensions();
-	},
-
-	getDensity: function (length) {
-		// -1 to exclude length
-		return this.propertyCount - 1 / length;
-	},
-
-	toString: function () {
-		return "[" + this.type + "]";
 	},
 
 	equals: function (obj) {

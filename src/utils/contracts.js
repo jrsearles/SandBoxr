@@ -20,9 +20,9 @@ module.exports = {
 		}
 	},
 
-	assertIsFunction: function (obj) {
-		if (!obj || obj.type !== "function") {
-			throw new TypeError((obj ? obj.toString() : "undefined") + " is not a function");
+	assertIsFunction: function (obj, toString) {
+		if (!obj || obj.className !== "Function") {
+			throw new TypeError("%s is not a function");
 		}
 	},
 

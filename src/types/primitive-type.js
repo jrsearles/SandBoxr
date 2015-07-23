@@ -21,7 +21,4 @@ PrimitiveType.prototype.getProperty = function (name) {
 	return ObjectType.prototype.getProperty.apply(this, arguments);
 };
 
-// overwrite object methods
-PrimitiveType.prototype.toString = function () { return String(this.value); };
-
 module.exports = PrimitiveType;

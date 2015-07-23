@@ -2193,16 +2193,16 @@ function DeclarativeEnvironment (parent, thisArg, env) {
 DeclarativeEnvironment.prototype = {
 	constructor: DeclarativeEnvironment,
 
-	createReference: function (name, strict) {
+	getReference: function (name, strict) {
 		return new Reference(name, this, strict, this.env);
 	},
 
-	hasBinding: function (name) {
+	hasVariable: function (name) {
 		return name in this.properties;
 	},
 
-	createMutableBinding: function (name) {
-		if (this.hasBinding(name)) {
+	createVariable: function (name) {
+		if (this.hasVariable(name)) {
 			return this.properties[name];
 		}
 
@@ -2214,18 +2214,8 @@ DeclarativeEnvironment.prototype = {
 		});
 	},
 
-	createImmutableBinding: function (name) {
-		this.createMutableBinding(name, false);
-	},
-
-	initializeImmutableBinding: function (name, value) {
-		if (this.hasBinding(name) && !this.properties[name].value) {
-			this.properties[name].setValue(value);
-		}
-	},
-
-	setMutableBinding: function (name, value, throwOnError) {
-		if (this.hasBinding(name)) {
+	putValue: function (name, value, throwOnError) {
+		if (this.hasVariable(name)) {
 			if (!this.properties[name].writable) {
 				if (throwOnError) {
 					throw new TypeError("Cannot write to immutable binding: " + name);
@@ -2238,8 +2228,8 @@ DeclarativeEnvironment.prototype = {
 		}
 	},
 
-	getBindingValue: function (name, throwOnError) {
-		if (this.hasBinding(name)) {
+	getValue: function (name, throwOnError) {
+		if (this.hasVariable(name)) {
 			if (!this.properties[name].value) {
 				if (throwOnError) {
 					throw new ReferenceError(name + " is not defined");
@@ -2252,8 +2242,8 @@ DeclarativeEnvironment.prototype = {
 		}
 	},
 
-	deleteBinding: function (name) {
-		if (!this.hasBinding(name)) {
+	deleteVariable: function (name) {
+		if (!this.hasVariable(name)) {
 			return true;
 		}
 
@@ -2369,8 +2359,8 @@ Environment.prototype = {
 	getReference: function (name, strict) {
 		var scope = this.current;
 		while (scope) {
-			if (scope.hasBinding(name)) {
-				return scope.createReference(name, strict);
+			if (scope.hasVariable(name)) {
+				return scope.getReference(name, strict);
 			}
 
 			scope = scope.parent;
@@ -2384,35 +2374,31 @@ Environment.prototype = {
 	},
 
 	putValue: function (name, value, strict) {
-		this.current.setMutableBinding(name, value, strict);
+		this.current.putValue(name, value, strict);
 	},
 
-	createBinding: function (name, immutable) {
+	createVariable: function (name, immutable) {
 		if (keywords.isReserved(name)) {
 			throw new SyntaxError("Illegal use of reserved keyword: " + name);
 		}
 
-		this.current.createMutableBinding(name, !immutable);
+		this.current.createVariable(name, !immutable);
 	},
 
-	createExecutionContext: function (node, callee) {
-		return new ExecutionContext(this, node, callee);
+	hasVariable: function (name) {
+		return this.current.hasVariable(name);
 	},
 
-	hasBinding: function (name) {
-		return this.current.hasBinding(name);
-	},
-
-	setBinding: function (name, value, strict) {
-		this.current.setMutableBinding(name, value);
-	},
-
-	deleteBinding: function (name) {
-		this.current.deleteBinding(name);
+	deleteVariable: function (name) {
+		this.current.deleteVariable(name);
 	},
 
 	getThisBinding: function () {
 		return this.current.getThisBinding() || this.global;
+	},
+
+	createExecutionContext: function (node, callee) {
+		return new ExecutionContext(this, node, callee);
 	},
 
 	createScope: function (thisArg) {
@@ -2441,20 +2427,13 @@ Environment.prototype = {
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
 				var func = env.objectFactory.createFunction(decl, env.current);
-				env.createBinding(name, true);
-				env.setBinding(name, func, strict);
-				// note: since the function name may collide with a variable we need to test for existence
-
-				// if (env.hasBinding(name)) {
-				// 	env.putValue(name, func);
-				// } else {
-				// 	env.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
-				// }
+				env.createVariable(name, true);
+				env.putValue(name, func, strict);
 			} else {
-				if (env.hasBinding(name)) {
-					env.setBinding(name, undef, strict);
+				if (env.hasVariable(name)) {
+					env.putValue(name, undef, strict);
 				} else {
-					env.createBinding(name, true);
+					env.createVariable(name, true);
 				}
 			}
 		});
@@ -2498,21 +2477,17 @@ function ObjectEnvironment (parent, obj, env) {
 ObjectEnvironment.prototype = {
 	constructor: ObjectEnvironment,
 
-	createReference: function (name, strict) {
+	getReference: function (name, strict) {
 		return new PropertyReference(name, this.object, strict, this.env);
 	},
 
-	getValue: function (name) {
-		return this.object.getValue(name);
-	},
-
-	hasBinding: function (name) {
+	hasVariable: function (name) {
 		return this.object.hasProperty(name);
 	},
 
-	createMutableBinding: function (name, immutable) {
+	createVariable: function (name, immutable) {
 		if (this.parent) {
-			this.parent.createMutableBinding.apply(this.parent, arguments);
+			this.parent.createVariable.apply(this.parent, arguments);
 		} else {
 			this.object.defineOwnProperty(name, {
 				value: undefined,
@@ -2523,20 +2498,16 @@ ObjectEnvironment.prototype = {
 		}
 	},
 
-	createImmutableBinding: function (name) {
-		this.createMutableBinding(name, false);
-	},
-
-	setMutableBinding: function (name, value, throwOnError) {
+	putValue: function (name, value, throwOnError) {
 		if (this.parent && !this.object.hasProperty(name)) {
-			this.parent.setMutableBinding.apply(this.parent, arguments);
+			this.parent.putValue.apply(this.parent, arguments);
 		} else {
 			this.object.putValue(name, value, throwOnError);
 		}
 	},
 
-	getBindingValue: function (name, throwOnError) {
-		if (!this.hasBinding(name)) {
+	getValue: function (name, throwOnError) {
+		if (!this.hasVariable(name)) {
 			if (throwOnError) {
 				throw new ReferenceError(name + " is not defined.");
 			}
@@ -2547,7 +2518,7 @@ ObjectEnvironment.prototype = {
 		return this.object.getProperty(name).getValue();
 	},
 
-	deleteBinding: function (name) {
+	deleteVariable: function (name) {
 		return this.object.deleteProperty(name, false);
 	},
 
@@ -2610,7 +2581,7 @@ Reference.prototype = {
 		}
 
 		if (this.base) {
-			this.base.setMutableBinding(this.name, value, this.strict);
+			this.base.putValue(this.name, value, this.strict);
 		} else {
 			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
 		}
@@ -2621,12 +2592,12 @@ Reference.prototype = {
 			throw new ReferenceError(this.name + " is not defined");
 		}
 
-		return this.base.getBindingValue(this.name);
+		return this.base.getValue(this.name, this.strict);
 	},
 
 	deleteBinding: function (name) {
 		if (this.base) {
-			return this.base.deleteBinding(name);
+			return this.base.deleteVariable(name);
 		}
 
 		return true;
@@ -3425,13 +3396,13 @@ module.exports = function TryCatchStatement (context) {
 			// scope.init(context.node.handler.body);
 
 			var errVar = context.node.handler.param.name;
-			var hasBinding = context.env.hasBinding(errVar);
+			var hasVariable = context.env.hasVariable(errVar);
 
-			if (!hasBinding) {
-				context.env.createBinding(errVar);
+			if (!hasVariable) {
+				context.env.createVariable(errVar);
 			}
 
-			context.env.setBinding(errVar, caughtError);
+			context.env.putValue(errVar, caughtError);
 
 			try {
 				result = context.create(context.node.handler.body, context.node.handler).execute();
@@ -3439,8 +3410,8 @@ module.exports = function TryCatchStatement (context) {
 				// scope.exitScope();
 				throw catchError;
 			} finally {
-				if (!hasBinding) {
-					context.env.deleteBinding(errVar);
+				if (!hasVariable) {
+					context.env.deleteVariable(errVar);
 				}
 			}
 
@@ -3898,10 +3869,6 @@ function ErrorType (source) {
 ErrorType.prototype = Object.create(ObjectType.prototype);
 ErrorType.prototype.constructor = ErrorType;
 
-ErrorType.prototype.toString = function () {
-	return String(this.source);
-};
-
 module.exports = ErrorType;
 
 },{"./object-type":63}],60:[function(require,module,exports){
@@ -3955,8 +3922,6 @@ FunctionType.prototype.bindThis = function (thisArg) {
 
 FunctionType.prototype.createScope = function (env, thisArg) {
 	// if a parent scope is defined we need to limit the scope to that scope
-	// return (this.parentScope || currentScope).createScope(thisArg);
-
 	var priorScope = env.current;
 	if (this.parentScope) {
 		env.current = this.parentScope;
@@ -4087,7 +4052,6 @@ function setOrphans (scope) {
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
 				child.setPrototype(parent.getProperty("prototype").getValue());
-				// child.setProto(parent.proto);
 			});
 
 			delete orphans[typeName];
@@ -4105,8 +4069,6 @@ function setProto (typeName, instance, env) {
 	var parent = env.getReference(typeName);
 	if (!parent.isUnresolved()) {
 		instance.setPrototype(parent.getValue().getProperty("prototype").getValue());
-		// instance.parent = parent.getValue();
-		// instance.setProto(instance.parent.proto);
 		return;
 	}
 
@@ -4172,7 +4134,6 @@ ObjectFactory.prototype = {
 					});
 				}
 
-				// instance.putValue("name", this.createPrimitive(typeName));
 				break;
 
 			default:
@@ -4186,13 +4147,11 @@ ObjectFactory.prototype = {
 
 	createObject: function (parent) {
 		var instance = new ObjectType();
+
 		if (parent !== null) {
 			if (parent) {
 				instance.setPrototype(parent && parent.getProperty("prototype").getValue());
-				// instance.parent = parent;
-				// instance.setProto(parent.proto);
 			} else {
-				// instance.parent = this.env.global.getProperty("Object").getValue();
 				setProto("Object", instance, this.env);
 			}
 		}
@@ -4224,7 +4183,6 @@ ObjectFactory.prototype = {
 		instance.init(this, proto, ctor, descriptor);
 		var functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
-			// instance.parent = functionClass.getValue();
 			instance.setPrototype(functionClass.getValue().getProperty("prototype").getValue());
 		}
 
@@ -4261,7 +4219,6 @@ function ObjectType () {
 	this.extensible = true;
 
 	this.primitiveHint = "number";
-	this.propertyCount = 0;
 }
 
 ObjectType.prototype = ObjectType.fn = {
@@ -4319,14 +4276,13 @@ ObjectType.prototype = ObjectType.fn = {
 		if (descriptor) {
 			if (!descriptor.canSetValue()) {
 				if (throwOnError) {
-					throw new TypeError("Cannot assign to read only property '" + name + "' of " + this.toString());
+					throw new TypeError("Cannot assign to read only property '" + name + "' of %s");
 				}
 
 				return;
 			}
 
 			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
-				this.propertyCount++;
 				this.properties[name] = new PropertyDescriptor(this, {
 					value: value,
 					configurable: descriptor.configurable,
@@ -4370,7 +4326,6 @@ ObjectType.prototype = ObjectType.fn = {
 			return false;
 		}
 
-		this.propertyCount++;
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
 		return true;
 	},
@@ -4379,11 +4334,11 @@ ObjectType.prototype = ObjectType.fn = {
 		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
 		descriptor.value = value;
 
-		if (!(name in this.properties)) {
-			this.propertyCount++;
-		}
-
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
+	},
+
+	remove: function (name) {
+		delete this.properties[name];
 	},
 
 	getValue: function () {
@@ -4399,8 +4354,6 @@ ObjectType.prototype = ObjectType.fn = {
 			if (!this.properties[name].configurable) {
 				return false;
 			}
-
-			this.propertyCount--;
 		}
 
 		return delete this.properties[name];
@@ -4428,11 +4381,6 @@ ObjectType.prototype = ObjectType.fn = {
 		}
 
 		this.preventExtensions();
-	},
-
-	getDensity: function (length) {
-		// -1 to exclude length
-		return this.propertyCount - 1 / length;
 	},
 
 	toString: function () {
@@ -4648,8 +4596,7 @@ function getCharacter (source, position) {
 	if (position < source.value.length) {
 		// todo: need to set length
 		var character = new StringType(source.value[position]);
-		character.parent = source.parent;
-		// character.setProto(source.proto);
+		character.setPrototype(this.getPrototype());
 		return character;
 	}
 
@@ -4660,7 +4607,12 @@ StringType.prototype = Object.create(PrimitiveType.prototype);
 StringType.prototype.constructor = StringType;
 
 StringType.prototype.init = function (objectFactory) {
-	this.properties.length = new PropertyDescriptor(this, { configurable: false, enumerable: false, writable: false, value: objectFactory.createPrimitive(this.value.length) });
+	this.properties.length = new PropertyDescriptor(this, {
+		configurable: false,
+		enumerable: false,
+		writable: false,
+		value: objectFactory.createPrimitive(this.value.length)
+	});
 };
 
 StringType.prototype.getProperty = function (name) {
@@ -4672,10 +4624,6 @@ StringType.prototype.getProperty = function (name) {
 	}
 
 	return PrimitiveType.prototype.getProperty.apply(this, arguments);
-};
-
-StringType.prototype.getDensity = function () {
-	return 100;
 };
 
 StringType.prototype.getOwnPropertyNames = function () {
@@ -5058,18 +5006,18 @@ module.exports = {
 		var undef = env.global.getProperty("undefined").getValue();
 
 		var argumentList = env.objectFactory.createArguments(args, callee);
-		env.current.createMutableBinding("arguments");
-		env.current.setMutableBinding("arguments", argumentList);
+		env.current.createVariable("arguments");
+		env.current.putValue("arguments", argumentList);
 
 		params.forEach(function (param, index) {
-			if (!env.current.hasBinding(param.name)) {
-				var descriptor = env.current.createMutableBinding(param.name);
+			if (!env.current.hasVariable(param.name)) {
+				var descriptor = env.current.createVariable(param.name);
 				if (args.length > index) {
 					argumentList.mapProperty(index, descriptor);
 				}
 			}
 
-			env.current.setMutableBinding(param.name, args[index] || undef);
+			env.current.putValue(param.name, args[index] || undef);
 		});
 
 		// just set value if additional, unnamed arguments are passed in

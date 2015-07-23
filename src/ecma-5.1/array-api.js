@@ -384,7 +384,7 @@ module.exports = function (env) {
 
 	proto.define("forEach", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		var length = getLength(env, this.node);
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		for (var i = 0; i < length; i++) {
 			if (this.node.hasProperty(i)) {
@@ -396,7 +396,7 @@ module.exports = function (env) {
 	proto.define("map", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		var length = getLength(env, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.map");
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		var newArray = objectFactory.create("Array");
 		newArray.putValue("length", objectFactory.createPrimitive(length));
@@ -413,7 +413,7 @@ module.exports = function (env) {
 	proto.define("filter", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.filter");
 		var length = getLength(env, this.node);
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		var newArray = objectFactory.create("Array");
 		var index = 0;
@@ -430,7 +430,7 @@ module.exports = function (env) {
 	proto.define("every", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.every");
 		var length = getLength(env, this.node);
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		for (var i = 0; i < length; i++) {
 			if (this.node.hasProperty(i) && !convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
@@ -444,7 +444,7 @@ module.exports = function (env) {
 	proto.define("some", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.some");
 		var length = getLength(env, this.node);
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		for (var i = 0; i < length; i++) {
 			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
@@ -458,7 +458,7 @@ module.exports = function (env) {
 	proto.define("reduce", objectFactory.createBuiltInFunction(function (callback, initialValue) {
 		var length = getLength(env, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduce");
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		var index = 0;
 		var value;
@@ -490,7 +490,7 @@ module.exports = function (env) {
 	proto.define("reduceRight", objectFactory.createBuiltInFunction(function (callback, initialValue) {
 		var length = getLength(env, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
-		contracts.assertIsFunction(callback);
+		contracts.assertIsFunction(callback, this.node);
 
 		// length--;
 		var accumulator;
