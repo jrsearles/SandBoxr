@@ -11,16 +11,16 @@ function DeclarativeEnvironment (parent, thisArg, env) {
 DeclarativeEnvironment.prototype = {
 	constructor: DeclarativeEnvironment,
 
-	createReference: function (name, strict) {
+	getReference: function (name, strict) {
 		return new Reference(name, this, strict, this.env);
 	},
 
-	hasBinding: function (name) {
+	hasVariable: function (name) {
 		return name in this.properties;
 	},
 
-	createMutableBinding: function (name) {
-		if (this.hasBinding(name)) {
+	createVariable: function (name) {
+		if (this.hasVariable(name)) {
 			return this.properties[name];
 		}
 
@@ -32,18 +32,8 @@ DeclarativeEnvironment.prototype = {
 		});
 	},
 
-	createImmutableBinding: function (name) {
-		this.createMutableBinding(name, false);
-	},
-
-	initializeImmutableBinding: function (name, value) {
-		if (this.hasBinding(name) && !this.properties[name].value) {
-			this.properties[name].setValue(value);
-		}
-	},
-
-	setMutableBinding: function (name, value, throwOnError) {
-		if (this.hasBinding(name)) {
+	putValue: function (name, value, throwOnError) {
+		if (this.hasVariable(name)) {
 			if (!this.properties[name].writable) {
 				if (throwOnError) {
 					throw new TypeError("Cannot write to immutable binding: " + name);
@@ -56,8 +46,8 @@ DeclarativeEnvironment.prototype = {
 		}
 	},
 
-	getBindingValue: function (name, throwOnError) {
-		if (this.hasBinding(name)) {
+	getValue: function (name, throwOnError) {
+		if (this.hasVariable(name)) {
 			if (!this.properties[name].value) {
 				if (throwOnError) {
 					throw new ReferenceError(name + " is not defined");
@@ -70,8 +60,8 @@ DeclarativeEnvironment.prototype = {
 		}
 	},
 
-	deleteBinding: function (name) {
-		if (!this.hasBinding(name)) {
+	deleteVariable: function (name) {
+		if (!this.hasVariable(name)) {
 			return true;
 		}
 

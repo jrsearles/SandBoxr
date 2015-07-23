@@ -9,21 +9,17 @@ function ObjectEnvironment (parent, obj, env) {
 ObjectEnvironment.prototype = {
 	constructor: ObjectEnvironment,
 
-	createReference: function (name, strict) {
+	getReference: function (name, strict) {
 		return new PropertyReference(name, this.object, strict, this.env);
 	},
 
-	getValue: function (name) {
-		return this.object.getValue(name);
-	},
-
-	hasBinding: function (name) {
+	hasVariable: function (name) {
 		return this.object.hasProperty(name);
 	},
 
-	createMutableBinding: function (name, immutable) {
+	createVariable: function (name, immutable) {
 		if (this.parent) {
-			this.parent.createMutableBinding.apply(this.parent, arguments);
+			this.parent.createVariable.apply(this.parent, arguments);
 		} else {
 			this.object.defineOwnProperty(name, {
 				value: undefined,
@@ -34,20 +30,16 @@ ObjectEnvironment.prototype = {
 		}
 	},
 
-	createImmutableBinding: function (name) {
-		this.createMutableBinding(name, false);
-	},
-
-	setMutableBinding: function (name, value, throwOnError) {
+	putValue: function (name, value, throwOnError) {
 		if (this.parent && !this.object.hasProperty(name)) {
-			this.parent.setMutableBinding.apply(this.parent, arguments);
+			this.parent.putValue.apply(this.parent, arguments);
 		} else {
 			this.object.putValue(name, value, throwOnError);
 		}
 	},
 
-	getBindingValue: function (name, throwOnError) {
-		if (!this.hasBinding(name)) {
+	getValue: function (name, throwOnError) {
+		if (!this.hasVariable(name)) {
 			if (throwOnError) {
 				throw new ReferenceError(name + " is not defined.");
 			}
@@ -58,7 +50,7 @@ ObjectEnvironment.prototype = {
 		return this.object.getProperty(name).getValue();
 	},
 
-	deleteBinding: function (name) {
+	deleteVariable: function (name) {
 		return this.object.deleteProperty(name, false);
 	},
 

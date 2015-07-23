@@ -6,7 +6,7 @@ var parser = require("./test/ast-parser");
 var args = require("yargs")
 	.default("stopOnFail", false)
 	.alias("f", "stopOnFail")
-	.default("strict", false)
+	.default("strict", true)
 	.alias("s", "strict")
 	.default("verbose", false)
 	.alias("v", "verbose")
@@ -32,26 +32,26 @@ if (chapter) {
 	tests = [
 		root + "suite/ch06/**/*.js", 	// passed!
 		root + "suite/ch07/**/*.js",	// passed!
-		root + "suite/ch08/**/*.js",	// passed! *
-		root + "suite/ch09/**/*.js",	// passed!
-		root + "suite/ch10/**/*.js",	// passed! *
-		root + "suite/ch11/**/*.js",	// passed!
+		// root + "suite/ch08/**/*.js",	// passed! *
+		// root + "suite/ch09/**/*.js",	// passed!
+		// root + "suite/ch10/**/*.js",	// passed! *
+		// root + "suite/ch11/**/*.js",	// passed!
 		// root + "suite/ch12/12.6/12.6.2/**/*.js",
-		root + "suite/ch13/**/*.js",	// functions	-- passed!
-		root + "suite/ch14/**/*.js",	// program	-- passed!
-		root + "suite/ch15/15.1/**/*.js",	// global	-- passed
-		root + "suite/ch15/15.2/**/*.js",	// object	-- passed
-		root + "suite/ch15/15.3/**/*.js",	// function	-- passed
-		root + "suite/ch15/15.4/**/*.js",	// array		-- passed - 1
-		root + "suite/ch15/15.5/**/*.js",	// string 	-- passed
-		root + "suite/ch15/15.6/**/*.js",	// boolean	-- passed
-		root + "suite/ch15/15.7/**/*.js",	// number -- passed
-		root + "suite/ch15/15.8/**/*.js",	// math	-- passed -1
-		root + "suite/ch15/15.9/**/*.js",	// date	-- passed with exceptions
-		root + "suite/ch15/15.10/**/*.js",	// regex	-- passed
-		root + "suite/ch15/15.11/**/*.js",	// error	-- passed
-		root + "suite/ch15/15.12/**/*.js",	// json		-- passed
-		root + "suite/annexB/**/*.js",	// passed
+		// root + "suite/ch13/**/*.js",	// functions	-- passed!
+		// root + "suite/ch14/**/*.js",	// program	-- passed!
+		// root + "suite/ch15/15.1/**/*.js",	// global	-- passed
+		// root + "suite/ch15/15.2/**/*.js",	// object	-- passed
+		// root + "suite/ch15/15.3/**/*.js",	// function	-- passed
+		// root + "suite/ch15/15.4/**/*.js",	// array		-- passed - 1
+		// root + "suite/ch15/15.5/**/*.js",	// string 	-- passed
+		// root + "suite/ch15/15.6/**/*.js",	// boolean	-- passed
+		// root + "suite/ch15/15.7/**/*.js",	// number -- passed
+		// root + "suite/ch15/15.8/**/*.js",	// math	-- passed -1
+		// root + "suite/ch15/15.9/**/*.js",	// date	-- passed with exceptions
+		// root + "suite/ch15/15.10/**/*.js",	// regex	-- passed
+		// root + "suite/ch15/15.11/**/*.js",	// error	-- passed
+		// root + "suite/ch15/15.12/**/*.js",	// json		-- passed
+		// root + "suite/annexB/**/*.js",	// passed
 		// root + "suite/bestPractice/**/*.js"
 	];
 }

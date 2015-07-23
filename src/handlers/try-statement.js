@@ -11,13 +11,13 @@ module.exports = function TryCatchStatement (context) {
 			// scope.init(context.node.handler.body);
 
 			var errVar = context.node.handler.param.name;
-			var hasBinding = context.env.hasBinding(errVar);
+			var hasVariable = context.env.hasVariable(errVar);
 
-			if (!hasBinding) {
-				context.env.createBinding(errVar);
+			if (!hasVariable) {
+				context.env.createVariable(errVar);
 			}
 
-			context.env.setBinding(errVar, caughtError);
+			context.env.putValue(errVar, caughtError);
 
 			try {
 				result = context.create(context.node.handler.body, context.node.handler).execute();
@@ -25,8 +25,8 @@ module.exports = function TryCatchStatement (context) {
 				// scope.exitScope();
 				throw catchError;
 			} finally {
-				if (!hasBinding) {
-					context.env.deleteBinding(errVar);
+				if (!hasVariable) {
+					context.env.deleteVariable(errVar);
 				}
 			}
 

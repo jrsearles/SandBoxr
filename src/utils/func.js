@@ -53,18 +53,18 @@ module.exports = {
 		var undef = env.global.getProperty("undefined").getValue();
 
 		var argumentList = env.objectFactory.createArguments(args, callee);
-		env.current.createMutableBinding("arguments");
-		env.current.setMutableBinding("arguments", argumentList);
+		env.current.createVariable("arguments");
+		env.current.putValue("arguments", argumentList);
 
 		params.forEach(function (param, index) {
-			if (!env.current.hasBinding(param.name)) {
-				var descriptor = env.current.createMutableBinding(param.name);
+			if (!env.current.hasVariable(param.name)) {
+				var descriptor = env.current.createVariable(param.name);
 				if (args.length > index) {
 					argumentList.mapProperty(index, descriptor);
 				}
 			}
 
-			env.current.setMutableBinding(param.name, args[index] || undef);
+			env.current.putValue(param.name, args[index] || undef);
 		});
 
 		// just set value if additional, unnamed arguments are passed in

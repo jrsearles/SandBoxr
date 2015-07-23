@@ -26,7 +26,6 @@ function setOrphans (scope) {
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
 				child.setPrototype(parent.getProperty("prototype").getValue());
-				// child.setProto(parent.proto);
 			});
 
 			delete orphans[typeName];
@@ -44,8 +43,6 @@ function setProto (typeName, instance, env) {
 	var parent = env.getReference(typeName);
 	if (!parent.isUnresolved()) {
 		instance.setPrototype(parent.getValue().getProperty("prototype").getValue());
-		// instance.parent = parent.getValue();
-		// instance.setProto(instance.parent.proto);
 		return;
 	}
 
@@ -111,7 +108,6 @@ ObjectFactory.prototype = {
 					});
 				}
 
-				// instance.putValue("name", this.createPrimitive(typeName));
 				break;
 
 			default:
@@ -125,13 +121,11 @@ ObjectFactory.prototype = {
 
 	createObject: function (parent) {
 		var instance = new ObjectType();
+
 		if (parent !== null) {
 			if (parent) {
 				instance.setPrototype(parent && parent.getProperty("prototype").getValue());
-				// instance.parent = parent;
-				// instance.setProto(parent.proto);
 			} else {
-				// instance.parent = this.env.global.getProperty("Object").getValue();
 				setProto("Object", instance, this.env);
 			}
 		}
@@ -163,7 +157,6 @@ ObjectFactory.prototype = {
 		instance.init(this, proto, ctor, descriptor);
 		var functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
-			// instance.parent = functionClass.getValue();
 			instance.setPrototype(functionClass.getValue().getProperty("prototype").getValue());
 		}
 

@@ -93,8 +93,8 @@ Environment.prototype = {
 	getReference: function (name, strict) {
 		var scope = this.current;
 		while (scope) {
-			if (scope.hasBinding(name)) {
-				return scope.createReference(name, strict);
+			if (scope.hasVariable(name)) {
+				return scope.getReference(name, strict);
 			}
 
 			scope = scope.parent;
@@ -108,35 +108,31 @@ Environment.prototype = {
 	},
 
 	putValue: function (name, value, strict) {
-		this.current.setMutableBinding(name, value, strict);
+		this.current.putValue(name, value, strict);
 	},
 
-	createBinding: function (name, immutable) {
+	createVariable: function (name, immutable) {
 		if (keywords.isReserved(name)) {
 			throw new SyntaxError("Illegal use of reserved keyword: " + name);
 		}
 
-		this.current.createMutableBinding(name, !immutable);
+		this.current.createVariable(name, !immutable);
 	},
 
-	createExecutionContext: function (node, callee) {
-		return new ExecutionContext(this, node, callee);
+	hasVariable: function (name) {
+		return this.current.hasVariable(name);
 	},
 
-	hasBinding: function (name) {
-		return this.current.hasBinding(name);
-	},
-
-	setBinding: function (name, value, strict) {
-		this.current.setMutableBinding(name, value);
-	},
-
-	deleteBinding: function (name) {
-		this.current.deleteBinding(name);
+	deleteVariable: function (name) {
+		this.current.deleteVariable(name);
 	},
 
 	getThisBinding: function () {
 		return this.current.getThisBinding() || this.global;
+	},
+
+	createExecutionContext: function (node, callee) {
+		return new ExecutionContext(this, node, callee);
 	},
 
 	createScope: function (thisArg) {
@@ -165,20 +161,13 @@ Environment.prototype = {
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
 				var func = env.objectFactory.createFunction(decl, env.current);
-				env.createBinding(name, true);
-				env.setBinding(name, func, strict);
-				// note: since the function name may collide with a variable we need to test for existence
-
-				// if (env.hasBinding(name)) {
-				// 	env.putValue(name, func);
-				// } else {
-				// 	env.defineOwnProperty(name, func, { configurable: false, enumerable: false, writable: true }, true);
-				// }
+				env.createVariable(name, true);
+				env.putValue(name, func, strict);
 			} else {
-				if (env.hasBinding(name)) {
-					env.setBinding(name, undef, strict);
+				if (env.hasVariable(name)) {
+					env.putValue(name, undef, strict);
 				} else {
-					env.createBinding(name, true);
+					env.createVariable(name, true);
 				}
 			}
 		});

@@ -14,7 +14,7 @@ Reference.prototype = {
 		}
 
 		if (this.base) {
-			this.base.setMutableBinding(this.name, value, this.strict);
+			this.base.putValue(this.name, value, this.strict);
 		} else {
 			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
 		}
@@ -25,12 +25,12 @@ Reference.prototype = {
 			throw new ReferenceError(this.name + " is not defined");
 		}
 
-		return this.base.getBindingValue(this.name);
+		return this.base.getValue(this.name, this.strict);
 	},
 
 	deleteBinding: function (name) {
 		if (this.base) {
-			return this.base.deleteBinding(name);
+			return this.base.deleteVariable(name);
 		}
 
 		return true;
