@@ -3,6 +3,7 @@ var ObjectEnvironment = require("./object-environment");
 var ExecutionContext = require("../execution-context");
 var Reference = require("./reference");
 var keywords = require("../keywords");
+var api = require("../ecma-5.1");
 
 var scopedBlocks = {
 	"CallExpression": true,
@@ -80,15 +81,20 @@ function isStrictMode (node) {
 		&& node.expression.value === "use strict";
 }
 
-
 function Environment (runner) {
 	this.runner = runner;
-	this.current = null;
-	this.globalScope = null;
 }
 
 Environment.prototype = {
 	constructor: Environment,
+
+	init: function (config) {
+		// clear state in case of re-init
+		this.current = null;
+		this.globalScope = null;
+		
+		api(this, config);
+	},
 
 	getReference: function (name, strict) {
 		var scope = this.current;

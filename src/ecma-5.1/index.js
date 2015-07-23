@@ -1,5 +1,3 @@
-var Environment = require("../env/environment");
-// var Scope = require("./scope");
 var PrimitiveType = require("../types/primitive-type");
 var ObjectFactory = require("../types/object-factory");
 var numberAPI = require("./number-api");
@@ -19,9 +17,7 @@ var Reference = require("../env/reference");
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
-module.exports = function GlobalScope (runner) {
-	var config = runner.config;
-	var env = new Environment(runner);
+module.exports = function (env, config) {
 	var objectFactory = env.objectFactory = new ObjectFactory(env);
 	var globalObject = env.global = objectFactory.createObject();
 
@@ -117,5 +113,4 @@ module.exports = function GlobalScope (runner) {
 
 	// globalObject.setProto(globalObject.getValue("Object").proto);
 	objectFactory.init();
-	return env;
 };
