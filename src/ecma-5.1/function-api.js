@@ -22,6 +22,7 @@ module.exports = function (env, options) {
 	var globalObject = env.global;
 	var undef = env.global.getProperty("undefined").getValue();
 	var objectFactory = env.objectFactory;
+	var funcClass;
 
 	var funcCtor = function () {
 		var funcInstance;
@@ -82,7 +83,7 @@ module.exports = function (env, options) {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
 
-		funcInstance.putValue("constructor", functionClass);
+		funcInstance.putValue("constructor", funcClass);
 		return funcInstance;
 	};
 
@@ -90,15 +91,15 @@ module.exports = function (env, options) {
 	var proto = new NativeFunctionType(function () {});
 
 	funcCtor.nativeLength = 1;
-	var functionClass = objectFactory.createFunction(funcCtor, proto, frozen);
-	functionClass.putValue("constructor", functionClass);
+	funcClass = objectFactory.createFunction(funcCtor, proto, frozen);
+	funcClass.putValue("constructor", funcClass);
 
-	globalObject.define("Function", functionClass);
+	globalObject.define("Function", funcClass);
 
 	proto.define("length", objectFactory.createPrimitive(0), frozen);
 
 	// function itself is a function
-	functionClass.setPrototype(proto);
+	funcClass.setPrototype(proto);
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.native) {

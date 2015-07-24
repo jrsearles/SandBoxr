@@ -65,7 +65,7 @@ function serializeArray (env, stack, arr, replacer, gap, depth) {
 			// undefined positions are replaced with null
 			values.push("null");
 		} else {
-			values.push(serialize(env, stack, value, replacer));	
+			values.push(serialize(env, stack, value, replacer));
 		}
 	}
 

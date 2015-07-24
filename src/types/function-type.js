@@ -27,7 +27,7 @@ FunctionType.prototype.init = function (objectFactory, proto, descriptor) {
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value:  this });
+	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
 	this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
 };
 

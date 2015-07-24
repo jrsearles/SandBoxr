@@ -14,7 +14,7 @@ SandBoxr.prototype.execute = function (context) {
 		this.createEnvironment();
 		this.env.init(this.config);
 	}
-	
+
 	if (!context) {
 		// initial call - create initial context
 		context = new ExecutionContext(this.env, this.ast);

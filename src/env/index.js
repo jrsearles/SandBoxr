@@ -92,7 +92,7 @@ Environment.prototype = {
 		// clear state in case of re-init
 		this.current = null;
 		this.globalScope = null;
-		
+
 		api(this, config);
 	},
 
@@ -168,7 +168,7 @@ Environment.prototype = {
 				// functions can be used before they are defined
 				var func = env.objectFactory.createFunction(decl);
 				func.bindScope(env.current);
-				
+
 				env.createVariable(name, true);
 				env.putValue(name, func, strict);
 			} else {

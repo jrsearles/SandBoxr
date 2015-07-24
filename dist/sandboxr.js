@@ -16,7 +16,7 @@ SandBoxr.prototype.execute = function (context) {
 		this.createEnvironment();
 		this.env.init(this.config);
 	}
-	
+
 	if (!context) {
 		// initial call - create initial context
 		context = new ExecutionContext(this.env, this.ast);
@@ -950,6 +950,7 @@ module.exports = function (env, options) {
 	var globalObject = env.global;
 	var undef = env.global.getProperty("undefined").getValue();
 	var objectFactory = env.objectFactory;
+	var funcClass;
 
 	var funcCtor = function () {
 		var funcInstance;
@@ -1010,7 +1011,7 @@ module.exports = function (env, options) {
 			funcInstance = objectFactory.createFunction(function () {});
 		}
 
-		funcInstance.putValue("constructor", functionClass);
+		funcInstance.putValue("constructor", funcClass);
 		return funcInstance;
 	};
 
@@ -1018,15 +1019,15 @@ module.exports = function (env, options) {
 	var proto = new NativeFunctionType(function () {});
 
 	funcCtor.nativeLength = 1;
-	var functionClass = objectFactory.createFunction(funcCtor, proto, frozen);
-	functionClass.putValue("constructor", functionClass);
+	funcClass = objectFactory.createFunction(funcCtor, proto, frozen);
+	funcClass.putValue("constructor", funcClass);
 
-	globalObject.define("Function", functionClass);
+	globalObject.define("Function", funcClass);
 
 	proto.define("length", objectFactory.createPrimitive(0), frozen);
 
 	// function itself is a function
-	functionClass.setPrototype(proto);
+	funcClass.setPrototype(proto);
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		if (this.node.native) {
@@ -1287,7 +1288,7 @@ function serializeArray (env, stack, arr, replacer, gap, depth) {
 			// undefined positions are replaced with null
 			values.push("null");
 		} else {
-			values.push(serialize(env, stack, value, replacer));	
+			values.push(serialize(env, stack, value, replacer));
 		}
 	}
 
@@ -2363,7 +2364,7 @@ Environment.prototype = {
 		// clear state in case of re-init
 		this.current = null;
 		this.globalScope = null;
-		
+
 		api(this, config);
 	},
 
@@ -2439,7 +2440,7 @@ Environment.prototype = {
 				// functions can be used before they are defined
 				var func = env.objectFactory.createFunction(decl);
 				func.bindScope(env.current);
-				
+
 				env.createVariable(name, true);
 				env.putValue(name, func, strict);
 			} else {
@@ -2747,7 +2748,6 @@ module.exports = function ArrayExpression (context) {
 			i++;
 		}
 
-		// todo: can we remove this?
 		arr.putValue("length", objectFactory.createPrimitive(ln), false, context);
 	}
 
@@ -3110,7 +3110,7 @@ module.exports = function FunctionExpression (context) {
 	var objectFactory = context.env.objectFactory;
 	var func = objectFactory.createFunction(context.node);
 	func.bindScope(context.env.current);
-	
+
 	if (context.node.id) {
 		func.name = context.node.id.name;
 	}
@@ -3911,7 +3911,7 @@ FunctionType.prototype.init = function (objectFactory, proto, descriptor) {
 
 	// functions have a prototype
 	proto = proto || objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value:  this });
+	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
 	this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
 };
 

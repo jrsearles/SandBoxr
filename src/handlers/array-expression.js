@@ -15,7 +15,6 @@ module.exports = function ArrayExpression (context) {
 			i++;
 		}
 
-		// todo: can we remove this?
 		arr.putValue("length", objectFactory.createPrimitive(ln), false, context);
 	}
 

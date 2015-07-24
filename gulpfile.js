@@ -3,13 +3,21 @@ var gulp = require("gulp");
 var source = require("vinyl-source-stream");
 var eslint = require("gulp-eslint");
 var mocha = require("gulp-mocha");
+var uglify = require("gulp-uglify");
+var rename = require("gulp-rename");
+var streamify = require("gulp-streamify");
 
-gulp.task("browserify", ["lint"], function () {
+gulp.task("build", ["lint"], function () {
 	return browserify("./src/index.js", { standalone: "SandBoxr" })
 		.transform("strictify")
 		.bundle()
 		.pipe(source("sandboxr.js"))
-		.pipe(gulp.dest("./build/"));
+		.pipe(gulp.dest("./dist/"))
+
+		// minified copy
+		.pipe(streamify(uglify()))
+		.pipe(rename("sandboxr.min.js"))
+		.pipe(gulp.dest("./dist/"));
 });
 
 gulp.task("test", function () {
@@ -23,8 +31,8 @@ gulp.task("lint", function () {
 		.pipe(eslint.format());
 });
 
-gulp.task("default", ["browserify"]);
+gulp.task("default", ["build"]);
 
 gulp.task("watch", function () {
-	gulp.watch("./src/**/*.js", ["test", "browserify"]);
+	gulp.watch("./src/**/*.js", ["test", "build"]);
 });
