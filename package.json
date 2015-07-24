@@ -1,8 +1,8 @@
 {
   "name": "SandBoxr",
-  "version": "0.5.0",
-  "description": "",
-  "main": "src/sandboxr.js",
+  "version": "0.9.0",
+  "description": "SandBoxr runs JavaScript in a completely sandboxed environment.",
+  "main": "src/index.js",
   "scripts": {
     "test": "mocha"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/jrsearles/SandBoxr.git"
   },
-  "author": "",
+  "author": "Joshua Searles",
   "license": "ISC",
   "devDependencies": {
     "acorn": "^1.0.3",

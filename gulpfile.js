@@ -5,7 +5,7 @@ var eslint = require("gulp-eslint");
 var mocha = require("gulp-mocha");
 
 gulp.task("browserify", ["lint"], function () {
-	return browserify("./src/sandboxr.js", { standalone: "SandBoxr" })
+	return browserify("./src/index.js", { standalone: "SandBoxr" })
 		.transform("strictify")
 		.bundle()
 		.pipe(source("sandboxr.js"))

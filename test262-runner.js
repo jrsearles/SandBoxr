@@ -14,7 +14,7 @@ var args = require("yargs")
 	.alias("ch", "chapter")
 	.argv;
 
-var SandBoxr = require("./src/sandboxr");
+var SandBoxr = require("./src");
 var verbose = args.verbose;
 var stopOnFail = args.stopOnFail;
 var strictMode = args.strict;

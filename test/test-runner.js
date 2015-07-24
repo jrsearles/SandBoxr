@@ -1,5 +1,5 @@
 var parser = require("./ast-parser");
-var SandBoxer = require("../src/sandboxr");
+var SandBoxer = require("../src");
 
 module.exports = {
 	runBlock: function (code) {

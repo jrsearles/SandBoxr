@@ -1,6 +1,6 @@
 var expect = require("chai").expect;
 var parser = require("./ast-parser");
-var SandBoxr = require("../src/sandboxr");
+var SandBoxr = require("../src");
 
 function createRunner (text) {
 	return new SandBoxr(parser.parse(text), { parser: parser.parse });
