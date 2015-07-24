@@ -110,7 +110,7 @@ module.exports = function (env) {
 
 	arrayClass.define("isArray", objectFactory.createBuiltInFunction(function (obj) {
 		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
-	}, 0, "Array.isArray"));
+	}, 1, "Array.isArray"));
 
 	proto.define("push", objectFactory.createBuiltInFunction(function (arg) {
 		var start = getLength(env, this.node);
