@@ -1,5 +1,5 @@
 {
-  "name": "SandBoxr",
+  "name": "sandboxr",
   "version": "0.9.0",
   "description": "SandBoxr runs JavaScript in a completely sandboxed environment.",
   "main": "src/index.js",
