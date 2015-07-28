@@ -12,7 +12,7 @@ module.exports = function ForInStatement (context) {
 	}
 
 	var obj = context.create(context.node.right).execute().result.getValue();
-	var result;
+	var result, priorResult;
 
 	// track visited properties to prevent iterating over shadowed properties, regardless of enumerable flag
 	// 12.6.4 NOTE: a property of a prototype is not enumerated if it is “shadowed” because some previous
@@ -27,8 +27,7 @@ module.exports = function ForInStatement (context) {
 				left.putValue(context.env.objectFactory.createPrimitive(prop));
 
 				result = context.create(context.node.body).execute();
-
-				if (result && result.shouldBreak(context, true)) {
+				if (result && result.shouldBreak(context, true, priorResult)) {
 					return result;
 				}
 			}
@@ -36,7 +35,8 @@ module.exports = function ForInStatement (context) {
 			visited[prop] = true;
 		}
 
-		obj = obj.proto;
+		priorResult = result;
+		obj = obj.getPrototype();
 	}
 
 	return result;

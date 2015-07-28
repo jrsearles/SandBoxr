@@ -2695,6 +2695,7 @@ function ExecutionResult (value, name, obj) {
 	this.object = obj;
 
 	this.cancel = false;
+	this.cancelled = false;
 	this.exit = false;
 	this.skip = false;
 }
@@ -2703,7 +2704,7 @@ ExecutionResult.prototype.isCancelled = function () {
 	return this.cancel || this.exit;
 };
 
-ExecutionResult.prototype.shouldBreak = function (context, loop) {
+ExecutionResult.prototype.shouldBreak = function (context, loop, priorResult) {
 	if (this.exit) {
 		return true;
 	}
@@ -2714,16 +2715,22 @@ ExecutionResult.prototype.shouldBreak = function (context, loop) {
 
 	var breaking = true;
 	if (this.name && this.name === context.label) {
-		breaking = this.cancel;
+		breaking = this.cancelled = this.cancel;
 		this.cancel = this.skip = false;
+		
+		if (this.cancelled) {
+			this.result = priorResult && priorResult.result || this.result;
+		}
+
 		return breaking;
 	}
 
 	if (loop && !this.name) {
-		breaking = this.cancel;
+		breaking = this.cancelled = this.cancel;
 		this.cancel = this.skip = false;
 	}
 
+	this.result = priorResult && priorResult.result || this.result;
 	return breaking;
 };
 
@@ -2918,7 +2925,7 @@ module.exports = function BinaryExpression (context) {
 },{"../utils/convert":69}],25:[function(require,module,exports){
 "use strict";
 module.exports = function BlockStatement (context) {
-	var result;
+	var result, priorResult;
 
 	if (context.node.type === "Program") {
 		context.env.initScope(context.node.body);
@@ -2926,9 +2933,11 @@ module.exports = function BlockStatement (context) {
 
 	for (var i = 0, ln = context.node.body.length; i < ln; i++) {
 		result = context.create(context.node.body[i]).execute();
-		if (result && result.shouldBreak(context)) {
-			break;
+		if (result && result.shouldBreak(context, false, priorResult)) {
+			return result;
 		}
+
+		priorResult = result;
 	}
 
 	return result;
@@ -2986,7 +2995,7 @@ module.exports = function DebuggerStatement (context) {
 var convert = require("../utils/convert");
 
 module.exports = function DoWhileStatement (context) {
-	var result;
+	var result, priorResult;
 	var passed = true;
 
 	if (context.node.type === "WhileStatement") {
@@ -2995,12 +3004,12 @@ module.exports = function DoWhileStatement (context) {
 
 	while (passed) {
 		result = context.create(context.node.body).execute();
-
-		if (result && result.shouldBreak(context, true)) {
-			break;
+		if (result && result.shouldBreak(context, true, priorResult)) {
+			return result;
 		}
 
 		passed = convert.toBoolean(context.create(context.node.test).execute().result.getValue());
+		priorResult = result;
 	}
 
 	return result;
@@ -3036,7 +3045,7 @@ module.exports = function ForInStatement (context) {
 	}
 
 	var obj = context.create(context.node.right).execute().result.getValue();
-	var result;
+	var result, priorResult;
 
 	// track visited properties to prevent iterating over shadowed properties, regardless of enumerable flag
 	// 12.6.4 NOTE: a property of a prototype is not enumerated if it is “shadowed” because some previous
@@ -3051,8 +3060,7 @@ module.exports = function ForInStatement (context) {
 				left.putValue(context.env.objectFactory.createPrimitive(prop));
 
 				result = context.create(context.node.body).execute();
-
-				if (result && result.shouldBreak(context, true)) {
+				if (result && result.shouldBreak(context, true, priorResult)) {
 					return result;
 				}
 			}
@@ -3060,7 +3068,8 @@ module.exports = function ForInStatement (context) {
 			visited[prop] = true;
 		}
 
-		obj = obj.proto;
+		priorResult = result;
+		obj = obj.getPrototype();
 	}
 
 	return result;
@@ -3083,16 +3092,18 @@ module.exports = function ForStatement (context) {
 		context.create(context.node.init).execute();
 	}
 
-	var result;
+	var result, priorResult;
 	while (shouldContinue(context)) {
 		result = context.create(context.node.body).execute();
-		if (result && result.shouldBreak(context, true)) {
-			break;
+		if (result && result.shouldBreak(context, true, priorResult)) {
+			return result;
 		}
 
 		if (context.node.update) {
 			context.create(context.node.update).execute();
 		}
+
+		priorResult = result;
 	}
 
 	return result;

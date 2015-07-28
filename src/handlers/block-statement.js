@@ -1,5 +1,5 @@
 module.exports = function BlockStatement (context) {
-	var result;
+	var result, priorResult;
 
 	if (context.node.type === "Program") {
 		context.env.initScope(context.node.body);
@@ -7,9 +7,11 @@ module.exports = function BlockStatement (context) {
 
 	for (var i = 0, ln = context.node.body.length; i < ln; i++) {
 		result = context.create(context.node.body[i]).execute();
-		if (result && result.shouldBreak(context)) {
-			break;
+		if (result && result.shouldBreak(context, false, priorResult)) {
+			return result;
 		}
+
+		priorResult = result;
 	}
 
 	return result;

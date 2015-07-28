@@ -13,16 +13,18 @@ module.exports = function ForStatement (context) {
 		context.create(context.node.init).execute();
 	}
 
-	var result;
+	var result, priorResult;
 	while (shouldContinue(context)) {
 		result = context.create(context.node.body).execute();
-		if (result && result.shouldBreak(context, true)) {
-			break;
+		if (result && result.shouldBreak(context, true, priorResult)) {
+			return result;
 		}
 
 		if (context.node.update) {
 			context.create(context.node.update).execute();
 		}
+
+		priorResult = result;
 	}
 
 	return result;

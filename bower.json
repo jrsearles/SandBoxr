@@ -6,7 +6,7 @@
     "Joshua Searles <jrsearles@comcast.net>"
   ],
   "description": "Run JavaScript code in a sand-boxed environment.",
-  "main": "src/index.js",
+  "main": "dist/sandboxr.js",
   "moduleType": [
     "node"
   ],
