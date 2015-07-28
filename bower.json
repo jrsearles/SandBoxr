@@ -1,6 +1,6 @@
 {
   "name": "sandboxr",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "homepage": "https://github.com/jrsearles/SandBoxr",
   "authors": [
     "Joshua Searles <jrsearles@comcast.net>"
@@ -24,6 +24,8 @@
     "test",
     "tests",
     "test262",
-    "typings"
+    "typings",
+    "src",
+    "demo"
   ]
 }

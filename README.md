@@ -28,7 +28,7 @@ This library was written for the purpose of allowing user generated code to be r
 This library was heavily inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). The initial intention was to build some of the missing API's, most notably the Array methods added in ECMAScript 5.1. I found it difficult to implement, largely because of the stepping mechanism in `JS Interpreter`, which is a great feature but one i did not require. It became clear to me that it would simplify development 
 greatly to break out of the stepping loop - especially with the new functional Array methods that execute callbacks in a loop. 
 
-Upon discovering the [Test 262 conformance suite](https://github.com/tc39/test262/tree/es5-tests) my goals become much more ambitious. I realized that it would be feasible to completely implement the ECMAScript 5.1 specification. The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring. The primary test mechanism is the Test 262 tests.
+Upon discovering the [Test 262 conformance suite](test262.md) my goals become much more ambitious. I realized that it would be feasible to completely implement the ECMAScript 5.1 specification. The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring. The primary test mechanism is the Test 262 tests.
 
 ### What this library does not do:
 - **"Fix" JavaScript.** All those quirks you love to hate are kept intact. (To come will be extension points so that you can, if you so chose, alter aspects of JavaScript's implementation, for example for equality.)
