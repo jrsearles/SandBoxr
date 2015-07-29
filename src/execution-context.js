@@ -1,4 +1,5 @@
 var ExecutionResult = require("./execution-result");
+var expressionVisitor = require("./visitors");
 
 function ExecutionContext (env, node, callee) {
 	this.node = node;
@@ -12,7 +13,7 @@ function ExecutionContext (env, node, callee) {
 }
 
 ExecutionContext.prototype.execute = function () {
-	return this.env.runner.execute(this);
+	return expressionVisitor.visit(this);
 };
 
 ExecutionContext.prototype.create = function (node, callee, isNew) {
