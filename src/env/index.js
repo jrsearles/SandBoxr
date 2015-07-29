@@ -81,8 +81,7 @@ function isStrictMode (node) {
 		&& node.expression.value === "use strict";
 }
 
-function Environment (runner) {
-	this.runner = runner;
+function Environment () {
 }
 
 Environment.prototype = {
@@ -122,7 +121,11 @@ Environment.prototype = {
 			throw new SyntaxError("Illegal use of reserved keyword: " + name);
 		}
 
-		this.current.createVariable(name, !immutable);
+		return this.current.createVariable(name, !immutable);
+	},
+
+	getVariable: function (name) {
+		return this.current.getVariable(name);
 	},
 
 	hasVariable: function (name) {

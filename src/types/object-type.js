@@ -130,7 +130,11 @@ ObjectType.prototype = ObjectType.fn = {
 		delete this.properties[name];
 	},
 
-	getValue: function () {
+	getValue: function (name) {
+		if (name) {
+			return this.getProperty(name).getValue();
+		}
+		
 		return this;
 	},
 

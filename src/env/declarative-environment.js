@@ -60,6 +60,10 @@ DeclarativeEnvironment.prototype = {
 		}
 	},
 
+	getVariable: function (name) {
+		return this.properties[name];
+	},
+
 	deleteVariable: function (name) {
 		if (!this.hasVariable(name)) {
 			return true;

@@ -7,18 +7,23 @@ function SandBoxr (ast, config) {
 	this.env = null;
 }
 
-SandBoxr.prototype.execute = function () {
-	if (!this.env) {
+SandBoxr.prototype.execute = function (env) {
+	if (!env) {
 		// create environment if it hasn't been created
-		this.createEnvironment();
-		this.env.init(this.config);
+		env = SandBoxr.createEnvironment();
+		env.init(this.config);
 	}
 
+	this.env = env;
 	return new ExecutionContext(this.env, this.ast).execute();
 };
 
-SandBoxr.prototype.createEnvironment = function () {
-	return this.env = new Environment(this);
+SandBoxr.create = function (ast, config) {
+	return new SandBoxr(ast, config);
+};
+
+SandBoxr.createEnvironment = function () {
+	return new Environment();
 };
 
 module.exports = SandBoxr;

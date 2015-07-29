@@ -9,18 +9,23 @@ function SandBoxr (ast, config) {
 	this.env = null;
 }
 
-SandBoxr.prototype.execute = function () {
-	if (!this.env) {
+SandBoxr.prototype.execute = function (env) {
+	if (!env) {
 		// create environment if it hasn't been created
-		this.createEnvironment();
-		this.env.init(this.config);
+		env = SandBoxr.createEnvironment();
+		env.init(this.config);
 	}
 
+	this.env = env;
 	return new ExecutionContext(this.env, this.ast).execute();
 };
 
-SandBoxr.prototype.createEnvironment = function () {
-	return this.env = new Environment(this);
+SandBoxr.create = function (ast, config) {
+	return new SandBoxr(ast, config);
+};
+
+SandBoxr.createEnvironment = function () {
+	return new Environment();
 };
 
 module.exports = SandBoxr;
@@ -1111,6 +1116,7 @@ var Reference = require("../env/reference");
 var frozen = { configurable: false, enumerable: false, writable: false };
 
 module.exports = function (env, config) {
+	config = config || {};
 	var objectFactory = env.objectFactory = new ObjectFactory(env);
 	var globalObject = env.global = objectFactory.createObject();
 
@@ -2238,6 +2244,10 @@ DeclarativeEnvironment.prototype = {
 		}
 	},
 
+	getVariable: function (name) {
+		return this.properties[name];
+	},
+
 	deleteVariable: function (name) {
 		if (!this.hasVariable(name)) {
 			return true;
@@ -2343,8 +2353,7 @@ function isStrictMode (node) {
 		&& node.expression.value === "use strict";
 }
 
-function Environment (runner) {
-	this.runner = runner;
+function Environment () {
 }
 
 Environment.prototype = {
@@ -2384,7 +2393,11 @@ Environment.prototype = {
 			throw new SyntaxError("Illegal use of reserved keyword: " + name);
 		}
 
-		this.current.createVariable(name, !immutable);
+		return this.current.createVariable(name, !immutable);
+	},
+
+	getVariable: function (name) {
+		return this.current.getVariable(name);
 	},
 
 	hasVariable: function (name) {
@@ -2491,7 +2504,7 @@ ObjectEnvironment.prototype = {
 
 	createVariable: function (name, immutable) {
 		if (this.parent) {
-			this.parent.createVariable.apply(this.parent, arguments);
+			return this.parent.createVariable.apply(this.parent, arguments);
 		} else {
 			this.object.defineOwnProperty(name, {
 				value: undefined,
@@ -2499,6 +2512,8 @@ ObjectEnvironment.prototype = {
 				enumerable: true,
 				writable: true
 			}, true);
+
+			return this.object.getProperty(name);
 		}
 	},
 
@@ -3498,7 +3513,11 @@ ObjectType.prototype = ObjectType.fn = {
 		delete this.properties[name];
 	},
 
-	getValue: function () {
+	getValue: function (name) {
+		if (name) {
+			return this.getProperty(name).getValue();
+		}
+		
 		return this;
 	},
 

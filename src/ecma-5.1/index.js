@@ -18,6 +18,7 @@ var Reference = require("../env/reference");
 var frozen = { configurable: false, enumerable: false, writable: false };
 
 module.exports = function (env, config) {
+	config = config || {};
 	var objectFactory = env.objectFactory = new ObjectFactory(env);
 	var globalObject = env.global = objectFactory.createObject();
 

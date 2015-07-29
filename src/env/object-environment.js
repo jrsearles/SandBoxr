@@ -19,7 +19,7 @@ ObjectEnvironment.prototype = {
 
 	createVariable: function (name, immutable) {
 		if (this.parent) {
-			this.parent.createVariable.apply(this.parent, arguments);
+			return this.parent.createVariable.apply(this.parent, arguments);
 		} else {
 			this.object.defineOwnProperty(name, {
 				value: undefined,
@@ -27,6 +27,8 @@ ObjectEnvironment.prototype = {
 				enumerable: true,
 				writable: true
 			}, true);
+
+			return this.object.getProperty(name);
 		}
 	},
 
