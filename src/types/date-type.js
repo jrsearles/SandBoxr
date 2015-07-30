@@ -14,5 +14,6 @@ function DateType (value) {
 
 DateType.prototype = Object.create(ObjectType.prototype);
 DateType.prototype.constructor = DateType;
+DateType.prototype.unwrap = function () { return this.value; };
 
 module.exports = DateType;

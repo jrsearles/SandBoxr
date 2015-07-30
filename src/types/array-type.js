@@ -117,4 +117,18 @@ ArrayType.prototype.init = function (objectFactory) {
 	this.defineOwnProperty("length", { value: objectFactory.createPrimitive(0), configurable: false, enumerable: false, writable: true });
 };
 
+ArrayType.prototype.unwrap = function () {
+	var arr = [];
+
+	// this won't grab properties from the prototype - do we care?
+	// it's an edge case but we may want to address it
+	for (var index in this.properties) {
+		if (this.properties[index].enumerable) {
+			arr[Number(index)] = this.getValue(index).unwrap();
+		}
+	}
+
+	return arr;
+};
+
 module.exports = ArrayType;

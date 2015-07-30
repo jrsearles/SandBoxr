@@ -21,4 +21,6 @@ PrimitiveType.prototype.getProperty = function (name) {
 	return ObjectType.prototype.getProperty.apply(this, arguments);
 };
 
+PrimitiveType.prototype.unwrap = function () { return this.value; };
+
 module.exports = PrimitiveType;

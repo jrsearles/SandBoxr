@@ -3,7 +3,7 @@ var SandBoxer = require("../src");
 
 module.exports = {
 	runBlock: function (code) {
-		return this.getRunner(code).execute().result;
+		return this.getRunner(code).execute();
 	},
 
 	getScope: function (code) {

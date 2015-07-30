@@ -1,4 +1,4 @@
-### Notes on running the 262 test suite
+## Notes on running the 262 test suite
 The [Test 262 conformance suite](https://github.com/tc39/test262/tree/es5-tests) is not included in this repository, so to run those tests you will need to clone the branch that contains the 5.1 test suite. Run the following from the root of the SandBoxr directory to clone the test suite.
 
 ```shell
@@ -26,6 +26,9 @@ Run strict mode tests. These are skipped by default.
 
 #### chapter (ch)
 Run tests from a specific chapter of the specification. Example:
+
+
+## Examples
 
 ```shell
 node test262-runner --ch '12'

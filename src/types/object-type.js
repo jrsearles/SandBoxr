@@ -120,6 +120,9 @@ ObjectType.prototype = ObjectType.fn = {
 	},
 
 	define: function (name, value, descriptor) {
+		// this method is intended for external usage only - it provides a way to define
+		// methods and properties and overwrite any existing properties even if they are
+		// not configurable
 		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
 		descriptor.value = value;
 
@@ -127,6 +130,8 @@ ObjectType.prototype = ObjectType.fn = {
 	},
 
 	remove: function (name) {
+		// this method is intended for external usage only - it provides a way to remove
+		// properties even if they are not normally able to be deleted
 		delete this.properties[name];
 	},
 
@@ -134,7 +139,7 @@ ObjectType.prototype = ObjectType.fn = {
 		if (name) {
 			return this.getProperty(name).getValue();
 		}
-		
+
 		return this;
 	},
 
@@ -182,6 +187,22 @@ ObjectType.prototype = ObjectType.fn = {
 		}
 
 		return this === obj;
+	},
+
+	unwrap: function () {
+		var unwrapped = {};
+		var current = this;
+		while (current) {
+			for (var name in current.properties) {
+				if (current.properties[name].enumerable && !(name in unwrapped)) {
+					unwrapped[name] = current.getValue(name).unwrap();
+				}
+			}
+
+			current = current.getPrototype();
+		}
+
+		return unwrapped;
 	}
 };
 

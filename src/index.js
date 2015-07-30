@@ -15,7 +15,8 @@ SandBoxr.prototype.execute = function (env) {
 	}
 
 	this.env = env;
-	return new ExecutionContext(this.env, this.ast).execute();
+	var executionResult = new ExecutionContext(this.env, this.ast).execute();
+	return executionResult && executionResult.result;
 };
 
 SandBoxr.create = function (ast, config) {

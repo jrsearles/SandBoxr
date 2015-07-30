@@ -38,7 +38,7 @@ module.exports = {
 		if (!(context.node.type in visitors)) {
 			throw new TypeError("No handler defined for: " + context.node.type);
 		}
-		
+
 		return visitors[context.node.type](context);
 	}
 };

@@ -18,4 +18,6 @@ RegexType.prototype.init = function (objectFactory) {
 	this.defineOwnProperty("multiline", { value: objectFactory.createPrimitive(this.source.multiline) });
 };
 
+RegexType.prototype.unwrap = function () { return this.source; };
+
 module.exports = RegexType;

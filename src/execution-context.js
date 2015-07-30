@@ -6,7 +6,7 @@ function ExecutionContext (env, node, callee, isNew) {
 	this.callee = callee;
 	this.env = env;
 	this.isNew = !!isNew;
-	
+
 	this.label = "";
 	this.value = null;
 	this.strict = false;

@@ -42,6 +42,11 @@ result;
 
 		document.getElementById("result").innerHTML = JSON.stringify(value && value.result && value.result.getValue().value);
 	}
+	
+		var ast = acorn.parse("({foo:true});");
+		var sandbox = SandBoxr.create(ast);
+		var result = sandbox.execute();
+		console.log(result.unwrap());
 </script>
 </body>
 </html>

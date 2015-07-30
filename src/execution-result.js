@@ -26,7 +26,7 @@ ExecutionResult.prototype.shouldBreak = function (context, loop, priorResult) {
 	if (this.name && this.name === context.label) {
 		breaking = this.cancelled = this.cancel;
 		this.cancel = this.skip = false;
-		
+
 		if (this.cancelled) {
 			this.result = priorResult && priorResult.result || this.result;
 		}

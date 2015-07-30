@@ -15,7 +15,7 @@ describe("API", function () {
 		var sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
 		
-		expect(result.result.value).to.be.true;
+		expect(result.value).to.be.true;
 	});
 	
 	it("should allow an object to be defined", function () { 
@@ -32,7 +32,7 @@ describe("API", function () {
 		var sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
 		
-		expect(result.result.value).to.be.true;
+		expect(result.value).to.be.true;
 	});
 	
 	it("should allow function to be removed", function () {
@@ -45,7 +45,7 @@ describe("API", function () {
 		var sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
 		
-		expect(result.result.value).to.be.true;
+		expect(result.value).to.be.true;
 	});
 	
 	it("should allow functions to be added", function () {
@@ -65,7 +65,7 @@ describe("API", function () {
 		var sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
 		
-		expect(result.result.value).to.be.true;
+		expect(result.value).to.be.true;
 	});
 	
 	it("should keep variables and values if environment is reused", function () {
@@ -83,7 +83,7 @@ describe("API", function () {
 		sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
 		
-		expect(result.result.value).to.be.true;
+		expect(result.value).to.be.true;
 	});
 	
 	it("should lose variables and values if environment is reinitialized", function () {
@@ -102,6 +102,30 @@ describe("API", function () {
 		sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
 		
-		expect(result.result.value).to.be.true;
+		expect(result.value).to.be.true;
+	});
+	
+	it("should allow an object to be converted to a unwrapped object", function () {
+		var ast = parser.parse("({foo:true});");
+		var sandbox = SandBoxr.create(ast);
+		var result = sandbox.execute();
+		
+		expect(result.unwrap().foo).to.be.true;
+	});
+	
+	it("should allow a primitive to be unwrapped", function () {
+		var ast = parser.parse("(1);");
+		var sandbox = SandBoxr.create(ast);
+		var result = sandbox.execute();
+		
+		expect(result.unwrap()).to.equal(1);
+	});
+	
+	it("should allow an array to be unwrapped", function () {
+		var ast = parser.parse("([1,2,3]);");
+		var sandbox = SandBoxr.create(ast);
+		var result = sandbox.execute();
+		
+		expect(result.unwrap()[2]).to.equal(3);
 	});
 });
