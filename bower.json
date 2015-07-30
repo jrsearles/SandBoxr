@@ -6,26 +6,22 @@
     "Joshua Searles <jrsearles@comcast.net>"
   ],
   "description": "Run JavaScript code in a sand-boxed environment.",
-  "main": "dist/sandboxr.js",
-  "moduleType": [
-    "node"
-  ],
+  "main": ["dist/sandboxr.js"],
+  "moduleType": ["node"],
   "keywords": [
     "sandbox",
     "acorn",
     "esprima",
     "ast"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jrsearles/SandBoxr.git"
+  },
   "license": "MIT",
   "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests",
-    "test262",
-    "typings",
-    "src",
-    "demo"
+    "/*",
+    "!/dist/**/*",
+    "!/readme.md"
   ]
 }

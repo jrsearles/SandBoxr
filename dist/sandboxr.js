@@ -990,7 +990,7 @@ module.exports = function (env, options) {
 					thisArg = objectFactory.createObject(funcInstance);
 				}
 
-				var executionResult = func.getFunctionResult(this, fn, params, arguments, thisArg, callee);
+				var executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
 
 				if (this.isNew) {
 					return thisArg;
@@ -1039,7 +1039,7 @@ module.exports = function (env, options) {
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
-		return func.executeFunction(this, this.node, params, args, thisArg, callee);
+		return func.executeFunction(env, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
 	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
@@ -1055,7 +1055,7 @@ module.exports = function (env, options) {
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
-		return func.executeFunction(this, this.node, params, args, thisArg, callee);
+		return func.executeFunction(env, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
 	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg) {
@@ -1077,7 +1077,7 @@ module.exports = function (env, options) {
 
 		var nativeFunc = function () {
 			var mergedArgs = args.concat(slice.call(arguments));
-			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee, this.isNew);
+			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
@@ -1328,26 +1328,26 @@ function serialize (env, stack, obj, replacer, gap, depth) {
 	return jsonResult;
 }
 
-function createReplacer (context, replacer) {
+function createReplacer (env, replacer) {
 	if (replacer) {
 		if (replacer.className === "Function") {
 			return function (holder, key, value) {
-				var args = [context.env.objectFactory.createPrimitive(key), value];
+				var args = [env.objectFactory.createPrimitive(key), value];
 				var params = replacer.native ? [] : replacer.node.params;
 				var callee = replacer.native ? replacer : replacer.node;
 
-				return func.executeFunction(context, replacer, params, args, holder, callee);
+				return func.executeFunction(env, replacer, params, args, holder, callee);
 			};
 		}
 
 		if (replacer.className === "Array") {
 			var keys = convert.toArray(replacer).map(function (arg) {
 				if (arg.className === "String") {
-					return convert.toString(context.env, arg);
+					return convert.toString(env, arg);
 				}
 
 				if (arg.className === "Number") {
-					return String(convert.toNumber(context.env, arg));
+					return String(convert.toNumber(env, arg));
 				}
 
 				return undefined;
@@ -1428,14 +1428,14 @@ function deserialize (objectFactory, value, reviver) {
 	}
 }
 
-function createReviver (context, reviver) {
+function createReviver (env, reviver) {
 	if (reviver && reviver.className === "Function") {
 		return function (holder, key, value) {
-			var args = [context.env.objectFactory.createPrimitive(key), value];
+			var args = [env.objectFactory.createPrimitive(key), value];
 			var params = reviver.native ? [] : reviver.node.params;
 			var callee = reviver.native ? reviver : reviver.node;
 
-			return func.executeFunction(context, reviver, params, args, holder, callee);
+			return func.executeFunction(env, reviver, params, args, holder, callee);
 		};
 	}
 
@@ -1450,7 +1450,7 @@ module.exports = function (env) {
 	jsonClass.className = "JSON";
 
 	jsonClass.define("stringify", objectFactory.createBuiltInFunction(function (obj, replacer, spacer) {
-		replacer = createReplacer(this, replacer);
+		replacer = createReplacer(env, replacer);
 		spacer = getSpacer(env, spacer);
 
 		// run at the top value
@@ -1464,7 +1464,7 @@ module.exports = function (env) {
 	}, 3, "JSON.stringify"));
 
 	jsonClass.define("parse", objectFactory.createBuiltInFunction(function (str, reviver) {
-		reviver = createReviver(this, reviver);
+		reviver = createReviver(env, reviver);
 
 		var stringValue = convert.toString(env, str);
 		var parsedObject = JSON.parse(stringValue);
@@ -1590,12 +1590,12 @@ function isObject (obj) {
 	return true;
 }
 
-function defineProperty (context, obj, name, descriptor) {
+function defineProperty (env, obj, name, descriptor) {
 	if (!isObject(descriptor)) {
 		throw new TypeError("Property description must be an object: " + convert.toString(context.env, descriptor));
 	}
 
-	var undef = context.env.global.getProperty("undefined").getValue();
+	var undef = env.global.getProperty("undefined").getValue();
 	var options = {};
 
 	if (descriptor) {
@@ -1614,7 +1614,7 @@ function defineProperty (context, obj, name, descriptor) {
 			}
 		});
 
-		var currentScope = context.env.current;
+		var currentScope = env.current;
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
@@ -1623,16 +1623,16 @@ function defineProperty (context, obj, name, descriptor) {
 				options.get = options.getter = undefined;
 			} else {
 				if (getter.className !== "Function") {
-					throw new TypeError("Getter must be a function: " + convert.toString(context.env, getter));
+					throw new TypeError("Getter must be a function: " + convert.toString(env, getter));
 				}
 
 				options.get = getter;
 				options.getter = function () {
-					var scope = context.env.setScope(currentScope);
-					var thisArg = convert.toObject(context.env, this);
+					var scope = env.setScope(currentScope);
+					var thisArg = convert.toObject(env, this);
 
 					try {
-						var getResult = func.getFunctionResult(context, getter, getter.node.params, [], thisArg, getter.node);
+						var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
 						scope.exitScope();
 						return getResult && getResult.exit ? getResult.result.getValue() : undef;
 					} catch (err) {
@@ -1654,11 +1654,11 @@ function defineProperty (context, obj, name, descriptor) {
 
 				options.set = setter;
 				options.setter = function () {
-					var scope = context.env.setScope(currentScope);
-					var thisArg = convert.toObject(context.env, this);
+					var scope = env.setScope(currentScope);
+					var thisArg = convert.toObject(env, this);
 
 					try {
-						func.executeFunction(context, setter, setter.node.params, arguments, thisArg, setter.node);
+						func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
 						scope.exitScope();
 						return undef;
 					} catch (err) {
@@ -1674,7 +1674,7 @@ function defineProperty (context, obj, name, descriptor) {
 		}
 	}
 
-	obj.defineOwnProperty(name, options, true, context.env);
+	obj.defineOwnProperty(name, options, true, env);
 }
 
 module.exports = function (env) {
@@ -1760,7 +1760,7 @@ module.exports = function (env) {
 		if (descriptors) {
 			for (var prop in descriptors.properties) {
 				if (descriptors.properties[prop].enumerable) {
-					defineProperty(this, obj, prop, descriptors.getProperty(prop).getValue());
+					defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
 				}
 			}
 		}
@@ -1770,7 +1770,7 @@ module.exports = function (env) {
 
 	objectClass.define("defineProperty", objectFactory.createBuiltInFunction(function (obj, prop, descriptor) {
 		contracts.assertIsObject(obj, "Object.defineProperty");
-		defineProperty(this, obj, convert.toString(env, prop), descriptor);
+		defineProperty(env, obj, convert.toString(env, prop), descriptor);
 		return obj;
 	}, 3, "Object.defineProperty"));
 
@@ -1780,7 +1780,7 @@ module.exports = function (env) {
 
 		for (var prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
-				defineProperty(this, obj, prop, descriptors.getProperty(prop).getValue());
+				defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
 			}
 		}
 
@@ -2111,13 +2111,12 @@ module.exports = function (env) {
 
 		var replacer;
 		if (substrOrFn && substrOrFn.type === "function") {
-			var executionContext = this;
 			var callee = substrOrFn.native ? substrOrFn : substrOrFn.node;
 			var params = callee.params || [];
 
 			replacer = function () {
 				var args = slice.call(arguments).map(function (arg) { return objectFactory.createPrimitive(arg); });
-				var replacedValue = func.executeFunction(executionContext, substrOrFn, params, args, globalObject, callee);
+				var replacedValue = func.executeFunction(env, substrOrFn, params, args, globalObject, callee);
 				return replacedValue ? convert.toString(env, replacedValue) : undefined;
 			};
 		} else {
@@ -2412,8 +2411,8 @@ Environment.prototype = {
 		return this.current.getThisBinding() || this.global;
 	},
 
-	createExecutionContext: function (node, callee) {
-		return new ExecutionContext(this, node, callee);
+	createExecutionContext: function (node, callee, isNew) {
+		return new ExecutionContext(this, node, callee, isNew);
 	},
 
 	createScope: function (thisArg) {
@@ -4121,21 +4120,21 @@ module.exports = {
 },{"./func":37}],37:[function(require,module,exports){
 "use strict";
 module.exports = {
-	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
-		var scope = fn.createScope(context.env, thisArg, false);
+	executeFunction: function (env, fn, params, args, thisArg, callee, isNew) {
+		var scope = fn.createScope(env, thisArg, false);
 		var returnResult;
 
 		if (isNew) {
 			returnResult = thisArg;
 		}
 
-		this.loadArguments(context.env, params, args, fn);
+		this.loadArguments(env, params, args, fn);
 
 		try {
 			if (fn.native) {
-				returnResult = fn.nativeFunction.apply(context.create(thisArg, callee, isNew), args) || returnResult;
+				returnResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 			} else {
-				var executionResult = context.create(fn.node.body, callee, isNew).execute();
+				var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
 				if (executionResult && executionResult.exit && executionResult.result) {
 					if (!isNew || !executionResult.result.isPrimitive) {
 						returnResult = executionResult.result;
@@ -4148,19 +4147,19 @@ module.exports = {
 		}
 
 		scope.exitScope();
-		return returnResult || context.env.global.getProperty("undefined").getValue();
+		return returnResult || env.global.getProperty("undefined").getValue();
 	},
 
-	getFunctionResult: function (context, fn, params, args, thisArg, callee) {
-		var scope = fn.createScope(context.env, thisArg, false);
-		this.loadArguments(context.env, params, args, fn);
+	getFunctionResult: function (env, fn, params, args, thisArg, callee) {
+		var scope = fn.createScope(env, thisArg, false);
+		this.loadArguments(env, params, args, fn);
 
 		var executionResult;
 		try {
 			if (fn.native) {
-				executionResult = fn.nativeFunction.apply(context.create(thisArg, callee, false), args);
+				executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
 			} else {
-				executionResult = context.create(fn.node.body, callee, false).execute();
+				executionResult = env.createExecutionContext(fn.node.body, callee).execute();
 			}
 		} catch (err) {
 			scope.exitScope();
@@ -4488,7 +4487,7 @@ module.exports = function CallExpression (context) {
 	var callee = fnMember;
 
 	callee.identifier = fn.name;
-	return context.result(func.executeFunction(context, fn, params, args, thisArg, callee, isNew));
+	return context.result(func.executeFunction(context.env, fn, params, args, thisArg, callee, isNew));
 };
 
 },{"../env/reference":19,"../utils/convert":36,"../utils/func":37}],43:[function(require,module,exports){
@@ -4779,16 +4778,16 @@ module.exports = function MemberExpression (context) {
 "use strict";
 var func = require("../utils/func");
 
-function setDescriptor (context, obj, name, descriptor) {
+function setDescriptor (env, obj, name, descriptor) {
 	if (descriptor.get) {
 		descriptor.getter = function () {
-			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
+			return func.executeFunction(env, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
 		};
 	}
 
 	if (descriptor.set) {
 		descriptor.setter = function () {
-			func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
+			func.executeFunction(env, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
 		};
 	}
 
@@ -4821,7 +4820,7 @@ module.exports = function ObjectExpression (context) {
 	});
 
 	for (var prop in descriptors) {
-		setDescriptor(context, obj, prop, descriptors[prop]);
+		setDescriptor(context.env, obj, prop, descriptors[prop]);
 	}
 
 	return context.result(obj);

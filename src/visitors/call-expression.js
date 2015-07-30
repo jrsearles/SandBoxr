@@ -34,5 +34,5 @@ module.exports = function CallExpression (context) {
 	var callee = fnMember;
 
 	callee.identifier = fn.name;
-	return context.result(func.executeFunction(context, fn, params, args, thisArg, callee, isNew));
+	return context.result(func.executeFunction(context.env, fn, params, args, thisArg, callee, isNew));
 };

@@ -1,14 +1,14 @@
 var ExecutionResult = require("./execution-result");
 var expressionVisitor = require("./visitors");
 
-function ExecutionContext (env, node, callee) {
+function ExecutionContext (env, node, callee, isNew) {
 	this.node = node;
 	this.callee = callee;
 	this.env = env;
-
+	this.isNew = !!isNew;
+	
 	this.label = "";
 	this.value = null;
-	this.isNew = false;
 	this.strict = false;
 }
 
@@ -17,9 +17,8 @@ ExecutionContext.prototype.execute = function () {
 };
 
 ExecutionContext.prototype.create = function (node, callee, isNew) {
-	var context = new ExecutionContext(this.env, node, callee || this.callee);
+	var context = new ExecutionContext(this.env, node, callee || this.callee, isNew);
 	context.value = this.value;
-	context.isNew = !!isNew;
 	return context;
 };
 

@@ -140,8 +140,8 @@ Environment.prototype = {
 		return this.current.getThisBinding() || this.global;
 	},
 
-	createExecutionContext: function (node, callee) {
-		return new ExecutionContext(this, node, callee);
+	createExecutionContext: function (node, callee, isNew) {
+		return new ExecutionContext(this, node, callee, isNew);
 	},
 
 	createScope: function (thisArg) {

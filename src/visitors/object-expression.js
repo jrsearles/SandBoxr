@@ -1,15 +1,15 @@
 var func = require("../utils/func");
 
-function setDescriptor (context, obj, name, descriptor) {
+function setDescriptor (env, obj, name, descriptor) {
 	if (descriptor.get) {
 		descriptor.getter = function () {
-			return func.executeFunction(context, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
+			return func.executeFunction(env, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
 		};
 	}
 
 	if (descriptor.set) {
 		descriptor.setter = function () {
-			func.executeFunction(context, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
+			func.executeFunction(env, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
 		};
 	}
 
@@ -42,7 +42,7 @@ module.exports = function ObjectExpression (context) {
 	});
 
 	for (var prop in descriptors) {
-		setDescriptor(context, obj, prop, descriptors[prop]);
+		setDescriptor(context.env, obj, prop, descriptors[prop]);
 	}
 
 	return context.result(obj);

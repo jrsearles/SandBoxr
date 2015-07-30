@@ -109,26 +109,26 @@ function serialize (env, stack, obj, replacer, gap, depth) {
 	return jsonResult;
 }
 
-function createReplacer (context, replacer) {
+function createReplacer (env, replacer) {
 	if (replacer) {
 		if (replacer.className === "Function") {
 			return function (holder, key, value) {
-				var args = [context.env.objectFactory.createPrimitive(key), value];
+				var args = [env.objectFactory.createPrimitive(key), value];
 				var params = replacer.native ? [] : replacer.node.params;
 				var callee = replacer.native ? replacer : replacer.node;
 
-				return func.executeFunction(context, replacer, params, args, holder, callee);
+				return func.executeFunction(env, replacer, params, args, holder, callee);
 			};
 		}
 
 		if (replacer.className === "Array") {
 			var keys = convert.toArray(replacer).map(function (arg) {
 				if (arg.className === "String") {
-					return convert.toString(context.env, arg);
+					return convert.toString(env, arg);
 				}
 
 				if (arg.className === "Number") {
-					return String(convert.toNumber(context.env, arg));
+					return String(convert.toNumber(env, arg));
 				}
 
 				return undefined;
@@ -209,14 +209,14 @@ function deserialize (objectFactory, value, reviver) {
 	}
 }
 
-function createReviver (context, reviver) {
+function createReviver (env, reviver) {
 	if (reviver && reviver.className === "Function") {
 		return function (holder, key, value) {
-			var args = [context.env.objectFactory.createPrimitive(key), value];
+			var args = [env.objectFactory.createPrimitive(key), value];
 			var params = reviver.native ? [] : reviver.node.params;
 			var callee = reviver.native ? reviver : reviver.node;
 
-			return func.executeFunction(context, reviver, params, args, holder, callee);
+			return func.executeFunction(env, reviver, params, args, holder, callee);
 		};
 	}
 
@@ -231,7 +231,7 @@ module.exports = function (env) {
 	jsonClass.className = "JSON";
 
 	jsonClass.define("stringify", objectFactory.createBuiltInFunction(function (obj, replacer, spacer) {
-		replacer = createReplacer(this, replacer);
+		replacer = createReplacer(env, replacer);
 		spacer = getSpacer(env, spacer);
 
 		// run at the top value
@@ -245,7 +245,7 @@ module.exports = function (env) {
 	}, 3, "JSON.stringify"));
 
 	jsonClass.define("parse", objectFactory.createBuiltInFunction(function (str, reviver) {
-		reviver = createReviver(this, reviver);
+		reviver = createReviver(env, reviver);
 
 		var stringValue = convert.toString(env, str);
 		var parsedObject = JSON.parse(stringValue);

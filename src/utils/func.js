@@ -1,19 +1,19 @@
 module.exports = {
-	executeFunction: function (context, fn, params, args, thisArg, callee, isNew) {
-		var scope = fn.createScope(context.env, thisArg, false);
+	executeFunction: function (env, fn, params, args, thisArg, callee, isNew) {
+		var scope = fn.createScope(env, thisArg, false);
 		var returnResult;
 
 		if (isNew) {
 			returnResult = thisArg;
 		}
 
-		this.loadArguments(context.env, params, args, fn);
+		this.loadArguments(env, params, args, fn);
 
 		try {
 			if (fn.native) {
-				returnResult = fn.nativeFunction.apply(context.create(thisArg, callee, isNew), args) || returnResult;
+				returnResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 			} else {
-				var executionResult = context.create(fn.node.body, callee, isNew).execute();
+				var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
 				if (executionResult && executionResult.exit && executionResult.result) {
 					if (!isNew || !executionResult.result.isPrimitive) {
 						returnResult = executionResult.result;
@@ -26,19 +26,19 @@ module.exports = {
 		}
 
 		scope.exitScope();
-		return returnResult || context.env.global.getProperty("undefined").getValue();
+		return returnResult || env.global.getProperty("undefined").getValue();
 	},
 
-	getFunctionResult: function (context, fn, params, args, thisArg, callee) {
-		var scope = fn.createScope(context.env, thisArg, false);
-		this.loadArguments(context.env, params, args, fn);
+	getFunctionResult: function (env, fn, params, args, thisArg, callee) {
+		var scope = fn.createScope(env, thisArg, false);
+		this.loadArguments(env, params, args, fn);
 
 		var executionResult;
 		try {
 			if (fn.native) {
-				executionResult = fn.nativeFunction.apply(context.create(thisArg, callee, false), args);
+				executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
 			} else {
-				executionResult = context.create(fn.node.body, callee, false).execute();
+				executionResult = env.createExecutionContext(fn.node.body, callee).execute();
 			}
 		} catch (err) {
 			scope.exitScope();

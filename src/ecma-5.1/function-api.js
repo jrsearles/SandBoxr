@@ -67,7 +67,7 @@ module.exports = function (env, options) {
 					thisArg = objectFactory.createObject(funcInstance);
 				}
 
-				var executionResult = func.getFunctionResult(this, fn, params, arguments, thisArg, callee);
+				var executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
 
 				if (this.isNew) {
 					return thisArg;
@@ -116,7 +116,7 @@ module.exports = function (env, options) {
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
-		return func.executeFunction(this, this.node, params, args, thisArg, callee);
+		return func.executeFunction(env, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
 	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
@@ -132,7 +132,7 @@ module.exports = function (env, options) {
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
-		return func.executeFunction(this, this.node, params, args, thisArg, callee);
+		return func.executeFunction(env, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
 	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg) {
@@ -154,7 +154,7 @@ module.exports = function (env, options) {
 
 		var nativeFunc = function () {
 			var mergedArgs = args.concat(slice.call(arguments));
-			return func.executeFunction(this, fn, params, mergedArgs, thisArg, callee, this.isNew);
+			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);

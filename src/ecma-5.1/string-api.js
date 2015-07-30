@@ -121,13 +121,12 @@ module.exports = function (env) {
 
 		var replacer;
 		if (substrOrFn && substrOrFn.type === "function") {
-			var executionContext = this;
 			var callee = substrOrFn.native ? substrOrFn : substrOrFn.node;
 			var params = callee.params || [];
 
 			replacer = function () {
 				var args = slice.call(arguments).map(function (arg) { return objectFactory.createPrimitive(arg); });
-				var replacedValue = func.executeFunction(executionContext, substrOrFn, params, args, globalObject, callee);
+				var replacedValue = func.executeFunction(env, substrOrFn, params, args, globalObject, callee);
 				return replacedValue ? convert.toString(env, replacedValue) : undefined;
 			};
 		} else {
