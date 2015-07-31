@@ -16,7 +16,6 @@
     "acorn": "^1.0.3",
     "browserify": "^9.0.8",
     "chai": "^2.3.0",
-    "colors": "^1.1.0",
     "esprima": "^2.4.1",
     "glob": "^5.0.6",
     "gulp": "^3.8.11",
@@ -28,6 +27,7 @@
     "mocha": "^2.2.4",
     "strictify": "^0.2.0",
     "vinyl-source-stream": "^1.1.0",
+    "winston": "^1.0.1",
     "yargs": "^3.10.0"
   }
 }

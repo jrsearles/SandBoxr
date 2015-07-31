@@ -454,7 +454,7 @@ module.exports = function (env) {
 		var index = 0;
 
 		for (var i = 0; i < length; i++) {
-			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
+			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
 			}
 		}
@@ -482,7 +482,7 @@ module.exports = function (env) {
 		contracts.assertIsFunction(callback, this.node);
 
 		for (var i = 0; i < length; i++) {
-			if (convert.toBoolean(this.node.hasProperty(i) && executeCallback(callback, thisArg, this, i))) {
+			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(true);
 			}
 		}

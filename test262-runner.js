@@ -1,8 +1,8 @@
 var fs = require("fs");
 var util = require("util");
 var glob = require("glob");
-var colors = require("colors");
 var parser = require("./test/ast-parser");
+var winston = require("winston");
 var args = require("yargs")
 	.default("stopOnFail", false)
 	.alias("f", "stopOnFail")
@@ -15,13 +15,25 @@ var args = require("yargs")
 	.argv;
 
 var SandBoxr = require("./");
-var verbose = args.verbose;
+var logLevel = args.verbose ? "verbose" : "info";
 var stopOnFail = args.stopOnFail;
 var strictMode = args.strict;
 var chapter = args.chapter;
 
+var logFileName = "test262.log";
 var root = "test262/test/";
 var include = fs.readFileSync("test262-harness.js");
+
+if (fs.existsSync(logFileName)) {
+	fs.unlinkSync(logFileName);
+}
+
+var logger = new winston.Logger({
+	transports: [
+		new winston.transports.Console({ level: logLevel, colorize: true }),
+		new winston.transports.File({ level: "verbose", filename: "test262.log" })
+	]
+});
 
 var tests;
 if (chapter) {
@@ -36,10 +48,10 @@ if (chapter) {
 		root + "suite/ch09/**/*.js",	// passed!
 		root + "suite/ch10/**/*.js",	// passed! *
 		root + "suite/ch11/**/*.js",	// passed!
-		// root + "suite/ch12/12.6/12.6.2/**/*.js",
+		root + "suite/ch12/**/*.js",
 		root + "suite/ch13/**/*.js",	// functions	-- passed!
 		root + "suite/ch14/**/*.js",	// program	-- passed!
-		// root + "suite/ch15/15.1/**/*.js",	// global	-- passed
+		root + "suite/ch15/15.1/**/*.js",	// global	-- passed
 		root + "suite/ch15/15.2/**/*.js",	// object	-- passed
 		root + "suite/ch15/15.3/**/*.js",	// function	-- passed
 		root + "suite/ch15/15.4/**/*.js",	// array		-- passed - 1
@@ -52,7 +64,7 @@ if (chapter) {
 		root + "suite/ch15/15.11/**/*.js",	// error	-- passed
 		root + "suite/ch15/15.12/**/*.js",	// json		-- passed
 		root + "suite/annexB/**/*.js",	// passed
-		// root + "suite/bestPractice/**/*.js"
+		root + "suite/bestPractice/**/*.js"
 	];
 }
 
@@ -132,40 +144,32 @@ for (var i = 0; running && i < tests.length; i++) {
 }
 
 if (passedCount) {
-	console.log(colors.green("total passed: " + passedCount));
+	logger.info("total passed: " + passedCount);
 }
 
 if (failedCount) {
-	console.log(colors.red("total failed: " + failedCount));
+	logger.error("total failed: " + failedCount);
 }
 
 if (skippedCount) {
-	console.log(colors.blue("total skipped: " + skippedCount));
+	logger.info("total skipped: " + skippedCount);
 }
 
 function testStarting (name, desc) {
-	if (verbose) {
-		console.log(colors.blue("starting: ") + util.format("%s (%s)", name, desc));
-	}
+	logger.verbose("starting: %s (%s)", name, desc);
 }
 
 function testPassed (name, desc) {
-	if (verbose) {
-		console.log(colors.green("passed: ") + util.format("%s (%s)", name, desc));
-	}
-
+	logger.verbose("passed: %s (%s)", name, desc);
 	passedCount++;
 }
 
 function testFailed (name, desc, err) {
-	console.log(colors.red("failed: ") + util.format("%s (%s)", name, desc));
+	logger.error("failed: %s (%s)", name, desc);
 	failedCount++;
 }
 
 function testSkipped (name, reason) {
-	if (verbose) {
-		console.log(colors.blue("skipped: ") + util.format("%s (%s)", name, reason));
-	}
-
+	logger.verbose("skipped: %s (%s)", name, reason);
 	skippedCount++;
 }
