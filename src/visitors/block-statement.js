@@ -5,7 +5,7 @@ module.exports = function BlockStatement (context) {
 		context.env.initScope(context.node.body);
 	}
 
-	for (var i = 0, ln = context.node.body.length; i < ln; i++) {
+	for (let i = 0, ln = context.node.body.length; i < ln; i++) {
 		result = context.create(context.node.body[i]).execute();
 		if (result && result.shouldBreak(context, false, priorResult)) {
 			return result;

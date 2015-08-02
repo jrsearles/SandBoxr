@@ -2,7 +2,6 @@ var convert = require("../utils/convert");
 var contracts = require("../utils/contracts");
 var func = require("../utils/func");
 var NativeFunctionType = require("../types/native-function-type");
-var slice = Array.prototype.slice;
 
 function defineThis (env, fn, thisArg) {
 	if (fn.builtIn) {
@@ -24,12 +23,11 @@ module.exports = function (env, options) {
 	var objectFactory = env.objectFactory;
 	var funcClass;
 
-	var funcCtor = function () {
+	var funcCtor = function (...args) {
 		var funcInstance;
 
-		if (options.parser && arguments.length > 0) {
-			var args = slice.call(arguments);
-			var body = args.pop();
+		if (options.parser && args.length > 0) {
+			let body = args.pop();
 
 			if (args.length > 0) {
 				args = args.map(function (arg, index) {
@@ -43,8 +41,8 @@ module.exports = function (env, options) {
 				.join(",").split(/\s*,\s*/g);
 			}
 
-			var ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
-			var params = args.map(function (arg) {
+			let ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
+			let params = args.map(function (arg) {
 				arg = arg.trim();
 				contracts.assertIsValidParameterName(arg);
 
@@ -54,7 +52,7 @@ module.exports = function (env, options) {
 				};
 			});
 
-			var callee = {
+			let callee = {
 				type: "FunctionDeclaration",
 				params: params,
 				body: ast
@@ -109,8 +107,7 @@ module.exports = function (env, options) {
 		return objectFactory.createPrimitive("function () { [user code] }");
 	}, 0, "Function.prototype.toString"));
 
-	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg) {
-		var args = slice.call(arguments, 1);
+	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg, ...args) {
 		var params = this.node.native ? [] : this.node.node.params;
 		var callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
@@ -135,8 +132,7 @@ module.exports = function (env, options) {
 		return func.executeFunction(env, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
-	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg) {
-		var args = slice.call(arguments, 1);
+	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg, ...args) {
 		var fn = this.node;
 		var params = fn.native ? [] : fn.node.params;
 		var callee = fn.native ? fn : fn.node;
@@ -152,8 +148,8 @@ module.exports = function (env, options) {
 			configurable: false
 		};
 
-		var nativeFunc = function () {
-			var mergedArgs = args.concat(slice.call(arguments));
+		var nativeFunc = function (...additionArgs) {
+			var mergedArgs = args.concat(additionArgs);
 			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 

@@ -220,7 +220,7 @@ module.exports = function (env) {
 		return arr;
 	}, 2, "Array.prototype.slice"));
 
-	proto.define("splice", objectFactory.createBuiltInFunction(function (start, deleteCount) {
+	proto.define("splice", objectFactory.createBuiltInFunction(function (start, deleteCount, ...elements) {
 		var length = getLength(env, this.node);
 
 		start = convert.toInteger(env, start);
@@ -248,7 +248,7 @@ module.exports = function (env) {
 			k++;
 		}
 
-		var newCount = arguments.length - 2;
+		var newCount = elements.length;
 		if (newCount < deleteCount) {
 			k = start;
 
@@ -282,7 +282,7 @@ module.exports = function (env) {
 		k = start;
 		var i = 0;
 		for (; i < newCount; i++) {
-			this.node.putValue(k, arguments[i + 2]);
+			this.node.putValue(k, elements[i]);
 			k++;
 		}
 
@@ -290,9 +290,8 @@ module.exports = function (env) {
 		return removed;
 	}, 2, "Array.prototype.splice"));
 
-	proto.define("concat", objectFactory.createBuiltInFunction(function () {
+	proto.define("concat", objectFactory.createBuiltInFunction(function (...arrays) {
 		var newArray = objectFactory.create("Array");
-		var arrays = Array.prototype.slice.call(arguments);
 
 		// add "this" array to bunch
 		arrays.unshift(convert.toObject(env, this.node));
@@ -386,7 +385,7 @@ module.exports = function (env) {
 		var length = getLength(env, this.node);
 		contracts.assertIsFunction(callback, this.node);
 
-		for (var i = 0; i < length; i++) {
+		for (let i = 0; i < length; i++) {
 			if (this.node.hasProperty(i)) {
 				executeCallback(callback, thisArg, this, i);
 			}
@@ -401,7 +400,7 @@ module.exports = function (env) {
 		var newArray = objectFactory.create("Array");
 		newArray.putValue("length", objectFactory.createPrimitive(length));
 
-		for (var i = 0; i < length; i++) {
+		for (let i = 0; i < length; i++) {
 			if (this.node.hasProperty(i)) {
 				newArray.defineOwnProperty(i, createIndexProperty(executeCallback(callback, thisArg, this, i)), true, env);
 			}
@@ -418,7 +417,7 @@ module.exports = function (env) {
 		var newArray = objectFactory.create("Array");
 		var index = 0;
 
-		for (var i = 0; i < length; i++) {
+		for (let i = 0; i < length; i++) {
 			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
 			}
@@ -432,7 +431,7 @@ module.exports = function (env) {
 		var length = getLength(env, this.node);
 		contracts.assertIsFunction(callback, this.node);
 
-		for (var i = 0; i < length; i++) {
+		for (let i = 0; i < length; i++) {
 			if (this.node.hasProperty(i) && !convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(false);
 			}
@@ -446,7 +445,7 @@ module.exports = function (env) {
 		var length = getLength(env, this.node);
 		contracts.assertIsFunction(callback, this.node);
 
-		for (var i = 0; i < length; i++) {
+		for (let i = 0; i < length; i++) {
 			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				return objectFactory.createPrimitive(true);
 			}
@@ -504,7 +503,7 @@ module.exports = function (env) {
 			accumulator = initialValue;
 		} else {
 			// make sure array isn't empty
-			var hasElements = false;
+			let hasElements = false;
 			while (k >= 0 && !hasElements) {
 				hasElements = this.node.hasProperty(k);
 				if (hasElements) {
@@ -611,7 +610,7 @@ module.exports = function (env) {
 		// convert to array, run the wrapped comparer, then re-assign indexes
 		var sortedArray = convert.toArray(arr, length)
 			// undefined positions are handled by the underlying sort algorithm, so replace them with the raw primitive value
-			.map(function (el) { return el.isPrimitive && el.value === undefined ? undefined : el; })
+			.map(el => { return el.isPrimitive && el.value === undefined ? undefined : el })
 			.sort(comparer);
 
 		while (i < length) {

@@ -7,7 +7,7 @@ module.exports = function (env) {
 	var objectFactory = env.objectFactory;
 	var consoleClass = objectFactory.createObject();
 
-	methods.forEach(function (name) {
+	methods.forEach(name => {
 		consoleClass.define(name, objectFactory.createBuiltInFunction(function (message) {
 			var stringValue = convert.toString(env, message);
 			console[name](stringValue);

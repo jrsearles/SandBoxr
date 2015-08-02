@@ -15,7 +15,7 @@ module.exports = function SwitchStatement (context) {
 	var passed = false;
 	var caseValue, value, defaultCase;
 
-	for (var i = 0, ln = context.node.cases.length; i < ln; i++) {
+	for (let i = 0, ln = context.node.cases.length; i < ln; i++) {
 		if (!passed) {
 			if (context.node.cases[i].test) {
 				caseValue = context.create(context.node.cases[i].test).execute().result.getValue();

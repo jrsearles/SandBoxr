@@ -1,4 +1,5 @@
 var convert = require("../utils/convert");
+var contracts = require("../utils/contracts");
 
 module.exports = function (env) {
 	var globalObject = env.global;
@@ -19,18 +20,12 @@ module.exports = function (env) {
 	proto.value = false;
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		if (this.node.className !== "Boolean") {
-			throw new TypeError("Boolean.prototype.toString is not generic.");
-		}
-
+		contracts.assertIsNotGeneric(this.node, "Boolean", "Boolean.prototype.toString");
 		return objectFactory.createPrimitive(String(this.node.value));
 	}, 0, "Boolean.prototype.toString"));
 
 	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-		if (this.node.className !== "Boolean") {
-			throw new TypeError("Boolean.prototype.valueOf is not generic.");
-		}
-
+		contracts.assertIsNotGeneric(this.node, "Boolean", "Boolean.prototype.valueOf");
 		return objectFactory.createPrimitive(this.node.value);
 	}, 0, "Boolean.prototype.valueOf"));
 

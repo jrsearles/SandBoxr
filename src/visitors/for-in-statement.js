@@ -4,7 +4,7 @@ module.exports = function ForInStatement (context) {
 		// should only be one, but
 		// need to unwrap the declaration to get it
 		// todo: this is sloppy - need to revisit
-		context.node.left.declarations.forEach(function (decl) {
+		context.node.left.declarations.forEach(decl => {
 			left = context.create(decl).execute().result;
 		});
 	} else {
@@ -22,7 +22,7 @@ module.exports = function ForInStatement (context) {
 	var visited = Object.create(null);
 
 	while (obj) {
-		for (var prop in obj.properties) {
+		for (let prop in obj.properties) {
 			if (obj.properties[prop].enumerable && !visited[prop]) {
 				left.putValue(context.env.objectFactory.createPrimitive(prop));
 

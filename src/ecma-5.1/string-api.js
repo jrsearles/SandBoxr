@@ -53,19 +53,19 @@ module.exports = function (env) {
 		return objectFactory.createPrimitive(value.substring(start, end));
 	}, 2, "String.prototype.substring"));
 
-	protoMethods.forEach(function (name) {
+	protoMethods.forEach(name => {
 		var fn = String.prototype[name];
 		if (fn) {
 			proto.define(name, objectFactory.createBuiltInFunction(function () {
 				var stringValue = convert.toString(env, this.node);
-				var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg); });
+				var args = slice.call(arguments).map(arg => convert.toPrimitive(env, arg));
 				return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
 			}, String.prototype[name].length, "String.prototype." + name));
 		}
 	});
 
-	stringClass.define("fromCharCode", objectFactory.createBuiltInFunction(function (charCode) {
-		var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg); });
+	stringClass.define("fromCharCode", objectFactory.createBuiltInFunction(function (...charCodes) {
+		var args = charCodes.map(arg => convert.toPrimitive(env, arg));
 		return objectFactory.createPrimitive(String.fromCharCode.apply(null, args));
 	}, 1, "String.fromCharCode"));
 
@@ -125,7 +125,7 @@ module.exports = function (env) {
 			var params = callee.params || [];
 
 			replacer = function () {
-				var args = slice.call(arguments).map(function (arg) { return objectFactory.createPrimitive(arg); });
+				var args = slice.call(arguments).map(arg => objectFactory.createPrimitive(arg));
 				var replacedValue = func.executeFunction(env, substrOrFn, params, args, globalObject, callee);
 				return replacedValue ? convert.toString(env, replacedValue) : undefined;
 			};
@@ -149,14 +149,13 @@ module.exports = function (env) {
 		var match = stringValue.match(actualRegex);
 		if (match) {
 			var matches = objectFactory.create("Array");
-			var context = this;
 
 			match.forEach(function (value, index) {
-				matches.putValue(index, objectFactory.createPrimitive(value), false, context);
+				matches.putValue(index, objectFactory.createPrimitive(value), false);
 			});
 
-			matches.putValue("index", objectFactory.createPrimitive(match.index), false, this);
-			matches.putValue("input", objectFactory.createPrimitive(match.input), false, this);
+			matches.putValue("index", objectFactory.createPrimitive(match.index), false);
+			matches.putValue("input", objectFactory.createPrimitive(match.input), false);
 			return matches;
 		}
 
@@ -171,18 +170,12 @@ module.exports = function (env) {
 	}, 0, "String.prototype.trim"));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		if (this.node.className !== "String") {
-			throw new TypeError("String.prototype.toString is not generic");
-		}
-
+		contracts.assertIsNotGeneric(this.node, "String", "String.prototype.toString");
 		return objectFactory.createPrimitive(this.node.value);
 	}, 0, "String.prototype.toString"));
 
 	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-		if (this.node.className !== "String") {
-			throw new TypeError("String.prototype.valueOf is not generic");
-		}
-
+		contracts.assertIsNotGeneric(this.node, "String", "String.prototype.valueOf");
 		return objectFactory.createPrimitive(this.node.value);
 	}, 0, "String.prototype.valueOf"));
 

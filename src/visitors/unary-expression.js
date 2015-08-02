@@ -8,7 +8,7 @@ module.exports = function UnaryExpression (context) {
 
 	switch (context.node.operator) {
 		case "typeof":
-			var type;
+			let type;
 			if (result instanceof Reference && result.isUnresolved()) {
 				type = "undefined";
 			} else {
@@ -40,7 +40,7 @@ module.exports = function UnaryExpression (context) {
 			break;
 
 		case "delete":
-			var deleted = true;
+			let deleted = true;
 			if (result && result instanceof Reference) {
 				if (!result.isUnresolved()) {
 					deleted = result.deleteBinding(result.name);

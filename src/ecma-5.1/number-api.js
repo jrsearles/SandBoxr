@@ -1,4 +1,5 @@
 var convert = require("../utils/convert");
+var contracts = require("../utils/contracts");
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
@@ -21,9 +22,7 @@ module.exports = function (env) {
 	proto.value = 0;
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
-		if (this.node.className !== "Number") {
-			throw new TypeError("Number.prototype.toString is not generic");
-		}
+		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toString");
 
 		var radixValue = 10;
 		if (radix) {
@@ -37,6 +36,8 @@ module.exports = function (env) {
 	}, 1, "Number.prototype.toString"));
 
 	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
+		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toFixed");
+		
 		var digits = 0;
 		if (fractionDigits) {
 			digits = convert.toNumber(env, fractionDigits);
@@ -46,21 +47,22 @@ module.exports = function (env) {
 	}, 1, "Number.prototype.toFixed"));
 
 	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-		if (this.node.className !== "Number") {
-			throw new TypeError("Number.prototype.valueOf is not generic");
-		}
-
+		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.valueOf");
 		return objectFactory.createPrimitive(this.node.value == null ? 0 : this.node.value);
 	}, 0, "Number.prototype.valueOf"));
 
-	constants.forEach(function (name) {
+	constants.forEach(name => {
 		numberClass.define(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
-	protoMethods.forEach(function (name) {
+	protoMethods.forEach(name => {
 		var fn = Number.prototype[name];
 		if (fn) {
-			proto.define(name, convert.toNativeFunction(env, fn, "Number.prototype." + name));
+			let methodName = `Number.prototype.${name}`;
+			proto.define(name, objectFactory.createBuiltInFunction(function () {
+				contracts.assertIsNotGeneric(this.node, "Number", methodName);
+				return objectFactory.createPrimitive(fn.call(this.node.value));
+			}, fn.length, methodName));
 		}
 	});
 

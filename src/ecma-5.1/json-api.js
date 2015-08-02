@@ -1,3 +1,4 @@
+require("core-js/fn/string/repeat");
 var convert = require("../utils/convert");
 var func = require("../utils/func");
 var contracts = require("../utils/contracts");
@@ -9,10 +10,6 @@ var primitives = {
 	"Date": true
 };
 
-function repeat (what, count) {
-	return Array(count + 1).join(what);
-}
-
 function formatValues (values, gap, depth) {
 	if (values.length === 0) {
 		return "";
@@ -22,11 +19,11 @@ function formatValues (values, gap, depth) {
 		return values.join(",");
 	}
 
-	var indent = "\n" + repeat(gap, depth);
+	var indent = "\n" + gap.repeat(depth);
 	var joinedValues = values.join(indent + ",");
 
 	// remove indent on closing
-	return indent + joinedValues + "\n" + repeat(gap, depth - 1);
+	return indent + joinedValues + "\n" + gap.repeat(depth - 1);
 }
 
 function serializePrimitive (value) {
@@ -155,7 +152,7 @@ function getSpacer (env, spacer) {
 			count = Math.max(Math.min(10, count), 0);
 
 			if (count > 0) {
-				return repeat(" ", count);
+				return " ".repeat(count);
 			}
 
 			return "";

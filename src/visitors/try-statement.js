@@ -5,13 +5,13 @@ module.exports = function TryCatchStatement (context) {
 		result = context.create(context.node.block).execute();
 	} catch (err) {
 		if (context.node.handler) {
-			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
+			let caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
 			// var scope = context.env.createScope();
 			// scope.init(context.node.handler.body);
 
-			var errVar = context.node.handler.param.name;
-			var hasVariable = context.env.hasVariable(errVar);
+			let errVar = context.node.handler.param.name;
+			let hasVariable = context.env.hasVariable(errVar);
 
 			if (!hasVariable) {
 				context.env.createVariable(errVar);
@@ -36,7 +36,7 @@ module.exports = function TryCatchStatement (context) {
 		}
 	} finally {
 		if (context.node.finalizer) {
-			var finalResult = context.create(context.node.finalizer).execute();
+			let finalResult = context.create(context.node.finalizer).execute();
 			if (finalResult && finalResult.shouldBreak(context)) {
 				return finalResult;
 			}

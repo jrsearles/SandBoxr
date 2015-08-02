@@ -49,7 +49,7 @@ module.exports = function (env, config) {
 	jsonAPI(env, config);
 	consoleAPI(env, config);
 
-	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(function (name) {
+	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(name => {
 		globalObject.define(name, objectFactory.createBuiltInFunction(function (value) {
 			var stringValue = convert.toString(env, value);
 			return objectFactory.createPrimitive(global[name](stringValue));
@@ -107,11 +107,8 @@ module.exports = function (env, config) {
 			return executionResult && executionResult.result ? executionResult.result.getValue() : undefinedClass;
 		}, 1, "eval");
 
-		// evalFunc.parent = globalObject.getValue("Object");
-		// evalFunc.setProto(null);
 		globalObject.define("eval", evalFunc);
 	}
 
-	// globalObject.setProto(globalObject.getValue("Object").proto);
 	objectFactory.init();
 };

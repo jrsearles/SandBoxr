@@ -1,4 +1,4 @@
-var SandBoxr = require("../src/");
+var SandBoxr = require("../dist/sandboxr");
 var parser = require("./ast-parser");
 var runner = require("./test-runner");
 var expect = require("chai").expect;

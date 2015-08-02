@@ -182,7 +182,7 @@ module.exports = function (env) {
 		}
 
 		if (descriptors) {
-			for (var prop in descriptors.properties) {
+			for (let prop in descriptors.properties) {
 				if (descriptors.properties[prop].enumerable) {
 					defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
 				}
@@ -203,7 +203,7 @@ module.exports = function (env) {
 		contracts.assertIsObject(obj, "Object.defineProperties");
 		contracts.assertArgIsNotNullOrUndefined(descriptors);
 
-		for (var prop in descriptors.properties) {
+		for (let prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
 				defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
 			}
@@ -244,14 +244,10 @@ module.exports = function (env) {
 		var arr = objectFactory.create("Array");
 		var index = 0;
 
-		for (var name in obj.properties) {
+		for (let name in obj.properties) {
 			if (obj.properties[name].enumerable) {
-				arr.defineOwnProperty(index++, {
-					configurable: true,
-					enumerable: true,
-					writable: true,
-					value: objectFactory.createPrimitive(name)
-				}, false, env);
+				let value = objectFactory.createPrimitive(name);
+				arr.defineOwnProperty(index++, { configurable: true, enumerable: true, writable: true, value }, false, env);
 			}
 		}
 

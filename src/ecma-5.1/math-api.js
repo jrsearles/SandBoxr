@@ -9,11 +9,11 @@ module.exports = function (env) {
 	var mathClass = objectFactory.createObject();
 	mathClass.className = "Math";
 
-	constants.forEach(function (name) {
+	constants.forEach(name => {
 		mathClass.define(name, objectFactory.createPrimitive(Math[name]), { configurable: false, enumerable: false, writable: false });
 	});
 
-	methods.forEach(function (name) {
+	methods.forEach(name => {
 		mathClass.define(name, convert.toNativeFunction(env, Math[name], "Math." + name));
 	});
 

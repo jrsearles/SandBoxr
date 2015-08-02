@@ -1,7 +1,7 @@
 module.exports = function SequenceExpression (context) {
 	var value;
 
-	context.node.expressions.forEach(function (expr) {
+	context.node.expressions.forEach(expr => {
 		value = context.create(expr).execute().result.getValue();
 	});
 

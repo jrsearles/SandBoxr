@@ -72,15 +72,15 @@ module.exports = function (env) {
 	proto.className = "Date";
 	proto.value = new Date(Date.prototype);
 
-	staticMethods.forEach(function (name) {
+	staticMethods.forEach(name => {
 		dateClass.define(name, convert.toNativeFunction(env, Date[name], "Date." + name));
 	});
 
-	protoMethods.forEach(function (name) {
+	protoMethods.forEach(name => {
 		proto.define(name, convert.toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
 	});
 
-	setters.forEach(function (name) {
+	setters.forEach(name => {
 		function setter () {
 			var args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg); });
 			Date.prototype[name].apply(this.node.value, args);

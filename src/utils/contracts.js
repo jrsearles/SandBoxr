@@ -4,13 +4,13 @@ var integerRgx = /^-?\d+$/;
 module.exports = {
 	assertIsObject: function (obj, methodName, message) {
 		if (!this.isObject(obj)) {
-			throw new TypeError(methodName + " called on non-object");
+			throw new TypeError(`${methodName} called on non-object`);
 		}
 	},
 
 	assertIsNotNullOrUndefined: function (value, methodName) {
 		if (this.isNullOrUndefined(value)) {
-			throw new TypeError(methodName + " called on null or undefined");
+			throw new TypeError(`${methodName} called on null or undefined`);
 		}
 	},
 
@@ -28,7 +28,7 @@ module.exports = {
 
 	assertIsNotConstructor: function (context, methodName) {
 		if (context.isNew) {
-			throw new TypeError(methodName + " is not a constructor");
+			throw new TypeError(`${methodName} is not a constructor`);
 		}
 	},
 
@@ -40,7 +40,13 @@ module.exports = {
 
 	assertIsValidParameterName: function (name) {
 		if (/^\d|[;\(\)"']/.test(name)) {
-			throw new SyntaxError("Unexpected token in " + name);
+			throw new SyntaxError(`Unexpected token in ${name}`);
+		}
+	},
+	
+	assertIsNotGeneric: function (obj, expectedClass, methodName) {
+		if (!obj || obj.className !== expectedClass) {
+			throw new TypeError(`${methodName} is not generic`)
 		}
 	},
 

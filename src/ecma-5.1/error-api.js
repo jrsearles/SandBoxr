@@ -48,7 +48,7 @@ module.exports = function (env) {
 
 	globalObject.define("Error", errorClass);
 
-	errorTypes.forEach(function (type) {
+	errorTypes.forEach(type => {
 		var errClass = objectFactory.createFunction(function (message) {
 			return createError(objectFactory, message, type);
 		}, null, { configurable: false, enumerable: false, writable: false });

@@ -1,4 +1,6 @@
 var browserify = require("browserify");
+var babelify = require("babelify");
+var derequire = require("browserify-derequire");
 var gulp = require("gulp");
 var source = require("vinyl-source-stream");
 var eslint = require("gulp-eslint");
@@ -8,8 +10,9 @@ var rename = require("gulp-rename");
 var streamify = require("gulp-streamify");
 
 gulp.task("build", ["lint"], function () {
-	return browserify("./src/index.js", { standalone: "SandBoxr" })
-		.transform("strictify")
+	return browserify({ standalone: "SandBoxr" })
+		.transform(babelify)
+		.require("./", { entry: true })
 		.bundle()
 		.pipe(source("sandboxr.js"))
 		.pipe(gulp.dest("./dist/"))

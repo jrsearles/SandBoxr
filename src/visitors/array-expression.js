@@ -3,8 +3,8 @@ module.exports = function ArrayExpression (context) {
 	var arr = objectFactory.create("Array");
 
 	if (context.node.elements) {
-		var i = 0;
-		var ln = context.node.elements.length;
+		let i = 0;
+		let ln = context.node.elements.length;
 
 		while (i < ln) {
 			if (context.node.elements[i]) {

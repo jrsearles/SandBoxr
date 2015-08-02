@@ -66,7 +66,7 @@ module.exports = function (env) {
 	proto.define("compile", convert.toNativeFunction(env, RegExp.prototype.compile, "RegExp.prototype.compile"));
 	proto.defineOwnProperty("lastIndex", { value: objectFactory.createPrimitive(0), writable: true });
 
-	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {
+	["global", "ignoreCase", "multiline", "source"].forEach(name => {
 		proto.defineOwnProperty(name, { value: objectFactory.createPrimitive(RegExp.prototype[name]) });
 	});
 

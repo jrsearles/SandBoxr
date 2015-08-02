@@ -41,7 +41,7 @@ module.exports = function ObjectExpression (context) {
 		}
 	});
 
-	for (var prop in descriptors) {
+	for (let prop in descriptors) {
 		setDescriptor(context.env, obj, prop, descriptors[prop]);
 	}
 

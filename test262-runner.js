@@ -14,7 +14,7 @@ var args = require("yargs")
 	.alias("ch", "chapter")
 	.argv;
 
-var SandBoxr = require("./");
+var SandBoxr = require("./dist/sandboxr");
 var logLevel = args.verbose ? "verbose" : "info";
 var stopOnFail = args.stopOnFail;
 var strictMode = args.strict;
