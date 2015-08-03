@@ -1,4 +1,4 @@
-var func = require("../utils/func");
+import * as func from "../utils/func";
 
 function setDescriptor (env, obj, name, descriptor) {
 	if (descriptor.get) {
@@ -20,7 +20,7 @@ function createDescriptor (value) {
 	return { value: value, configurable: true, enumerable: true, writable: true };
 }
 
-module.exports = function ObjectExpression (context) {
+export default function ObjectExpression (context) {
 	var obj = context.env.objectFactory.createObject();
 	var descriptors = Object.create(null);
 
@@ -46,4 +46,4 @@ module.exports = function ObjectExpression (context) {
 	}
 
 	return context.result(obj);
-};
+}

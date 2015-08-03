@@ -1,12 +1,9 @@
-var ObjectType = require("./object-type");
+import ObjectType from "./object-type";
 
-function ErrorType (source) {
-	ObjectType.call(this);
-	this.source = source;
-	this.className = "Error";
+export default class ErrorType extends ObjectType {
+	constructor (source) {
+		super();
+		this.source = source;
+		this.className = "Error";
+	}
 }
-
-ErrorType.prototype = Object.create(ObjectType.prototype);
-ErrorType.prototype.constructor = ErrorType;
-
-module.exports = ErrorType;

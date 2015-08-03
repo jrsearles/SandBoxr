@@ -1,3 +1,3 @@
-module.exports = function EmptyStatement (context) {
+export default function EmptyStatement (context) {
 	return context.empty();
-};
+}

@@ -1,7 +1,7 @@
-var Reference = require("../env/reference");
-var convert = require("../utils/convert");
+import Reference from "../env/reference";
+import * as convert from "../utils/convert";
 
-module.exports = function UnaryExpression (context) {
+export default function UnaryExpression (context) {
 	var result = context.create(context.node.argument).execute().result;
 	var objectFactory = context.env.objectFactory;
 	var value, newValue;
@@ -61,4 +61,4 @@ module.exports = function UnaryExpression (context) {
 	}
 
 	return context.result(newValue);
-};
+}

@@ -1,4 +1,4 @@
-module.exports = function Identifier (context) {
+export default function Identifier (context) {
 	var name = context.node.name;
 
 	if (context.callee && context.callee.identifier === name) {
@@ -6,4 +6,4 @@ module.exports = function Identifier (context) {
 	}
 
 	return context.result(context.env.getReference(context.node.name));
-};
+}

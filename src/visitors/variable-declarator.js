@@ -1,4 +1,4 @@
-module.exports = function VariableDeclarator (context) {
+export default function VariableDeclarator (context) {
 	var name = context.node.id.name;
 	var value;
 
@@ -12,4 +12,4 @@ module.exports = function VariableDeclarator (context) {
 	}
 
 	return context.result(context.env.getReference(name));
-};
+}

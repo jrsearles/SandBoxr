@@ -1,9 +1,9 @@
-var DeclarativeEnvironment = require("./declarative-environment");
-var ObjectEnvironment = require("./object-environment");
-var ExecutionContext = require("../execution-context");
-var Reference = require("./reference");
-var keywords = require("../keywords");
-var api = require("../ecma-5.1");
+import ExecutionContext from "../execution-context";
+import DeclarativeEnvironment from "./declarative-environment";
+import ObjectEnvironment from "./object-environment";
+import Reference from "./reference";
+import keywords from "../keywords";
+import api from "../ecma-5.1";
 
 var scopedBlocks = {
 	"CallExpression": true,
@@ -81,21 +81,16 @@ function isStrictMode (node) {
 		&& node.expression.value === "use strict";
 }
 
-function Environment () {
-}
-
-Environment.prototype = {
-	constructor: Environment,
-
-	init: function (config) {
+export default class Environment {
+	init (config) {
 		// clear state in case of re-init
 		this.current = null;
 		this.globalScope = null;
 
 		api(this, config);
-	},
+	}
 
-	getReference: function (name, strict) {
+	getReference (name, strict) {
 		var scope = this.current;
 		while (scope) {
 			if (scope.hasVariable(name)) {
@@ -106,55 +101,55 @@ Environment.prototype = {
 		}
 
 		return new Reference(name, undefined, strict, this);
-	},
+	}
 
-	getValue: function (name) {
+	getValue (name) {
 		return this.getReference(name).getValue();
-	},
+	}
 
-	putValue: function (name, value, strict) {
+	putValue (name, value, strict) {
 		this.current.putValue(name, value, strict);
-	},
+	}
 
-	createVariable: function (name, immutable) {
+	hasVariable (name) {
+		return this.current.hasVariable(name);
+	}
+
+	getVariable (name) {
+		return this.current.getVariable(name);
+	}
+
+	deleteVariable (name) {
+		this.current.deleteVariable(name);
+	}
+
+	createVariable (name, immutable) {
 		if (keywords.isReserved(name)) {
-			throw new SyntaxError("Illegal use of reserved keyword: " + name);
+			throw new SyntaxError(`Illegal use of reserved keyword: ${name}`);
 		}
 
 		return this.current.createVariable(name, !immutable);
-	},
+	}
 
-	getVariable: function (name) {
-		return this.current.getVariable(name);
-	},
-
-	hasVariable: function (name) {
-		return this.current.hasVariable(name);
-	},
-
-	deleteVariable: function (name) {
-		this.current.deleteVariable(name);
-	},
-
-	getThisBinding: function () {
+	getThisBinding () {
 		return this.current.getThisBinding() || this.global;
-	},
+	}
 
-	createExecutionContext: function (node, callee, isNew) {
+	createExecutionContext (node, callee, isNew) {
 		return new ExecutionContext(this, node, callee, isNew);
-	},
+	}
 
-	createScope: function (thisArg) {
+	createScope (thisArg) {
 		var env = new DeclarativeEnvironment(this.current, thisArg, this);
 		return this.setScope(env);
-	},
+	}
 
-	createObjectScope: function (obj) {
+	createObjectScope (obj) {
 		var env = new ObjectEnvironment(this.current, obj, this);
 		return this.setScope(env);
-	},
+	}
 
-	initScope: function (node) {
+	initScope (node) {
 		var env = this;
 		var strict = isStrictMode(node);
 		var undef = this.global.getProperty("undefined").getValue();
@@ -182,9 +177,9 @@ Environment.prototype = {
 				}
 			}
 		});
-	},
+	}
 
-	setScope: function (scope) {
+	setScope (scope) {
 		this.globalScope = this.globalScope || scope;
 
 		var env = this;
@@ -205,6 +200,4 @@ Environment.prototype = {
 			}
 		};
 	}
-};
-
-module.exports = Environment;
+}

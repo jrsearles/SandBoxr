@@ -1,7 +1,7 @@
-var convert = require("../utils/convert");
-var contracts = require("../utils/contracts");
+import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
 
-module.exports = function (env) {
+export default function regexApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var regexClass = objectFactory.createFunction(function (pattern, flags) {
@@ -71,4 +71,4 @@ module.exports = function (env) {
 	});
 
 	globalObject.define("RegExp", regexClass);
-};
+}

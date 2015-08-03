@@ -1,4 +1,4 @@
-module.exports = function ArrayExpression (context) {
+export default function ArrayExpression (context) {
 	var objectFactory = context.env.objectFactory;
 	var arr = objectFactory.create("Array");
 
@@ -19,4 +19,4 @@ module.exports = function ArrayExpression (context) {
 	}
 
 	return context.result(arr);
-};
+}

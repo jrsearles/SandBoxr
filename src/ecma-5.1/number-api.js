@@ -1,10 +1,10 @@
-var convert = require("../utils/convert");
-var contracts = require("../utils/contracts");
+import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
 
 var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
 var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
 
-module.exports = function (env) {
+export default function numberApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var numberClass = objectFactory.createFunction(function (obj) {
@@ -67,4 +67,4 @@ module.exports = function (env) {
 	});
 
 	globalObject.define("Number", numberClass);
-};
+}

@@ -1,7 +1,7 @@
-var convert = require("../utils/convert");
-var contracts = require("../utils/contracts");
-var func = require("../utils/func");
-var NativeFunctionType = require("../types/native-function-type");
+import NativeFunctionType from "../types/native-function-type";
+import * as contracts from "../utils/contracts";
+import * as func from "../utils/func";
+import * as convert from "../utils/convert";
 
 function defineThis (env, fn, thisArg) {
 	if (fn.builtIn) {
@@ -17,7 +17,7 @@ function defineThis (env, fn, thisArg) {
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
-module.exports = function (env, options) {
+export default function functionApi (env, options) {
 	var globalObject = env.global;
 	var undef = env.global.getProperty("undefined").getValue();
 	var objectFactory = env.objectFactory;
@@ -164,4 +164,4 @@ module.exports = function (env, options) {
 
 		return boundFunc;
 	}, 1, "Function.prototype.bind"));
-};
+}

@@ -1,6 +1,6 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
-module.exports = function DoWhileStatement (context) {
+export default function DoWhileStatement (context) {
 	var result, priorResult;
 	var passed = true;
 
@@ -19,4 +19,4 @@ module.exports = function DoWhileStatement (context) {
 	}
 
 	return result;
-};
+}

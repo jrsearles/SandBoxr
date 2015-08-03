@@ -1,14 +1,12 @@
-function Reference (name, base, strict, env) {
-	this.name = name;
-	this.base = base;
-	this.strict = strict;
-	this.env = env;
-}
-
-Reference.prototype = {
-	constructor: Reference,
-
-	putValue: function (value) {
+export default class Reference {
+	constructor (name, base, strict, env) {
+		this.name = name;
+		this.base = base;
+		this.strict = strict;
+		this.env = env;
+	}
+	
+	putValue (value) {
 		if (this.base === undefined && this.strict) {
 			throw new ReferenceError(this.name + " is not defined");
 		}
@@ -18,27 +16,25 @@ Reference.prototype = {
 		} else {
 			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
 		}
-	},
-
-	getValue: function () {
+	}
+	
+	getValue () {
 		if (!this.base) {
-			throw new ReferenceError(this.name + " is not defined");
+			throw new ReferenceError(`${this.name} is not defined`);
 		}
 
 		return this.base.getValue(this.name, this.strict);
-	},
-
-	deleteBinding: function (name) {
+	}
+	
+	deleteBinding (name) {
 		if (this.base) {
 			return this.base.deleteVariable(name);
 		}
 
 		return true;
-	},
-
-	isUnresolved: function () {
+	}
+	
+	isUnresolved () {
 		return !this.base;
 	}
-};
-
-module.exports = Reference;
+}

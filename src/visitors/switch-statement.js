@@ -10,7 +10,7 @@ function executeStatements (context, statements) {
 	return result;
 }
 
-module.exports = function SwitchStatement (context) {
+export default function SwitchStatement (context) {
 	var testValue = context.create(context.node.discriminant).execute().result.getValue();
 	var passed = false;
 	var caseValue, value, defaultCase;
@@ -44,4 +44,4 @@ module.exports = function SwitchStatement (context) {
 	}
 
 	return value;
-};
+}

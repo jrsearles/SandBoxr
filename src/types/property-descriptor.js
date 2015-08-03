@@ -1,4 +1,4 @@
-var contracts = require("../utils/contracts");
+import * as contracts from "../utils/contracts";
 
 var defaultDescriptor = {
 	configurable: false,
@@ -6,34 +6,32 @@ var defaultDescriptor = {
 	writable: false
 };
 
-function PropertyDescriptor (base, config, value) {
-	config = config || defaultDescriptor;
-	this.base = base;
-	this.configurable = config.configurable || false;
-	this.enumerable = config.enumerable || false;
-
-	if ("get" in config || "set" in config) {
-		this.dataProperty = false;
-		this.get = config.get;
-		this.getter = config.getter;
-		this.set = config.set;
-		this.setter = config.setter;
-	} else {
-		this.writable = config.writable || false;
-		this.dataProperty = true;
-		this.value = value || config.value;
+export default class PropertyDescriptor {
+	constructor (base, config, value) {
+		config = config || defaultDescriptor;
+		this.base = base;
+		this.configurable = config.configurable || false;
+		this.enumerable = config.enumerable || false;
+	
+		if ("get" in config || "set" in config) {
+			this.dataProperty = false;
+			this.get = config.get;
+			this.getter = config.getter;
+			this.set = config.set;
+			this.setter = config.setter;
+		} else {
+			this.writable = config.writable || false;
+			this.dataProperty = true;
+			this.value = value || config.value;
+		}
 	}
-}
-
-PropertyDescriptor.prototype = {
-	constructor: PropertyDescriptor,
-
-	bind: function (obj) {
+	
+	bind (obj) {
 		this.base = obj;
 		return this;
-	},
-
-	update: function (descriptor) {
+	}
+	
+	update (descriptor) {
 		for (var prop in descriptor) {
 			if (descriptor.hasOwnProperty(prop)) {
 				this[prop] = descriptor[prop];
@@ -49,9 +47,9 @@ PropertyDescriptor.prototype = {
 			this.dataProperty = true;
 			this.get = this.getter = this.set = this.setter = undefined;
 		}
-	},
-
-	canUpdate: function (descriptor) {
+	}
+	
+	canUpdate (descriptor) {
 		if (this.configurable) {
 			return true;
 		}
@@ -93,9 +91,9 @@ PropertyDescriptor.prototype = {
 		}
 
 		return true;
-	},
+	}
 
-	getValue: function () {
+	getValue () {
 		if (this.dataProperty) {
 			return this.value;
 		}
@@ -105,9 +103,13 @@ PropertyDescriptor.prototype = {
 		}
 
 		return undefined;
-	},
+	}
 
-	setValue: function (value) {
+	canSetValue () {
+		return this.writable || !!this.setter;
+	}
+
+	setValue (value) {
 		if (!this.canSetValue()) {
 			return;
 		}
@@ -117,11 +119,5 @@ PropertyDescriptor.prototype = {
 		} else if (this.setter) {
 			this.setter.call(this.base, value);
 		}
-	},
-
-	canSetValue: function () {
-		return this.writable || !!this.setter;
 	}
-};
-
-module.exports = PropertyDescriptor;
+}

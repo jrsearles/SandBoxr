@@ -1,19 +1,19 @@
-var ObjectType = require("./object-type");
+import ObjectType from "./object-type";
 
-function DateType (value) {
-	ObjectType.call(this);
-	this.value = value;
-	this.type = "object";
-	this.className = "Date";
+export default class DateType extends ObjectType {
+	constructor (value) {
+		super();
+		this.value = value;
+		this.type = "object";
+		this.className = "Date";
 
-	// 11.6.1 Note 1
-	// All native ECMAScript objects except Date objects handle the absence of a hint as if the hint
-	// Number were given; Date objects handle the absence of a hint as if the hint String were given.
-	this.primitiveHint = "string";
+		// 11.6.1 Note 1
+		// All native ECMAScript objects except Date objects handle the absence of a hint as if the hint
+		// Number were given; Date objects handle the absence of a hint as if the hint String were given.
+		this.primitiveHint = "string";
+	}
+
+	unwrap () {
+		return this.value;
+	}
 }
-
-DateType.prototype = Object.create(ObjectType.prototype);
-DateType.prototype.constructor = DateType;
-DateType.prototype.unwrap = function () { return this.value; };
-
-module.exports = DateType;

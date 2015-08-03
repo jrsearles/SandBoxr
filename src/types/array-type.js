@@ -1,6 +1,6 @@
-var ObjectType = require("./object-type");
-var contracts = require("../utils/contracts");
-var convert = require("../utils/convert");
+import ObjectType from "./object-type";
+import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
 
 // todo: this is hacky - remove this for passed in environment
 var localObjectFactory;
@@ -83,52 +83,49 @@ function setLength (env, arr, name, descriptor, throwOnError) {
 	return succeeded;
 }
 
-function ArrayType () {
-	ObjectType.call(this);
-	this.className = "Array";
-}
-
-ArrayType.prototype = Object.create(ObjectType.prototype);
-ArrayType.prototype.constructor = ArrayType;
-
-ArrayType.prototype.putValue = function (name, value, throwOnError, env) {
-	if (name === "length") {
-		setLength(env, this, name, { value: value }, throwOnError);
-		return;
+export default class ArrayType extends ObjectType {
+	constructor () {
+		super();
+		this.className = "Array";
 	}
 
-	ObjectType.prototype.putValue.apply(this, arguments);
-};
-
-ArrayType.prototype.defineOwnProperty = function (name, descriptor, throwOnError, env) {
-	if (contracts.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
-		return setIndex(env, this, name, descriptor, throwOnError);
+	init (objectFactory) {
+		localObjectFactory = objectFactory;
+		this.defineOwnProperty("length", { value: objectFactory.createPrimitive(0), configurable: false, enumerable: false, writable: true });
 	}
 
-	if (name === "length" && "length" in this.properties && descriptor && "value" in descriptor) {
-		return setLength(env, this, name, descriptor, throwOnError);
-	}
-
-	return ObjectType.prototype.defineOwnProperty.apply(this, arguments);
-};
-
-ArrayType.prototype.init = function (objectFactory) {
-	localObjectFactory = objectFactory;
-	this.defineOwnProperty("length", { value: objectFactory.createPrimitive(0), configurable: false, enumerable: false, writable: true });
-};
-
-ArrayType.prototype.unwrap = function () {
-	var arr = [];
-
-	// this won't grab properties from the prototype - do we care?
-	// it's an edge case but we may want to address it
-	for (var index in this.properties) {
-		if (this.properties[index].enumerable) {
-			arr[Number(index)] = this.getValue(index).unwrap();
+	putValue (name, value, throwOnError, env) {
+		if (name === "length") {
+			setLength(env, this, name, { value: value }, throwOnError);
+			return;
 		}
+
+		super.putValue.apply(this, arguments);
 	}
 
-	return arr;
-};
+	defineOwnProperty (name, descriptor, throwOnError, env) {
+		if (contracts.isInteger(name) && contracts.isValidArrayLength(Number(name) + 1) && !this.hasOwnProperty(name)) {
+			return setIndex(env, this, name, descriptor, throwOnError);
+		}
 
-module.exports = ArrayType;
+		if (name === "length" && "length" in this.properties && descriptor && "value" in descriptor) {
+			return setLength(env, this, name, descriptor, throwOnError);
+		}
+
+		return super.defineOwnProperty.apply(this, arguments);
+	}
+
+	unwrap () {
+		var arr = [];
+
+		// this won't grab properties from the prototype - do we care?
+		// it's an edge case but we may want to address it
+		for (var index in this.properties) {
+			if (this.properties[index].enumerable) {
+				arr[Number(index)] = this.getValue(index).unwrap();
+			}
+		}
+
+		return arr;
+	}
+}

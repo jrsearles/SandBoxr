@@ -1,6 +1,5 @@
 var browserify = require("browserify");
 var babelify = require("babelify");
-var derequire = require("browserify-derequire");
 var gulp = require("gulp");
 var source = require("vinyl-source-stream");
 var eslint = require("gulp-eslint");
@@ -12,7 +11,7 @@ var streamify = require("gulp-streamify");
 gulp.task("build", ["lint"], function () {
 	return browserify({ standalone: "SandBoxr" })
 		.transform(babelify)
-		.require("./", { entry: true })
+		.require("./src/", { entry: true })
 		.bundle()
 		.pipe(source("sandboxr.js"))
 		.pipe(gulp.dest("./dist/"))
@@ -37,5 +36,5 @@ gulp.task("lint", function () {
 gulp.task("default", ["build"]);
 
 gulp.task("watch", function () {
-	gulp.watch("./src/**/*.js", ["test", "build"]);
+	gulp.watch("./src/**/*.js", ["build", "test"]);
 });

@@ -1,6 +1,6 @@
-var Reference = require("../env/reference");
-var func = require("../utils/func");
-var convert = require("../utils/convert");
+import Reference from "../env/reference";
+import * as convert from "../utils/convert";
+import * as func from "../utils/func";
 
 function assignThis (env, fnMember, fn, isNew, native) {
 	if (isNew) {
@@ -16,7 +16,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 	return null;
 }
 
-module.exports = function CallExpression (context) {
+export default function CallExpression (context) {
 	var node = context.node;
 	var isNew = context.node.type === "NewExpression";
 
@@ -35,4 +35,4 @@ module.exports = function CallExpression (context) {
 
 	callee.identifier = fn.name;
 	return context.result(func.executeFunction(context.env, fn, params, args, thisArg, callee, isNew));
-};
+}

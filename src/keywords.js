@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	"es5": [
 		"do",
 		"if",
@@ -51,4 +51,4 @@ module.exports = {
 	isReserved: function (name, scope) {
 		return this.es5.indexOf(name) >= 0;
 	}
-};
+}

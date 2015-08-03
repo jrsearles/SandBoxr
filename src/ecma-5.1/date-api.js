@@ -1,11 +1,11 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
 var staticMethods = ["now"];
 var protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString"];
 var setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 var slice = Array.prototype.slice;
 
-module.exports = function (env) {
+export default function dateApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 
@@ -94,4 +94,4 @@ module.exports = function (env) {
 	}, 0, "Date.prototype.valueOf"));
 
 	globalObject.define("Date", dateClass);
-};
+}

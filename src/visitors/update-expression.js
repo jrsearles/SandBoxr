@@ -1,6 +1,6 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
-module.exports = function UpdateExpression (context) {
+export default function UpdateExpression (context) {
 	var objectFactory = context.env.objectFactory;
 	var ref = context.create(context.node.argument).execute().result;
 	var originalValue = convert.toNumber(context.env, ref.getValue());
@@ -19,4 +19,4 @@ module.exports = function UpdateExpression (context) {
 
 	ref.putValue(newValue);
 	return context.result(returnValue);
-};
+}

@@ -1,3 +1,3 @@
-module.exports = function DebuggerStatement (context) {
+export default function DebuggerStatement (context) {
 	return context.empty();
-};
+}

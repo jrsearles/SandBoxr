@@ -1,6 +1,6 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
-module.exports = function IfStatement (context) {
+export default function IfStatement (context) {
 	var testValue = context.create(context.node.test).execute().result.getValue();
 	if (convert.toBoolean(testValue)) {
 		return context.create(context.node.consequent).execute();
@@ -9,4 +9,4 @@ module.exports = function IfStatement (context) {
 	if (context.node.alternate) {
 		return context.create(context.node.alternate).execute();
 	}
-};
+}

@@ -1,4 +1,4 @@
-module.exports = function BlockStatement (context) {
+export default function BlockStatement (context) {
 	var result, priorResult;
 
 	if (context.node.type === "Program") {
@@ -15,4 +15,4 @@ module.exports = function BlockStatement (context) {
 	}
 
 	return result;
-};
+}

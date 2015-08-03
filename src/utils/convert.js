@@ -1,11 +1,8 @@
-var func = require("./func");
+import * as func from "../utils/func";
 
+var sign = require("core-js/library/fn/math/sign");
 var floor = Math.floor;
 var abs = Math.abs;
-
-function sign (value) {
-	return value < 0 ? -1 : 1;
-}
 
 function getString (env, value) {
 	if (!value) {
@@ -64,113 +61,107 @@ function getValues (env, args) {
 	return values;
 }
 
-module.exports = {
-	primitiveToObject: function (env, value) {
-		var newValue = env.objectFactory.createPrimitive(value);
-		newValue.isPrimitive = false;
-		newValue.type = "object";
-		return newValue;
-	},
+export function primitiveToObject (env, value) {
+	var newValue = env.objectFactory.createPrimitive(value);
+	newValue.isPrimitive = false;
+	newValue.type = "object";
+	return newValue;
+}
 
-	toObject: function (env, obj) {
-		if (obj.isPrimitive && obj.value != null && obj.type !== "object") {
-			return this.primitiveToObject(env, obj.value);
-		}
-
-		return obj;
-	},
-
-	toArray: function (obj, length) {
-		var arr = [];
-
-		if (obj) {
-			var ln = length >= 0 ? length : obj.getProperty("length").getValue().value;
-			var i = 0;
-
-			while (i < ln) {
-				if (obj.hasProperty(i)) {
-					arr[i] = obj.getProperty(i).getValue();
-				}
-
-				i++;
-			}
-		}
-
-		return arr;
-	},
-
-	toPrimitive: function (env, obj, preferredType) {
-		preferredType = preferredType && preferredType.toLowerCase();
-		if (!preferredType && obj) {
-			preferredType = obj.primitiveHint;
-		}
-
-		if (preferredType === "string") {
-			return getString(env, obj);
-		}
-
-		// default case/number
-		return getPrimitive(env, obj);
-	},
-
-	toString: function (env, obj) {
-		return String(this.toPrimitive(env, obj, "string"));
-	},
-
-	toNumber: function (env, obj) {
-		if (!obj || obj.type === "undefined") {
-			return NaN;
-		}
-
-		return Number(this.toPrimitive(env, obj, "number"));
-	},
-
-	toInteger: function (env, obj) {
-		var value = this.toNumber(env, obj);
-		if (isNaN(value)) {
-			return 0;
-		}
-
-		if (value === 0 || !isFinite(value)) {
-			return value;
-		}
-
-		return sign(value) * floor(abs(value));
-	},
-
-	toInt32: function (env, obj) {
-		var value = this.toNumber(env, obj);
-		if (value === 0 || isNaN(value) || !isFinite(value)) {
-			return 0;
-		}
-
-		return sign(value) * floor(abs(value));
-	},
-
-	toUInt32: function (env, obj) {
-		var value = this.toInt32(env, obj);
-		return value >>> 0;
-	},
-
-	toBoolean: function (obj) {
-		if (!obj) {
-			return false;
-		}
-
-		if (obj.isPrimitive) {
-			return Boolean(obj.value);
-		}
-
-		return true;
-	},
-
-	toNativeFunction: function (env, fn, name) {
-		return env.objectFactory.createBuiltInFunction(function () {
-			var scope = this && this.node && this.node.value;
-			var args = getValues(env, arguments);
-
-			var value = fn.apply(scope, args);
-			return env.objectFactory.createPrimitive(value);
-		}, fn.length, name);
+export function	toObject (env, obj) {
+	if (obj.isPrimitive && obj.value != null && obj.type !== "object") {
+		return primitiveToObject(env, obj.value);
 	}
-};
+
+	return obj;
+}
+
+export function	toArray (obj, length) {
+	var arr = [];
+
+	if (obj) {
+		var ln = length >= 0 ? length : obj.getProperty("length").getValue().value;
+		var i = 0;
+
+		while (i < ln) {
+			if (obj.hasProperty(i)) {
+				arr[i] = obj.getProperty(i).getValue();
+			}
+
+			i++;
+		}
+	}
+
+	return arr;
+}
+
+export function	toPrimitive (env, obj, preferredType) {
+	preferredType = preferredType && preferredType.toLowerCase();
+	if (!preferredType && obj) {
+		preferredType = obj.primitiveHint;
+	}
+
+	if (preferredType === "string") {
+		return getString(env, obj);
+	}
+
+	// default case/number
+	return getPrimitive(env, obj);
+}
+
+export function	toString (env, obj) {
+	return String(toPrimitive(env, obj, "string"));
+}
+
+export function	toNumber (env, obj) {
+	if (!obj || obj.type === "undefined") {
+		return NaN;
+	}
+
+	return Number(toPrimitive(env, obj, "number"));
+}
+
+export function	toInteger (env, obj) {
+	var value = toNumber(env, obj);
+	if (isNaN(value)) {
+		return 0;
+	}
+
+	if (value === 0 || !isFinite(value)) {
+		return value;
+	}
+
+	return sign(value) * floor(abs(value));
+}
+
+export function	toInt32 (env, obj) {
+	var value = toInteger(env, obj);
+	return isFinite(value) ? value : 0;
+}
+
+export function	toUInt32 (env, obj) {
+	var value = toInt32(env, obj);
+	return value >>> 0;
+}
+
+export function	toBoolean (obj) {
+	if (!obj) {
+		return false;
+	}
+
+	if (obj.isPrimitive) {
+		return Boolean(obj.value);
+	}
+
+	return true;
+}
+
+export function	toNativeFunction (env, fn, name) {
+	return env.objectFactory.createBuiltInFunction(function () {
+		var scope = this && this.node && this.node.value;
+		var args = getValues(env, arguments);
+
+		var value = fn.apply(scope, args);
+		return env.objectFactory.createPrimitive(value);
+	}, fn.length, name);
+}

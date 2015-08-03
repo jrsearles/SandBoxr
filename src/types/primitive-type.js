@@ -1,26 +1,25 @@
-var ObjectType = require("./object-type");
-var contracts = require("../utils/contracts");
+import ObjectType from "./object-type";
+import * as contracts from "../utils/contracts";
 
-function PrimitiveType (value) {
-	ObjectType.call(this);
-	this.isPrimitive = true;
-	this.value = value;
-	this.type = typeof value;
-	this.className = contracts.getType(value);
-}
-
-PrimitiveType.prototype = Object.create(ObjectType.prototype);
-PrimitiveType.prototype.constructor = PrimitiveType;
-
-PrimitiveType.prototype.getProperty = function (name) {
-	// can't read properties of null/undefined
-	if (this.value == null) {
-		throw new TypeError("Cannot read property '" + name + "' of " + this.type);
+export default class PrimitiveType extends ObjectType {
+	constructor (value) {
+		super();
+		this.isPrimitive = true;
+		this.value = value;
+		this.type = typeof value;
+		this.className = contracts.getType(value);
 	}
 
-	return ObjectType.prototype.getProperty.apply(this, arguments);
-};
+	getProperty (name) {
+		// can't read properties of null/undefined
+		if (this.value == null) {
+			throw new TypeError(`Cannot read property '${name}' of ${this.type}`);
+		}
+	
+		return super.getProperty.apply(this, arguments);
+	}
 
-PrimitiveType.prototype.unwrap = function () { return this.value; };
-
-module.exports = PrimitiveType;
+	unwrap () {
+		return this.value;
+	}
+}

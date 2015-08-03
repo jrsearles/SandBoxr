@@ -1,4 +1,4 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
 function shouldContinue (context) {
 	if (!context.node.test) {
@@ -8,7 +8,7 @@ function shouldContinue (context) {
 	return convert.toBoolean(context.create(context.node.test).execute().result.getValue());
 }
 
-module.exports = function ForStatement (context) {
+export default function ForStatement (context) {
 	if (context.node.init) {
 		context.create(context.node.init).execute();
 	}
@@ -28,4 +28,4 @@ module.exports = function ForStatement (context) {
 	}
 
 	return result;
-};
+}

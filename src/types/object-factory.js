@@ -1,14 +1,14 @@
-var PrimitiveType = require("./primitive-type");
-var FunctionType = require("./function-type");
-var NativeFunctionType = require("./native-function-type");
-var RegexType = require("./regex-type");
-var ObjectType = require("./object-type");
-var ArrayType = require("./array-type");
-var StringType = require("./string-type");
-var DateType = require("./date-type");
-var ErrorType = require("./error-type");
-var ArgumentType = require("./argument-type");
-var contracts = require("../utils/contracts");
+import PrimitiveType from "./primitive-type";
+import FunctionType from "./function-type";
+import NativeFunctionType from "./native-function-type";
+import RegexType from "./regex-type";
+import ObjectType from "./object-type";
+import ArrayType from "./array-type";
+import StringType from "./string-type";
+import DateType from "./date-type";
+import ErrorType from "./error-type";
+import ArgumentType from "./argument-type";
+import * as contracts from "../utils/contracts";
 
 var parentless = {
 	"Undefined": true,
@@ -53,7 +53,7 @@ function setProto (typeName, instance, env) {
 	orphans[typeName].push(instance);
 }
 
-function ObjectFactory (env) {
+export default function ObjectFactory (env) {
 	this.env = env;
 }
 

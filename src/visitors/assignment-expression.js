@@ -1,4 +1,4 @@
-var Reference = require("../env/reference");
+import Reference from "../env/reference";
 
 var assignOperators = {
 	"+=": function (a, b) { return a.value + b.value; },
@@ -14,7 +14,7 @@ var assignOperators = {
 	"&=": function (a, b) { return a.value & b.value; }
 };
 
-module.exports = function AssignmentExpression (context) {
+export default function AssignmentExpression (context) {
 	var assignment = context.node.operator === "=";
 	var right = context.create(context.node.right).execute().result;
 
@@ -33,4 +33,4 @@ module.exports = function AssignmentExpression (context) {
 
 	left.putValue(newValue);
 	return context.result(newValue);
-};
+}

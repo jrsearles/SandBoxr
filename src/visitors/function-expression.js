@@ -1,4 +1,4 @@
-module.exports = function FunctionExpression (context) {
+export default function FunctionExpression (context) {
 	var objectFactory = context.env.objectFactory;
 	var func = objectFactory.createFunction(context.node);
 	func.bindScope(context.env.current);
@@ -8,4 +8,4 @@ module.exports = function FunctionExpression (context) {
 	}
 
 	return context.result(func);
-};
+}

@@ -1,11 +1,11 @@
-var contracts = require("../utils/contracts");
-var convert = require("../utils/convert");
-var func = require("../utils/func");
+import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
+import * as func from "../utils/func";
 
 var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
 var slice = Array.prototype.slice;
 
-module.exports = function (env) {
+export default function stringApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var stringClass = objectFactory.createFunction(function (value) {
@@ -180,4 +180,4 @@ module.exports = function (env) {
 	}, 0, "String.prototype.valueOf"));
 
 	globalObject.define("String", stringClass);
-};
+}

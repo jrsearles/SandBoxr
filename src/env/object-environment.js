@@ -1,23 +1,29 @@
-var PropertyReference = require("./property-reference");
+import PropertyReference from "./property-reference";
 
-function ObjectEnvironment (parent, obj, env) {
-	this.parent = parent;
-	this.object = this.thisNode = obj;
-	this.env = env;
-}
+export default class ObjectEnvironment {
+	constructor (parent, obj, env) {
+		this.parent = parent;
+		this.object = this.thisNode = obj;
+		this.env = env;
+	}
 
-ObjectEnvironment.prototype = {
-	constructor: ObjectEnvironment,
-
-	getReference: function (name, strict) {
+	getReference (name, strict) {
 		return new PropertyReference(name, this.object, strict, this.env);
-	},
+	}
 
-	hasVariable: function (name) {
+	hasVariable (name) {
 		return this.object.hasProperty(name);
-	},
+	}
 
-	createVariable: function (name, immutable) {
+	getVariable (name) {
+		return this.object.getProperty(name);
+	}
+
+	deleteVariable (name) {
+		return this.object.deleteProperty(name, false);
+	}
+
+	createVariable (name, immutable) {
 		if (this.parent) {
 			return this.parent.createVariable.apply(this.parent, arguments);
 		} else {
@@ -30,35 +36,29 @@ ObjectEnvironment.prototype = {
 
 			return this.object.getProperty(name);
 		}
-	},
+	}
 
-	putValue: function (name, value, throwOnError) {
+	putValue (name, value, throwOnError) {
 		if (this.parent && !this.object.hasProperty(name)) {
 			this.parent.putValue.apply(this.parent, arguments);
 		} else {
 			this.object.putValue(name, value, throwOnError);
 		}
-	},
+	}
 
-	getValue: function (name, throwOnError) {
+	getValue (name, throwOnError) {
 		if (!this.hasVariable(name)) {
 			if (throwOnError) {
-				throw new ReferenceError(name + " is not defined.");
+				throw new ReferenceError(`${name} is not defined.`);
 			}
 
 			return undefined;
 		}
 
 		return this.object.getProperty(name).getValue();
-	},
+	}
 
-	deleteVariable: function (name) {
-		return this.object.deleteProperty(name, false);
-	},
-
-	getThisBinding: function () {
+	getThisBinding () {
 		return this.object;
 	}
-};
-
-module.exports = ObjectEnvironment;
+}

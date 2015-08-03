@@ -1,7 +1,7 @@
-var ObjectType = require("../types/object-type");
-var convert = require("../utils/convert");
-var contracts = require("../utils/contracts");
-var func = require("../utils/func");
+import ObjectType from "../types/object-type";
+import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
+import * as func from "../utils/func";
 
 function isObject (obj) {
 	if (!obj) {
@@ -102,7 +102,7 @@ function defineProperty (env, obj, name, descriptor) {
 	obj.defineOwnProperty(name, options, true, env);
 }
 
-module.exports = function (env) {
+export default function objectApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var undef = globalObject.getProperty("undefined").getValue();
@@ -333,4 +333,4 @@ module.exports = function (env) {
 	// function is an object - make sure that it is in the prototype chain
 	globalObject.getProperty("Function").getValue().getPrototype().setPrototype(proto);
 	globalObject.define("Object", objectClass);
-};
+}

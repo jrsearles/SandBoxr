@@ -1,4 +1,4 @@
-module.exports = function InterruptStatement (context) {
+export default function InterruptStatement (context) {
 	var label;
 	if (context.node.label) {
 		label = context.node.label.name;
@@ -9,4 +9,4 @@ module.exports = function InterruptStatement (context) {
 	}
 
 	return context.skip(label);
-};
+}

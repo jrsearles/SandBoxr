@@ -1,122 +1,120 @@
-module.exports = {
-	executeFunction: function (env, fn, params, args, thisArg, callee, isNew) {
-		var scope = fn.createScope(env, thisArg, false);
-		var returnResult;
+export function executeFunction (env, fn, params, args, thisArg, callee, isNew) {
+	var scope = fn.createScope(env, thisArg, false);
+	var returnResult;
 
-		if (isNew) {
-			returnResult = thisArg;
-		}
+	if (isNew) {
+		returnResult = thisArg;
+	}
 
-		this.loadArguments(env, params, args, fn);
+	loadArguments(env, params, args, fn);
 
-		try {
-			if (fn.native) {
-				returnResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
-			} else {
-				var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
-				if (executionResult && executionResult.exit && executionResult.result) {
-					if (!isNew || !executionResult.result.isPrimitive) {
-						returnResult = executionResult.result;
-					}
+	try {
+		if (fn.native) {
+			returnResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
+		} else {
+			var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
+			if (executionResult && executionResult.exit && executionResult.result) {
+				if (!isNew || !executionResult.result.isPrimitive) {
+					returnResult = executionResult.result;
 				}
 			}
-		} catch (err) {
-			scope.exitScope();
-			throw err;
 		}
-
+	} catch (err) {
 		scope.exitScope();
-		return returnResult || env.global.getProperty("undefined").getValue();
-	},
+		throw err;
+	}
 
-	getFunctionResult: function (env, fn, params, args, thisArg, callee) {
-		var scope = fn.createScope(env, thisArg, false);
-		this.loadArguments(env, params, args, fn);
+	scope.exitScope();
+	return returnResult || env.global.getProperty("undefined").getValue();
+}
 
-		var executionResult;
-		try {
-			if (fn.native) {
-				executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
-			} else {
-				executionResult = env.createExecutionContext(fn.node.body, callee).execute();
-			}
-		} catch (err) {
-			scope.exitScope();
-			throw err;
+export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
+	var scope = fn.createScope(env, thisArg, false);
+	loadArguments(env, params, args, fn);
+
+	var executionResult;
+	try {
+		if (fn.native) {
+			executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
+		} else {
+			executionResult = env.createExecutionContext(fn.node.body, callee).execute();
 		}
-
+	} catch (err) {
 		scope.exitScope();
-		return executionResult;
-	},
+		throw err;
+	}
 
-	loadArguments: function (env, params, args, callee) {
-		var undef = env.global.getProperty("undefined").getValue();
+	scope.exitScope();
+	return executionResult;
+}
 
-		var argumentList = env.objectFactory.createArguments(args, callee);
-		env.current.createVariable("arguments");
-		env.current.putValue("arguments", argumentList);
+export function	loadArguments (env, params, args, callee) {
+	var undef = env.global.getProperty("undefined").getValue();
 
-		params.forEach(function (param, index) {
-			if (!env.current.hasVariable(param.name)) {
-				var descriptor = env.current.createVariable(param.name);
-				if (args.length > index) {
-					argumentList.mapProperty(index, descriptor);
-				}
+	var argumentList = env.objectFactory.createArguments(args, callee);
+	env.current.createVariable("arguments");
+	env.current.putValue("arguments", argumentList);
+
+	params.forEach(function (param, index) {
+		if (!env.current.hasVariable(param.name)) {
+			var descriptor = env.current.createVariable(param.name);
+			if (args.length > index) {
+				argumentList.mapProperty(index, descriptor);
 			}
-
-			env.current.putValue(param.name, args[index] || undef);
-		});
-
-		// just set value if additional, unnamed arguments are passed in
-		var length = args.length;
-		for (var i = params.length; i < length; i++) {
-			argumentList.defineOwnProperty(i, {
-				value: args[i],
-				configurable: true,
-				enumerable: true,
-				writable: true
-			});
 		}
 
-		argumentList.defineOwnProperty("length", {
-			value: env.objectFactory.createPrimitive(length),
+		env.current.putValue(param.name, args[index] || undef);
+	});
+
+	// just set value if additional, unnamed arguments are passed in
+	var length = args.length;
+	for (var i = params.length; i < length; i++) {
+		argumentList.defineOwnProperty(i, {
+			value: args[i],
 			configurable: true,
-			enumerable: false,
+			enumerable: true,
 			writable: true
 		});
-	},
+	}
 
-	tryCallMethod: function (env, obj, name) {
-		var fn = obj.getProperty(name);
-		if (!fn) {
-			return false;
-		}
+	argumentList.defineOwnProperty("length", {
+		value: env.objectFactory.createPrimitive(length),
+		configurable: true,
+		enumerable: false,
+		writable: true
+	});
+}
 
-		fn = fn.getValue();
-		var undef = env.global.getProperty("undefined").getValue();
-
-		if (fn && fn.className === "Function") {
-			var scope = fn.createScope(env, obj);
-			var executionResult;
-
-			try {
-				if (fn.native) {
-					executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
-				} else {
-					this.loadArguments(env, fn.node.params, []);
-
-					executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
-					executionResult = executionResult && executionResult.result;
-				}
-			} catch (err) {
-				scope.exitScope();
-				throw err;
-			}
-
-			scope.exitScope();
-			return executionResult ? executionResult.getValue() : undef;
-		}
-
+export function	tryCallMethod (env, obj, name) {
+	var fn = obj.getProperty(name);
+	if (!fn) {
 		return false;
 	}
-};
+
+	fn = fn.getValue();
+	var undef = env.global.getProperty("undefined").getValue();
+
+	if (fn && fn.className === "Function") {
+		var scope = fn.createScope(env, obj);
+		var executionResult;
+
+		try {
+			if (fn.native) {
+				executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
+			} else {
+				loadArguments(env, fn.node.params, []);
+
+				executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
+				executionResult = executionResult && executionResult.result;
+			}
+		} catch (err) {
+			scope.exitScope();
+			throw err;
+		}
+
+		scope.exitScope();
+		return executionResult ? executionResult.getValue() : undef;
+	}
+
+	return false;
+}

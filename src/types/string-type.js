@@ -1,10 +1,6 @@
-var PrimitiveType = require("./primitive-type");
-var PropertyDescriptor = require("./property-descriptor");
-var contracts = require("../utils/contracts");
-
-function StringType (value) {
-	PrimitiveType.call(this, value);
-}
+import PrimitiveType from "./primitive-type";
+import PropertyDescriptor from "./property-descriptor";
+import * as contracts from "../utils/contracts";
 
 function getCharacter (source, position) {
 	if (position < source.value.length) {
@@ -17,45 +13,46 @@ function getCharacter (source, position) {
 	return new PrimitiveType(undefined);
 }
 
-StringType.prototype = Object.create(PrimitiveType.prototype);
-StringType.prototype.constructor = StringType;
+export default class StringType extends PrimitiveType {
+	constructor (value) {
+		super(value);
+	}
 
-StringType.prototype.init = function (objectFactory) {
-	this.properties.length = new PropertyDescriptor(this, {
-		configurable: false,
-		enumerable: false,
-		writable: false,
-		value: objectFactory.createPrimitive(this.value.length)
-	});
-};
+	init (objectFactory) {
+		this.properties.length = new PropertyDescriptor(this, {
+			configurable: false,
+			enumerable: false,
+			writable: false,
+			value: objectFactory.createPrimitive(this.value.length)
+		});
+	}
 
-StringType.prototype.getProperty = function (name) {
-	if (contracts.isInteger(name)) {
-		var position = Number(name);
-		if (position < this.value.length) {
-			return new PropertyDescriptor(this, { configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
+	getProperty (name) {
+		if (contracts.isInteger(name)) {
+			var position = Number(name);
+			if (position < this.value.length) {
+				return new PropertyDescriptor(this, { configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
+			}
 		}
+
+		return super.getProperty.apply(this, arguments);
 	}
 
-	return PrimitiveType.prototype.getProperty.apply(this, arguments);
-};
+	getOwnPropertyNames () {
+		var props = [];
+		var ln, i;
+		for (i = 0, ln = this.value.length; i < ln; i++) {
+			props.push(String(i));
+		}
 
-StringType.prototype.getOwnPropertyNames = function () {
-	var props = [];
-	var ln, i;
-	for (i = 0, ln = this.value.length; i < ln; i++) {
-		props.push(String(i));
+		return props.concat(super.getOwnPropertyNames());
 	}
 
-	return props.concat(PrimitiveType.prototype.getOwnPropertyNames.call(this));
-};
+	hasOwnProperty (name) {
+		if (contracts.isInteger(name)) {
+			return name < this.value.length;
+		}
 
-StringType.prototype.hasOwnProperty = function (name) {
-	if (contracts.isInteger(name)) {
-		return name < this.value.length;
+		return super.hasOwnProperty.apply(this, arguments);
 	}
-
-	return PrimitiveType.prototype.hasOwnProperty.apply(this, arguments);
-};
-
-module.exports = StringType;
+}

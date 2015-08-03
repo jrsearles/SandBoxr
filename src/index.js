@@ -1,7 +1,7 @@
-var Environment = require("./env");
-var ExecutionContext = require("./execution-context");
+import Environment from "./env";
+import ExecutionContext from "./execution-context";
 
-function SandBoxr (ast, config) {
+export default function SandBoxr (ast, config) {
 	this.ast = ast;
 	this.config = config || {};
 	this.env = null;
@@ -26,5 +26,3 @@ SandBoxr.create = function (ast, config) {
 SandBoxr.createEnvironment = function () {
 	return new Environment();
 };
-
-module.exports = SandBoxr;

@@ -1,4 +1,4 @@
-module.exports = function TryCatchStatement (context) {
+export default function TryCatchStatement (context) {
 	var result;
 
 	try {
@@ -44,4 +44,4 @@ module.exports = function TryCatchStatement (context) {
 	}
 
 	return result;
-};
+}

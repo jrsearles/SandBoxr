@@ -25,7 +25,9 @@ rules:
 ecmaFeatures:
     arrowFunctions: true
     blockBindings: true
+    classes: true
     destructuring: true
     generators: true
+    modules: true
     restParams: true
     templateStrings: true

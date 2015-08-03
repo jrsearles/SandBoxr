@@ -1,4 +1,4 @@
-module.exports = function WithStatement (context) {
+export default function WithStatement (context) {
 	var obj = context.create(context.node.object).execute().result.getValue();
 	var scope = context.env.createObjectScope(obj);
 	var result;
@@ -14,4 +14,4 @@ module.exports = function WithStatement (context) {
 
 	scope.exitScope();
 	return result;
-};
+}

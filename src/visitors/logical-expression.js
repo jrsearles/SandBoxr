@@ -1,6 +1,6 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
-module.exports = function LogicalExpression (context) {
+export default function LogicalExpression (context) {
 	var left = context.create(context.node.left).execute();
 	var passed = convert.toBoolean(left.result.getValue());
 
@@ -13,4 +13,4 @@ module.exports = function LogicalExpression (context) {
 	}
 
 	return context.create(context.node.right).execute();
-};
+}

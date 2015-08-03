@@ -1,7 +1,7 @@
-var convert = require("../utils/convert");
-var PropertyReference = require("../env/property-reference");
+import PropertyReference from "../env/property-reference";
+import * as convert from "../utils/convert";
 
-module.exports = function MemberExpression (context) {
+export default function MemberExpression (context) {
 	var obj = context.create(context.node.object).execute().result.getValue();
 	var name, value;
 
@@ -13,4 +13,4 @@ module.exports = function MemberExpression (context) {
 
 	value = new PropertyReference(name, obj, false, context.env);
 	return context.result(value);
-};
+}

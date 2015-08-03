@@ -1,23 +1,23 @@
-var PrimitiveType = require("../types/primitive-type");
-var ObjectFactory = require("../types/object-factory");
-var numberAPI = require("./number-api");
-var stringAPI = require("./string-api");
-var functionAPI = require("./function-api");
-var objectAPI = require("./object-api");
-var booleanAPI = require("./boolean-api");
-var dateAPI = require("./date-api");
-var arrayAPI = require("./array-api");
-var mathAPI = require("./math-api");
-var regexAPI = require("./regex-api");
-var errorAPI = require("./error-api");
-var jsonAPI = require("./json-api");
-var consoleAPI = require("./console-api");
-var convert = require("../utils/convert");
-var Reference = require("../env/reference");
+import PrimitiveType from "../types/primitive-type";
+import ObjectFactory from "../types/object-factory";
+import Reference from "../env/reference";
+import numberAPI from "./number-api";
+import stringAPI from "./string-api";
+import functionAPI from "./function-api";
+import objectAPI from "./object-api";
+import booleanAPI from "./boolean-api";
+import dateAPI from "./date-api";
+import arrayAPI from "./array-api";
+import mathAPI from "./math-api";
+import regexAPI from "./regex-api";
+import errorAPI from "./error-api";
+import jsonAPI from "./json-api";
+import consoleAPI from "./console-api";
+import * as convert from "../utils/convert";
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
-module.exports = function (env, config) {
+export default function ecma51 (env, config) {
 	config = config || {};
 	var objectFactory = env.objectFactory = new ObjectFactory(env);
 	var globalObject = env.global = objectFactory.createObject();
@@ -111,4 +111,4 @@ module.exports = function (env, config) {
 	}
 
 	objectFactory.init();
-};
+}

@@ -1,41 +1,38 @@
-var FunctionType = require("./function-type");
-var PropertyDescriptor = require("./property-descriptor");
+import FunctionType from "./function-type";
+import PropertyDescriptor from "./property-descriptor";
 
-function NativeFunctionType (fn) {
-	FunctionType.call(this);
-	this.type = "function";
-	this.native = true;
-	this.nativeFunction = fn;
-}
-
-NativeFunctionType.prototype = Object.create(FunctionType.prototype);
-NativeFunctionType.prototype.constructor = NativeFunctionType;
-
-NativeFunctionType.prototype.init = function (objectFactory, proto, descriptor) {
-	var length = this.nativeFunction.length;
-	if ("nativeLength" in this.nativeFunction) {
-		length = this.nativeFunction.nativeLength;
+export default class NativeFunctionType extends FunctionType {
+	constructor (fn) {
+		super();
+		this.type = "function";
+		this.native = true;
+		this.nativeFunction = fn;
 	}
 
-	this.defineOwnProperty("length", {
-		value: objectFactory.createPrimitive(length),
-		configurable: false,
-		enumerable: false,
-		writable: false
-	});
-
-	proto = proto || objectFactory.createObject();
-	proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
-
-	descriptor = descriptor || { configurable: false, enumerable: false, writable: true };
-	var protoDescriptor = {
-		value: proto,
-		configurable: descriptor.configurable,
-		enumerable: descriptor.enumerable,
-		writable: descriptor.writable
-	};
-
-	this.defineOwnProperty("prototype", protoDescriptor);
-};
-
-module.exports = NativeFunctionType;
+	init (objectFactory, proto, descriptor) {
+		var length = this.nativeFunction.length;
+		if ("nativeLength" in this.nativeFunction) {
+			length = this.nativeFunction.nativeLength;
+		}
+	
+		this.defineOwnProperty("length", {
+			value: objectFactory.createPrimitive(length),
+			configurable: false,
+			enumerable: false,
+			writable: false
+		});
+	
+		proto = proto || objectFactory.createObject();
+		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
+	
+		descriptor = descriptor || { configurable: false, enumerable: false, writable: true };
+		var protoDescriptor = {
+			value: proto,
+			configurable: descriptor.configurable,
+			enumerable: descriptor.enumerable,
+			writable: descriptor.writable
+		};
+	
+		this.defineOwnProperty("prototype", protoDescriptor);
+	}
+}

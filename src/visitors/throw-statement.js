@@ -1,4 +1,4 @@
-module.exports = function ThrowStatement (context) {
+export default function ThrowStatement (context) {
 	// todo: handle more specific errors
 	var arg = context.create(context.node.argument).execute().result.getValue();
 
@@ -9,4 +9,4 @@ module.exports = function ThrowStatement (context) {
 	var err = new Error();
 	err.wrappedError = arg;
 	throw err;
-};
+}

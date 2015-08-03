@@ -1,29 +1,27 @@
-var PropertyDescriptor = require("./property-descriptor");
+import PropertyDescriptor from "./property-descriptor";
 
-function ObjectType () {
-	this.isPrimitive = false;
-	this.type = "object";
-	this.className = "Object";
-	this.properties = Object.create(null);
-	this.extensible = true;
+export default class ObjectType {
+	constructor () {
+		this.isPrimitive = false;
+		this.type = "object";
+		this.className = "Object";
+		this.properties = Object.create(null);
+		this.extensible = true;
 
-	this.primitiveHint = "number";
-}
+		this.primitiveHint = "number";
+	}
 
-ObjectType.prototype = ObjectType.fn = {
-	constructor: ObjectType,
+	init () { }
 
-	init: function () { },
-
-	getPrototype: function () {
+	getPrototype () {
 		return this.proto;
-	},
+	}
 
-	setPrototype: function (proto) {
+	setPrototype (proto) {
 		this.proto = proto;
-	},
+	}
 
-	getProperty: function (name) {
+	getProperty (name) {
 		name = String(name);
 
 		var current = this;
@@ -36,25 +34,25 @@ ObjectType.prototype = ObjectType.fn = {
 		}
 
 		return undefined;
-	},
+	}
 
-	getOwnProperty: function (name) {
+	getOwnProperty (name) {
 		return this.properties[String(name)];
-	},
+	}
 
-	getOwnPropertyNames: function () {
+	getOwnPropertyNames () {
 		return Object.keys(this.properties);
-	},
+	}
 
-	hasProperty: function (name) {
+	hasProperty (name) {
 		return !!this.getProperty(name);
-	},
+	}
 
-	hasOwnProperty: function (name) {
+	hasOwnProperty (name) {
 		return String(name) in this.properties;
-	},
+	}
 
-	putValue: function (name, value, throwOnError) {
+	putValue (name, value, throwOnError) {
 		if (this.isPrimitive) {
 			return;
 		}
@@ -65,7 +63,7 @@ ObjectType.prototype = ObjectType.fn = {
 		if (descriptor) {
 			if (!descriptor.canSetValue()) {
 				if (throwOnError) {
-					throw new TypeError("Cannot assign to read only property '" + name + "' of %s");
+					throw new TypeError(`Cannot assign to read only property '${name}' of %s`);
 				}
 
 				return;
@@ -84,12 +82,12 @@ ObjectType.prototype = ObjectType.fn = {
 		} else {
 			this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
 		}
-	},
+	}
 
-	defineOwnProperty: function (name, descriptor, throwOnError) {
+	defineOwnProperty (name, descriptor, throwOnError) {
 		if (this.isPrimitive) {
 			if (throwOnError) {
-				throw new TypeError("Cannot define property: " + name + ", object is not extensible");
+				throw new TypeError(`Cannot define property: ${name}, object is not extensible`);
 			}
 
 			return false;
@@ -103,13 +101,13 @@ ObjectType.prototype = ObjectType.fn = {
 			}
 
 			if (throwOnError) {
-				throw new TypeError("Cannot redefine property: " + name);
+				throw new TypeError(`Cannot redefine property: ${name}`);
 			}
 
 			return false;
 		} else if (!this.extensible) {
 			if (throwOnError) {
-				throw new TypeError("Cannot define property: " + name + ", object is not extensible");
+				throw new TypeError(`Cannot define property: ${name}, object is not extensible`);
 			}
 
 			return false;
@@ -117,33 +115,9 @@ ObjectType.prototype = ObjectType.fn = {
 
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
 		return true;
-	},
+	}
 
-	define: function (name, value, descriptor) {
-		// this method is intended for external usage only - it provides a way to define
-		// methods and properties and overwrite any existing properties even if they are
-		// not configurable
-		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
-		descriptor.value = value;
-
-		this.properties[name] = new PropertyDescriptor(this, descriptor);
-	},
-
-	remove: function (name) {
-		// this method is intended for external usage only - it provides a way to remove
-		// properties even if they are not normally able to be deleted
-		delete this.properties[name];
-	},
-
-	getValue: function (name) {
-		if (name) {
-			return this.getProperty(name).getValue();
-		}
-
-		return this;
-	},
-
-	deleteProperty: function (name) {
+	deleteProperty (name) {
 		if (this.isPrimitive) {
 			return false;
 		}
@@ -155,9 +129,33 @@ ObjectType.prototype = ObjectType.fn = {
 		}
 
 		return delete this.properties[name];
-	},
+	}
 
-	freeze: function () {
+	define (name, value, descriptor) {
+		// this method is intended for external usage only - it provides a way to define
+		// methods and properties and overwrite any existing properties even if they are
+		// not configurable
+		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
+		descriptor.value = value;
+
+		this.properties[name] = new PropertyDescriptor(this, descriptor);
+	}
+
+	remove (name) {
+		// this method is intended for external usage only - it provides a way to remove
+		// properties even if they are not normally able to be deleted
+		delete this.properties[name];
+	}
+
+	getValue (name) {
+		if (name) {
+			return this.getProperty(name).getValue();
+		}
+
+		return this;
+	}
+
+	freeze () {
 		for (var prop in this.properties) {
 			if (this.properties[prop].dataProperty) {
 				this.defineOwnProperty(prop, { writable: false, configurable: false }, true);
@@ -167,31 +165,32 @@ ObjectType.prototype = ObjectType.fn = {
 		}
 
 		this.preventExtensions();
-	},
+	}
 
-	preventExtensions: function () {
+	preventExtensions () {
 		this.extensible = false;
-	},
+	}
 
-	seal: function () {
+	seal () {
 		for (var prop in this.properties) {
 			this.defineOwnProperty(prop, { configurable: false }, true);
 		}
 
 		this.preventExtensions();
-	},
+	}
 
-	equals: function (obj) {
+	equals (obj) {
 		if (this.isPrimitive && obj.isPrimitive) {
 			return this.value === obj.value;
 		}
 
 		return this === obj;
-	},
+	}
 
-	unwrap: function () {
+	unwrap () {
 		var unwrapped = {};
 		var current = this;
+
 		while (current) {
 			for (var name in current.properties) {
 				if (current.properties[name].enumerable && !(name in unwrapped)) {
@@ -204,6 +203,4 @@ ObjectType.prototype = ObjectType.fn = {
 
 		return unwrapped;
 	}
-};
-
-module.exports = ObjectType;
+}

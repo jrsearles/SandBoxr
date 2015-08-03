@@ -1,7 +1,7 @@
 require("core-js/fn/string/repeat");
-var convert = require("../utils/convert");
-var func = require("../utils/func");
-var contracts = require("../utils/contracts");
+import * as contracts from "../utils/contracts";
+import * as func from "../utils/func";
+import * as convert from "../utils/convert";
 
 var primitives = {
 	"String": true,
@@ -220,7 +220,7 @@ function createReviver (env, reviver) {
 	return function (holder, key, value) { return value; };
 }
 
-module.exports = function (env) {
+export default function jsonApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var undef = env.global.getProperty("undefined").getValue();
@@ -252,4 +252,4 @@ module.exports = function (env) {
 	}, 2, "JSON.parse"));
 
 	globalObject.define("JSON", jsonClass);
-};
+}

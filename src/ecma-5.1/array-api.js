@@ -1,7 +1,7 @@
-var contracts = require("../utils/contracts");
-var func = require("../utils/func");
-var convert = require("../utils/convert");
-var ArrayType = require("../types/array-type");
+import ArrayType from "../types/array-type";
+import * as contracts from "../utils/contracts";
+import * as func from "../utils/func";
+import * as convert from "../utils/convert";
 
 function getStartIndex (index, length) {
 	if (index < 0) {
@@ -82,7 +82,7 @@ function createIndexProperty (value) {
 	};
 }
 
-module.exports = function (env) {
+export default function arrayApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var undef = globalObject.getProperty("undefined").getValue();
@@ -653,4 +653,4 @@ module.exports = function (env) {
 	// but will call Object..toString if not
 	proto.define("toString", objectFactory.createBuiltInFunction(join, 0, "Array.prototype.toString"));
 	globalObject.define("Array", arrayClass);
-};
+}

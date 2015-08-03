@@ -1,4 +1,4 @@
-module.exports = function ForInStatement (context) {
+export default function ForInStatement (context) {
 	var left;
 	if (context.node.left.type === "VariableDeclaration") {
 		// should only be one, but
@@ -40,4 +40,4 @@ module.exports = function ForInStatement (context) {
 	}
 
 	return result;
-};
+}

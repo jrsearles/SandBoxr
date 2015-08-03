@@ -1,8 +1,8 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
 var methods = ["log", "info", "error"];
 
-module.exports = function (env) {
+export default function consoleApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var consoleClass = objectFactory.createObject();
@@ -15,4 +15,4 @@ module.exports = function (env) {
 	});
 
 	globalObject.define("console", consoleClass);
-};
+}

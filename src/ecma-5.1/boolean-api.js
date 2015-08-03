@@ -1,7 +1,7 @@
-var convert = require("../utils/convert");
-var contracts = require("../utils/contracts");
+import * as contracts from "../utils/contracts";
+import * as convert from "../utils/convert";
 
-module.exports = function (env) {
+export default function booleanApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var booleanClass = objectFactory.createFunction(function (obj) {
@@ -30,4 +30,4 @@ module.exports = function (env) {
 	}, 0, "Boolean.prototype.valueOf"));
 
 	globalObject.define("Boolean", booleanClass);
-};
+}

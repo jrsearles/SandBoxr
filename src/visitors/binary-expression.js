@@ -1,4 +1,4 @@
-var convert = require("../utils/convert");
+import * as convert from "../utils/convert";
 
 function implicitEquals (a, b, env) {
 	if (a.isPrimitive && b.isPrimitive) {
@@ -105,7 +105,7 @@ var binaryOperators = {
 	}
 };
 
-module.exports = function BinaryExpression (context) {
+export default function BinaryExpression (context) {
 	var undef = context.env.global.getProperty("undefined").getValue();
 	var left = context.create(context.node.left).execute().result;
 	var leftValue = left.getValue() || undef;
@@ -116,4 +116,4 @@ module.exports = function BinaryExpression (context) {
 	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context.env);
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));
-};
+}

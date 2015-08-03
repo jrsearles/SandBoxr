@@ -1,5 +1,5 @@
-var convert = require("../utils/convert");
-var contracts = require("../utils/contracts");
+import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
 
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
@@ -18,7 +18,7 @@ function createError (objectFactory, message, name) {
 	return obj;
 }
 
-module.exports = function (env) {
+export default function errorApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var errorClass = objectFactory.createFunction(function (message) {
@@ -61,4 +61,4 @@ module.exports = function (env) {
 
 		globalObject.define(type, errClass);
 	});
-};
+}
