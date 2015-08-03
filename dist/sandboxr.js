@@ -4,9 +4,12 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports["default"] = SandBoxr;
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _env = require("./env");
 
@@ -16,31 +19,42 @@ var _executionContext = require("./execution-context");
 
 var _executionContext2 = _interopRequireDefault(_executionContext);
 
-function SandBoxr(ast, config) {
-	this.ast = ast;
-	this.config = config || {};
-	this.env = null;
-}
+var SandBoxr = (function () {
+	function SandBoxr(ast, config) {
+		_classCallCheck(this, SandBoxr);
 
-SandBoxr.prototype.execute = function (env) {
-	if (!env) {
-		// create environment if it hasn't been created
-		env = SandBoxr.createEnvironment();
-		env.init(this.config);
+		this.ast = ast;
+		this.config = config || {};
 	}
 
-	this.env = env;
-	var executionResult = new _executionContext2["default"](this.env, this.ast).execute();
-	return executionResult && executionResult.result;
-};
+	_createClass(SandBoxr, [{
+		key: "execute",
+		value: function execute(env) {
+			if (!env) {
+				env = SandBoxr.createEnvironment();
+				env.init(this.config);
+			}
 
-SandBoxr.create = function (ast, config) {
-	return new SandBoxr(ast, config);
-};
+			this.env = env;
+			var executionResult = new _executionContext2["default"](env, this.ast).execute();
+			return executionResult && executionResult.result;
+		}
+	}], [{
+		key: "createEnvironment",
+		value: function createEnvironment() {
+			return new _env2["default"]();
+		}
+	}, {
+		key: "create",
+		value: function create(ast, config) {
+			return new SandBoxr(ast, config);
+		}
+	}]);
 
-SandBoxr.createEnvironment = function () {
-	return new _env2["default"]();
-};
+	return SandBoxr;
+})();
+
+exports["default"] = SandBoxr;
 module.exports = exports["default"];
 
 },{"./env":37,"./execution-context":41}],2:[function(require,module,exports){
@@ -1645,6 +1659,24 @@ function ecma51(env, config) {
 	}
 
 	objectFactory.init();
+
+	if (config.exclude && config.exclude.length > 0) {
+		config.exclude.forEach(function (name) {
+			var segments = name.split(".");
+			var parent = globalObject;
+
+			while (segments.length > 1) {
+				parent = parent.getValue(segments.shift());
+
+				// api not defined - assume user error?
+				if (!parent) {
+					return;
+				}
+			}
+
+			parent.remove(segments.shift());
+		});
+	}
 }
 
 module.exports = exports["default"];

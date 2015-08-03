@@ -111,4 +111,22 @@ export default function ecma51 (env, config) {
 	}
 
 	objectFactory.init();
+	
+	if (config.exclude && config.exclude.length > 0) {
+		config.exclude.forEach(name => {
+			var segments = name.split(".");
+			var parent = globalObject;
+			
+			while (segments.length > 1) {
+				parent = parent.getValue(segments.shift());
+				
+				// api not defined - assume user error?
+				if (!parent) {
+					return;
+				}	
+			}
+			
+			parent.remove(segments.shift());
+		});
+	}
 }

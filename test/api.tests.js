@@ -128,4 +128,27 @@ describe("API", function () {
 		
 		expect(result.unwrap()[2]).to.equal(3);
 	});
+	
+	describe("Exclusions", function () {
+		it("should be able to exclude api's", function () {
+			var ast = parser.parse("typeof JSON === 'undefined'");
+			var sandbox = SandBoxr.create(ast, { exclude: ["JSON"] });
+			var result = sandbox.execute();
+			
+			expect(result.value).to.be.true;
+		});
+		
+		it("should be able to exclude methods from prototype", function () {
+			var ast = parser.parse("typeof String.prototype.trim === 'undefined'");
+			var sandbox = SandBoxr.create(ast, { exclude: ["String.prototype.trim"] });
+			var result = sandbox.execute();
+			
+			expect(result.value).to.be.true;
+		});
+		
+		it("should not throw if api does not exist", function () {
+			var ast = parser.parse("(1)");
+			var sandbox = SandBoxr.create(ast, { exclude: "String.foo.bar" });
+		});
+	});
 });

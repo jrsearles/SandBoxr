@@ -1,28 +1,28 @@
 import Environment from "./env";
 import ExecutionContext from "./execution-context";
 
-export default function SandBoxr (ast, config) {
-	this.ast = ast;
-	this.config = config || {};
-	this.env = null;
-}
-
-SandBoxr.prototype.execute = function (env) {
-	if (!env) {
-		// create environment if it hasn't been created
-		env = SandBoxr.createEnvironment();
-		env.init(this.config);
+export default class SandBoxr {
+	constructor (ast, config) {
+		this.ast = ast;
+		this.config = config || {};
+	}
+	
+	execute (env) {
+		if (!env) {
+			env = SandBoxr.createEnvironment();
+			env.init(this.config);
+		}
+		
+		this.env = env;
+		var executionResult = new ExecutionContext(env, this.ast).execute();
+		return executionResult && executionResult.result;
 	}
 
-	this.env = env;
-	var executionResult = new ExecutionContext(this.env, this.ast).execute();
-	return executionResult && executionResult.result;
-};
+	static createEnvironment () {
+		return new Environment();
+	}
 
-SandBoxr.create = function (ast, config) {
-	return new SandBoxr(ast, config);
-};
-
-SandBoxr.createEnvironment = function () {
-	return new Environment();
-};
+	static create (ast, config) {
+		return new SandBoxr(ast, config);
+	}
+}
