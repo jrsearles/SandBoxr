@@ -51,7 +51,7 @@ if (chapter) {
 		root + "suite/ch12/**/*.js",
 		root + "suite/ch13/**/*.js",	// functions	-- passed!
 		root + "suite/ch14/**/*.js",	// program	-- passed!
-		root + "suite/ch15/15.1/**/*.js",	// global	-- passed
+		// root + "suite/ch15/15.1/**/*.js",	// global	-- passed
 		root + "suite/ch15/15.2/**/*.js",	// object	-- passed
 		root + "suite/ch15/15.3/**/*.js",	// function	-- passed
 		root + "suite/ch15/15.4/**/*.js",	// array		-- passed - 1

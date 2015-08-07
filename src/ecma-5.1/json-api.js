@@ -1,4 +1,4 @@
-require("core-js/fn/string/repeat");
+import "core-js/fn/string/repeat";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";

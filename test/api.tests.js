@@ -148,7 +148,40 @@ describe("API", function () {
 		
 		it("should not throw if api does not exist", function () {
 			var ast = parser.parse("(1)");
-			var sandbox = SandBoxr.create(ast, { exclude: "String.foo.bar" });
+			SandBoxr.create(ast, { exclude: "String.foo.bar" });
+		});
+	});
+	
+	describe("Operators", function () {
+		it("should be able to replace an operators", function () {
+			var env = SandBoxr.createEnvironment();
+			env.init({
+				comparers: {
+					"implicitEquals": function (env, a, b) {
+						if (a.isPrimitive && b.isPrimitive) {
+							return a.value === b.value;
+						}
+						
+						if (a.isPrimitive || b.isPrimitive) {
+							return false;
+						}
+						
+						return a === b;
+					}
+				}
+			});
+			
+			var ast = parser.parse("0 == '0'");
+			var sandbox = SandBoxr.create(ast);
+			
+			var result = sandbox.execute(env);
+			expect(result.value).to.be.false;
+			
+			ast = parser.parse("0 != '0'");
+			sandbox = SandBoxr.create(ast);
+			
+			result = sandbox.execute();
+			expect(result.value).to.be.true;
 		});
 	});
 });

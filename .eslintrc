@@ -26,8 +26,12 @@ ecmaFeatures:
     arrowFunctions: true
     blockBindings: true
     classes: true
+    defaultParams: true
     destructuring: true
     generators: true
     modules: true
+    objectLiteralComputedProperties: true
+    objectLiteralShorthandMethods: true
+    objectLiteralShorthandProperties: true
     restParams: true
     templateStrings: true

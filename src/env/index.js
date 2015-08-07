@@ -1,74 +1,12 @@
+import "core-js/fn/object/assign";
 import ExecutionContext from "../execution-context";
 import DeclarativeEnvironment from "./declarative-environment";
 import ObjectEnvironment from "./object-environment";
 import Reference from "./reference";
 import keywords from "../keywords";
 import api from "../ecma-5.1";
-
-var scopedBlocks = {
-	"CallExpression": true,
-	"NewExpression": true,
-	"FunctionExpression": true,
-	"WithStatement": true
-};
-
-function populateHoistedVariables (node, declarators, parent) {
-	if (Array.isArray(node)) {
-		node.forEach(function (child) {
-			populateHoistedVariables(child, declarators, parent);
-		});
-
-		return;
-	}
-
-	if (!node || !(typeof node === "object")) {
-		return;
-	}
-
-	if (node.type) {
-		if (node.type === "VariableDeclaration") {
-			populateHoistedVariables(node.declarations, declarators, node);
-			return;
-		}
-
-		if (node.type === "VariableDeclarator" || node.type === "FunctionDeclaration") {
-			declarators.push({
-				decl: node,
-				parent: parent
-			});
-
-			return;
-		}
-
-		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
-			declarators.push({
-				decl: node.left,
-				parent: node
-			});
-
-			// keep analyzing
-		}
-
-		if (node.type === "IfStatement") {
-			// cannot hoist variables within if
-			populateHoistedVariables(node.consequent, declarators, node);
-			populateHoistedVariables(node.alternate, declarators, node);
-			return;
-		}
-
-		if (scopedBlocks[node.type]) {
-			return;
-		}
-	}
-
-	// todo: we could be smarter about this by being more descerning about what nodes we traverse
-	var prop;
-	for (prop in node) {
-		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
-			populateHoistedVariables(node[prop], declarators, "type" in node ? node : parent);
-		}
-	}
-}
+import comparers from "../utils/comparers";
+import {visit as hoister} from "./hoister";
 
 function isStrictMode (node) {
 	if (Array.isArray(node)) {
@@ -82,12 +20,17 @@ function isStrictMode (node) {
 }
 
 export default class Environment {
-	init (config) {
+	init (config = {}) {
 		// clear state in case of re-init
 		this.current = null;
 		this.globalScope = null;
 
 		api(this, config);
+		this.ops = Object.assign(comparers, config.comparers);
+	}
+
+	evaluate (left, right, operator) {
+		return this.ops[operator](this, left, right);
 	}
 
 	getReference (name, strict) {
@@ -150,30 +93,24 @@ export default class Environment {
 	}
 
 	initScope (node) {
-		var env = this;
-		var strict = isStrictMode(node);
-		var undef = this.global.getProperty("undefined").getValue();
-		var variables = [];
-		var name;
+		let strict = isStrictMode(node);
+		let undef = this.global.getProperty("undefined").getValue();
 
-		populateHoistedVariables(node, variables, node);
-
-		variables.forEach(function (obj) {
-			var decl = obj.decl;
-			name = decl.name || decl.id.name;
+		hoister(node, decl => {
+			let name = decl.name || decl.id.name;
 
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
-				var func = env.objectFactory.createFunction(decl);
-				func.bindScope(env.current);
+				let func = this.objectFactory.createFunction(decl);
+				func.bindScope(this.current);
 
-				env.createVariable(name, true);
-				env.putValue(name, func, strict);
+				this.createVariable(name, true);
+				this.putValue(name, func, strict);
 			} else {
-				if (env.hasVariable(name)) {
-					env.putValue(name, undef, strict);
+				if (this.hasVariable(name)) {
+					this.putValue(name, undef, strict);
 				} else {
-					env.createVariable(name, true);
+					this.createVariable(name, true);
 				}
 			}
 		});

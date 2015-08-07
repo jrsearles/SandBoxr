@@ -1,6 +1,7 @@
+import "core-js/fn/math/sign";
 import * as func from "../utils/func";
 
-var sign = require("core-js/library/fn/math/sign");
+var sign = Math.sign;
 var floor = Math.floor;
 var abs = Math.abs;
 

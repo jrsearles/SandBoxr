@@ -8,6 +8,7 @@ export default function TryCatchStatement (context) {
 			let caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
 			// var scope = context.env.createScope();
+			context.env.initScope(context.node.handler.body);
 			// scope.init(context.node.handler.body);
 
 			let errVar = context.node.handler.param.name;

@@ -65,33 +65,6 @@ export function	isObject (obj) {
 	return true;
 }
 
-export function	areSame (a, b) {
-	if (a.type !== b.type) {
-		return false;
-	}
-
-	if (a.isPrimitive && b.isPrimitive) {
-		if (a.value == null) {
-			return true;
-		}
-
-		if (a.type === "number") {
-			if (isNaN(a.value) && isNaN(b.value)) {
-				return true;
-			}
-
-			if (a.value === 0) {
-				// this will account for negative zero
-				return 1 / a.value === 1 / b.value;
-			}
-		}
-
-		return a.value === b.value;
-	}
-
-	return a === b;
-}
-
 export function	getType (obj) {
 	return objectRgx.exec(Object.prototype.toString.call(obj))[1];
 }

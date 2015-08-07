@@ -57,80 +57,46 @@ var SandBoxr = (function () {
 exports["default"] = SandBoxr;
 module.exports = exports["default"];
 
-},{"./env":37,"./execution-context":41}],2:[function(require,module,exports){
-require('../../modules/es6.string.repeat');
-module.exports = require('../../modules/$.core').String.repeat;
-},{"../../modules/$.core":9,"../../modules/es6.string.repeat":22}],3:[function(require,module,exports){
+},{"./env":42,"./execution-context":46}],2:[function(require,module,exports){
 require('../../modules/es6.math.sign');
 module.exports = require('../../modules/$.core').Math.sign;
-},{"../../modules/$.core":4,"../../modules/es6.math.sign":8}],4:[function(require,module,exports){
+},{"../../modules/$.core":7,"../../modules/es6.math.sign":24}],3:[function(require,module,exports){
+require('../../modules/es6.object.assign');
+module.exports = require('../../modules/$.core').Object.assign;
+},{"../../modules/$.core":7,"../../modules/es6.object.assign":25}],4:[function(require,module,exports){
+require('../../modules/es6.string.repeat');
+module.exports = require('../../modules/$.core').String.repeat;
+},{"../../modules/$.core":7,"../../modules/es6.string.repeat":26}],5:[function(require,module,exports){
+var toObject  = require('./$.to-object')
+  , ES5Object = require('./$.es5-object')
+  , enumKeys  = require('./$.enum-keys');
+// 19.1.2.1 Object.assign(target, source, ...)
+/* eslint-disable no-unused-vars */
+module.exports = Object.assign || function assign(target, source){
+/* eslint-enable no-unused-vars */
+  var T = toObject(target, true)
+    , l = arguments.length
+    , i = 1;
+  while(l > i){
+    var S      = ES5Object(arguments[i++])
+      , keys   = enumKeys(S)
+      , length = keys.length
+      , j      = 0
+      , key;
+    while(length > j)T[key = keys[j++]] = S[key];
+  }
+  return T;
+};
+},{"./$.enum-keys":10,"./$.es5-object":11,"./$.to-object":22}],6:[function(require,module,exports){
+var toString = {}.toString;
+
+module.exports = function(it){
+  return toString.call(it).slice(8, -1);
+};
+},{}],7:[function(require,module,exports){
 var core = module.exports = {};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-},{}],5:[function(require,module,exports){
-var global    = require('./$.global')
-  , core      = require('./$.core')
-  , PROTOTYPE = 'prototype';
-function ctx(fn, that){
-  return function(){
-    return fn.apply(that, arguments);
-  };
-}
-// type bitmap
-$def.F = 1;  // forced
-$def.G = 2;  // global
-$def.S = 4;  // static
-$def.P = 8;  // proto
-$def.B = 16; // bind
-$def.W = 32; // wrap
-function $def(type, name, source){
-  var key, own, out, exp
-    , isGlobal = type & $def.G
-    , isProto  = type & $def.P
-    , target   = isGlobal ? global : type & $def.S
-        ? global[name] : (global[name] || {})[PROTOTYPE]
-    , exports  = isGlobal ? core : core[name] || (core[name] = {});
-  if(isGlobal)source = name;
-  for(key in source){
-    // contains in native
-    own = !(type & $def.F) && target && key in target;
-    if(own && key in exports)continue;
-    // export native or passed
-    out = own ? target[key] : source[key];
-    // prevent global pollution for namespaces
-    if(isGlobal && typeof target[key] != 'function')exp = source[key];
-    // bind timers to global for call from export context
-    else if(type & $def.B && own)exp = ctx(out, global);
-    // wrap global constructors for prevent change them in library
-    else if(type & $def.W && target[key] == out)!function(C){
-      exp = function(param){
-        return this instanceof C ? new C(param) : C(param);
-      };
-      exp[PROTOTYPE] = C[PROTOTYPE];
-    }(out);
-    else exp = isProto && typeof out == 'function' ? ctx(Function.call, out) : out;
-    // export
-    exports[key] = exp;
-    if(isProto)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
-  }
-}
-module.exports = $def;
-},{"./$.core":4,"./$.global":6}],6:[function(require,module,exports){
-var global = typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
-module.exports = global;
-if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-},{}],7:[function(require,module,exports){
-// 20.2.2.28 Math.sign(x)
-module.exports = Math.sign || function sign(x){
-  return (x = +x) == 0 || x != x ? x : x < 0 ? -1 : 1;
-};
 },{}],8:[function(require,module,exports){
-// 20.2.2.28 Math.sign(x)
-var $def = require('./$.def');
-
-$def($def.S, 'Math', {sign: require('./$.sign')});
-},{"./$.def":5,"./$.sign":7}],9:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],10:[function(require,module,exports){
 var global     = require('./$.global')
   , core       = require('./$.core')
   , hide       = require('./$.hide')
@@ -173,14 +139,34 @@ function $def(type, name, source){
   }
 }
 module.exports = $def;
-},{"./$.core":9,"./$.global":12,"./$.hide":14,"./$.redef":17}],11:[function(require,module,exports){
+},{"./$.core":7,"./$.global":12,"./$.hide":14,"./$.redef":17}],9:[function(require,module,exports){
 module.exports = function(it){
   if(it == undefined)throw TypeError("Can't call method on  " + it);
   return it;
 };
-},{}],12:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],13:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
+var $ = require('./$');
+module.exports = function(it){
+  var keys       = $.getKeys(it)
+    , isEnum     = $.isEnum
+    , getSymbols = $.getSymbols;
+  if(getSymbols)for(var symbols = getSymbols(it), i = 0, key; symbols.length > i; ){
+    if(isEnum.call(it, key = symbols[i++]))keys.push(key);
+  }
+  return keys;
+};
+},{"./$":15}],11:[function(require,module,exports){
+// fallback for not array-like ES3 strings
+var cof     = require('./$.cof')
+  , $Object = Object;
+module.exports = 0 in $Object('z') ? $Object : function(it){
+  return cof(it) == 'String' ? it.split('') : $Object(it);
+};
+},{"./$.cof":6}],12:[function(require,module,exports){
+var global = typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
+module.exports = global;
+if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
+},{}],13:[function(require,module,exports){
 var hasOwnProperty = {}.hasOwnProperty;
 module.exports = function(it, key){
   return hasOwnProperty.call(it, key);
@@ -194,7 +180,7 @@ module.exports = require('./$.support-desc') ? function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./$":15,"./$.property-desc":16,"./$.support-desc":19}],15:[function(require,module,exports){
+},{"./$":15,"./$.property-desc":16,"./$.support-desc":20}],15:[function(require,module,exports){
 var $Object = Object;
 module.exports = {
   create:     $Object.create,
@@ -250,7 +236,12 @@ require('./$.core').inspectSource = function(it){
 };
 
 module.exports = $redef;
-},{"./$.core":9,"./$.global":12,"./$.has":13,"./$.hide":14,"./$.uid":21}],18:[function(require,module,exports){
+},{"./$.core":7,"./$.global":12,"./$.has":13,"./$.hide":14,"./$.uid":23}],18:[function(require,module,exports){
+// 20.2.2.28 Math.sign(x)
+module.exports = Math.sign || function sign(x){
+  return (x = +x) == 0 || x != x ? x : x < 0 ? -1 : 1;
+};
+},{}],19:[function(require,module,exports){
 'use strict';
 var toInteger = require('./$.to-integer')
   , defined   = require('./$.defined');
@@ -263,34 +254,49 @@ module.exports = function repeat(count){
   for(;n > 0; (n >>>= 1) && (str += str))if(n & 1)res += str;
   return res;
 };
-},{"./$.defined":11,"./$.to-integer":20}],19:[function(require,module,exports){
+},{"./$.defined":9,"./$.to-integer":21}],20:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
 module.exports = !!function(){
   try {
     return Object.defineProperty({}, 'a', {get: function(){ return 2; }}).a == 2;
   } catch(e){ /* empty */ }
 }();
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // 7.1.4 ToInteger
 var ceil  = Math.ceil
   , floor = Math.floor;
 module.exports = function(it){
   return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
 };
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
+var ES5Object = require('./$.es5-object')
+  , defined   = require('./$.defined');
+module.exports = function(it, realString){
+  return (realString ? Object : ES5Object)(defined(it));
+};
+},{"./$.defined":9,"./$.es5-object":11}],23:[function(require,module,exports){
 var id = 0
   , px = Math.random();
 module.exports = function(key){
   return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
 };
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
+// 20.2.2.28 Math.sign(x)
+var $def = require('./$.def');
+
+$def($def.S, 'Math', {sign: require('./$.sign')});
+},{"./$.def":8,"./$.sign":18}],25:[function(require,module,exports){
+// 19.1.3.1 Object.assign(target, source)
+var $def = require('./$.def');
+$def($def.S, 'Object', {assign: require('./$.assign')});
+},{"./$.assign":5,"./$.def":8}],26:[function(require,module,exports){
 var $def = require('./$.def');
 
 $def($def.P, 'String', {
   // 21.1.3.13 String.prototype.repeat(count)
   repeat: require('./$.string-repeat')
 });
-},{"./$.def":10,"./$.string-repeat":18}],23:[function(require,module,exports){
+},{"./$.def":8,"./$.string-repeat":19}],27:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -985,7 +991,7 @@ function arrayApi(env) {
 
 module.exports = exports["default"];
 
-},{"../types/array-type":45,"../utils/contracts":56,"../utils/convert":57,"../utils/func":58}],24:[function(require,module,exports){
+},{"../types/array-type":50,"../utils/contracts":62,"../utils/convert":63,"../utils/func":64}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1036,7 +1042,7 @@ function booleanApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57}],25:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1069,7 +1075,7 @@ function consoleApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],26:[function(require,module,exports){
+},{"../utils/convert":63}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1187,7 +1193,7 @@ function dateApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],27:[function(require,module,exports){
+},{"../utils/convert":63}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1269,7 +1275,7 @@ function errorApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57}],28:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1486,7 +1492,7 @@ function functionApi(env, options) {
 
 module.exports = exports["default"];
 
-},{"../types/native-function-type":49,"../utils/contracts":56,"../utils/convert":57,"../utils/func":58}],29:[function(require,module,exports){
+},{"../types/native-function-type":54,"../utils/contracts":62,"../utils/convert":63,"../utils/func":64}],33:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -1565,14 +1571,15 @@ var convert = _interopRequireWildcard(_utilsConvert);
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
-function ecma51(env, config) {
-	config = config || {};
+function ecma51(env) {
+	var config = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
 	var objectFactory = env.objectFactory = new _typesObjectFactory2["default"](env);
 	var globalObject = env.global = objectFactory.createObject();
 
 	env.createObjectScope(globalObject);
 
-	var undefinedClass = new _typesPrimitiveType2["default"](undefined);
+	var undefinedClass = new _typesPrimitiveType2["default"]();
 	globalObject.define("undefined", undefinedClass, frozen);
 
 	var nullClass = new _typesPrimitiveType2["default"](null);
@@ -1625,7 +1632,7 @@ function ecma51(env, config) {
 				return code;
 			}
 
-			var indirect = !(this.callee instanceof _envReference2["default"]) || this.callee.base !== globalObject;
+			var directCall = this.callee instanceof _envReference2["default"] && this.callee.base === globalObject;
 			var ast;
 
 			try {
@@ -1641,7 +1648,7 @@ function ecma51(env, config) {
 
 			// use the same scope unless this is an "indirect" call
 			// in which case we use the global scope
-			var scope = env.setScope(indirect ? env.globalScope : env.current.parent);
+			var scope = env.setScope(directCall ? env.current.parent : env.globalScope);
 			var executionResult;
 
 			try {
@@ -1682,7 +1689,7 @@ function ecma51(env, config) {
 module.exports = exports["default"];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../env/reference":40,"../types/object-factory":50,"../types/primitive-type":52,"../utils/convert":57,"./array-api":23,"./boolean-api":24,"./console-api":25,"./date-api":26,"./error-api":27,"./function-api":28,"./json-api":30,"./math-api":31,"./number-api":32,"./object-api":33,"./regex-api":34,"./string-api":35}],30:[function(require,module,exports){
+},{"../env/reference":45,"../types/object-factory":55,"../types/primitive-type":57,"../utils/convert":63,"./array-api":27,"./boolean-api":28,"./console-api":29,"./date-api":30,"./error-api":31,"./function-api":32,"./json-api":34,"./math-api":35,"./number-api":36,"./object-api":37,"./regex-api":38,"./string-api":39}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1691,6 +1698,8 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = jsonApi;
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
+
+require("core-js/fn/string/repeat");
 
 var _utilsContracts = require("../utils/contracts");
 
@@ -1703,8 +1712,6 @@ var func = _interopRequireWildcard(_utilsFunc);
 var _utilsConvert = require("../utils/convert");
 
 var convert = _interopRequireWildcard(_utilsConvert);
-
-require("core-js/fn/string/repeat");
 
 var primitives = {
 	"String": true,
@@ -1963,7 +1970,7 @@ function jsonApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57,"../utils/func":58,"core-js/fn/string/repeat":2}],31:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63,"../utils/func":64,"core-js/fn/string/repeat":4}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1999,7 +2006,7 @@ function mathApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],32:[function(require,module,exports){
+},{"../utils/convert":63}],36:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2089,7 +2096,7 @@ function numberApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57}],33:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2451,7 +2458,7 @@ function objectApi(env) {
 
 module.exports = exports["default"];
 
-},{"../types/object-type":51,"../utils/contracts":56,"../utils/convert":57,"../utils/func":58}],34:[function(require,module,exports){
+},{"../types/object-type":56,"../utils/contracts":62,"../utils/convert":63,"../utils/func":64}],38:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2543,7 +2550,7 @@ function regexApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57}],35:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63}],39:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2757,7 +2764,7 @@ function stringApi(env) {
 
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57,"../utils/func":58}],36:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63,"../utils/func":64}],40:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2874,7 +2881,111 @@ var DeclarativeEnvironment = (function () {
 exports["default"] = DeclarativeEnvironment;
 module.exports = exports["default"];
 
-},{"../types/property-descriptor":53,"./reference":40}],37:[function(require,module,exports){
+},{"../types/property-descriptor":58,"./reference":45}],41:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+var visit = function visit(node, callback) {
+	if (!node) {
+		return;
+	}
+
+	if (Array.isArray(node)) {
+		node.forEach(function (n) {
+			return visit(n, callback);
+		});
+		return;
+	}
+
+	switch (node.type) {
+		// case "ArrayExpression":
+		// case "AssignmentExpression":
+		// case "BinaryExpression":
+		case "BlockStatement":
+			visit(node.body, callback);
+			break;
+
+		// case "BreakStatement":
+		// case "CallExpression":
+		// case "ConditionalExpression":
+		// case "ContinueStatement":
+		// case "DebuggerStatement":
+		case "DoWhileStatement":
+		case "WhileStatement":
+			visit(node.test, callback);
+			visit(node.body, callback);
+			break;
+
+		// case "EmptyStatement":
+		case "ExpressionStatement":
+			visit(node.expression, callback);
+			break;
+
+		case "ForStatement":
+			visit(node.init, callback);
+			visit(node.body, callback);
+			break;
+
+		case "ForInStatement":
+			visit(node.left, callback);
+			visit(node.body, callback);
+			break;
+
+		// case "FunctionExpression":
+		// case "Identifier":
+		case "IfStatement":
+			// do not scan `test`
+			visit(node.consequent, callback);
+			visit(node.alternate, callback);
+			break;
+
+		case "LabeledStatement":
+			visit(node.body, callback);
+			break;
+
+		// case "Literal":
+		// case "LogicalExpression":
+		// case "MemberExpression":
+		// case "ObjectExpression":
+		// case "ReturnStatement":
+		// case "SequenceExpression":
+		case "SwitchStatement":
+			visit(node.discriminant, callback);
+			break;
+
+		case "SwitchCase":
+			visit(node.consequent, callback);
+			break;
+
+		// case "ThisExpression":
+		// case "ThrowStatement":
+		case "TryStatement":
+			visit(node.block, callback);
+			visit(node.finalizer, callback);
+			break;
+
+		// case "UnaryExpression":
+		// case "UpdateExpression":
+		case "VariableDeclaration":
+			visit(node.declarations, callback);
+			break;
+
+		case "FunctionDeclaration":
+		case "VariableDeclarator":
+			callback(node);
+			break;
+
+		// case "WithStatement":
+
+		// case "NewExpression":
+		// case "Program":
+	}
+};
+exports.visit = visit;
+
+},{}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2886,6 +2997,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+require("core-js/fn/object/assign");
 
 var _executionContext = require("../execution-context");
 
@@ -2911,80 +3024,21 @@ var _ecma51 = require("../ecma-5.1");
 
 var _ecma512 = _interopRequireDefault(_ecma51);
 
-var scopedBlocks = {
-	"CallExpression": true,
-	"NewExpression": true,
-	"FunctionExpression": true,
-	"WithStatement": true
-};
+var _utilsComparers = require("../utils/comparers");
 
-function populateHoistedVariables(node, declarators, parent) {
-	if (Array.isArray(node)) {
-		node.forEach(function (child) {
-			populateHoistedVariables(child, declarators, parent);
-		});
+var _utilsComparers2 = _interopRequireDefault(_utilsComparers);
 
-		return;
-	}
+var _hoister = require("./hoister");
 
-	if (!node || !(typeof node === "object")) {
-		return;
-	}
-
-	if (node.type) {
-		if (node.type === "VariableDeclaration") {
-			populateHoistedVariables(node.declarations, declarators, node);
-			return;
-		}
-
-		if (node.type === "VariableDeclarator" || node.type === "FunctionDeclaration") {
-			declarators.push({
-				decl: node,
-				parent: parent
-			});
-
-			return;
-		}
-
-		if (node.type === "ForInStatement" && node.left.type === "Identifier") {
-			declarators.push({
-				decl: node.left,
-				parent: node
-			});
-
-			// keep analyzing
-		}
-
-		if (node.type === "IfStatement") {
-			// cannot hoist variables within if
-			populateHoistedVariables(node.consequent, declarators, node);
-			populateHoistedVariables(node.alternate, declarators, node);
-			return;
-		}
-
-		if (scopedBlocks[node.type]) {
-			return;
-		}
-	}
-
-	// todo: we could be smarter about this by being more descerning about what nodes we traverse
-	var prop;
-	for (prop in node) {
-		if (node.hasOwnProperty(prop) && node[prop] && typeof node[prop] === "object") {
-			populateHoistedVariables(node[prop], declarators, "type" in node ? node : parent);
-		}
-	}
-}
-
-function isStrictMode(_x) {
+function isStrictMode(_x2) {
 	var _again = true;
 
 	_function: while (_again) {
-		var node = _x;
+		var node = _x2;
 		_again = false;
 
 		if (Array.isArray(node)) {
-			_x = node[0];
+			_x2 = node[0];
 			_again = true;
 			continue _function;
 		}
@@ -3000,12 +3054,20 @@ var Environment = (function () {
 
 	_createClass(Environment, [{
 		key: "init",
-		value: function init(config) {
+		value: function init() {
+			var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
 			// clear state in case of re-init
 			this.current = null;
 			this.globalScope = null;
 
 			(0, _ecma512["default"])(this, config);
+			this.ops = Object.assign(_utilsComparers2["default"], config.comparers);
+		}
+	}, {
+		key: "evaluate",
+		value: function evaluate(left, right, operator) {
+			return this.ops[operator](this, left, right);
 		}
 	}, {
 		key: "getReference",
@@ -3080,30 +3142,26 @@ var Environment = (function () {
 	}, {
 		key: "initScope",
 		value: function initScope(node) {
-			var env = this;
+			var _this = this;
+
 			var strict = isStrictMode(node);
 			var undef = this.global.getProperty("undefined").getValue();
-			var variables = [];
-			var name;
 
-			populateHoistedVariables(node, variables, node);
-
-			variables.forEach(function (obj) {
-				var decl = obj.decl;
-				name = decl.name || decl.id.name;
+			(0, _hoister.visit)(node, function (decl) {
+				var name = decl.name || decl.id.name;
 
 				if (decl.type === "FunctionDeclaration") {
 					// functions can be used before they are defined
-					var func = env.objectFactory.createFunction(decl);
-					func.bindScope(env.current);
+					var func = _this.objectFactory.createFunction(decl);
+					func.bindScope(_this.current);
 
-					env.createVariable(name, true);
-					env.putValue(name, func, strict);
+					_this.createVariable(name, true);
+					_this.putValue(name, func, strict);
 				} else {
-					if (env.hasVariable(name)) {
-						env.putValue(name, undef, strict);
+					if (_this.hasVariable(name)) {
+						_this.putValue(name, undef, strict);
 					} else {
-						env.createVariable(name, true);
+						_this.createVariable(name, true);
 					}
 				}
 			});
@@ -3139,7 +3197,7 @@ var Environment = (function () {
 exports["default"] = Environment;
 module.exports = exports["default"];
 
-},{"../ecma-5.1":29,"../execution-context":41,"../keywords":43,"./declarative-environment":36,"./object-environment":38,"./reference":40}],38:[function(require,module,exports){
+},{"../ecma-5.1":33,"../execution-context":46,"../keywords":48,"../utils/comparers":61,"./declarative-environment":40,"./hoister":41,"./object-environment":43,"./reference":45,"core-js/fn/object/assign":3}],43:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3236,7 +3294,7 @@ var ObjectEnvironment = (function () {
 exports["default"] = ObjectEnvironment;
 module.exports = exports["default"];
 
-},{"./property-reference":39}],39:[function(require,module,exports){
+},{"./property-reference":44}],44:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3304,7 +3362,7 @@ var PropertyReference = (function (_Reference) {
 exports["default"] = PropertyReference;
 module.exports = exports["default"];
 
-},{"../types/primitive-type":52,"./reference":40}],40:[function(require,module,exports){
+},{"../types/primitive-type":57,"./reference":45}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3369,7 +3427,7 @@ var Reference = (function () {
 exports["default"] = Reference;
 module.exports = exports["default"];
 
-},{}],41:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3465,7 +3523,7 @@ var ExecutionContext = (function () {
 exports["default"] = ExecutionContext;
 module.exports = exports["default"];
 
-},{"./execution-result":42,"./visitors":74}],42:[function(require,module,exports){
+},{"./execution-result":47,"./visitors":81}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3534,7 +3592,7 @@ var ExecutionResult = (function () {
 exports["default"] = ExecutionResult;
 module.exports = exports["default"];
 
-},{}],43:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3551,7 +3609,7 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{}],44:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3654,7 +3712,7 @@ var ArgumentType = (function (_ObjectType) {
 exports["default"] = ArgumentType;
 module.exports = exports["default"];
 
-},{"./object-type":51}],45:[function(require,module,exports){
+},{"./object-type":56}],50:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3828,7 +3886,7 @@ var ArrayType = (function (_ObjectType) {
 exports["default"] = ArrayType;
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"../utils/convert":57,"./object-type":51}],46:[function(require,module,exports){
+},{"../utils/contracts":62,"../utils/convert":63,"./object-type":56}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3879,7 +3937,7 @@ var DateType = (function (_ObjectType) {
 exports["default"] = DateType;
 module.exports = exports["default"];
 
-},{"./object-type":51}],47:[function(require,module,exports){
+},{"./object-type":56}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3915,7 +3973,7 @@ var ErrorType = (function (_ObjectType) {
 exports["default"] = ErrorType;
 module.exports = exports["default"];
 
-},{"./object-type":51}],48:[function(require,module,exports){
+},{"./object-type":56}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4071,7 +4129,7 @@ var FunctionType = (function (_ObjectType) {
 exports["default"] = FunctionType;
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"./object-type":51,"./property-descriptor":53}],49:[function(require,module,exports){
+},{"../utils/contracts":62,"./object-type":56,"./property-descriptor":58}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4144,7 +4202,7 @@ var NativeFunctionType = (function (_FunctionType) {
 exports["default"] = NativeFunctionType;
 module.exports = exports["default"];
 
-},{"./function-type":48,"./property-descriptor":53}],50:[function(require,module,exports){
+},{"./function-type":53,"./property-descriptor":58}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4372,7 +4430,7 @@ ObjectFactory.prototype = {
 module.exports = ObjectFactory;
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"./argument-type":44,"./array-type":45,"./date-type":46,"./error-type":47,"./function-type":48,"./native-function-type":49,"./object-type":51,"./primitive-type":52,"./regex-type":54,"./string-type":55}],51:[function(require,module,exports){
+},{"../utils/contracts":62,"./argument-type":49,"./array-type":50,"./date-type":51,"./error-type":52,"./function-type":53,"./native-function-type":54,"./object-type":56,"./primitive-type":57,"./regex-type":59,"./string-type":60}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4622,7 +4680,7 @@ var ObjectType = (function () {
 exports["default"] = ObjectType;
 module.exports = exports["default"];
 
-},{"./property-descriptor":53}],52:[function(require,module,exports){
+},{"./property-descriptor":58}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4685,7 +4743,7 @@ var PrimitiveType = (function (_ObjectType) {
 exports["default"] = PrimitiveType;
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"./object-type":51}],53:[function(require,module,exports){
+},{"../utils/contracts":62,"./object-type":56}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4698,9 +4756,9 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _utilsContracts = require("../utils/contracts");
+var _utilsComparers = require("../utils/comparers");
 
-var contracts = _interopRequireWildcard(_utilsContracts);
+var comparers = _interopRequireWildcard(_utilsComparers);
 
 var defaultDescriptor = {
 	configurable: false,
@@ -4784,7 +4842,7 @@ var PropertyDescriptor = (function () {
 						return false;
 					}
 
-					return !("value" in descriptor) || contracts.areSame(this.value, descriptor.value);
+					return !("value" in descriptor) || comparers.areSame(this.value, descriptor.value);
 				}
 
 				return true;
@@ -4839,7 +4897,7 @@ var PropertyDescriptor = (function () {
 exports["default"] = PropertyDescriptor;
 module.exports = exports["default"];
 
-},{"../utils/contracts":56}],54:[function(require,module,exports){
+},{"../utils/comparers":61}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4894,7 +4952,7 @@ var RegexType = (function (_ObjectType) {
 exports["default"] = RegexType;
 module.exports = exports["default"];
 
-},{"./object-type":51}],55:[function(require,module,exports){
+},{"./object-type":56}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4995,7 +5053,144 @@ var StringType = (function (_PrimitiveType) {
 exports["default"] = StringType;
 module.exports = exports["default"];
 
-},{"../utils/contracts":56,"./primitive-type":52,"./property-descriptor":53}],56:[function(require,module,exports){
+},{"../utils/contracts":62,"./primitive-type":57,"./property-descriptor":58}],61:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _comparers;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var _convert = require("./convert");
+
+var convert = _interopRequireWildcard(_convert);
+
+function negate(value) {
+	if (value === undefined) {
+		return false;
+	}
+
+	return !value;
+}
+
+var comparers = (_comparers = {
+	areSame: function areSame(a, b) {
+		if (a.type !== b.type) {
+			return false;
+		}
+
+		if (a.isPrimitive && b.isPrimitive) {
+			if (a.value == null) {
+				return true;
+			}
+
+			if (a.type === "number") {
+				if (isNaN(a.value) && isNaN(b.value)) {
+					return true;
+				}
+
+				if (a.value === 0) {
+					// this will account for negative zero
+					return 1 / a.value === 1 / b.value;
+				}
+			}
+
+			return a.value === b.value;
+		}
+
+		return a === b;
+	},
+
+	implicitEquals: function implicitEquals(env, a, b) {
+		if (a.isPrimitive && b.isPrimitive) {
+			return a.value == b.value;
+		}
+
+		if (a.type === "object" && b.type === "object" || a.type === "function" && b.type === "function") {
+			return a === b;
+		}
+
+		var primitiveA = convert.toPrimitive(env, a);
+		var primitiveB = convert.toPrimitive(env, b);
+
+		if (typeof primitiveA === "number" || typeof primitiveB === "number" || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
+			return Number(primitiveA) === Number(primitiveB);
+		}
+
+		if (typeof primitiveA === "string") {
+			return primitiveA === convert.toPrimitive(env, b, "string");
+		}
+
+		if (typeof primitiveB === "string") {
+			return convert.toPrimitive(env, a, "string") === primitiveB;
+		}
+
+		return primitiveA == primitiveB;
+	},
+
+	strictEquals: function strictEquals(env, a, b) {
+		if (a.isPrimitive && b.isPrimitive) {
+			return a.value === b.value;
+		}
+
+		if (a.isPrimitive || b.isPrimitive) {
+			return false;
+		}
+
+		return a === b;
+	},
+
+	relationalCompare: function relationalCompare(env, a, b, leftFirst) {
+		var primitiveA, primitiveB;
+		if (leftFirst) {
+			primitiveA = convert.toPrimitive(env, a, "number");
+			primitiveB = convert.toPrimitive(env, b, "number");
+		} else {
+			primitiveB = convert.toPrimitive(env, b, "number");
+			primitiveA = convert.toPrimitive(env, a, "number");
+		}
+
+		if (typeof primitiveA === "string" && typeof primitiveB === "string") {
+			return primitiveA < primitiveB;
+		}
+
+		primitiveA = Number(primitiveA);
+		primitiveB = Number(primitiveB);
+
+		if (isNaN(primitiveA) || isNaN(primitiveB)) {
+			return undefined;
+		}
+
+		return primitiveA < primitiveB;
+	}
+
+}, _defineProperty(_comparers, "==", function _() {
+	return this.implicitEquals.apply(this, arguments);
+}), _defineProperty(_comparers, "!=", function _() {
+	return !this.implicitEquals.apply(this, arguments);
+}), _defineProperty(_comparers, "===", function _() {
+	return this.strictEquals.apply(this, arguments);
+}), _defineProperty(_comparers, "!==", function _() {
+	return !this.strictEquals.apply(this, arguments);
+}), _defineProperty(_comparers, "<", function _(env, a, b) {
+	return !!this.relationalCompare(env, a, b, true);
+}), _defineProperty(_comparers, "<=", function _(env, a, b) {
+	return negate(this.relationalCompare(env, b, a, false));
+}), _defineProperty(_comparers, ">", function _(env, a, b) {
+	return !!this.relationalCompare(env, b, a, false);
+}), _defineProperty(_comparers, ">=", function _(env, a, b) {
+	return negate(this.relationalCompare(env, a, b, true));
+}), _comparers);
+
+exports["default"] = comparers;
+module.exports = exports["default"];
+
+},{"./convert":63}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5011,7 +5206,6 @@ exports.assertIsValidParameterName = assertIsValidParameterName;
 exports.assertIsNotGeneric = assertIsNotGeneric;
 exports.isValidArrayLength = isValidArrayLength;
 exports.isObject = isObject;
-exports.areSame = areSame;
 exports.getType = getType;
 exports.isNullOrUndefined = isNullOrUndefined;
 exports.isUndefined = isUndefined;
@@ -5084,33 +5278,6 @@ function isObject(obj) {
 	return true;
 }
 
-function areSame(a, b) {
-	if (a.type !== b.type) {
-		return false;
-	}
-
-	if (a.isPrimitive && b.isPrimitive) {
-		if (a.value == null) {
-			return true;
-		}
-
-		if (a.type === "number") {
-			if (isNaN(a.value) && isNaN(b.value)) {
-				return true;
-			}
-
-			if (a.value === 0) {
-				// this will account for negative zero
-				return 1 / a.value === 1 / b.value;
-			}
-		}
-
-		return a.value === b.value;
-	}
-
-	return a === b;
-}
-
 function getType(obj) {
 	return objectRgx.exec(Object.prototype.toString.call(obj))[1];
 }
@@ -5139,7 +5306,7 @@ function isInteger(value) {
 	return false;
 }
 
-},{}],57:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5159,11 +5326,13 @@ exports.toNativeFunction = toNativeFunction;
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
 
+require("core-js/fn/math/sign");
+
 var _utilsFunc = require("../utils/func");
 
 var func = _interopRequireWildcard(_utilsFunc);
 
-var sign = require("core-js/library/fn/math/sign");
+var sign = Math.sign;
 var floor = Math.floor;
 var abs = Math.abs;
 
@@ -5328,7 +5497,7 @@ function toNativeFunction(env, fn, name) {
 	}, fn.length, name);
 }
 
-},{"../utils/func":58,"core-js/library/fn/math/sign":3}],58:[function(require,module,exports){
+},{"../utils/func":64,"core-js/fn/math/sign":2}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5460,7 +5629,74 @@ function tryCallMethod(env, obj, name) {
 	return false;
 }
 
-},{}],59:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _$$$$$$$$$$$in$instanceof;
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var _convert = require("./convert");
+
+var convert = _interopRequireWildcard(_convert);
+
+function addOrConcat(env, a, b) {
+	if (a.isPrimitive && b.isPrimitive) {
+		return a.value + b.value;
+	}
+
+	a = convert.toPrimitive(env, a);
+	b = convert.toPrimitive(env, b);
+	return a + b;
+}
+
+exports["default"] = (_$$$$$$$$$$$in$instanceof = {}, _defineProperty(_$$$$$$$$$$$in$instanceof, "+", addOrConcat), _defineProperty(_$$$$$$$$$$$in$instanceof, "-", function _(env, a, b) {
+	return convert.toNumber(env, a) - convert.toNumber(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "/", function _(env, a, b) {
+	return convert.toNumber(env, a) / convert.toNumber(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "*", function _(env, a, b) {
+	return convert.toNumber(env, a) * convert.toNumber(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "<<", function _(env, a, b) {
+	return convert.toPrimitive(env, a) << convert.toPrimitive(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, ">>", function _(env, a, b) {
+	return convert.toPrimitive(env, a) >> convert.toPrimitive(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, ">>>", function _(env, a, b) {
+	return convert.toPrimitive(env, a) >>> convert.toPrimitive(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "%", function _(env, a, b) {
+	return convert.toPrimitive(env, a) % convert.toPrimitive(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "|", function _(env, a, b) {
+	return convert.toInt32(env, a) | convert.toInt32(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "^", function _(env, a, b) {
+	return convert.toInt32(env, a) ^ convert.toInt32(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "&", function _(env, a, b) {
+	return convert.toInt32(env, a) & convert.toInt32(env, b);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "in", function _in(env, a, b) {
+	a = convert.toString(env, a);
+	if (b.isPrimitive) {
+		throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + convert.toString(env, b));
+	}
+
+	return b.hasProperty(a);
+}), _defineProperty(_$$$$$$$$$$$in$instanceof, "instanceof", function _instanceof(env, a, b) {
+	if (b.type !== "function") {
+		throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
+	}
+
+	if (a.isPrimitive) {
+		return false;
+	}
+
+	return b.hasInstance(a);
+}), _$$$$$$$$$$$in$instanceof);
+module.exports = exports["default"];
+
+},{"./convert":63}],66:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5493,7 +5729,7 @@ function ArrayExpression(context) {
 
 module.exports = exports["default"];
 
-},{}],60:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5507,40 +5743,22 @@ var _envReference = require("../env/reference");
 
 var _envReference2 = _interopRequireDefault(_envReference);
 
+var _utilsOperators = require("../utils/operators");
+
+var _utilsOperators2 = _interopRequireDefault(_utilsOperators);
+
 var assignOperators = {
-	"+=": function _(a, b) {
-		return a.value + b.value;
-	},
-	"-=": function _(a, b) {
-		return a.value - b.value;
-	},
-	"*=": function _(a, b) {
-		return a.value * b.value;
-	},
-	"/=": function _(a, b) {
-		return a.value / b.value;
-	},
-	"%=": function _(a, b) {
-		return a.value % b.value;
-	},
-	"<<=": function _(a, b) {
-		return a.value << b.value;
-	},
-	">>=": function _(a, b) {
-		return a.value >> b.value;
-	},
-	">>>=": function _(a, b) {
-		return a.value >>> b.value;
-	},
-	"|=": function _(a, b) {
-		return a.value | b.value;
-	},
-	"^=": function _(a, b) {
-		return a.value ^ b.value;
-	},
-	"&=": function _(a, b) {
-		return a.value & b.value;
-	}
+	"+=": _utilsOperators2["default"]["+"],
+	"-=": _utilsOperators2["default"]["-"],
+	"*=": _utilsOperators2["default"]["*"],
+	"/=": _utilsOperators2["default"]["/"],
+	"%=": _utilsOperators2["default"]["%"],
+	"<<=": _utilsOperators2["default"]["<<"],
+	">>=": _utilsOperators2["default"][">>"],
+	">>>=": _utilsOperators2["default"][">>>"],
+	"|=": _utilsOperators2["default"]["|"],
+	"^=": _utilsOperators2["default"]["^"],
+	"&=": _utilsOperators2["default"]["&"]
 };
 
 function AssignmentExpression(context) {
@@ -5556,7 +5774,7 @@ function AssignmentExpression(context) {
 	if (assignment) {
 		newValue = right.getValue();
 	} else {
-		var rawValue = assignOperators[context.node.operator](left.getValue(), right.getValue());
+		var rawValue = assignOperators[context.node.operator](context.env, left.getValue(), right.getValue());
 		newValue = context.env.objectFactory.createPrimitive(rawValue);
 	}
 
@@ -5566,7 +5784,7 @@ function AssignmentExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../env/reference":40}],61:[function(require,module,exports){
+},{"../env/reference":45,"../utils/operators":65}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5576,142 +5794,9 @@ exports["default"] = BinaryExpression;
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
 
-var _utilsConvert = require("../utils/convert");
+var _utilsOperators = require("../utils/operators");
 
-var convert = _interopRequireWildcard(_utilsConvert);
-
-function implicitEquals(a, b, env) {
-	if (a.isPrimitive && b.isPrimitive) {
-		return a.value == b.value;
-	}
-
-	if (a.type === "object" && b.type === "object" || a.type === "function" && b.type === "function") {
-		return a === b;
-	}
-
-	var primitiveA = convert.toPrimitive(env, a);
-	var primitiveB = convert.toPrimitive(env, b);
-
-	if (typeof primitiveA === "number" || typeof primitiveB === "number" || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
-		return Number(primitiveA) === Number(primitiveB);
-	}
-
-	if (typeof primitiveA === "string") {
-		return primitiveA === convert.toPrimitive(env, b, "string");
-	}
-
-	if (typeof primitiveB === "string") {
-		return convert.toPrimitive(env, a, "string") === primitiveB;
-	}
-
-	return primitiveA == primitiveB;
-}
-
-function strictEquals(a, b) {
-	if (a.isPrimitive && b.isPrimitive) {
-		return a.value === b.value;
-	}
-
-	if (a.isPrimitive || b.isPrimitive) {
-		return false;
-	}
-
-	return a === b;
-}
-
-function not(fn) {
-	return function (a, b, e) {
-		return !fn(a, b, e);
-	};
-}
-
-function add(a, b, env) {
-	if (a.isPrimitive && b.isPrimitive) {
-		return a.value + b.value;
-	}
-
-	a = convert.toPrimitive(env, a);
-	b = convert.toPrimitive(env, b);
-	return a + b;
-}
-
-function toNumber(env, obj) {
-	if (obj.className === "Number") {
-		return obj.value;
-	}
-
-	return convert.toNumber(env, obj);
-}
-
-/* eslint eqeqeq:0 */
-var binaryOperators = {
-	"+": add,
-	"-": function _(a, b, e) {
-		return toNumber(e, a) - toNumber(e, b);
-	},
-	"/": function _(a, b, e) {
-		return toNumber(e, a) / toNumber(e, b);
-	},
-	"*": function _(a, b, e) {
-		return toNumber(e, a) * toNumber(e, b);
-	},
-	"==": implicitEquals,
-	"!=": not(implicitEquals),
-	"===": strictEquals,
-	"!==": not(strictEquals),
-	"<": function _(a, b, e) {
-		return convert.toPrimitive(e, a) < convert.toPrimitive(e, b);
-	},
-	"<=": function _(a, b, e) {
-		return convert.toPrimitive(e, a) <= convert.toPrimitive(e, b);
-	},
-	">": function _(a, b, e) {
-		return convert.toPrimitive(e, a) > convert.toPrimitive(e, b);
-	},
-	">=": function _(a, b, e) {
-		return convert.toPrimitive(e, a) >= convert.toPrimitive(e, b);
-	},
-	"<<": function _(a, b, e) {
-		return convert.toPrimitive(e, a) << convert.toPrimitive(e, b);
-	},
-	">>": function _(a, b, e) {
-		return convert.toPrimitive(e, a) >> convert.toPrimitive(e, b);
-	},
-	">>>": function _(a, b, e) {
-		return convert.toPrimitive(e, a) >>> convert.toPrimitive(e, b);
-	},
-	"%": function _(a, b, e) {
-		return convert.toPrimitive(e, a) % convert.toPrimitive(e, b);
-	},
-	"|": function _(a, b, e) {
-		return convert.toInt32(e, a) | convert.toInt32(e, b);
-	},
-	"^": function _(a, b, e) {
-		return convert.toInt32(e, a) ^ convert.toInt32(e, b);
-	},
-	"&": function _(a, b, e) {
-		return convert.toInt32(e, a) & convert.toInt32(e, b);
-	},
-	"in": function _in(a, b, e) {
-		a = convert.toString(e, a);
-		if (b.isPrimitive) {
-			throw new TypeError("Cannot use 'in' operator to search for '" + a + "' in " + convert.toString(e, b));
-		}
-
-		return b.hasProperty(a);
-	},
-	"instanceof": function _instanceof(a, b) {
-		if (b.type !== "function") {
-			throw new TypeError("Expecting a function in instanceof check, but got " + b.type);
-		}
-
-		if (a.isPrimitive) {
-			return false;
-		}
-
-		return b.hasInstance(a);
-	}
-};
+var operators = _interopRequireWildcard(_utilsOperators);
 
 function BinaryExpression(context) {
 	var undef = context.env.global.getProperty("undefined").getValue();
@@ -5721,14 +5806,19 @@ function BinaryExpression(context) {
 	var right = context.create(context.node.right).execute().result;
 	var rightValue = right.getValue() || undef;
 
-	var newValue = binaryOperators[context.node.operator](leftValue, rightValue, context.env);
+	var newValue;
+	if (context.node.operator in operators) {
+		newValue = operators[context.node.operator](context.env, leftValue, rightValue);
+	} else {
+		newValue = context.env.evaluate(leftValue, rightValue, context.node.operator);
+	}
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));
 }
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],62:[function(require,module,exports){
+},{"../utils/operators":65}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5757,7 +5847,7 @@ function BlockStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],63:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5820,7 +5910,7 @@ function CallExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../env/reference":40,"../utils/convert":57,"../utils/func":58}],64:[function(require,module,exports){
+},{"../env/reference":45,"../utils/convert":63,"../utils/func":64}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5834,7 +5924,7 @@ function DebuggerStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],65:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5871,7 +5961,7 @@ function DoWhileStatement(context) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],66:[function(require,module,exports){
+},{"../utils/convert":63}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5885,7 +5975,7 @@ function EmptyStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],67:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5901,7 +5991,7 @@ function ExpressionStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],68:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5955,7 +6045,7 @@ function ForInStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],69:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6001,7 +6091,7 @@ function ForStatement(context) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],70:[function(require,module,exports){
+},{"../utils/convert":63}],77:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6015,7 +6105,7 @@ function FunctionDeclaration(context) {
 
 module.exports = exports["default"];
 
-},{}],71:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6037,7 +6127,7 @@ function FunctionExpression(context) {
 
 module.exports = exports["default"];
 
-},{}],72:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6057,7 +6147,7 @@ function Identifier(context) {
 
 module.exports = exports["default"];
 
-},{}],73:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6084,7 +6174,7 @@ function IfStatement(context) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],74:[function(require,module,exports){
+},{"../utils/convert":63}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6273,7 +6363,7 @@ exports["default"] = {
 };
 module.exports = exports["default"];
 
-},{"./array-expression":59,"./assignment-expression":60,"./binary-expression":61,"./block-statement":62,"./call-expression":63,"./debugger-statement":64,"./do-while-statement.js":65,"./empty-statement":66,"./expression-statement":67,"./for-in-statement":68,"./for-statement":69,"./function-declaration":70,"./function-expression":71,"./identifier":72,"./if-statement":73,"./interrupt-statement":75,"./labeled-statement":76,"./literal":77,"./logical-expression":78,"./member-expression":79,"./object-expression":80,"./return-statement":81,"./sequence-expression":82,"./switch-statement":83,"./this-expression":84,"./throw-statement":85,"./try-statement":86,"./unary-expression":87,"./update-expression":88,"./variable-declaration":89,"./variable-declarator":90,"./with-statement":91}],75:[function(require,module,exports){
+},{"./array-expression":66,"./assignment-expression":67,"./binary-expression":68,"./block-statement":69,"./call-expression":70,"./debugger-statement":71,"./do-while-statement.js":72,"./empty-statement":73,"./expression-statement":74,"./for-in-statement":75,"./for-statement":76,"./function-declaration":77,"./function-expression":78,"./identifier":79,"./if-statement":80,"./interrupt-statement":82,"./labeled-statement":83,"./literal":84,"./logical-expression":85,"./member-expression":86,"./object-expression":87,"./return-statement":88,"./sequence-expression":89,"./switch-statement":90,"./this-expression":91,"./throw-statement":92,"./try-statement":93,"./unary-expression":94,"./update-expression":95,"./variable-declaration":96,"./variable-declarator":97,"./with-statement":98}],82:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6296,7 +6386,7 @@ function InterruptStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],76:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6310,7 +6400,7 @@ function LabeledStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],77:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6324,7 +6414,7 @@ function Literal(context) {
 
 module.exports = exports["default"];
 
-},{}],78:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6355,7 +6445,7 @@ function LogicalExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],79:[function(require,module,exports){
+},{"../utils/convert":63}],86:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6391,7 +6481,7 @@ function MemberExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../env/property-reference":39,"../utils/convert":57}],80:[function(require,module,exports){
+},{"../env/property-reference":44,"../utils/convert":63}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6455,7 +6545,7 @@ function ObjectExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../utils/func":58}],81:[function(require,module,exports){
+},{"../utils/func":64}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6473,7 +6563,7 @@ function ReturnStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],82:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6493,7 +6583,7 @@ function SequenceExpression(context) {
 
 module.exports = exports["default"];
 
-},{}],83:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6550,7 +6640,7 @@ function SwitchStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],84:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6564,7 +6654,7 @@ function ThisExpression(context) {
 
 module.exports = exports["default"];
 
-},{}],85:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6587,7 +6677,7 @@ function ThrowStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],86:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6605,6 +6695,7 @@ function TryCatchStatement(context) {
 			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
 			// var scope = context.env.createScope();
+			context.env.initScope(context.node.handler.body);
 			// scope.init(context.node.handler.body);
 
 			var errVar = context.node.handler.param.name;
@@ -6645,7 +6736,7 @@ function TryCatchStatement(context) {
 
 module.exports = exports["default"];
 
-},{}],87:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6729,7 +6820,7 @@ function UnaryExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../env/reference":40,"../utils/convert":57}],88:[function(require,module,exports){
+},{"../env/reference":45,"../utils/convert":63}],95:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6766,7 +6857,7 @@ function UpdateExpression(context) {
 
 module.exports = exports["default"];
 
-},{"../utils/convert":57}],89:[function(require,module,exports){
+},{"../utils/convert":63}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6783,7 +6874,7 @@ function VariableDeclaration(context) {
 
 module.exports = exports["default"];
 
-},{}],90:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6809,7 +6900,7 @@ function VariableDeclarator(context) {
 
 module.exports = exports["default"];
 
-},{}],91:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

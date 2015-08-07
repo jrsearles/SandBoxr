@@ -17,14 +17,13 @@ import * as convert from "../utils/convert";
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
-export default function ecma51 (env, config) {
-	config = config || {};
+export default function ecma51 (env, config = {}) {
 	var objectFactory = env.objectFactory = new ObjectFactory(env);
 	var globalObject = env.global = objectFactory.createObject();
 
 	env.createObjectScope(globalObject);
 
-	var undefinedClass = new PrimitiveType(undefined);
+	var undefinedClass = new PrimitiveType();
 	globalObject.define("undefined", undefinedClass, frozen);
 
 	var nullClass = new PrimitiveType(null);
@@ -77,7 +76,7 @@ export default function ecma51 (env, config) {
 				return code;
 			}
 
-			var indirect = !(this.callee instanceof Reference) || this.callee.base !== globalObject;
+			var directCall = this.callee instanceof Reference && this.callee.base === globalObject;
 			var ast;
 
 			try {
@@ -93,7 +92,7 @@ export default function ecma51 (env, config) {
 
 			// use the same scope unless this is an "indirect" call
 			// in which case we use the global scope
-			var scope = env.setScope(indirect ? env.globalScope : env.current.parent);
+			var scope = env.setScope(directCall ? env.current.parent : env.globalScope);
 			var executionResult;
 
 			try {

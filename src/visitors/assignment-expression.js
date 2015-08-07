@@ -1,17 +1,18 @@
 import Reference from "../env/reference";
+import operators from "../utils/operators";
 
 var assignOperators = {
-	"+=": function (a, b) { return a.value + b.value; },
-	"-=": function (a, b) { return a.value - b.value; },
-	"*=": function (a, b) { return a.value * b.value; },
-	"/=": function (a, b) { return a.value / b.value; },
-	"%=": function (a, b) { return a.value % b.value; },
-	"<<=": function (a, b) { return a.value << b.value; },
-	">>=": function (a, b) { return a.value >> b.value; },
-	">>>=": function (a, b) { return a.value >>> b.value; },
-	"|=": function (a, b) { return a.value | b.value; },
-	"^=": function (a, b) { return a.value ^ b.value; },
-	"&=": function (a, b) { return a.value & b.value; }
+	"+=": operators["+"],
+	"-=": operators["-"],
+	"*=": operators["*"],
+	"/=": operators["/"],
+	"%=": operators["%"],
+	"<<=": operators["<<"],
+	">>=": operators[">>"],
+	">>>=": operators[">>>"],
+	"|=": operators["|"],
+	"^=": operators["^"],
+	"&=": operators["&"]
 };
 
 export default function AssignmentExpression (context) {
@@ -27,7 +28,7 @@ export default function AssignmentExpression (context) {
 	if (assignment) {
 		newValue = right.getValue();
 	} else {
-		var rawValue = assignOperators[context.node.operator](left.getValue(), right.getValue());
+		var rawValue = assignOperators[context.node.operator](context.env, left.getValue(), right.getValue());
 		newValue = context.env.objectFactory.createPrimitive(rawValue);
 	}
 

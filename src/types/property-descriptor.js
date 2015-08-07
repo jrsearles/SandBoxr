@@ -1,4 +1,4 @@
-import * as contracts from "../utils/contracts";
+import * as comparers from "../utils/comparers";
 
 var defaultDescriptor = {
 	configurable: false,
@@ -76,7 +76,7 @@ export default class PropertyDescriptor {
 					return false;
 				}
 
-				return !("value" in descriptor) || contracts.areSame(this.value, descriptor.value);
+				return !("value" in descriptor) || comparers.areSame(this.value, descriptor.value);
 			}
 
 			return true;

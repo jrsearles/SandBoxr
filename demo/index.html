@@ -43,10 +43,27 @@ result;
 		document.getElementById("result").innerHTML = JSON.stringify(value && value.result && value.result.getValue().value);
 	}
 	
-		var ast = acorn.parse("({foo:true});");
-		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute();
-		console.log(result.unwrap());
+	debugger;
+			var env = SandBoxr.createEnvironment();
+			env.init({
+				comparers: {
+					"implicitEquals": function (env, a, b) {
+						if (a.isPrimitive && b.isPrimitive) {
+							return a.value === b.value;
+						}
+						
+						if (a.isPrimitive || b.isPrimitive) {
+							return false;
+						}
+						
+						return a === b;
+					}
+				}
+			});
+			
+			var ast = acorn.parse("0 == '0'");
+			var sandbox = SandBoxr.create(ast);
+			sandbox.execute(env);
 </script>
 </body>
 </html>
