@@ -2851,6 +2851,8 @@ var DeclarativeEnvironment = (function () {
 				}
 
 				this.properties[name].setValue(value);
+			} else {
+				this.parent.putValue.apply(this.parent, arguments);
 			}
 		}
 	}, {
@@ -2904,6 +2906,10 @@ var visit = function visit(node, callback) {
 		// case "AssignmentExpression":
 		// case "BinaryExpression":
 		case "BlockStatement":
+			visit(node.body, callback);
+			break;
+
+		case "CatchClause":
 			visit(node.body, callback);
 			break;
 
@@ -2963,6 +2969,7 @@ var visit = function visit(node, callback) {
 		// case "ThrowStatement":
 		case "TryStatement":
 			visit(node.block, callback);
+			visit(node.handler, callback);
 			visit(node.finalizer, callback);
 			break;
 
@@ -6683,10 +6690,10 @@ module.exports = exports["default"];
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports["default"] = TryCatchStatement;
+exports["default"] = TryStatement;
 
-function TryCatchStatement(context) {
-	var result;
+function TryStatement(context) {
+	var result, uncaughtError;
 
 	try {
 		result = context.create(context.node.block).execute();
@@ -6694,16 +6701,16 @@ function TryCatchStatement(context) {
 		if (context.node.handler) {
 			var caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
-			// var scope = context.env.createScope();
-			context.env.initScope(context.node.handler.body);
+			var scope = context.env.createScope();
+			// context.env.initScope(context.node.handler);
 			// scope.init(context.node.handler.body);
 
 			var errVar = context.node.handler.param.name;
-			var hasVariable = context.env.hasVariable(errVar);
+			// let hasVariable = context.env.hasVariable(errVar);
 
-			if (!hasVariable) {
-				context.env.createVariable(errVar);
-			}
+			// if (!hasVariable) {
+			context.env.createVariable(errVar);
+			// }
 
 			context.env.putValue(errVar, caughtError);
 
@@ -6711,17 +6718,17 @@ function TryCatchStatement(context) {
 				result = context.create(context.node.handler.body, context.node.handler).execute();
 			} catch (catchError) {
 				// scope.exitScope();
-				throw catchError;
+				uncaughtError = catchError;
 			} finally {
-				if (!hasVariable) {
-					context.env.deleteVariable(errVar);
-				}
+				// if (!hasVariable) {
+				// 	context.env.deleteVariable(errVar);
+				// }
 			}
 
-			// scope.exitScope();
+			scope.exitScope();
 		} else {
-				throw err;
-			}
+			uncaughtError = err;
+		}
 	} finally {
 		if (context.node.finalizer) {
 			var finalResult = context.create(context.node.finalizer).execute();
@@ -6729,6 +6736,10 @@ function TryCatchStatement(context) {
 				return finalResult;
 			}
 		}
+	}
+
+	if (uncaughtError) {
+		throw uncaughtError;
 	}
 
 	return result;

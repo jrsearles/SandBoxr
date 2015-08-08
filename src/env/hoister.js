@@ -16,6 +16,10 @@ export const visit = (node, callback) => {
 			visit(node.body, callback);
 			break;
 
+		case "CatchClause":
+			visit(node.body, callback);
+			break;
+
 		// case "BreakStatement":
 		// case "CallExpression":
 		// case "ConditionalExpression":
@@ -72,6 +76,7 @@ export const visit = (node, callback) => {
 		// case "ThrowStatement":
 		case "TryStatement":
 			visit(node.block, callback);
+			visit(node.handler, callback);
 			visit(node.finalizer, callback);
 			break;
 

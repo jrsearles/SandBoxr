@@ -1,5 +1,5 @@
-export default function TryCatchStatement (context) {
-	var result;
+export default function TryStatement (context) {
+	var result, uncaughtError;
 
 	try {
 		result = context.create(context.node.block).execute();
@@ -7,16 +7,16 @@ export default function TryCatchStatement (context) {
 		if (context.node.handler) {
 			let caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
 
-			// var scope = context.env.createScope();
-			context.env.initScope(context.node.handler.body);
+			var scope = context.env.createScope();
+			// context.env.initScope(context.node.handler);
 			// scope.init(context.node.handler.body);
 
 			let errVar = context.node.handler.param.name;
-			let hasVariable = context.env.hasVariable(errVar);
+			// let hasVariable = context.env.hasVariable(errVar);
 
-			if (!hasVariable) {
+			// if (!hasVariable) {
 				context.env.createVariable(errVar);
-			}
+			// }
 
 			context.env.putValue(errVar, caughtError);
 
@@ -24,16 +24,16 @@ export default function TryCatchStatement (context) {
 				result = context.create(context.node.handler.body, context.node.handler).execute();
 			} catch (catchError) {
 				// scope.exitScope();
-				throw catchError;
+				uncaughtError = catchError;
 			} finally {
-				if (!hasVariable) {
-					context.env.deleteVariable(errVar);
-				}
+				// if (!hasVariable) {
+				// 	context.env.deleteVariable(errVar);
+				// }
 			}
 
-			// scope.exitScope();
+			scope.exitScope();
 		} else {
-			throw err;
+			uncaughtError = err;
 		}
 	} finally {
 		if (context.node.finalizer) {
@@ -42,6 +42,10 @@ export default function TryCatchStatement (context) {
 				return finalResult;
 			}
 		}
+	}
+
+	if (uncaughtError) {
+		throw uncaughtError;
 	}
 
 	return result;

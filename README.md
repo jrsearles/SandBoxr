@@ -4,7 +4,7 @@
 -----
 
 ## TODO for 1.0
-- ~~Finish implementation - getting close!~~ (Barring a couple try/catch scope issues)
+- ~~Finish implementation!~~
 - ~~Finalize API, including extension points~~
 - Strict mode (may end up in next version)
 - ~~Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)~~

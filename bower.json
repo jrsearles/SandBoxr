@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git://github.com/jrsearles/SandBoxr.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "ignore": [
     "/*",
     "!/dist/**/*",

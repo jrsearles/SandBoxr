@@ -11,7 +11,7 @@
     "url": "https://github.com/jrsearles/SandBoxr.git"
   },
   "author": "Joshua Searles",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "devDependencies": {
     "acorn": "^1.0.3",
     "babelify": "^6.1.3",

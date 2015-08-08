@@ -58,6 +58,8 @@ export default class DeclarativeEnvironment {
 			}
 
 			this.properties[name].setValue(value);
+		} else {
+			this.parent.putValue.apply(this.parent, arguments);
 		}
 	}
 
