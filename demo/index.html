@@ -38,9 +38,15 @@ result;
 
 		debugger;
 		var runner = new SandBoxr(ast, { parser: parser });
-		var value = runner.execute();
-
-		document.getElementById("result").innerHTML = JSON.stringify(value && value.getValue().value);
+		runner.execute().then(function (value) {
+			writeValue(value && value.unwrap());
+		}, function (err) {
+			writeValue(err.toString());
+		});
+	}
+	
+	function writeValue (obj) {
+		document.getElementById("result").innerHTML = JSON.stringify(obj);
 	}
 </script>
 </body>

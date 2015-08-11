@@ -1,12 +1,14 @@
-export default function WithStatement (context) {
-	var obj = context.create(context.node.object).execute().result.getValue();
+import {degenerate} from "../utils/async";
+
+export default degenerate(function* WithStatement (context) {
+	var obj = (yield context.create(context.node.object).execute()).result.getValue();
 	var scope = context.env.createObjectScope(obj);
 	var result;
 
 	scope.init(context.node.body);
 
 	try {
-		result = context.create(context.node.body).execute();
+		result = yield context.create(context.node.body).execute();
 	} catch (err) {
 		scope.exitScope();
 		throw err;
@@ -14,4 +16,4 @@ export default function WithStatement (context) {
 
 	scope.exitScope();
 	return result;
-}
+});

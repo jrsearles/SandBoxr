@@ -3,9 +3,8 @@ var expect = require("chai").expect;
 
 describe("Expressions", function () {
 	describe("Sequence", function () {
-		it("should assign to last value in sequence", function () {
-			var scope = runner.getScope("var a = (7, 5);");
-			expect(scope.getValue("a").value).to.equal(5);
+		it("should assign to last value in sequence", function (done) {
+			runner.confirmBlock("var a = (7, 5);a===5;", done);
 		});
 	});
 });

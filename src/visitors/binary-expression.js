@@ -1,11 +1,12 @@
 import * as operators from "../utils/operators";
+import {degenerate} from "../utils/async";
 
-export default function BinaryExpression (context) {
+export default degenerate(function* BinaryExpression (context) {
 	var undef = context.env.global.getProperty("undefined").getValue();
-	var left = context.create(context.node.left).execute().result;
+	var left = (yield context.create(context.node.left).execute()).result;
 	var leftValue = left.getValue() || undef;
 
-	var right = context.create(context.node.right).execute().result;
+	var right = (yield context.create(context.node.right).execute()).result;
 	var rightValue = right.getValue() || undef;
 
 	var newValue;
@@ -16,4 +17,4 @@ export default function BinaryExpression (context) {
 	}
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));
-}
+});

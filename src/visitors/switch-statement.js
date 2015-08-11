@@ -1,47 +1,49 @@
-function executeStatements (context, statements) {
+import {degenerate} from "../utils/async";
+
+let executeStatements = degenerate(function* executeStatements (context, statements) {
 	var result;
-	for (var i = 0, ln = statements.length; i < ln; i++) {
-		result = context.create(statements[i]).execute();
+	for (let statement of statements) {
+		result = yield context.create(statement).execute();
 		if (result && result.isCancelled()) {
 			return result;
 		}
 	}
-
+	
 	return result;
-}
+});
 
-export default function SwitchStatement (context) {
-	var testValue = context.create(context.node.discriminant).execute().result.getValue();
+export default degenerate(function* SwitchStatement (context) {
+	var testValue = (yield context.create(context.node.discriminant).execute()).result.getValue();
 	var passed = false;
-	var caseValue, value, defaultCase;
-
-	for (let i = 0, ln = context.node.cases.length; i < ln; i++) {
+	var value, defaultCase;
+	
+	for (let current of context.node.cases) {
 		if (!passed) {
-			if (context.node.cases[i].test) {
-				caseValue = context.create(context.node.cases[i].test).execute().result.getValue();
+			if (current.test) {
+				let caseValue = (yield context.create(current.test).execute()).result.getValue();
 				if (!caseValue.equals(testValue)) {
 					continue;
 				}
 			} else {
 				// default might not be the last case
-				defaultCase = context.node.cases[i];
+				defaultCase = current;
 				continue;
 			}
 		}
-
+		
 		passed = true;
-		value = executeStatements(context, context.node.cases[i].consequent);
+		value = yield executeStatements(context, current.consequent);
 		if (value && value.isCancelled()) {
 			value.cancel = false;
 			return value;
 		}
 	}
-
+	
 	if (!passed && defaultCase && defaultCase.consequent) {
-		value = executeStatements(context, defaultCase.consequent);
+		value = yield executeStatements(context, defaultCase.consequent);
 		value.cancel = false;
 		return value;
 	}
 
 	return value;
-}
+});

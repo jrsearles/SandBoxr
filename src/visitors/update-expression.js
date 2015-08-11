@@ -1,8 +1,9 @@
 import * as convert from "../utils/convert";
+import {degenerate} from "../utils/async";
 
-export default function UpdateExpression (context) {
+export default degenerate(function* UpdateExpression (context) {
 	var objectFactory = context.env.objectFactory;
-	var ref = context.create(context.node.argument).execute().result;
+	var ref = (yield context.create(context.node.argument).execute()).result;
 	var originalValue = convert.toNumber(context.env, ref.getValue());
 	var newValue = originalValue;
 
@@ -19,4 +20,4 @@ export default function UpdateExpression (context) {
 
 	ref.putValue(newValue);
 	return context.result(returnValue);
-}
+});

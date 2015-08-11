@@ -1,9 +1,11 @@
-export default function SequenceExpression (context) {
+import {degenerate} from "../utils/async";
+
+export default degenerate(function* SequenceExpression (context) {
 	var value;
-
-	context.node.expressions.forEach(expr => {
-		value = context.create(expr).execute().result.getValue();
-	});
-
+	
+	for (var expr of context.node.expressions) {
+		value = (yield context.create(expr).execute()).result.getValue();
+	}
+	
 	return context.result(value);
-}
+});

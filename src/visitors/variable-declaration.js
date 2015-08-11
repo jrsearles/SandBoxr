@@ -1,4 +1,9 @@
-export default function VariableDeclaration (context) {
-	context.node.declarations.forEach(decl => context.create(decl).execute());
+import {degenerate} from "../utils/async";
+
+export default degenerate(function* VariableDeclaration (context) {
+	for (let decl of context.node.declarations) {
+		yield context.create(decl).execute();
+	}
+	
 	return context.empty();
-}
+});

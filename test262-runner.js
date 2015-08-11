@@ -3,6 +3,7 @@ var util = require("util");
 var glob = require("glob");
 var parser = require("./test/ast-parser");
 var winston = require("winston");
+var Promise = require("core-js/es6/promise");
 var args = require("yargs")
 	.default("stopOnFail", false)
 	.alias("f", "stopOnFail")
@@ -35,13 +36,13 @@ var logger = new winston.Logger({
 	]
 });
 
-var tests;
+var testGlobs;
 if (chapter) {
 	chapter = String(chapter);
 	chapter = chapter.length === 1 ? "0" + chapter : chapter;
-	tests = [root + "suite/ch" + chapter + "/**/*.js"];
+	testGlobs = [root + "suite/ch" + chapter + "/**/*.js"];
 } else {
-	tests = [
+	testGlobs = [
 		root + "suite/ch06/**/*.js", 	// passed!
 		root + "suite/ch07/**/*.js",	// passed!
 		root + "suite/ch08/**/*.js",	// passed! *
@@ -95,64 +96,62 @@ var skippedCount = 0;
 var failedCount = 0;
 
 var files, file, contents, description;
+var execs = [];
 
-for (var i = 0; running && i < tests.length; i++) {
-	files = glob.sync(tests[i]);
+var tests = Array.prototype.concat.apply([], testGlobs.map(function (pattern) { return glob.sync(pattern); }));
 
-	for (var j = 0; running && j < files.length && running; j++) {
-		file = files[j];
-
-		if (exclusions.some(function (excl) { return excl.test(file); })) {
-			testSkipped(file, "Excluded");
-			continue;
-		}
-
-		contents = fs.readFileSync(file, "utf-8");
-
-		if (negativeRgx.test(contents)) {
-			testSkipped(file, "Syntax check");
-			continue;
-		}
-
-		if (!strictMode && strictRgx.test(contents)) {
-			testSkipped(file, "Strict mode");
-			continue;
-		}
-
-		description = descriptionRgx.exec(contents)[1];
-
-		try {
-			testStarting(file, description);
-
-			var ast = parser.parse(include + contents);
-			var runner = new SandBoxr(ast, { parser: parser.parse });
-
-			runner.execute();
-		} catch (err) {
-			testFailed(file, description, err);
-
-			if (stopOnFail) {
-				running = false;
-				break;
-			}
-
-			continue;
-		}
-
-		testPassed(file, description);
+function runOne () {
+	if (!tests.length) {
+		return testsCompleted();
 	}
+	
+	var file = tests.shift();
+	
+	if (exclusions.some(function (excl) { return excl.test(file); })) {
+		testSkipped(file, "Excluded");
+		return runOne();
+	}
+
+	contents = fs.readFileSync(file, "utf-8");
+
+	if (negativeRgx.test(contents)) {
+		testSkipped(file, "Syntax check");
+		return runOne();
+	}
+
+	if (!strictMode && strictRgx.test(contents)) {
+		testSkipped(file, "Strict mode");
+		return runOne();
+	}
+
+	description = descriptionRgx.exec(contents)[1];
+
+	testStarting(file, description);
+
+	var ast = parser.parse(include + contents);
+	var runner = new SandBoxr(ast, { parser: parser.parse });
+
+	runner.execute().then(function () {
+		testPassed(file, description);
+	}, function (err) {
+		testFailed(file, description, err);
+	}).then(runOne, runOne);
 }
 
-if (passedCount) {
-	logger.info("total passed: " + passedCount);
-}
+runOne();
 
-if (failedCount) {
-	logger.error("total failed: " + failedCount);
-}
-
-if (skippedCount) {
-	logger.info("total skipped: " + skippedCount);
+function testsCompleted () {
+	if (passedCount) {
+		logger.info("total passed: " + passedCount);
+	}
+	
+	if (failedCount) {
+		logger.error("total failed: " + failedCount);
+	}
+	
+	if (skippedCount) {
+		logger.info("total skipped: " + skippedCount);
+	}	
 }
 
 function testStarting (name, desc) {

@@ -1,5 +1,6 @@
 import Reference from "../env/reference";
 import operators from "../utils/operators";
+import {degenerate} from "../utils/async";
 
 var assignOperators = {
 	"+=": operators["+"],
@@ -15,11 +16,11 @@ var assignOperators = {
 	"&=": operators["&"]
 };
 
-export default function AssignmentExpression (context) {
+export default degenerate(function* AssignmentExpression (context) {
 	var assignment = context.node.operator === "=";
-	var right = context.create(context.node.right).execute().result;
+	var right = (yield context.create(context.node.right).execute()).result;
 
-	var left = context.create(context.node.left).execute().result;
+	var left = (yield context.create(context.node.left).execute()).result;
 	if (!(left instanceof Reference)) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
@@ -34,4 +35,4 @@ export default function AssignmentExpression (context) {
 
 	left.putValue(newValue);
 	return context.result(newValue);
-}
+});

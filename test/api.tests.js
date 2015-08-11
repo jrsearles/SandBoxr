@@ -4,7 +4,7 @@ var runner = require("./test-runner");
 var expect = require("chai").expect;
 
 describe("API", function () {
-	it("should allow a variable to be defined", function () {
+	it("should allow a variable to be defined", function (done) {
 		var env = SandBoxr.createEnvironment();
 		env.init();
 		
@@ -13,12 +13,14 @@ describe("API", function () {
 		
 		var ast = parser.parse("a === 99;");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
+		sandbox.execute(env)
+			.then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 	});
 	
-	it("should allow an object to be defined", function () { 
+	it("should allow an object to be defined", function (done) {
 		var env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -30,12 +32,14 @@ describe("API", function () {
 		
 		var ast = parser.parse("a.foo === 99;");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
+		sandbox.execute(env)
+			.then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 	});
 	
-	it("should allow function to be removed", function () {
+	it("should allow function to be removed", function (done) {
 		var env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -43,12 +47,14 @@ describe("API", function () {
 		
 		var ast = parser.parse("typeof String.prototype.trim === 'undefined';");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
+		sandbox.execute(env)
+			.then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 	});
 	
-	it("should allow functions to be added", function () {
+	it("should allow functions to be added", function (done) {
 		var env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -63,12 +69,14 @@ describe("API", function () {
 		
 		var ast = parser.parse("String.concat('foo','bar')==='foobar';");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
+		sandbox.execute(env)
+			.then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 	});
 	
-	it("should keep variables and values if environment is reused", function () {
+	it("should keep variables and values if environment is reused", function (done) {
 		var env = SandBoxr.createEnvironment();
 		env.init();
 		
@@ -77,16 +85,20 @@ describe("API", function () {
 		
 		var ast = parser.parse("a++;");
 		var sandbox = SandBoxr.create(ast);
-		sandbox.execute(env);
 		
-		ast = parser.parse("a===100;");
-		sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
+		sandbox.execute(env)
+			.then(function () {
+				ast = parser.parse("a===100;");
+				sandbox = SandBoxr.create(ast);
+				return sandbox.execute(env);
+			})
+			.then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 	});
 	
-	it("should lose variables and values if environment is reinitialized", function () {
+	it("should lose variables and values if environment is reinitialized", function (done) {
 		var env = SandBoxr.createEnvironment();
 		env.init();
 		
@@ -95,55 +107,63 @@ describe("API", function () {
 		
 		var ast = parser.parse("a++;");
 		var sandbox = SandBoxr.create(ast);
-		sandbox.execute(env);
-		
-		env.init();
-		ast = parser.parse("typeof a === 'undefined';");
-		sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
+		sandbox.execute(env)
+			.then(function () {
+				env.init();
+				ast = parser.parse("typeof a === 'undefined';");
+				sandbox = SandBoxr.create(ast);
+				return sandbox.execute(env);
+			})
+			.then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 	});
 	
-	it("should allow an object to be converted to a unwrapped object", function () {
+	it("should allow an object to be converted to a unwrapped object", function (done) {
 		var ast = parser.parse("({foo:true});");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute();
-		
-		expect(result.unwrap().foo).to.be.true;
+		sandbox.execute().then(function (result) {
+			expect(result.unwrap().foo).to.be.true;
+			done();
+		});
 	});
 	
-	it("should allow a primitive to be unwrapped", function () {
+	it("should allow a primitive to be unwrapped", function (done) {
 		var ast = parser.parse("(1);");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute();
-		
-		expect(result.unwrap()).to.equal(1);
+		sandbox.execute().then(function (result) {
+			expect(result.unwrap()).to.equal(1);
+			done();
+		});
 	});
 	
-	it("should allow an array to be unwrapped", function () {
+	it("should allow an array to be unwrapped", function (done) {
 		var ast = parser.parse("([1,2,3]);");
 		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute();
-		
-		expect(result.unwrap()[2]).to.equal(3);
+		sandbox.execute().then(function (result) {
+			expect(result.unwrap()[2]).to.equal(3);
+			done();
+		});
 	});
 	
 	describe("Exclusions", function () {
-		it("should be able to exclude api's", function () {
+		it("should be able to exclude api's", function (done) {
 			var ast = parser.parse("typeof JSON === 'undefined'");
 			var sandbox = SandBoxr.create(ast, { exclude: ["JSON"] });
-			var result = sandbox.execute();
-			
-			expect(result.value).to.be.true;
+			sandbox.execute().then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 		});
 		
-		it("should be able to exclude methods from prototype", function () {
+		it("should be able to exclude methods from prototype", function (done) {
 			var ast = parser.parse("typeof String.prototype.trim === 'undefined'");
 			var sandbox = SandBoxr.create(ast, { exclude: ["String.prototype.trim"] });
-			var result = sandbox.execute();
-			
-			expect(result.value).to.be.true;
+			sandbox.execute().then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 		});
 		
 		it("should not throw if api does not exist", function () {
@@ -153,7 +173,7 @@ describe("API", function () {
 	});
 	
 	describe("Operators", function () {
-		it("should be able to replace an operators", function () {
+		it("should be able to replace an operators", function (done) {
 			var env = SandBoxr.createEnvironment();
 			env.init({
 				comparers: {
@@ -174,14 +194,17 @@ describe("API", function () {
 			var ast = parser.parse("0 == '0'");
 			var sandbox = SandBoxr.create(ast);
 			
-			var result = sandbox.execute(env);
-			expect(result.value).to.be.false;
-			
-			ast = parser.parse("0 != '0'");
-			sandbox = SandBoxr.create(ast);
-			
-			result = sandbox.execute();
-			expect(result.value).to.be.true;
+			sandbox.execute(env).then(function (result) {
+				expect(result.value).to.be.false;
+				
+				ast = parser.parse("0 != '0'");
+				sandbox = SandBoxr.create(ast);
+				
+				return sandbox.execute();
+			}).then(function (result) {
+				expect(result.value).to.be.true;
+				done();
+			});
 		});
 	});
 });

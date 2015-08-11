@@ -10,7 +10,7 @@ var streamify = require("gulp-streamify");
 
 gulp.task("build", ["lint"], function () {
 	return browserify({ standalone: "SandBoxr" })
-		.transform(babelify)
+		.transform(babelify.configure({ optional: ["runtime"] }))
 		.require("./src/", { entry: true })
 		.bundle()
 		.pipe(source("sandboxr.js"))

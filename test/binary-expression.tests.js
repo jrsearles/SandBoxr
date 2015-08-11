@@ -1,16 +1,4 @@
 var runner = require("./test-runner");
-var expect = require("chai").expect;
-
-/*
-enum BinaryOperator {
-    "==" | "!=" | "===" | "!=="
-         | "<" | "<=" | ">" | ">="
-         | "<<" | ">>" | ">>>"
-         | "+" | "-" | "*" | "/" | "%"
-         | "|" | "^" | "&" | "in"
-         | "instanceof" | ".."
-}
-*/
 
 describe("Expressions", function () {
 	describe("Binary Expressions", function () {
@@ -40,58 +28,49 @@ describe("Expressions", function () {
 		];
 
 		operators.forEach(function (current) {
-			it("should apply " + current.op, function() {
+			it("should apply " + current.op, function(done) {
 				var code = "(" + left + " " + current.op + " " + right + ") === (" + current.expected + ");";
-	 			var result = runner.runBlock(code);
-
-	 			expect(result.value).to.be.true;
+	 			runner.confirmBlock(code, done);
 			});
 		});
 
-		it("should show that a property is in the object if it is", function () {
-			var result = runner.runBlock("var a = { foo: 1 };\n'foo' in a;");
-			expect(result.value).to.be.true;
+		it("should show that a property is in the object if it is", function (done) {
+			runner.confirmBlock("var a = { foo: 1 };\n'foo' in a;", done);
 		});
 
-		it("should show that a property is not in the object if it is not", function () {
-			var result = runner.runBlock("var a = { foo: 1 };\n!('bar' in a);");
-			expect(result.value).to.be.true;
+		it("should show that a property is not in the object if it is not", function (done) {
+			runner.confirmBlock("var a = { foo: 1 };\n!('bar' in a);", done);
 		});
 
 		describe("Quirks", function () {
-			it("should convert to string if either side is string", function () {
-				var result = runner.runBlock("'1' + 2 === '12';");
-				expect(result.value).to.be.true;
-
-				result = runner.runBlock("1 + '2' === '12'");
-				expect(result.value).to.be.true;
+			it("should convert to string if left is string", function (done) {
+				runner.confirmBlock("'1' + 2 === '12';", done);
 			});
 
-			it("should convert to number for subtraction operator", function () {
-				var result = runner.runBlock("'1' - 2 === -1;");
-				expect(result.value).to.be.true;
+			it("should convert to string if right is string", function (done) {
+				runner.confirmBlock("1 + '2' === '12'", done);
+			});
+
+			it("should convert to number for subtraction operator", function (done) {
+				runner.confirmBlock("'1' - 2 === -1;", done);
 			});
 		});
 
 		describe("instanceof", function () {
-			it("should return true for an object", function () {
-				var result = runner.runBlock("({} instanceof Object);");
-				expect(result.value).to.be.true;
+			it("should return true for an object", function (done) {
+				runner.confirmBlock("({} instanceof Object);", done);
 			});
 
-			it("should return false for not an object", function () {
-				var result = runner.runBlock("!({} instanceof String);");
-				expect(result.value).to.be.true;
+			it("should return false for not an object", function (done) {
+				runner.confirmBlock("!({} instanceof String);", done);
 			});
 
-			it("should respect inheritance", function () {
-				var result = runner.runBlock("function C(){}\nfunction D(){}\nD.prototype = new C();\nvar o = new D();(o instanceof C) && (o instanceof D);");
-				expect(result.value).to.be.true;
+			it("should respect inheritance", function (done) {
+				runner.confirmBlock("function C(){}\nfunction D(){}\nD.prototype = new C();\nvar o = new D();(o instanceof C) && (o instanceof D);", done);
 			});
 
-			it("should return false for primitive", function () {
-				var result = runner.runBlock("'foo' instanceof String;");
-				expect(result.value).to.be.false;
+			it("should return false for primitive", function (done) {
+				runner.confirmBlock("!('foo' instanceof String);", done);
 			});
 		});
 	});

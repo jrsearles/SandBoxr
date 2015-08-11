@@ -1,8 +1,9 @@
 import Reference from "../env/reference";
 import * as convert from "../utils/convert";
+import {degenerate} from "../utils/async";
 
-export default function UnaryExpression (context) {
-	var result = context.create(context.node.argument).execute().result;
+export default degenerate(function* UnaryExpression (context) {
+	var result = (yield context.create(context.node.argument).execute()).result;
 	var objectFactory = context.env.objectFactory;
 	var value, newValue;
 
@@ -61,4 +62,4 @@ export default function UnaryExpression (context) {
 	}
 
 	return context.result(newValue);
-}
+});

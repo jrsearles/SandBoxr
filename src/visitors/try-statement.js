@@ -1,27 +1,29 @@
-export default function TryStatement (context) {
-	var result, uncaughtError;
+import {degenerate} from "../utils/async";
 
+export default degenerate(function* TryStatement (context) {
+	var result, uncaughtError;
+	
 	try {
-		result = context.create(context.node.block).execute();
+		result = yield context.create(context.node.block).execute();
 	} catch (err) {
 		if (context.node.handler) {
 			let caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
-
+			
 			var scope = context.env.createScope();
 			// context.env.initScope(context.node.handler);
 			// scope.init(context.node.handler.body);
-
+			
 			let errVar = context.node.handler.param.name;
 			// let hasVariable = context.env.hasVariable(errVar);
-
+			
 			// if (!hasVariable) {
-				context.env.createVariable(errVar);
+			context.env.createVariable(errVar);
 			// }
-
+			
 			context.env.putValue(errVar, caughtError);
-
+			
 			try {
-				result = context.create(context.node.handler.body, context.node.handler).execute();
+				result = yield context.create(context.node.handler.body, context.node.handler).execute();
 			} catch (catchError) {
 				// scope.exitScope();
 				uncaughtError = catchError;
@@ -30,14 +32,14 @@ export default function TryStatement (context) {
 				// 	context.env.deleteVariable(errVar);
 				// }
 			}
-
+			
 			scope.exitScope();
 		} else {
 			uncaughtError = err;
 		}
 	} finally {
 		if (context.node.finalizer) {
-			let finalResult = context.create(context.node.finalizer).execute();
+			let finalResult = yield context.create(context.node.finalizer).execute();
 			if (finalResult && finalResult.shouldBreak(context)) {
 				return finalResult;
 			}
@@ -49,4 +51,4 @@ export default function TryStatement (context) {
 	}
 
 	return result;
-}
+});

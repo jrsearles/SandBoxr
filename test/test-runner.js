@@ -1,9 +1,26 @@
 var parser = require("./ast-parser");
 var SandBoxer = require("../dist/sandboxr");
+var expect = require("chai").expect;
 
 module.exports = {
-	runBlock: function (code) {
+	runBlock: function (code, done) {
 		return this.getRunner(code).execute();
+	},
+	
+	confirmBlock: function (code, done) {
+		this.runBlock(code)
+			.then(function (result) {
+				expect(result.unwrap()).to.be.true;
+				done();
+			});
+	},
+	
+	confirmError: function (code, errType, done) {
+		this.runBlock(code)
+			.then(null, function (err) {
+				expect(err).to.be.instanceof(errType);
+				done();
+			});
 	},
 
 	getScope: function (code) {

@@ -30,6 +30,7 @@ import UpdateExpression from "./update-expression";
 import VariableDeclaration from "./variable-declaration";
 import VariableDeclarator from "./variable-declarator";
 import WithStatement from "./with-statement";
+import {degenerate} from "../utils/async";
 
 var visitors = {
 	ArrayExpression,
@@ -73,11 +74,11 @@ var visitors = {
 };
 
 export default {
-	visit: function (context) {
+	visit: degenerate(function* (context) {
 		if (!(context.node.type in visitors)) {
 			throw new TypeError("No handler defined for: " + context.node.type);
 		}
 
-		return visitors[context.node.type](context);
-	}
+		return yield visitors[context.node.type](context);
+	})
 };

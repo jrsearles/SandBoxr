@@ -67,84 +67,76 @@ describe("String", function () {
 
 		{ fn: "valueOf", args: [] }
 	].forEach(function (testCase) {
-		it("should return expected results for '" + testCase.fn + "' with args: " + runner.wrapArgs(testCase.args), function () {
+		it("should return expected results for '" + testCase.fn + "' with args: " + runner.wrapArgs(testCase.args), function (done) {
 			var source = testCase.source || "Foo";
 			var expected = source[testCase.fn].apply(source, testCase.args);
 			var code = "'" + source + "'." + testCase.fn + "(" + runner.wrapArgs(testCase.args) + ");";
-			var result = runner.runBlock(code);
-
-			if (Array.isArray(expected)) {
-				expect(result.getProperty("length").getValue().value).to.equal(expected.length);
-				expected.forEach(function (value, index) {
-					expect(result.getProperty(index).getValue().value).to.equal(value);
-				});
-			} else {
-				expect(result.getValue().value).to.equal(expected);
-			}
+			
+			runner.runBlock(code).then(function (result) {
+	
+				if (Array.isArray(expected)) {
+					expect(result.getProperty("length").getValue().value).to.equal(expected.length);
+					expected.forEach(function (value, index) {
+						expect(result.getProperty(index).getValue().value).to.equal(value);
+					});
+				} else {
+					expect(result.getValue().value).to.equal(expected);
+				}
+				
+				done();
+			});
 		});
 	});
 
 	describe("String.fromCharCode", function () {
-		it("should return expected value.", function () {
-			var result = runner.runBlock("String.fromCharCode(65, 66, 67)=='ABC';");
-			expect(result.value).to.be.true;
+		it("should return expected value.", function (done) {
+			runner.confirmBlock("String.fromCharCode(65, 66, 67)=='ABC';", done);
 		});
 	});
 
 	describe("String.prototype.length", function () {
-		it("should return the length of the string.", function () {
-			var result = runner.runBlock("'foo'.length==3;");
-			expect(result.value).to.be.true;
+		it("should return the length of the string.", function (done) {
+			runner.confirmBlock("'foo'.length==3;", done);
 		});
 
-		it("should ignore when length is set", function () {
-			var result = runner.runBlock("var a = 'foo';a.length = 2;a.length==3;");
-			expect(result.value).to.be.true;
+		it("should ignore when length is set", function (done) {
+			runner.confirmBlock("var a = 'foo';a.length = 2;a.length==3;", done);
 		});
 	});
 
 	describe("When using bracket notation", function () {
-		it("should return character at that position", function () {
-			var result = runner.runBlock("'foo'[1] == 'o';");
-			expect(result.value).to.be.true;
+		it("should return character at that position", function (done) {
+			runner.confirmBlock("'foo'[1] == 'o';", done);
 		});
 
-		it("should return undefined if position is not in array", function () {
-			var result = runner.runBlock("'foo'[99] === undefined;");
-			expect(result.value).to.be.true;
+		it("should return undefined if position is not in array", function (done) {
+			runner.confirmBlock("'foo'[99] === undefined;", done);
 		});
 
-		it("should not allow character to be replaced by position", function () {
-			var result = runner.runBlock("var a = 'foo'; a[1] = 'f';a === 'foo';");
-			expect(result.value).to.be.true;
+		it("should not allow character to be replaced by position", function (done) {
+			runner.confirmBlock("var a = 'foo'; a[1] = 'f';a === 'foo';", done);
 		});
 	});
 
 	describe("When creating a string", function () {
-		it("should use overridden `toString` if set.", function () {
-			var result = runner.runBlock("var a = {toString:function() { return 'foo'; } };String(a) == 'foo';");
-			expect(result.value).to.be.true;
+		it("should use overridden `toString` if set.", function (done) {
+			runner.confirmBlock("var a = {toString:function() { return 'foo'; } };String(a) == 'foo';", done);
 		});
 
-		it("should throw a type error if overridden `toString` returns an object", function () {
-			expect(function () {
-				runner.runBlock("var a = {toString:function() { return {}; } };String(a);");
-			}).to.throw(TypeError);
+		it("should throw a type error if overridden `toString` returns an object", function (done) {
+			runner.confirmError("var a = {toString:function() { return {}; } };String(a);", TypeError, done);
 		});
 
-		it("should show typeof `object` when creating use `new`", function () {
-			var result = runner.runBlock("typeof new String('foo') == 'object';");
-			expect(result.value).to.be.true;
+		it("should show typeof `object` when creating use `new`", function (done) {
+			runner.confirmBlock("typeof new String('foo') == 'object';", done);
 		});
 
-		it("should not strictly equal a primitive string", function () {
-			var result = runner.runBlock("new String('foo') === 'foo';");
-			expect(result.value).to.be.false;
+		it("should not strictly equal a primitive string", function (done) {
+			runner.confirmBlock("new String('foo') !== 'foo';", done);
 		});
 
-		it("should implicitly equal a primitive string", function () {
-			var result = runner.runBlock("new String('foo') == 'foo';");
-			expect(result.value).to.be.true;
+		it("should implicitly equal a primitive string", function (done) {
+			runner.confirmBlock("new String('foo') == 'foo';", done);
 		});
 	});
 });

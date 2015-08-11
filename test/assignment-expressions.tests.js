@@ -1,12 +1,5 @@
 var runner = require("./test-runner");
 var expect = require("chai").expect;
-/*
-enum AssignmentOperator {
-    "=" | "+=" | "-=" | "*=" | "/=" | "%="
-        | "<<=" | ">>=" | ">>>="
-        | "|=" | "^=" | "&="
-}
-*/
 
 describe("Expressions", function () {
 	describe("Assignment Expressions", function () {
@@ -27,30 +20,25 @@ describe("Expressions", function () {
 			{ op:	"^=", name: "Bitwise XOR assignment", expected: left ^ right },
 			{ op:	"&=", name: "Bitwise OR assignment", expected: left & right }
 		].forEach(function (current) {
-			it("should apply " + current.op, function () {
+			it("should apply " + current.op, function (done) {
 				var code = "var a = " + left + "; a " + current.op + " " + right + ";a == " + current.expected + ";";
-				var result = runner.runBlock(code);
-				expect(result.value).to.be.true;
+				runner.confirmBlock(code, done);
 			});
 		});
 	});
 
-	it("should increment value", function () {
+	it("should increment value", function (done) {
 		var code = "var a = 0; a++;a==1;";
-		var result = runner.runBlock(code);
-		expect(result.value).to.be.true;
+		runner.confirmBlock(code, done);
 	});
 
-	it("should decrement value", function () {
+	it("should decrement value", function (done) {
 		var code = "var a = 0; a--;a==-1;";
-		var result = runner.runBlock(code);
-		expect(result.value).to.be.true;
+		runner.confirmBlock(code, done);
 	});
 
-
-	it("should decrement value after returning", function () {
+	it("should decrement value after returning", function (done) {
 		var code = "var a = 0; var b = a--;b==0;";
-		var result = runner.runBlock(code);
-		expect(result.value).to.be.true;
+		runner.confirmBlock(code, done);
 	});
 });

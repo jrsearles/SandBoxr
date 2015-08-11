@@ -1,4 +1,6 @@
-export default function ArrayExpression (context) {
+import {degenerate} from "../utils/async";
+
+export default degenerate(function* ArrayExpression (context) {
 	var objectFactory = context.env.objectFactory;
 	var arr = objectFactory.create("Array");
 
@@ -8,7 +10,7 @@ export default function ArrayExpression (context) {
 
 		while (i < ln) {
 			if (context.node.elements[i]) {
-				var item = context.create(context.node.elements[i]).execute().result.getValue();
+				var item = (yield context.create(context.node.elements[i]).execute()).result.getValue();
 				arr.defineOwnProperty(i, { value: item, configurable: true, enumerable: true, writable: true }, true, context.env);
 			}
 
@@ -19,4 +21,4 @@ export default function ArrayExpression (context) {
 	}
 
 	return context.result(arr);
-}
+});

@@ -1,4 +1,6 @@
-export function executeFunction (env, fn, params, args, thisArg, callee, isNew) {
+import {degenerate} from "./async";
+
+export let executeFunction = degenerate(function* (env, fn, params, args, thisArg, callee, isNew) {
 	var scope = fn.createScope(env, thisArg, false);
 	var returnResult;
 
@@ -10,7 +12,7 @@ export function executeFunction (env, fn, params, args, thisArg, callee, isNew) 
 
 	try {
 		if (fn.native) {
-			returnResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
+			returnResult = yield fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 		} else {
 			var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
 			if (executionResult && executionResult.exit && executionResult.result) {
@@ -26,7 +28,7 @@ export function executeFunction (env, fn, params, args, thisArg, callee, isNew) 
 
 	scope.exitScope();
 	return returnResult || env.global.getProperty("undefined").getValue();
-}
+});
 
 export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
 	var scope = fn.createScope(env, thisArg, false);
