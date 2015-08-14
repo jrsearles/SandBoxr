@@ -1,6 +1,6 @@
 {
   "name": "sandboxr",
-  "version": "0.9.5",
+  "version": "0.10.0",
   "description": "SandBoxr runs JavaScript in a completely sandboxed environment.",
   "main": "dist/sandboxr.js",
   "scripts": {
