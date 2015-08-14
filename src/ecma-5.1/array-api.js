@@ -112,7 +112,7 @@ export default function arrayApi (env) {
 		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
 	}, 1, "Array.isArray"));
 
-	proto.define("push", objectFactory.createBuiltInFunction(function (arg) {
+	proto.define("push", objectFactory.createBuiltInFunction(function () {
 		var start = getLength(env, this.node);
 		var i = 0;
 		var length = arguments.length;

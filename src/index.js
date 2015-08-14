@@ -1,11 +1,12 @@
+import "./polyfills";
 import Environment from "./env";
 import ExecutionContext from "./execution-context";
 import {promisify} from "./utils/async";
 
 export default class SandBoxr {
-	constructor (ast, config) {
+	constructor (ast, config = {}) {
 		this.ast = ast;
-		this.config = config || {};
+		this.config = config;
 	}
 	
 	execute (env) {
@@ -26,11 +27,11 @@ export default class SandBoxr {
 		// convert to promise
 		return promisify(response).then(r => r && r.result);
 	}
-
+	
 	static createEnvironment () {
 		return new Environment();
 	}
-
+	
 	static create (ast, config) {
 		return new SandBoxr(ast, config);
 	}

@@ -1,4 +1,3 @@
-import "core-js/fn/string/repeat";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";
@@ -48,12 +47,11 @@ function serializeObject (env, stack, obj, replacer, gap, depth) {
 }
 
 function serializeArray (env, stack, arr, replacer, gap, depth) {
-	var length = arr.getProperty("length").getValue().value;
+	var length = arr.getValue("length").unwrap();
 	var values = [];
-	var value;
 
-	for (var i = 0; i < length; i++) {
-		value = undefined;
+	for (let i = 0; i < length; i++) {
+		let value = undefined;
 		if (arr.hasProperty(i)) {
 			value = replacer(arr, String(i), arr.getProperty(i).getValue());
 		}
@@ -148,7 +146,7 @@ function createReplacer (env, replacer) {
 function getSpacer (env, spacer) {
 	if (spacer) {
 		if (spacer.className === "Number") {
-			var count = Math.floor(convert.toNumber(env, spacer));
+			let count = Math.floor(convert.toNumber(env, spacer));
 			count = Math.max(Math.min(10, count), 0);
 
 			if (count > 0) {
@@ -159,7 +157,7 @@ function getSpacer (env, spacer) {
 		}
 
 		if (spacer.className === "String") {
-			var gap = convert.toString(env, spacer);
+			let gap = convert.toString(env, spacer);
 			return gap.substr(0, 10);
 		}
 	}

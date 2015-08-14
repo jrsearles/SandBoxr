@@ -3,7 +3,6 @@ var util = require("util");
 var glob = require("glob");
 var parser = require("./test/ast-parser");
 var winston = require("winston");
-var Promise = require("core-js/es6/promise");
 var args = require("yargs")
 	.default("stopOnFail", false)
 	.alias("f", "stopOnFail")

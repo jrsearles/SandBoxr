@@ -1,4 +1,3 @@
-import "core-js/fn/object/assign";
 import ExecutionContext from "../execution-context";
 import DeclarativeEnvironment from "./declarative-environment";
 import ObjectEnvironment from "./object-environment";

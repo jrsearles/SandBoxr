@@ -18,6 +18,7 @@ result;
 </textarea>
 <button id="acornExec">Exec (Acorn)</button>
 <button id="esprimaExec">Exec (Esprima)</button>
+<button id="stepExec">Step</button>
 <fieldset><legend>Result</legend><pre id="result"></pre></fieldset>
 <fieldset><legend>Tree</legend><pre id="tree"></pre></fieldset>
 
@@ -30,6 +31,22 @@ result;
 		executeAst(esprima.parse);
 	};
 	
+	document.getElementById("stepExec").onclick = function step () {
+		var code = document.getElementById("codeArea").value;
+		var ast = acorn.parse(code);
+
+		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
+
+		debugger;
+		var runner = new SandBoxr(ast, { parser: acorn.parse });
+		var exec = runner.step();
+		var result;
+		
+		while (result = exec.next()) {
+			
+		}
+	}
+		
 	function executeAst (parser) {
 		var code = document.getElementById("codeArea").value;
 		var ast = parser(code);
@@ -44,7 +61,7 @@ result;
 			writeValue(err.toString());
 		});
 	}
-	
+
 	function writeValue (obj) {
 		document.getElementById("result").innerHTML = JSON.stringify(obj);
 	}

@@ -1,4 +1,4 @@
-import "core-js/fn/math/sign";
+import "../polyfills";
 import * as func from "../utils/func";
 
 var sign = Math.sign;
