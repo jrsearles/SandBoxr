@@ -2,6 +2,18 @@ var runner = require("./test-runner");
 var expect = require("chai").expect;
 
 describe("Scope", function () {
+	describe("strict mode", function () {
+		it("should detect 'use strict' literal and set scope to strict mode", function () {
+			var scope = runner.getScope("'use strict';");
+			expect(scope.current.strict).to.be.true;
+		});
+		
+		it("should inherit strict mode in `eval`", function (done) {
+			var code = "(function() { 'use strict';\neval('var public = 1'); })();";
+			runner.confirmError(code, SyntaxError, done);
+		});
+	});
+	
 	describe("Global variables", function () {
 		it("undefined exists", function (done) {
 			runner.confirmBlock("typeof undefined==='undefined';", done);

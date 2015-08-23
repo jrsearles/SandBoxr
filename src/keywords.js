@@ -1,4 +1,4 @@
-export default {
+const keywords = 	{
 	"es5": [
 		"do",
 		"if",
@@ -37,7 +37,7 @@ export default {
 		"function",
 		"instanceof"],
 
-	"es5-strict": [
+	"es5strict": [
 		"implements",
 		"let",
 		"private",
@@ -47,8 +47,14 @@ export default {
 		"protected",
 		"static",
 		"yield"],
+};
 
-	isReserved: function (name, scope) {
-		return this.es5.indexOf(name) >= 0;
+export default {
+	isReserved (name) {
+		return keywords.es5.indexOf(name) >= 0;
+	},
+	
+	isStrictReserved (name) {
+		return keywords.es5strict.indexOf(name) >= 0;	
 	}
-}
+};

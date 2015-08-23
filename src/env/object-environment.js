@@ -3,12 +3,13 @@ import PropertyReference from "./property-reference";
 export default class ObjectEnvironment {
 	constructor (parent, obj, env) {
 		this.parent = parent;
+		this.strict = parent && parent.strict;
 		this.object = this.thisNode = obj;
 		this.env = env;
 	}
 
-	getReference (name, strict) {
-		return new PropertyReference(name, this.object, strict, this.env);
+	getReference (name) {
+		return new PropertyReference(name, this.object, this.env);
 	}
 
 	hasVariable (name) {

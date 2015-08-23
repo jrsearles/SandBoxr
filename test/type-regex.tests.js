@@ -1,13 +1,13 @@
 var runner = require("./test-runner");
 var expect = require("chai").expect;
 
-describe("Regex", function () {
+describe("Type: RegExp", function () {
 	it("should evaluate as typeof object", function (done) {
 		runner.confirmBlock("typeof /a/ == 'object';", done);
 	});
 
-	describe("test", function () {
-		it("should return true when the string macthes", function (done) {
+	describe("RegExp.prototype.test", function () {
+		it("should return true when the string matches", function (done) {
 			runner.confirmBlock("/a/.test('abc');", done);
 		});
 
@@ -16,7 +16,7 @@ describe("Regex", function () {
 		});
 	});
 
-	describe("exec", function () {
+	describe("RegExp.prototype.exec", function () {
 		it("should return an array if matches", function (done) {
 			runner.confirmBlock("Array.isArray(/a/.exec('abc'));", done);
 		});

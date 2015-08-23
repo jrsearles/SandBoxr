@@ -62,7 +62,7 @@ export default class FunctionType extends ObjectType {
 	
 		var scope = env.createScope.apply(env, args);
 		if (!this.native) {
-			scope.init(this.node.body);
+			scope.init(this.node.body.body);
 		}
 	
 		return {

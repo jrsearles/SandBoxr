@@ -12,6 +12,8 @@ module.exports = {
 			.then(function (result) {
 				expect(result.unwrap()).to.be.true;
 				done();
+			}, function (err){
+				throw err;
 			});
 	},
 	
@@ -31,7 +33,7 @@ module.exports = {
 
 	getRunner: function (code) {
 		var ast = parser.parse(code);
-		return new SandBoxer(ast);
+		return SandBoxer.create(ast);
 	},
 
 	wrapArgs: function (args) {

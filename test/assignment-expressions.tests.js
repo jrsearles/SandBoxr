@@ -27,6 +27,11 @@ describe("Expressions", function () {
 		});
 	});
 
+
+	it("should error if the left side is null", function (done) {
+		runner.confirmError("var x = (y *= 1);", ReferenceError, done);
+	});
+	
 	it("should increment value", function (done) {
 		var code = "var a = 0; a++;a==1;";
 		runner.confirmBlock(code, done);

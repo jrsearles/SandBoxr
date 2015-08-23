@@ -1,7 +1,7 @@
 var runner = require("./test-runner");
 var expect = require("chai").expect;
 
-describe("String", function () {
+describe("Type: String", function () {
 	[
 		{ fn: "charAt", args: [1] },
 		{ fn: "charAt", args: [99] },
@@ -67,7 +67,7 @@ describe("String", function () {
 
 		{ fn: "valueOf", args: [] }
 	].forEach(function (testCase) {
-		it("should return expected results for '" + testCase.fn + "' with args: " + runner.wrapArgs(testCase.args), function (done) {
+		it("String.prototype." + testCase.fn + ": should return expected results with args: " + runner.wrapArgs(testCase.args), function (done) {
 			var source = testCase.source || "Foo";
 			var expected = source[testCase.fn].apply(source, testCase.args);
 			var code = "'" + source + "'." + testCase.fn + "(" + runner.wrapArgs(testCase.args) + ");";
@@ -89,7 +89,7 @@ describe("String", function () {
 	});
 
 	describe("String.fromCharCode", function () {
-		it("should return expected value.", function (done) {
+		it("should return expected value", function (done) {
 			runner.confirmBlock("String.fromCharCode(65, 66, 67)=='ABC';", done);
 		});
 	});
@@ -118,7 +118,7 @@ describe("String", function () {
 		});
 	});
 
-	describe("When creating a string", function () {
+	describe("When converting", function () {
 		it("should use overridden `toString` if set.", function (done) {
 			runner.confirmBlock("var a = {toString:function() { return 'foo'; } };String(a) == 'foo';", done);
 		});
@@ -126,7 +126,9 @@ describe("String", function () {
 		it("should throw a type error if overridden `toString` returns an object", function (done) {
 			runner.confirmError("var a = {toString:function() { return {}; } };String(a);", TypeError, done);
 		});
-
+	});
+	
+	describe("as object", function () {
 		it("should show typeof `object` when creating use `new`", function (done) {
 			runner.confirmBlock("typeof new String('foo') == 'object';", done);
 		});

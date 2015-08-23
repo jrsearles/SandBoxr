@@ -12,6 +12,6 @@ export default degenerate(function* MemberExpression (context) {
 		name = context.node.property.name;
 	}
 
-	value = new PropertyReference(name, obj, false, context.env);
+	value = new PropertyReference(name, obj, context.env);
 	return context.result(value);
 });

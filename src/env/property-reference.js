@@ -2,8 +2,8 @@ import Reference from "./reference";
 import PrimitiveType from "../types/primitive-type";
 
 export default class PropertyReference extends Reference {
-	constructor (name, object, strict, env) {
-		super(name, object, strict, env);
+	constructor (name, object, env) {
+		super(name, object, env);
 		this.isPropertyReference = true;
 	}
 	

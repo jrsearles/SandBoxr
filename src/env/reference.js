@@ -1,21 +1,24 @@
 export default class Reference {
-	constructor (name, base, strict, env) {
+	constructor (name, base, env) {
 		this.name = name;
 		this.base = base;
-		this.strict = strict;
 		this.env = env;
+		this.strict = env.isStrict();
 	}
 	
 	putValue (value) {
-		if (this.base === undefined && this.strict) {
+		if (this.base) {
+			return this.base.putValue(this.name, value, this.strict);
+		}
+		
+		// todo: always create variable?
+		this.env.createVariable(this.name, true);
+		
+		if (this.strict) {
 			throw new ReferenceError(this.name + " is not defined");
 		}
-
-		if (this.base) {
-			this.base.putValue(this.name, value, this.strict);
-		} else {
-			this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
-		}
+		
+		return this.env.putValue(this.name, value);
 	}
 	
 	getValue () {

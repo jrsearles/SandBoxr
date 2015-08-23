@@ -27,7 +27,7 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 	}
 
 	scope.exitScope();
-	return returnResult || env.global.getProperty("undefined").getValue();
+	return returnResult || env.global.getValue("undefined");
 });
 
 export function	getFunctionResult (env, fn, params, args, thisArg, callee) {

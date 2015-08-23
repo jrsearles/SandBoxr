@@ -7,9 +7,9 @@ import api from "../ecma-5.1";
 import comparers from "../utils/comparers";
 import {visit as hoister} from "./hoister";
 
-function isStrictMode (node) {
+function blockIsStrict (node) {
 	if (Array.isArray(node)) {
-		return isStrictMode(node[0]);
+		return blockIsStrict(node[0]);
 	}
 
 	return node
@@ -32,17 +32,17 @@ export default class Environment {
 		return this.ops[operator](this, left, right);
 	}
 
-	getReference (name, strict) {
+	getReference (name) {
 		var scope = this.current;
 		while (scope) {
 			if (scope.hasVariable(name)) {
-				return scope.getReference(name, strict);
+				return scope.getReference(name);
 			}
 
 			scope = scope.parent;
 		}
 
-		return new Reference(name, undefined, strict, this);
+		return new Reference(name, undefined, this);
 	}
 
 	getValue (name) {
@@ -69,8 +69,16 @@ export default class Environment {
 		if (keywords.isReserved(name)) {
 			throw new SyntaxError(`Illegal use of reserved keyword: ${name}`);
 		}
+		
+		if (this.isStrict() && keywords.isStrictReserved(name)) {
+			throw new SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
+		}
 
 		return this.current.createVariable(name, !immutable);
+	}
+	
+	isStrict () {
+		return this.current && this.current.strict;
 	}
 
 	getThisBinding () {
@@ -92,8 +100,8 @@ export default class Environment {
 	}
 
 	initScope (node) {
-		let strict = isStrictMode(node);
-		let undef = this.global.getProperty("undefined").getValue();
+		let undef = this.global.getValue("undefined");
+		this.current.strict = this.current.strict || blockIsStrict(node);
 
 		hoister(node, decl => {
 			let name = decl.name || decl.id.name;
@@ -104,10 +112,11 @@ export default class Environment {
 				func.bindScope(this.current);
 
 				this.createVariable(name, true);
-				this.putValue(name, func, strict);
+				this.putValue(name, func);
 			} else {
 				if (this.hasVariable(name)) {
-					this.putValue(name, undef, strict);
+					// shadow variable
+					this.putValue(name, undef);
 				} else {
 					this.createVariable(name, true);
 				}
@@ -121,9 +130,10 @@ export default class Environment {
 		var env = this;
 		var priorScope = this.current || this.globalScope;
 		this.current = scope;
-
+		this.current.strict = priorScope.strict;
+		
 		return {
-			init: function (node) {
+			init (node) {
 				if (!node) {
 					return;
 				}
@@ -131,7 +141,7 @@ export default class Environment {
 				env.initScope(node);
 			},
 
-			exitScope: function () {
+			exitScope () {
 				env.setScope(priorScope);
 			}
 		};

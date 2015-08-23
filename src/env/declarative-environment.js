@@ -5,12 +5,13 @@ export default class DeclarativeEnvironment {
 	constructor (parent, thisArg, env) {
 		this.properties = Object.create(null);
 		this.parent = parent;
+		this.strict = parent.strict;
 		this.thisNode = thisArg;
 		this.env = env;
 	}
 
-	getReference (name, strict) {
-		return new Reference(name, this, strict, this.env);
+	getReference (name) {
+		return new Reference(name, this, this.env);
 	}
 
 	hasVariable (name) {

@@ -10,7 +10,7 @@ export default degenerate(function* VariableDeclarator (context) {
 
 	// variables have already been hoisted so we just need to initialize them if defined
 	if (value) {
-		context.env.putValue(name, value.getValue(), false, context);
+		context.env.putValue(name, value.getValue(), context.env.isStrict(), context);
 	}
 
 	return context.result(context.env.getReference(name));
