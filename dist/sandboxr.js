@@ -3442,7 +3442,7 @@ var convert = _interopRequireWildcard(_utilsConvert);
 
 function defineThis(env, fn, thisArg) {
 	if (fn.builtIn) {
-		return thisArg || env.global.getProperty("undefined").getValue();
+		return thisArg || env.global.getValue("undefined");
 	}
 
 	if (contracts.isNullOrUndefined(thisArg)) {
@@ -3456,7 +3456,7 @@ var frozen = { configurable: false, enumerable: false, writable: false };
 
 function functionApi(env, options) {
 	var globalObject = env.global;
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 	var objectFactory = env.objectFactory;
 	var funcClass;
 
@@ -5243,7 +5243,16 @@ var Environment = (function () {
 	}, {
 		key: "getThisBinding",
 		value: function getThisBinding() {
-			return this.current.getThisBinding() || this.global;
+			var thisArg = this.current.getThisBinding();
+			if (thisArg) {
+				return thisArg;
+			}
+
+			if (this.isStrict()) {
+				return this.global.getValue("undefined");
+			}
+
+			return this.global;
 		}
 	}, {
 		key: "createExecutionContext",
@@ -7782,7 +7791,7 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 			case 18:
 
 				scope.exitScope();
-				return context$1$0.abrupt("return", returnResult || env.global.getProperty("undefined").getValue());
+				return context$1$0.abrupt("return", returnResult || env.global.getValue("undefined"));
 
 			case 20:
 			case "end":
@@ -8036,22 +8045,8 @@ var _utilsOperators2 = _interopRequireDefault(_utilsOperators);
 
 var _utilsAsync = require("../utils/async");
 
-var assignOperators = {
-	"+=": _utilsOperators2["default"]["+"],
-	"-=": _utilsOperators2["default"]["-"],
-	"*=": _utilsOperators2["default"]["*"],
-	"/=": _utilsOperators2["default"]["/"],
-	"%=": _utilsOperators2["default"]["%"],
-	"<<=": _utilsOperators2["default"]["<<"],
-	">>=": _utilsOperators2["default"][">>"],
-	">>>=": _utilsOperators2["default"][">>>"],
-	"|=": _utilsOperators2["default"]["|"],
-	"^=": _utilsOperators2["default"]["^"],
-	"&=": _utilsOperators2["default"]["&"]
-};
-
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function AssignmentExpression(context) {
-	var assignment, right, left, newValue, rawValue;
+	var assignment, right, left, newValue, op, rawValue;
 	return _regeneratorRuntime.wrap(function AssignmentExpression$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
@@ -8075,10 +8070,13 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				throw new ReferenceError("Invalid left-hand side in assignment");
 
 			case 9:
+				newValue = undefined;
+
 				if (assignment) {
 					newValue = right.getValue();
 				} else {
-					rawValue = assignOperators[context.node.operator](context.env, left.getValue(), right.getValue());
+					op = context.node.operator.slice(0, -1);
+					rawValue = _utilsOperators2["default"][op](context.env, left.getValue(), right.getValue());
 
 					newValue = context.env.objectFactory.createPrimitive(rawValue);
 				}
@@ -8086,13 +8084,15 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				left.putValue(newValue);
 				return context$1$0.abrupt("return", context.result(newValue));
 
-			case 12:
+			case 13:
 			case "end":
 				return context$1$0.stop();
 		}
 	}, AssignmentExpression, this);
 }));
 module.exports = exports["default"];
+
+// remove equals
 },{"../env/reference":172,"../utils/async":189,"../utils/operators":194,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],197:[function(require,module,exports){
 "use strict";
 
@@ -8262,9 +8262,9 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _envReference = require("../env/reference");
+var _envPropertyReference = require("../env/property-reference");
 
-var _envReference2 = _interopRequireDefault(_envReference);
+var _envPropertyReference2 = _interopRequireDefault(_envPropertyReference);
 
 var _utilsConvert = require("../utils/convert");
 
@@ -8283,7 +8283,7 @@ function assignThis(env, fnMember, fn, isNew, native) {
 		return native ? null : env.objectFactory.createObject(fn);
 	}
 
-	if (fnMember instanceof _envReference2["default"] && fnMember.isPropertyReference) {
+	if (fnMember instanceof _envPropertyReference2["default"] && fnMember.base !== env.global) {
 		return convert.toObject(env, fnMember.base);
 	}
 
@@ -8395,7 +8395,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, CallExpression, this, [[10, 24, 28, 36], [29,, 31, 35]]);
 }));
 module.exports = exports["default"];
-},{"../env/reference":172,"../utils/async":189,"../utils/convert":192,"../utils/func":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],200:[function(require,module,exports){
+},{"../env/property-reference":171,"../utils/async":189,"../utils/convert":192,"../utils/func":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],200:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

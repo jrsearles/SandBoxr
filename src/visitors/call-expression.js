@@ -1,4 +1,4 @@
-import Reference from "../env/reference";
+import PropertyReference from "../env/property-reference";
 import * as convert from "../utils/convert";
 import * as func from "../utils/func";
 import {degenerate} from "../utils/async";
@@ -10,7 +10,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 		return native ? null : env.objectFactory.createObject(fn);
 	}
 	
-	if (fnMember instanceof Reference && fnMember.isPropertyReference) {
+	if (fnMember instanceof PropertyReference && fnMember.base !== env.global) {
 		return convert.toObject(env, fnMember.base);
 	}
 	

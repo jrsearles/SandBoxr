@@ -1,5 +1,7 @@
-var objectRgx = /\[object (\w+)\]/;
-var integerRgx = /^-?\d+$/;
+import keywords from "../keywords";
+
+const objectRgx = /\[object (\w+)\]/;
+const integerRgx = /^-?\d+$/;
 
 export function assertIsObject (obj, methodName, message) {
 	if (!isObject(obj)) {
@@ -46,6 +48,16 @@ export function	assertIsValidParameterName (name) {
 export function	assertIsNotGeneric (obj, expectedClass, methodName) {
 	if (!obj || obj.className !== expectedClass) {
 		throw new TypeError(`${methodName} is not generic`)
+	}
+}
+
+export function assertIsValidIdentifier (name, strict) {
+	if (keywords.isReserved(name)) {
+		throw new SyntaxError(`Illegal use of reserved keyword: ${name}`);
+	}
+
+	if (strict && keywords.isStrictReserved(name)) {
+		throw new SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
 	}
 }
 

@@ -2,9 +2,9 @@ import ExecutionContext from "../execution-context";
 import DeclarativeEnvironment from "./declarative-environment";
 import ObjectEnvironment from "./object-environment";
 import Reference from "./reference";
-import keywords from "../keywords";
 import api from "../ecma-5.1";
 import comparers from "../utils/comparers";
+import * as contracts from "../utils/contracts";
 import {visit as hoister} from "./hoister";
 
 function blockIsStrict (node) {
@@ -66,23 +66,25 @@ export default class Environment {
 	}
 
 	createVariable (name, immutable) {
-		if (keywords.isReserved(name)) {
-			throw new SyntaxError(`Illegal use of reserved keyword: ${name}`);
-		}
-		
-		if (this.isStrict() && keywords.isStrictReserved(name)) {
-			throw new SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
-		}
-
+		contracts.assertIsValidIdentifier(name, this.isStrict());
 		return this.current.createVariable(name, !immutable);
 	}
-	
+
 	isStrict () {
 		return this.current && this.current.strict;
 	}
 
 	getThisBinding () {
-		return this.current.getThisBinding() || this.global;
+		var thisArg = this.current.getThisBinding();
+		if (thisArg) {
+			return thisArg;
+		}
+		
+		if (this.isStrict()) {
+			return this.global.getValue("undefined");
+		}
+		
+		return this.global;
 	}
 
 	createExecutionContext (node, callee, isNew) {

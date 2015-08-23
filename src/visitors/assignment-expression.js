@@ -2,34 +2,22 @@ import Reference from "../env/reference";
 import operators from "../utils/operators";
 import {degenerate} from "../utils/async";
 
-var assignOperators = {
-	"+=": operators["+"],
-	"-=": operators["-"],
-	"*=": operators["*"],
-	"/=": operators["/"],
-	"%=": operators["%"],
-	"<<=": operators["<<"],
-	">>=": operators[">>"],
-	">>>=": operators[">>>"],
-	"|=": operators["|"],
-	"^=": operators["^"],
-	"&=": operators["&"]
-};
-
 export default degenerate(function* AssignmentExpression (context) {
-	var assignment = context.node.operator === "=";
-	var right = (yield context.create(context.node.right).execute()).result;
+	let assignment = context.node.operator === "=";
+	let right = (yield context.create(context.node.right).execute()).result;
 
-	var left = (yield context.create(context.node.left).execute()).result;
+	let left = (yield context.create(context.node.left).execute()).result;
 	if (!(left instanceof Reference)) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
 
-	var newValue;
+	let newValue;
 	if (assignment) {
 		newValue = right.getValue();
 	} else {
-		var rawValue = assignOperators[context.node.operator](context.env, left.getValue(), right.getValue());
+		// remove equals
+		let op = context.node.operator.slice(0, -1);
+		let rawValue = operators[op](context.env, left.getValue(), right.getValue());
 		newValue = context.env.objectFactory.createPrimitive(rawValue);
 	}
 

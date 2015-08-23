@@ -1,3 +1,5 @@
+import * as contracts from "../utils/contracts";
+
 export default class Reference {
 	constructor (name, base, env) {
 		this.name = name;
@@ -13,7 +15,7 @@ export default class Reference {
 		
 		// todo: always create variable?
 		this.env.createVariable(this.name, true);
-		
+		contracts.assertIsValidIdentifier(this.name, this.strict);
 		if (this.strict) {
 			throw new ReferenceError(this.name + " is not defined");
 		}

@@ -5,7 +5,7 @@ import * as convert from "../utils/convert";
 
 function defineThis (env, fn, thisArg) {
 	if (fn.builtIn) {
-		return thisArg || env.global.getProperty("undefined").getValue();
+		return thisArg || env.global.getValue("undefined");
 	}
 
 	if (contracts.isNullOrUndefined(thisArg)) {
@@ -19,7 +19,7 @@ var frozen = { configurable: false, enumerable: false, writable: false };
 
 export default function functionApi (env, options) {
 	var globalObject = env.global;
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 	var objectFactory = env.objectFactory;
 	var funcClass;
 

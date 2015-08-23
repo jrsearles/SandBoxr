@@ -11,7 +11,7 @@ export default class ObjectType {
 		this.primitiveHint = "number";
 	}
 
-	init () { }
+	init (objectFactory, proto, descriptor) { }
 
 	getPrototype () {
 		return this.proto;
