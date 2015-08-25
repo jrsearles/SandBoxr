@@ -21,15 +21,10 @@ export function degenerate (fn) {
 				return result.value.then(res => handle(generator.next(res)), err => handle(generator.throw(err)));
 			}
 			
-			return handle(generator.next(result.value));
+			return handle(generator.next());
 		}
 		
 		return handle(generator.next());
-		// try {
-		// 	return handle(generator.next());
-		// } catch (err) {
-		// 	return generator.throw(err);
-		// }
 	};
 }
 

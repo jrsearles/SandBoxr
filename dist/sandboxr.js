@@ -6469,7 +6469,7 @@ function setOrphans(scope) {
 		parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
-				child.setPrototype(parent.getProperty("prototype").getValue());
+				child.setPrototype(parent.getValue("prototype"));
 			});
 
 			delete orphans[typeName];
@@ -7322,18 +7322,13 @@ function degenerate(fn) {
 					});
 				}
 
-				_x = generator.next(result.value);
+				_x = generator.next();
 				_again = true;
 				continue _function;
 			}
 		}
 
 		return handle(generator.next());
-		// try {
-		// 	return handle(generator.next());
-		// } catch (err) {
-		// 	return generator.throw(err);
-		// }
 	};
 }
 

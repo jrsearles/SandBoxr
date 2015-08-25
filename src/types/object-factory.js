@@ -25,7 +25,7 @@ function setOrphans (scope) {
 		parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
-				child.setPrototype(parent.getProperty("prototype").getValue());
+				child.setPrototype(parent.getValue("prototype"));
 			});
 
 			delete orphans[typeName];
