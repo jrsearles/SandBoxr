@@ -44,13 +44,28 @@ export default class FunctionType extends ObjectType {
 		this.boundThis = thisArg;
 	}
 
-	bindScope (scope) {
+	bindScope (scope, strict) {
 		this.parentScope = scope;
+		this.strict = strict;
+	}
+	
+	isStrict () {
+		if ("strict" in this) {
+			return this.strict;
+		}
+		
+		if (this.native) {
+			return false;
+		}
+		
+		return (this.strict = contracts.isStrictNode(this.node.body.body));
 	}
 
 	createScope (env, thisArg) {
 		// if a parent scope is defined we need to limit the scope to that scope
 		var priorScope = env.current;
+		var fn = this;
+		
 		if (this.parentScope) {
 			env.current = this.parentScope;
 		}
@@ -61,12 +76,14 @@ export default class FunctionType extends ObjectType {
 		}
 	
 		var scope = env.createScope.apply(env, args);
-		if (!this.native) {
-			scope.init(this.node.body.body);
-		}
-	
 		return {
-			exitScope: function () {
+			init () {
+				if (!fn.native) {
+					scope.init(fn.node.body.body);
+				}
+			},
+			
+			exitScope () {
 				scope.exitScope();
 				env.current = priorScope;
 			}

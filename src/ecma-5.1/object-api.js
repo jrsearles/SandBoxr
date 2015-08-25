@@ -54,7 +54,7 @@ function defineProperty (env, obj, name, descriptor) {
 				options.get = getter;
 				options.getter = function () {
 					var scope = env.setScope(currentScope);
-					var thisArg = convert.toObject(env, this);
+					var thisArg = getter.isStrict() ? this : convert.toObject(env, this);
 
 					try {
 						var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
@@ -80,7 +80,7 @@ function defineProperty (env, obj, name, descriptor) {
 				options.set = setter;
 				options.setter = function () {
 					var scope = env.setScope(currentScope);
-					var thisArg = convert.toObject(env, this);
+					var thisArg = setter.isStrict() ? this : convert.toObject(env, this);
 
 					try {
 						func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);

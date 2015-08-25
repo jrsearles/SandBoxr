@@ -6,7 +6,7 @@ function validateLiteral (node, strict) {
 	}
 	
 	if (typeof node.value === "number" && octalRgx.test(node.raw)) {
-			throw new SyntaxError("Octal literals are not allowed in strict mode.");
+		throw new SyntaxError("Octal literals are not allowed in strict mode.");
 	}
 }
 

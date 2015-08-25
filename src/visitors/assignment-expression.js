@@ -10,6 +10,10 @@ export default degenerate(function* AssignmentExpression (context) {
 	if (!(left instanceof Reference)) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
+	
+	if (context.env.isStrict() && (left.name === "arguments" || left.name === "eval")) {
+		throw new SyntaxError("Unexpected eval or arguments in strict mode");
+	}
 
 	let newValue;
 	if (assignment) {

@@ -12,15 +12,13 @@ export default class Reference {
 		if (this.base) {
 			return this.base.putValue(this.name, value, this.strict);
 		}
-		
-		// todo: always create variable?
-		this.env.createVariable(this.name, true);
+
 		contracts.assertIsValidIdentifier(this.name, this.strict);
 		if (this.strict) {
-			throw new ReferenceError(this.name + " is not defined");
+			throw new ReferenceError(`${this.name} is not defined`);
 		}
 		
-		return this.env.putValue(this.name, value);
+		return this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
 	}
 	
 	getValue () {

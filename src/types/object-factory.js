@@ -134,13 +134,44 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createArguments: function (args, callee) {
+	createArguments: function (args, callee, strict) {
 		var instance = new ArgumentType();
-		var objectClass = this.env.global.getProperty("Object").getValue();
+		var objectClass = this.env.global.getValue("Object");
 
 		instance.init(this, objectClass, objectClass.proto);
-		instance.setPrototype(objectClass.getProperty("prototype").getValue());
-		instance.defineOwnProperty("callee", { value: callee, configurable: true, enumerable: false, writable: true });
+		instance.setPrototype(objectClass.getValue("prototype"));
+
+		if (strict) {
+			let thrower = function () {
+				throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			};
+			
+			instance.defineOwnProperty("callee", {
+				configurable: false,
+				enumerable: false,
+				get: thrower,
+				getter: thrower,
+				set: thrower,
+				setter: thrower
+			});
+			
+			instance.defineOwnProperty("caller", {
+				configurable: false,
+				enumerable: false,
+				get: thrower,
+				getter: thrower,
+				set: thrower,
+				setter: thrower
+			});
+		} else {
+			instance.defineOwnProperty("callee", { 
+				configurable: true, 
+				enumerable: false,
+				value: callee,
+				writable: true
+			});
+		}
+		
 		return instance;
 	},
 

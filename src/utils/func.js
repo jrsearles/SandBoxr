@@ -9,7 +9,8 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 	}
 
 	loadArguments(env, params, args, fn);
-
+	scope.init();
+	
 	try {
 		if (fn.native) {
 			returnResult = yield fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
@@ -33,7 +34,8 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
 	var scope = fn.createScope(env, thisArg, false);
 	loadArguments(env, params, args, fn);
-
+	scope.init();
+	
 	var executionResult;
 	try {
 		if (fn.native) {
@@ -51,14 +53,15 @@ export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
 }
 
 export function	loadArguments (env, params, args, callee) {
-	var undef = env.global.getProperty("undefined").getValue();
-
-	var argumentList = env.objectFactory.createArguments(args, callee);
+	var undef = env.global.getValue("undefined");
+	let strict = env.isStrict() || callee.isStrict();
+	
+	var argumentList = env.objectFactory.createArguments(args, callee, strict);
 	env.current.createVariable("arguments");
 	env.current.putValue("arguments", argumentList);
 
 	params.forEach(function (param, index) {
-		if (!env.current.hasVariable(param.name)) {
+		if (!callee.isStrict() && !env.current.hasVariable(param.name)) {
 			var descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
 				argumentList.mapProperty(index, descriptor);
@@ -70,7 +73,8 @@ export function	loadArguments (env, params, args, callee) {
 
 	// just set value if additional, unnamed arguments are passed in
 	var length = args.length;
-	for (var i = params.length; i < length; i++) {
+	let i = callee.isStrict() ? 0 : params.length;
+	for (; i < length; i++) {
 		argumentList.defineOwnProperty(i, {
 			value: args[i],
 			configurable: true,
@@ -94,10 +98,11 @@ export function	tryCallMethod (env, obj, name) {
 	}
 
 	fn = fn.getValue();
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 
 	if (fn && fn.className === "Function") {
 		var scope = fn.createScope(env, obj);
+		scope.init();
 		var executionResult;
 
 		try {

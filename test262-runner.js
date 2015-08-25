@@ -102,7 +102,7 @@ function resetLog (cb) {
 function start (err, files) {
 	// flatten array
 	files = Array.prototype.concat.apply([], files);
-	// console.log(files);
+
 	async.series({
 		logger: resetLog,
 		include: function (cb) { fs.readFile("test262-harness.js", cb); }
@@ -114,6 +114,7 @@ function start (err, files) {
 
 function runTests (config) {
 	var logger = config.logger;
+	
 	async.mapLimit(config.files, 5, function (file, cb) {
 		var result = { file: file, skipped: false, passed: false };
 		
@@ -139,8 +140,20 @@ function runTests (config) {
 		
 			var description = descriptionRgx.exec(contents)[1];
 			testStarting(logger, file, description);
-					
-			var ast = parser.parse(config.include + contents);
+			
+			var prefix = "";
+			if (strictMode) {
+				// need to verify if strict is used at top level and move to top if so
+				var code = parser.parse(contents);
+				var node = code.body[0];
+				if (node.type === "ExpressionStatement"
+					&& node.expression.type === "Literal"
+					&& node.expression.value === "use strict") {
+					prefix = "\"use strict\";";
+				}
+			}
+			
+			var ast = parser.parse(prefix + config.include + contents);
 			var runner = SandBoxr.create(ast, { parser: parser.parse });
 		
 			runner.execute().then(function () {
@@ -149,7 +162,7 @@ function runTests (config) {
 				cb(null, result);
 			}, function (err) {
 				testFailed(logger, file, description, err);
-				cb(null, result);
+				cb(stopOnFail ? err : null, result);
 			});
 		});
 	}, function (err, results) {
@@ -162,12 +175,7 @@ function runTests (config) {
 			skippedCount += result.skipped ? 1 : 0;
 			failedCount += !result.passed && !result.skipped ? 1 : 0;	
 		});
-		
-		// var skipped = result.reduce(function (result, priorValue) { return priorValue + (result.skipped ? 1 : 0) }, 0);
-		// var passed = 
-		// console.log(arguments);
-		// console.log("FINISHED!");
-		// function testsCompleted () {
+
 		if (passedCount) {
 			logger.info("total passed: " + passedCount);
 		}
@@ -178,59 +186,9 @@ function runTests (config) {
 		
 		if (skippedCount) {
 			logger.info("total skipped: " + skippedCount);
-		}	
-		// }
-
+		}
 	});
 }
-
-// var running = true;
-// var passedCount = 0;
-// var skippedCount = 0;
-// var failedCount = 0;
-
-// var files, file, contents, description;
-// var execs = [];
-
-// function runOne () {
-	// if (!tests.length) {
-	// 	return testsCompleted();
-	// }
-	
-	// var file = tests.shift();
-	
-	// if (exclusions.some(function (excl) { return excl.test(file); })) {
-	// 	testSkipped(file, "Excluded");
-	// 	return runOne();
-	// }
-
-	// contents = fs.readFileSync(file, "utf-8");
-
-	// if (negativeRgx.test(contents)) {
-	// 	testSkipped(file, "Syntax check");
-	// 	return runOne();
-	// }
-
-	// if (!strictMode && strictRgx.test(contents)) {
-	// 	testSkipped(file, "Strict mode");
-	// 	return runOne();
-	// }
-
-	// description = descriptionRgx.exec(contents)[1];
-
-	// testStarting(file, description);
-
-// 	var ast = parser.parse(include + contents);
-// 	var runner = new SandBoxr(ast, { parser: parser.parse });
-
-// 	runner.execute().then(function () {
-// 		testPassed(file, description);
-// 	}, function (err) {
-// 		testFailed(file, description, err);
-// 	}).then(runOne, runOne);
-// }
-
-// runOne();
 
 function testStarting (logger, name, desc) {
 	logger.verbose("starting: %s (%s)", name, desc);
@@ -238,15 +196,12 @@ function testStarting (logger, name, desc) {
 
 function testPassed (logger, name, desc) {
 	logger.verbose("passed: %s (%s)", name, desc);
-	// passedCount++;
 }
 
 function testFailed (logger, name, desc, err) {
 	logger.error("failed: %s (%s)", name, desc);
-	// failedCount++;
 }
 
 function testSkipped (logger, name, reason) {
 	logger.verbose("skipped: %s (%s)", name, reason);
-	// skippedCount++;
 }

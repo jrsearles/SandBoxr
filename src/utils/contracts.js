@@ -104,3 +104,14 @@ export function	isInteger (value) {
 
 	return false;
 }
+
+export function isStrictNode (node) {
+	if (Array.isArray(node)) {
+		return isStrictNode(node[0]);
+	}
+
+	return node
+		&& node.type === "ExpressionStatement"
+		&& node.expression.type === "Literal"
+		&& node.expression.value === "use strict";	
+}

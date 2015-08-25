@@ -7,6 +7,7 @@ var slice = Array.prototype.slice;
 
 export default function stringApi (env) {
 	var globalObject = env.global;
+	var undef = globalObject.getValue("undefined");
 	var objectFactory = env.objectFactory;
 	var stringClass = objectFactory.createFunction(function (value) {
 		var stringValue = value ? convert.toString(env, value.getValue()) : "";
@@ -125,8 +126,9 @@ export default function stringApi (env) {
 			var params = callee.params || [];
 
 			replacer = function () {
+				var thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
 				var args = slice.call(arguments).map(arg => objectFactory.createPrimitive(arg));
-				var replacedValue = func.executeFunction(env, substrOrFn, params, args, globalObject, callee);
+				var replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
 				return replacedValue ? convert.toString(env, replacedValue) : undefined;
 			};
 		} else {

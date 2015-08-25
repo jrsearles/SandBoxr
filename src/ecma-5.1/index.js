@@ -14,6 +14,7 @@ import errorAPI from "./error-api";
 import jsonAPI from "./json-api";
 import consoleAPI from "./console-api";
 import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
@@ -92,7 +93,33 @@ export default function ecma51 (env, config = {}) {
 
 			// use the same scope unless this is an "indirect" call
 			// in which case we use the global scope
-			var scope = env.setScope(directCall ? env.current.parent : env.globalScope);
+			
+			let strictScope = env.isStrict();
+			let strictCode = strictScope || contracts.isStrictNode(ast.body);
+			let currentGlobal = env.current.parent === env.globalScope;
+			
+			let scope;
+			
+			if (directCall) {
+				if (strictCode) {
+					let thisArg;
+					if (strictScope) {
+						thisArg = currentGlobal ? globalObject : undefinedClass;
+					} else {
+						thisArg = env.current.getThisBinding() || globalObject;
+					}
+					
+					scope = env.createScope(thisArg);
+				} else {
+					scope = env.setScope(env.current.parent);
+				}
+			} else {
+				scope = env.setScope(env.globalScope);
+				if (strictCode) {
+					scope = env.createScope(globalObject);
+				}
+			}
+			
 			var executionResult;
 
 			try {

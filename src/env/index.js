@@ -7,17 +7,6 @@ import comparers from "../utils/comparers";
 import * as contracts from "../utils/contracts";
 import {visit as hoister} from "./hoister";
 
-function blockIsStrict (node) {
-	if (Array.isArray(node)) {
-		return blockIsStrict(node[0]);
-	}
-
-	return node
-		&& node.type === "ExpressionStatement"
-		&& node.expression.type === "Literal"
-		&& node.expression.value === "use strict";
-}
-
 export default class Environment {
 	init (config = {}) {
 		// clear state in case of re-init
@@ -71,7 +60,18 @@ export default class Environment {
 	}
 
 	isStrict () {
-		return this.current && this.current.strict;
+		var scope = this.current;
+		
+		while (scope) {
+			if (scope.strict) {
+				return true;
+			}
+			
+			scope = scope.parent;
+		}
+		
+		return false;
+		// return this.current && this.current.strict;
 	}
 
 	getThisBinding () {
@@ -103,7 +103,7 @@ export default class Environment {
 
 	initScope (node) {
 		let undef = this.global.getValue("undefined");
-		this.current.strict = this.current.strict || blockIsStrict(node);
+		this.current.strict = contracts.isStrictNode(node);
 
 		hoister(node, decl => {
 			let name = decl.name || decl.id.name;
@@ -111,7 +111,7 @@ export default class Environment {
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
 				let func = this.objectFactory.createFunction(decl);
-				func.bindScope(this.current);
+				func.bindScope(this.current, this.isStrict() || contracts.isStrictNode(decl.body.body));
 
 				this.createVariable(name, true);
 				this.putValue(name, func);
@@ -132,7 +132,7 @@ export default class Environment {
 		var env = this;
 		var priorScope = this.current || this.globalScope;
 		this.current = scope;
-		this.current.strict = priorScope.strict;
+		// this.current.strict = priorScope.strict;
 		
 		return {
 			init (node) {

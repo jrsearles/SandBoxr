@@ -10,7 +10,7 @@
 - ~~Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)~~
 - Add some sensible detection of infinite loops
 - Improve try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward.)
-- Docs & Examples - see beginnins below as API becomes stable
+- Docs & Examples - see beginnings below as API becomes stable
 - ~~Battle testing in production~~
 - ~~Port the library to ES6 - this will likely take the pain away from some of the async implementation~~
 - ~~Async support~~ (excluding timers)

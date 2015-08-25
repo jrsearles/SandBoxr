@@ -3441,7 +3441,7 @@ var _utilsConvert = require("../utils/convert");
 var convert = _interopRequireWildcard(_utilsConvert);
 
 function defineThis(env, fn, thisArg) {
-	if (fn.builtIn) {
+	if (fn.builtIn || fn.isStrict()) {
 		return thisArg || env.global.getValue("undefined");
 	}
 
@@ -3487,6 +3487,9 @@ function functionApi(env, options) {
 				}
 
 				var ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
+				var userNode = ast.body[0].expression.callee.object.body.body;
+				var strict = contracts.isStrictNode(userNode);
+
 				var params = args.map(function (arg) {
 					arg = arg.trim();
 					contracts.assertIsValidParameterName(arg);
@@ -3506,9 +3509,15 @@ function functionApi(env, options) {
 				fn = objectFactory.createFunction(callee);
 
 				wrappedFunc = function wrappedFunc() {
-					var thisArg = this.node || globalObject;
+					var thisArg = undefined;
 					if (this.isNew) {
 						thisArg = objectFactory.createObject(funcInstance);
+					} else {
+						thisArg = this.node;
+
+						if (!thisArg) {
+							thisArg = strict ? undef : globalObject;
+						}
 					}
 
 					var executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
@@ -3705,6 +3714,10 @@ var _utilsConvert = require("../utils/convert");
 
 var convert = _interopRequireWildcard(_utilsConvert);
 
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
 var frozen = { configurable: false, enumerable: false, writable: false };
 
 function ecma51(env) {
@@ -3784,7 +3797,33 @@ function ecma51(env) {
 
 			// use the same scope unless this is an "indirect" call
 			// in which case we use the global scope
-			var scope = env.setScope(directCall ? env.current.parent : env.globalScope);
+
+			var strictScope = env.isStrict();
+			var strictCode = strictScope || contracts.isStrictNode(ast.body);
+			var currentGlobal = env.current.parent === env.globalScope;
+
+			var scope = undefined;
+
+			if (directCall) {
+				if (strictCode) {
+					var thisArg = undefined;
+					if (strictScope) {
+						thisArg = currentGlobal ? globalObject : undefinedClass;
+					} else {
+						thisArg = env.current.getThisBinding() || globalObject;
+					}
+
+					scope = env.createScope(thisArg);
+				} else {
+					scope = env.setScope(env.current.parent);
+				}
+			} else {
+				scope = env.setScope(env.globalScope);
+				if (strictCode) {
+					scope = env.createScope(globalObject);
+				}
+			}
+
 			var executionResult;
 
 			try {
@@ -3824,7 +3863,7 @@ function ecma51(env) {
 
 module.exports = exports["default"];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../env/reference":172,"../types/object-factory":183,"../types/primitive-type":185,"../utils/convert":192,"./array-api":154,"./boolean-api":155,"./console-api":156,"./date-api":157,"./error-api":158,"./function-api":159,"./json-api":161,"./math-api":162,"./number-api":163,"./object-api":164,"./regex-api":165,"./string-api":166,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],161:[function(require,module,exports){
+},{"../env/reference":172,"../types/object-factory":183,"../types/primitive-type":185,"../utils/contracts":191,"../utils/convert":192,"./array-api":154,"./boolean-api":155,"./console-api":156,"./date-api":157,"./error-api":158,"./function-api":159,"./json-api":161,"./math-api":162,"./number-api":163,"./object-api":164,"./regex-api":165,"./string-api":166,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],161:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4304,7 +4343,7 @@ function defineProperty(env, obj, name, descriptor) {
 				options.get = getter;
 				options.getter = function () {
 					var scope = env.setScope(currentScope);
-					var thisArg = convert.toObject(env, this);
+					var thisArg = getter.isStrict() ? this : convert.toObject(env, this);
 
 					try {
 						var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
@@ -4330,7 +4369,7 @@ function defineProperty(env, obj, name, descriptor) {
 				options.set = setter;
 				options.setter = function () {
 					var scope = env.setScope(currentScope);
-					var thisArg = convert.toObject(env, this);
+					var thisArg = setter.isStrict() ? this : convert.toObject(env, this);
 
 					try {
 						func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
@@ -4704,6 +4743,7 @@ var slice = Array.prototype.slice;
 
 function stringApi(env) {
 	var globalObject = env.global;
+	var undef = globalObject.getValue("undefined");
 	var objectFactory = env.objectFactory;
 	var stringClass = objectFactory.createFunction(function (value) {
 		var stringValue = value ? convert.toString(env, value.getValue()) : "";
@@ -4830,10 +4870,11 @@ function stringApi(env) {
 			var params = callee.params || [];
 
 			replacer = function () {
+				var thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
 				var args = slice.call(arguments).map(function (arg) {
 					return objectFactory.createPrimitive(arg);
 				});
-				var replacedValue = func.executeFunction(env, substrOrFn, params, args, globalObject, callee);
+				var replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
 				return replacedValue ? convert.toString(env, replacedValue) : undefined;
 			};
 		} else {
@@ -5110,6 +5151,8 @@ var _Object$assign = require("babel-runtime/core-js/object/assign")["default"];
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
 
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
@@ -5130,10 +5173,6 @@ var _reference = require("./reference");
 
 var _reference2 = _interopRequireDefault(_reference);
 
-var _keywords = require("../keywords");
-
-var _keywords2 = _interopRequireDefault(_keywords);
-
 var _ecma51 = require("../ecma-5.1");
 
 var _ecma512 = _interopRequireDefault(_ecma51);
@@ -5142,24 +5181,11 @@ var _utilsComparers = require("../utils/comparers");
 
 var _utilsComparers2 = _interopRequireDefault(_utilsComparers);
 
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
 var _hoister = require("./hoister");
-
-function blockIsStrict(_x2) {
-	var _again = true;
-
-	_function: while (_again) {
-		var node = _x2;
-		_again = false;
-
-		if (Array.isArray(node)) {
-			_x2 = node[0];
-			_again = true;
-			continue _function;
-		}
-
-		return node && node.type === "ExpressionStatement" && node.expression.type === "Literal" && node.expression.value === "use strict";
-	}
-}
 
 var Environment = (function () {
 	function Environment() {
@@ -5225,20 +5251,24 @@ var Environment = (function () {
 	}, {
 		key: "createVariable",
 		value: function createVariable(name, immutable) {
-			if (_keywords2["default"].isReserved(name)) {
-				throw new SyntaxError("Illegal use of reserved keyword: " + name);
-			}
-
-			if (this.isStrict() && _keywords2["default"].isStrictReserved(name)) {
-				throw new SyntaxError("Illegal use of strict mode reserved keyword: " + name);
-			}
-
+			contracts.assertIsValidIdentifier(name, this.isStrict());
 			return this.current.createVariable(name, !immutable);
 		}
 	}, {
 		key: "isStrict",
 		value: function isStrict() {
-			return this.current && this.current.strict;
+			var scope = this.current;
+
+			while (scope) {
+				if (scope.strict) {
+					return true;
+				}
+
+				scope = scope.parent;
+			}
+
+			return false;
+			// return this.current && this.current.strict;
 		}
 	}, {
 		key: "getThisBinding",
@@ -5277,7 +5307,7 @@ var Environment = (function () {
 			var _this = this;
 
 			var undef = this.global.getValue("undefined");
-			this.current.strict = this.current.strict || blockIsStrict(node);
+			this.current.strict = contracts.isStrictNode(node);
 
 			(0, _hoister.visit)(node, function (decl) {
 				var name = decl.name || decl.id.name;
@@ -5285,7 +5315,7 @@ var Environment = (function () {
 				if (decl.type === "FunctionDeclaration") {
 					// functions can be used before they are defined
 					var func = _this.objectFactory.createFunction(decl);
-					func.bindScope(_this.current);
+					func.bindScope(_this.current, _this.isStrict() || contracts.isStrictNode(decl.body.body));
 
 					_this.createVariable(name, true);
 					_this.putValue(name, func);
@@ -5307,7 +5337,7 @@ var Environment = (function () {
 			var env = this;
 			var priorScope = this.current || this.globalScope;
 			this.current = scope;
-			this.current.strict = priorScope.strict;
+			// this.current.strict = priorScope.strict;
 
 			return {
 				init: function init(node) {
@@ -5330,7 +5360,7 @@ var Environment = (function () {
 
 exports["default"] = Environment;
 module.exports = exports["default"];
-},{"../ecma-5.1":160,"../execution-context":173,"../keywords":175,"../utils/comparers":190,"./declarative-environment":167,"./hoister":168,"./object-environment":170,"./reference":172,"babel-runtime/core-js/object/assign":4,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],170:[function(require,module,exports){
+},{"../ecma-5.1":160,"../execution-context":173,"../utils/comparers":190,"../utils/contracts":191,"./declarative-environment":167,"./hoister":168,"./object-environment":170,"./reference":172,"babel-runtime/core-js/object/assign":4,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],170:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5501,9 +5531,15 @@ var _createClass = require("babel-runtime/helpers/create-class")["default"];
 
 var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
 
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
 
 var Reference = (function () {
 	function Reference(name, base, env) {
@@ -5522,14 +5558,12 @@ var Reference = (function () {
 				return this.base.putValue(this.name, value, this.strict);
 			}
 
-			// todo: always create variable?
-			this.env.createVariable(this.name, true);
-
+			contracts.assertIsValidIdentifier(this.name, this.strict);
 			if (this.strict) {
 				throw new ReferenceError(this.name + " is not defined");
 			}
 
-			return this.env.putValue(this.name, value);
+			return this.env.global.defineOwnProperty(this.name, { value: value, configurable: true, enumerable: true, writable: true }, false);
 		}
 	}, {
 		key: "getValue",
@@ -5561,7 +5595,7 @@ var Reference = (function () {
 
 exports["default"] = Reference;
 module.exports = exports["default"];
-},{"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14}],173:[function(require,module,exports){
+},{"../utils/contracts":191,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],173:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -5780,12 +5814,13 @@ var _objectType2 = _interopRequireDefault(_objectType);
 var ArgumentType = (function (_ObjectType) {
 	_inherits(ArgumentType, _ObjectType);
 
-	function ArgumentType() {
+	function ArgumentType(callee) {
 		_classCallCheck(this, ArgumentType);
 
 		_get(Object.getPrototypeOf(ArgumentType.prototype), "constructor", this).call(this);
 		this.className = "Arguments";
 		this.parameterMap = _Object$create(null);
+		this.callee = callee;
 	}
 
 	_createClass(ArgumentType, [{
@@ -6198,14 +6233,30 @@ var FunctionType = (function (_ObjectType) {
 		}
 	}, {
 		key: "bindScope",
-		value: function bindScope(scope) {
+		value: function bindScope(scope, strict) {
 			this.parentScope = scope;
+			this.strict = strict;
+		}
+	}, {
+		key: "isStrict",
+		value: function isStrict() {
+			if ("strict" in this) {
+				return this.strict;
+			}
+
+			if (this.native) {
+				return false;
+			}
+
+			return this.strict = contracts.isStrictNode(this.node.body.body);
 		}
 	}, {
 		key: "createScope",
 		value: function createScope(env, thisArg) {
 			// if a parent scope is defined we need to limit the scope to that scope
 			var priorScope = env.current;
+			var fn = this;
+
 			if (this.parentScope) {
 				env.current = this.parentScope;
 			}
@@ -6216,11 +6267,13 @@ var FunctionType = (function (_ObjectType) {
 			}
 
 			var scope = env.createScope.apply(env, args);
-			if (!this.native) {
-				scope.init(this.node.body.body);
-			}
-
 			return {
+				init: function init() {
+					if (!fn.native) {
+						scope.init(fn.node.body.body);
+					}
+				},
+
 				exitScope: function exitScope() {
 					scope.exitScope();
 					env.current = priorScope;
@@ -6525,13 +6578,44 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createArguments: function createArguments(args, callee) {
+	createArguments: function createArguments(args, callee, strict) {
 		var instance = new _argumentType2["default"]();
-		var objectClass = this.env.global.getProperty("Object").getValue();
+		var objectClass = this.env.global.getValue("Object");
 
 		instance.init(this, objectClass, objectClass.proto);
-		instance.setPrototype(objectClass.getProperty("prototype").getValue());
-		instance.defineOwnProperty("callee", { value: callee, configurable: true, enumerable: false, writable: true });
+		instance.setPrototype(objectClass.getValue("prototype"));
+
+		if (strict) {
+			var thrower = function thrower() {
+				throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			};
+
+			instance.defineOwnProperty("callee", {
+				configurable: false,
+				enumerable: false,
+				get: thrower,
+				getter: thrower,
+				set: thrower,
+				setter: thrower
+			});
+
+			instance.defineOwnProperty("caller", {
+				configurable: false,
+				enumerable: false,
+				get: thrower,
+				getter: thrower,
+				set: thrower,
+				setter: thrower
+			});
+		} else {
+			instance.defineOwnProperty("callee", {
+				configurable: true,
+				enumerable: false,
+				value: callee,
+				writable: true
+			});
+		}
+
 		return instance;
 	},
 
@@ -6608,7 +6692,7 @@ var ObjectType = (function () {
 
 	_createClass(ObjectType, [{
 		key: "init",
-		value: function init() {}
+		value: function init(objectFactory, proto, descriptor) {}
 	}, {
 		key: "getPrototype",
 		value: function getPrototype() {
@@ -7422,6 +7506,8 @@ module.exports = exports["default"];
 },{"./convert":192,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],191:[function(require,module,exports){
 "use strict";
 
+var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
+
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
@@ -7433,6 +7519,7 @@ exports.assertIsNotConstructor = assertIsNotConstructor;
 exports.assertIsValidArrayLength = assertIsValidArrayLength;
 exports.assertIsValidParameterName = assertIsValidParameterName;
 exports.assertIsNotGeneric = assertIsNotGeneric;
+exports.assertIsValidIdentifier = assertIsValidIdentifier;
 exports.isValidArrayLength = isValidArrayLength;
 exports.isObject = isObject;
 exports.getType = getType;
@@ -7440,6 +7527,12 @@ exports.isNullOrUndefined = isNullOrUndefined;
 exports.isUndefined = isUndefined;
 exports.isNull = isNull;
 exports.isInteger = isInteger;
+exports.isStrictNode = isStrictNode;
+
+var _keywords = require("../keywords");
+
+var _keywords2 = _interopRequireDefault(_keywords);
+
 var objectRgx = /\[object (\w+)\]/;
 var integerRgx = /^-?\d+$/;
 
@@ -7491,6 +7584,16 @@ function assertIsNotGeneric(obj, expectedClass, methodName) {
 	}
 }
 
+function assertIsValidIdentifier(name, strict) {
+	if (_keywords2["default"].isReserved(name)) {
+		throw new SyntaxError("Illegal use of reserved keyword: " + name);
+	}
+
+	if (strict && _keywords2["default"].isStrictReserved(name)) {
+		throw new SyntaxError("Illegal use of strict mode reserved keyword: " + name);
+	}
+}
+
 function isValidArrayLength(length) {
 	return isInteger(length) && length >= 0 && length < 4294967296;
 }
@@ -7534,7 +7637,24 @@ function isInteger(value) {
 
 	return false;
 }
-},{}],192:[function(require,module,exports){
+
+function isStrictNode(_x) {
+	var _again = true;
+
+	_function: while (_again) {
+		var node = _x;
+		_again = false;
+
+		if (Array.isArray(node)) {
+			_x = node[0];
+			_again = true;
+			continue _function;
+		}
+
+		return node && node.type === "ExpressionStatement" && node.expression.type === "Literal" && node.expression.value === "use strict";
+	}
+}
+},{"../keywords":175,"babel-runtime/helpers/interop-require-default":18}],192:[function(require,module,exports){
 "use strict";
 
 var _Math$sign = require("babel-runtime/core-js/math/sign")["default"];
@@ -7752,23 +7872,24 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 				}
 
 				loadArguments(env, params, args, fn);
+				scope.init();
 
-				context$1$0.prev = 3;
+				context$1$0.prev = 4;
 
 				if (!fn.native) {
-					context$1$0.next = 10;
+					context$1$0.next = 11;
 					break;
 				}
 
-				context$1$0.next = 7;
+				context$1$0.next = 8;
 				return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 
-			case 7:
+			case 8:
 				returnResult = context$1$0.sent;
-				context$1$0.next = 12;
+				context$1$0.next = 13;
 				break;
 
-			case 10:
+			case 11:
 				executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
 
 				if (executionResult && executionResult.exit && executionResult.result) {
@@ -7777,27 +7898,27 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 					}
 				}
 
-			case 12:
-				context$1$0.next = 18;
+			case 13:
+				context$1$0.next = 19;
 				break;
 
-			case 14:
-				context$1$0.prev = 14;
-				context$1$0.t0 = context$1$0["catch"](3);
+			case 15:
+				context$1$0.prev = 15;
+				context$1$0.t0 = context$1$0["catch"](4);
 
 				scope.exitScope();
 				throw context$1$0.t0;
 
-			case 18:
+			case 19:
 
 				scope.exitScope();
 				return context$1$0.abrupt("return", returnResult || env.global.getValue("undefined"));
 
-			case 20:
+			case 21:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, callee$0$0, this, [[3, 14]]);
+	}, callee$0$0, this, [[4, 15]]);
 }));
 
 exports.executeFunction = executeFunction;
@@ -7805,6 +7926,7 @@ exports.executeFunction = executeFunction;
 function getFunctionResult(env, fn, params, args, thisArg, callee) {
 	var scope = fn.createScope(env, thisArg, false);
 	loadArguments(env, params, args, fn);
+	scope.init();
 
 	var executionResult;
 	try {
@@ -7823,14 +7945,15 @@ function getFunctionResult(env, fn, params, args, thisArg, callee) {
 }
 
 function loadArguments(env, params, args, callee) {
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
+	var strict = env.isStrict() || callee.isStrict();
 
-	var argumentList = env.objectFactory.createArguments(args, callee);
+	var argumentList = env.objectFactory.createArguments(args, callee, strict);
 	env.current.createVariable("arguments");
 	env.current.putValue("arguments", argumentList);
 
 	params.forEach(function (param, index) {
-		if (!env.current.hasVariable(param.name)) {
+		if (!callee.isStrict() && !env.current.hasVariable(param.name)) {
 			var descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
 				argumentList.mapProperty(index, descriptor);
@@ -7842,7 +7965,8 @@ function loadArguments(env, params, args, callee) {
 
 	// just set value if additional, unnamed arguments are passed in
 	var length = args.length;
-	for (var i = params.length; i < length; i++) {
+	var i = callee.isStrict() ? 0 : params.length;
+	for (; i < length; i++) {
 		argumentList.defineOwnProperty(i, {
 			value: args[i],
 			configurable: true,
@@ -7866,10 +7990,11 @@ function tryCallMethod(env, obj, name) {
 	}
 
 	fn = fn.getValue();
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 
 	if (fn && fn.className === "Function") {
 		var scope = fn.createScope(env, obj);
+		scope.init();
 		var executionResult;
 
 		try {
@@ -8070,6 +8195,14 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				throw new ReferenceError("Invalid left-hand side in assignment");
 
 			case 9:
+				if (!(context.env.isStrict() && (left.name === "arguments" || left.name === "eval"))) {
+					context$1$0.next = 11;
+					break;
+				}
+
+				throw new SyntaxError("Unexpected eval or arguments in strict mode");
+
+			case 11:
 				newValue = undefined;
 
 				if (assignment) {
@@ -8084,7 +8217,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				left.putValue(newValue);
 				return context$1$0.abrupt("return", context.result(newValue));
 
-			case 13:
+			case 15:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -8824,15 +8957,22 @@ module.exports = exports["default"];
 },{}],207:[function(require,module,exports){
 "use strict";
 
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports["default"] = FunctionExpression;
 
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
 function FunctionExpression(context) {
 	var objectFactory = context.env.objectFactory;
 	var func = objectFactory.createFunction(context.node);
-	func.bindScope(context.env.current);
+	var strict = context.env.isStrict() || contracts.isStrictNode(context.node.body.body);
+	func.bindScope(context.env.current, strict);
 
 	if (context.node.id) {
 		func.name = context.node.id.name;
@@ -8842,7 +8982,7 @@ function FunctionExpression(context) {
 }
 
 module.exports = exports["default"];
-},{}],208:[function(require,module,exports){
+},{"../utils/contracts":191,"babel-runtime/helpers/interop-require-wildcard":19}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

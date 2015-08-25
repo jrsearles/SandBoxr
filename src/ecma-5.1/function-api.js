@@ -4,7 +4,7 @@ import * as func from "../utils/func";
 import * as convert from "../utils/convert";
 
 function defineThis (env, fn, thisArg) {
-	if (fn.builtIn) {
+	if (fn.builtIn || fn.isStrict()) {
 		return thisArg || env.global.getValue("undefined");
 	}
 
@@ -42,6 +42,9 @@ export default function functionApi (env, options) {
 			}
 
 			let ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
+			let userNode = ast.body[0].expression.callee.object.body.body;
+			let strict = contracts.isStrictNode(userNode);
+			
 			let params = args.map(function (arg) {
 				arg = arg.trim();
 				contracts.assertIsValidParameterName(arg);
@@ -60,9 +63,15 @@ export default function functionApi (env, options) {
 
 			var fn = objectFactory.createFunction(callee);
 			var wrappedFunc = function () {
-				var thisArg = this.node || globalObject;
+				let thisArg;
 				if (this.isNew) {
 					thisArg = objectFactory.createObject(funcInstance);
+				} else {
+					thisArg = this.node;
+					
+					if (!thisArg) {
+						thisArg = strict ? undef : globalObject;
+					}
 				}
 
 				var executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);

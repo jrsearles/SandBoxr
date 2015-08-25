@@ -1,10 +1,11 @@
 import ObjectType from "./object-type";
 
 export default class ArgumentType extends ObjectType {
-	constructor () {
+	constructor (callee) {
 		super();
 		this.className = "Arguments";
 		this.parameterMap = Object.create(null);
+		this.callee = callee;
 	}
 
 	mapProperty (index, binding) {
