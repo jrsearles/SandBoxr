@@ -117,13 +117,17 @@ export default class ObjectType {
 		return true;
 	}
 
-	deleteProperty (name) {
+	deleteProperty (name, throwOnError) {
 		if (this.isPrimitive) {
 			return false;
 		}
 
 		if (name in this.properties) {
 			if (!this.properties[name].configurable) {
+				if (throwOnError) {
+					throw new TypeError(`Cannot delete property: ${name}`);
+				}
+				
 				return false;
 			}
 		}

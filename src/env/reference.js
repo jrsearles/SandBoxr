@@ -2,6 +2,9 @@ import * as contracts from "../utils/contracts";
 
 export default class Reference {
 	constructor (name, base, env) {
+		this.isReference = true;
+		this.unqualified = false;
+		
 		this.name = name;
 		this.base = base;
 		this.env = env;

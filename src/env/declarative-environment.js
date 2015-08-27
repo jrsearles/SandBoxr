@@ -11,7 +11,9 @@ export default class DeclarativeEnvironment {
 	}
 
 	getReference (name) {
-		return new Reference(name, this, this.env);
+		let ref = new Reference(name, this, this.env);
+		ref.unqualified = true;
+		return ref;
 	}
 
 	hasVariable (name) {

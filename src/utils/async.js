@@ -21,7 +21,7 @@ export function degenerate (fn) {
 				return result.value.then(res => handle(generator.next(res)), err => handle(generator.throw(err)));
 			}
 			
-			return handle(generator.next());
+			return handle(generator.next(result.value));
 		}
 		
 		return handle(generator.next());
@@ -44,16 +44,6 @@ export function promisify (obj) {
 				return Promise.resolve(result.value);
 			}
 		}
-		// let result = obj.next();
-		// if (isThenable(result.value)) {
-		// 	return result.value;
-		// }
-		
-		// while (!result.done) {
-		// 	result = obj.next();
-		// }
-		
-		// return promisify(result.value);
 	}
 	
 	return Promise.resolve(obj);

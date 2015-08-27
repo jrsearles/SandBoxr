@@ -4968,7 +4968,9 @@ var DeclarativeEnvironment = (function () {
 	_createClass(DeclarativeEnvironment, [{
 		key: "getReference",
 		value: function getReference(name) {
-			return new _reference2["default"](name, this, this.env);
+			var ref = new _reference2["default"](name, this, this.env);
+			ref.unqualified = true;
+			return ref;
 		}
 	}, {
 		key: "hasVariable",
@@ -5215,7 +5217,7 @@ var Environment = (function () {
 			var scope = this.current;
 			while (scope) {
 				if (scope.hasVariable(name)) {
-					return scope.getReference(name);
+					return scope.getReference(name, true);
 				}
 
 				scope = scope.parent;
@@ -5311,6 +5313,7 @@ var Environment = (function () {
 
 			(0, _hoister.visit)(node, function (decl) {
 				var name = decl.name || decl.id.name;
+				contracts.assertIsValidParameterName(name, _this.isStrict());
 
 				if (decl.type === "FunctionDeclaration") {
 					// functions can be used before they are defined
@@ -5389,8 +5392,10 @@ var ObjectEnvironment = (function () {
 
 	_createClass(ObjectEnvironment, [{
 		key: "getReference",
-		value: function getReference(name) {
-			return new _propertyReference2["default"](name, this.object, this.env);
+		value: function getReference(name, unqualified) {
+			var ref = new _propertyReference2["default"](name, this.object, this.env);
+			ref.unqualified = unqualified;
+			return ref;
 		}
 	}, {
 		key: "hasVariable",
@@ -5510,7 +5515,7 @@ var PropertyReference = (function (_Reference) {
 	}, {
 		key: "deleteBinding",
 		value: function deleteBinding(name) {
-			return this.base.deleteProperty(name, true);
+			return this.base.deleteProperty(name, this.env.isStrict());
 		}
 	}, {
 		key: "isUnresolved",
@@ -5544,6 +5549,9 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 var Reference = (function () {
 	function Reference(name, base, env) {
 		_classCallCheck(this, Reference);
+
+		this.isReference = true;
+		this.unqualified = false;
 
 		this.name = name;
 		this.base = base;
@@ -6808,13 +6816,17 @@ var ObjectType = (function () {
 		}
 	}, {
 		key: "deleteProperty",
-		value: function deleteProperty(name) {
+		value: function deleteProperty(name, throwOnError) {
 			if (this.isPrimitive) {
 				return false;
 			}
 
 			if (name in this.properties) {
 				if (!this.properties[name].configurable) {
+					if (throwOnError) {
+						throw new TypeError("Cannot delete property: " + name);
+					}
+
 					return false;
 				}
 			}
@@ -7322,7 +7334,7 @@ function degenerate(fn) {
 					});
 				}
 
-				_x = generator.next();
+				_x = generator.next(result.value);
 				_again = true;
 				continue _function;
 			}
@@ -7348,16 +7360,6 @@ function promisify(obj) {
 				return _Promise.resolve(result.value);
 			}
 		}
-		// let result = obj.next();
-		// if (isThenable(result.value)) {
-		// 	return result.value;
-		// }
-
-		// while (!result.done) {
-		// 	result = obj.next();
-		// }
-
-		// return promisify(result.value);
 	}
 
 	return _Promise.resolve(obj);
@@ -7512,6 +7514,7 @@ exports.assertArgIsNotNullOrUndefined = assertArgIsNotNullOrUndefined;
 exports.assertIsFunction = assertIsFunction;
 exports.assertIsNotConstructor = assertIsNotConstructor;
 exports.assertIsValidArrayLength = assertIsValidArrayLength;
+exports.assertIsValidAssignment = assertIsValidAssignment;
 exports.assertIsValidParameterName = assertIsValidParameterName;
 exports.assertIsNotGeneric = assertIsNotGeneric;
 exports.assertIsValidIdentifier = assertIsValidIdentifier;
@@ -7567,9 +7570,25 @@ function assertIsValidArrayLength(length) {
 	}
 }
 
-function assertIsValidParameterName(name) {
+function assertIsValidAssignment(left, strict) {
+	if (left && !left.isReference) {
+		throw new ReferenceError("Invalid left-hand side in assignment");
+	}
+
+	assertIsValidName(left.name, strict);
+}
+
+function assertIsValidParameterName(name, strict) {
 	if (/^\d|[;\(\)"']/.test(name)) {
 		throw new SyntaxError("Unexpected token in " + name);
+	}
+
+	assertIsValidName(name, strict);
+}
+
+function assertIsValidName(name, strict) {
+	if (strict && (name === "arguments" || name === "eval")) {
+		throw new SyntaxError("Unexpected eval or arguments in strict mode");
 	}
 }
 
@@ -7846,12 +7865,18 @@ function toNativeFunction(env, fn, name) {
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
 
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.getFunctionResult = getFunctionResult;
 exports.loadArguments = loadArguments;
 exports.tryCallMethod = tryCallMethod;
+
+var _contracts = require("./contracts");
+
+var contracts = _interopRequireWildcard(_contracts);
 
 var _async = require("./async");
 
@@ -7948,6 +7973,8 @@ function loadArguments(env, params, args, callee) {
 	env.current.putValue("arguments", argumentList);
 
 	params.forEach(function (param, index) {
+		contracts.assertIsValidParameterName(param.name, strict);
+
 		if (!callee.isStrict() && !env.current.hasVariable(param.name)) {
 			var descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
@@ -7996,7 +8023,7 @@ function tryCallMethod(env, obj, name) {
 			if (fn.native) {
 				executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
 			} else {
-				loadArguments(env, fn.node.params, []);
+				loadArguments(env, fn.node.params, [], fn);
 
 				executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
 				executionResult = executionResult && executionResult.result;
@@ -8012,7 +8039,7 @@ function tryCallMethod(env, obj, name) {
 
 	return false;
 }
-},{"./async":189,"babel-runtime/regenerator":20}],194:[function(require,module,exports){
+},{"./async":189,"./contracts":191,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],194:[function(require,module,exports){
 "use strict";
 
 var _defineProperty = require("babel-runtime/helpers/define-property")["default"];
@@ -8149,15 +8176,17 @@ module.exports = exports["default"];
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
 
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _envReference = require("../env/reference");
+var _utilsContracts = require("../utils/contracts");
 
-var _envReference2 = _interopRequireDefault(_envReference);
+var contracts = _interopRequireWildcard(_utilsContracts);
 
 var _utilsOperators = require("../utils/operators");
 
@@ -8182,22 +8211,8 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 			case 6:
 				left = context$1$0.sent.result;
 
-				if (left instanceof _envReference2["default"]) {
-					context$1$0.next = 9;
-					break;
-				}
+				contracts.assertIsValidAssignment(left, context.env.isStrict());
 
-				throw new ReferenceError("Invalid left-hand side in assignment");
-
-			case 9:
-				if (!(context.env.isStrict() && (left.name === "arguments" || left.name === "eval"))) {
-					context$1$0.next = 11;
-					break;
-				}
-
-				throw new SyntaxError("Unexpected eval or arguments in strict mode");
-
-			case 11:
 				newValue = undefined;
 
 				if (assignment) {
@@ -8212,7 +8227,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				left.putValue(newValue);
 				return context$1$0.abrupt("return", context.result(newValue));
 
-			case 15:
+			case 12:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -8221,7 +8236,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 module.exports = exports["default"];
 
 // remove equals
-},{"../env/reference":172,"../utils/async":189,"../utils/operators":194,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],197:[function(require,module,exports){
+},{"../utils/async":189,"../utils/contracts":191,"../utils/operators":194,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],197:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9480,10 +9495,19 @@ var _utilsFunc = require("../utils/func");
 
 var func = _interopRequireWildcard(_utilsFunc);
 
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
 var _utilsAsync = require("../utils/async");
 
 function setDescriptor(env, obj, name, descriptor) {
+	var strict = env.isStrict();
+
 	if (descriptor.get) {
+		descriptor.get.node.params.forEach(function (param) {
+			return contracts.assertIsValidParameterName(param.name, strict);
+		});
 		descriptor.getter = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function callee$1$0() {
 			return _regeneratorRuntime.wrap(function callee$1$0$(context$2$0) {
 				while (1) switch (context$2$0.prev = context$2$0.next) {
@@ -9503,6 +9527,9 @@ function setDescriptor(env, obj, name, descriptor) {
 	}
 
 	if (descriptor.set) {
+		descriptor.set.node.params.forEach(function (param) {
+			return contracts.assertIsValidParameterName(param.name, strict);
+		});
 		descriptor.setter = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function callee$1$0() {
 			var args$2$0 = arguments;
 			return _regeneratorRuntime.wrap(function callee$1$0$(context$2$0) {
@@ -9620,7 +9647,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ObjectExpression, this, [[5, 26, 30, 38], [31,, 33, 37]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/func":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],217:[function(require,module,exports){
+},{"../utils/async":189,"../utils/contracts":191,"../utils/func":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],217:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10175,6 +10202,10 @@ var _envReference = require("../env/reference");
 
 var _envReference2 = _interopRequireDefault(_envReference);
 
+var _envPropertyReference = require("../env/property-reference");
+
+var _envPropertyReference2 = _interopRequireDefault(_envPropertyReference);
+
 var _utilsConvert = require("../utils/convert");
 
 var convert = _interopRequireWildcard(_utilsConvert);
@@ -10182,7 +10213,7 @@ var convert = _interopRequireWildcard(_utilsConvert);
 var _utilsAsync = require("../utils/async");
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function UnaryExpression(context) {
-	var result, objectFactory, value, newValue, type, deleted;
+	var result, objectFactory, value, newValue, type, deleted, resolved;
 	return _regeneratorRuntime.wrap(function UnaryExpression$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
@@ -10193,7 +10224,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				result = context$1$0.sent.result;
 				objectFactory = context.env.objectFactory;
 				context$1$0.t0 = context.node.operator;
-				context$1$0.next = context$1$0.t0 === "typeof" ? 7 : context$1$0.t0 === "-" ? 11 : context$1$0.t0 === "+" ? 14 : context$1$0.t0 === "!" ? 17 : context$1$0.t0 === "~" ? 20 : context$1$0.t0 === "delete" ? 23 : context$1$0.t0 === "void" ? 32 : 34;
+				context$1$0.next = context$1$0.t0 === "typeof" ? 7 : context$1$0.t0 === "-" ? 11 : context$1$0.t0 === "+" ? 14 : context$1$0.t0 === "!" ? 17 : context$1$0.t0 === "~" ? 20 : context$1$0.t0 === "delete" ? 23 : context$1$0.t0 === "void" ? 36 : 38;
 				break;
 
 			case 7:
@@ -10207,73 +10238,89 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				}
 
 				newValue = objectFactory.createPrimitive(type);
-				return context$1$0.abrupt("break", 35);
+				return context$1$0.abrupt("break", 39);
 
 			case 11:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(-convert.toNumber(context.env, value));
-				return context$1$0.abrupt("break", 35);
+				return context$1$0.abrupt("break", 39);
 
 			case 14:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(+convert.toNumber(context.env, value));
-				return context$1$0.abrupt("break", 35);
+				return context$1$0.abrupt("break", 39);
 
 			case 17:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(!convert.toBoolean(value));
-				return context$1$0.abrupt("break", 35);
+				return context$1$0.abrupt("break", 39);
 
 			case 20:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(~convert.toInt32(context.env, value));
-				return context$1$0.abrupt("break", 35);
+				return context$1$0.abrupt("break", 39);
 
 			case 23:
 				deleted = true;
 
 				if (!(result && result instanceof _envReference2["default"])) {
-					context$1$0.next = 28;
+					context$1$0.next = 32;
 					break;
 				}
 
-				if (!result.isUnresolved()) {
+				resolved = !result.isUnresolved();
+
+				if (!context.env.isStrict()) {
+					context$1$0.next = 29;
+					break;
+				}
+
+				if (!(!resolved || !(result instanceof _envPropertyReference2["default"]) || result.unqualified)) {
+					context$1$0.next = 29;
+					break;
+				}
+
+				throw new SyntaxError("Delete of an unqualified identifier in strict mode.");
+
+			case 29:
+
+				if (resolved) {
 					deleted = result.deleteBinding(result.name);
 				}
-				context$1$0.next = 30;
+				context$1$0.next = 34;
 				break;
 
-			case 28:
+			case 32:
 				if (!context.node.argument.object) {
-					context$1$0.next = 30;
+					context$1$0.next = 34;
 					break;
 				}
 
 				throw new ReferenceError(context.node.argument.object.name + " is not defined");
 
-			case 30:
+			case 34:
 
 				newValue = objectFactory.createPrimitive(deleted);
-				return context$1$0.abrupt("break", 35);
-
-			case 32:
-				newValue = objectFactory.createPrimitive(undefined);
-				return context$1$0.abrupt("break", 35);
-
-			case 34:
-				throw new SyntaxError("Unknown unary operator: " + context.node.operator);
-
-			case 35:
-				return context$1$0.abrupt("return", context.result(newValue));
+				return context$1$0.abrupt("break", 39);
 
 			case 36:
+				newValue = objectFactory.createPrimitive(undefined);
+				return context$1$0.abrupt("break", 39);
+
+			case 38:
+				throw new SyntaxError("Unknown unary operator: " + context.node.operator);
+
+			case 39:
+				return context$1$0.abrupt("return", context.result(newValue));
+
+			case 40:
 			case "end":
 				return context$1$0.stop();
 		}
 	}, UnaryExpression, this);
 }));
 module.exports = exports["default"];
-},{"../env/reference":172,"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],224:[function(require,module,exports){
+},{"../env/property-reference":171,"../env/reference":172,"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],224:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10288,6 +10335,10 @@ var _utilsConvert = require("../utils/convert");
 
 var convert = _interopRequireWildcard(_utilsConvert);
 
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
 var _utilsAsync = require("../utils/async");
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function UpdateExpression(context) {
@@ -10301,6 +10352,9 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 3:
 				ref = context$1$0.sent.result;
+
+				contracts.assertIsValidAssignment(ref, context.env.isStrict());
+
 				originalValue = convert.toNumber(context.env, ref.getValue());
 				newValue = originalValue;
 
@@ -10318,14 +10372,14 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				ref.putValue(newValue);
 				return context$1$0.abrupt("return", context.result(returnValue));
 
-			case 12:
+			case 13:
 			case "end":
 				return context$1$0.stop();
 		}
 	}, UpdateExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
+},{"../utils/async":189,"../utils/contracts":191,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10470,41 +10524,49 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function WithStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
-				context$1$0.next = 2;
-				return context.create(context.node.object).execute();
+				if (!context.env.isStrict()) {
+					context$1$0.next = 2;
+					break;
+				}
+
+				throw new SyntaxError("Strict mode code may not include a with statement");
 
 			case 2:
+				context$1$0.next = 4;
+				return context.create(context.node.object).execute();
+
+			case 4:
 				obj = context$1$0.sent.result.getValue();
 				scope = context.env.createObjectScope(obj);
 
 				scope.init(context.node.body);
 
-				context$1$0.prev = 5;
-				context$1$0.next = 8;
+				context$1$0.prev = 7;
+				context$1$0.next = 10;
 				return context.create(context.node.body).execute();
 
-			case 8:
+			case 10:
 				result = context$1$0.sent;
-				context$1$0.next = 15;
+				context$1$0.next = 17;
 				break;
 
-			case 11:
-				context$1$0.prev = 11;
-				context$1$0.t0 = context$1$0["catch"](5);
+			case 13:
+				context$1$0.prev = 13;
+				context$1$0.t0 = context$1$0["catch"](7);
 
 				scope.exitScope();
 				throw context$1$0.t0;
 
-			case 15:
+			case 17:
 
 				scope.exitScope();
 				return context$1$0.abrupt("return", result);
 
-			case 17:
+			case 19:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, WithStatement, this, [[5, 11]]);
+	}, WithStatement, this, [[7, 13]]);
 }));
 module.exports = exports["default"];
 },{"../utils/async":189,"babel-runtime/regenerator":20}]},{},[1])(1)

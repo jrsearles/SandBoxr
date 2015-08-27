@@ -1,3 +1,4 @@
+import * as contracts from "./contracts";
 import {degenerate} from "./async";
 
 export let executeFunction = degenerate(function* (env, fn, params, args, thisArg, callee, isNew) {
@@ -61,6 +62,8 @@ export function	loadArguments (env, params, args, callee) {
 	env.current.putValue("arguments", argumentList);
 
 	params.forEach(function (param, index) {
+		contracts.assertIsValidParameterName(param.name, strict);
+		
 		if (!callee.isStrict() && !env.current.hasVariable(param.name)) {
 			var descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
@@ -109,7 +112,7 @@ export function	tryCallMethod (env, obj, name) {
 			if (fn.native) {
 				executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
 			} else {
-				loadArguments(env, fn.node.params, []);
+				loadArguments(env, fn.node.params, [], fn);
 
 				executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
 				executionResult = executionResult && executionResult.result;

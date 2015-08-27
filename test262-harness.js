@@ -28,8 +28,8 @@ function runTestCase (testcase) {
 	}
 }
 
- var __globalObject = Function("return this;")();
- function fnGlobalObject() {
+var __globalObject = Function("return this;")();
+function fnGlobalObject() {
  	return __globalObject;
 }
 

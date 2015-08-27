@@ -25,7 +25,7 @@ export default class Environment {
 		var scope = this.current;
 		while (scope) {
 			if (scope.hasVariable(name)) {
-				return scope.getReference(name);
+				return scope.getReference(name, true);
 			}
 
 			scope = scope.parent;
@@ -107,7 +107,8 @@ export default class Environment {
 
 		hoister(node, decl => {
 			let name = decl.name || decl.id.name;
-
+			contracts.assertIsValidParameterName(name, this.isStrict());
+			
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
 				let func = this.objectFactory.createFunction(decl);

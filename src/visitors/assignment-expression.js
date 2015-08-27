@@ -1,19 +1,13 @@
-import Reference from "../env/reference";
+import * as contracts from "../utils/contracts";
 import operators from "../utils/operators";
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* AssignmentExpression (context) {
 	let assignment = context.node.operator === "=";
 	let right = (yield context.create(context.node.right).execute()).result;
-
 	let left = (yield context.create(context.node.left).execute()).result;
-	if (!(left instanceof Reference)) {
-		throw new ReferenceError("Invalid left-hand side in assignment");
-	}
 	
-	if (context.env.isStrict() && (left.name === "arguments" || left.name === "eval")) {
-		throw new SyntaxError("Unexpected eval or arguments in strict mode");
-	}
+	contracts.assertIsValidAssignment(left, context.env.isStrict());
 
 	let newValue;
 	if (assignment) {

@@ -1,9 +1,12 @@
 import * as convert from "../utils/convert";
+import * as contracts from "../utils/contracts";
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* UpdateExpression (context) {
 	var objectFactory = context.env.objectFactory;
 	var ref = (yield context.create(context.node.argument).execute()).result;
+	contracts.assertIsValidAssignment(ref, context.env.isStrict());
+	
 	var originalValue = convert.toNumber(context.env, ref.getValue());
 	var newValue = originalValue;
 

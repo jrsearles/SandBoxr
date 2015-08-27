@@ -8,8 +8,10 @@ export default class ObjectEnvironment {
 		this.env = env;
 	}
 
-	getReference (name) {
-		return new PropertyReference(name, this.object, this.env);
+	getReference (name, unqualified) {
+		var ref = new PropertyReference(name, this.object, this.env);
+		ref.unqualified = unqualified;
+		return ref;
 	}
 
 	hasVariable (name) {

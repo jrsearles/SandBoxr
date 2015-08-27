@@ -39,9 +39,25 @@ export function	assertIsValidArrayLength (length) {
 	}
 }
 
-export function	assertIsValidParameterName (name) {
+export function assertIsValidAssignment (left, strict) {
+	if (left && !left.isReference) {
+		throw new ReferenceError("Invalid left-hand side in assignment");
+	}
+	
+	assertIsValidName(left.name, strict);
+}
+
+export function	assertIsValidParameterName (name, strict) {
 	if (/^\d|[;\(\)"']/.test(name)) {
 		throw new SyntaxError(`Unexpected token in ${name}`);
+	}
+	
+	assertIsValidName(name, strict);
+}
+
+function assertIsValidName (name, strict) {
+	if (strict && (name === "arguments" || name === "eval")) {
+		throw new SyntaxError("Unexpected eval or arguments in strict mode");	
 	}
 }
 

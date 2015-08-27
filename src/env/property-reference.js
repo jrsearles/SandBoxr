@@ -21,7 +21,7 @@ export default class PropertyReference extends Reference {
 	}
 	
 	deleteBinding (name) {
-		return this.base.deleteProperty(name, true);
+		return this.base.deleteProperty(name, this.env.isStrict());
 	}
 	
 	isUnresolved () {

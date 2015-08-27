@@ -1,4 +1,5 @@
 import Reference from "../env/reference";
+import PropertyReference from "../env/property-reference";
 import * as convert from "../utils/convert";
 import {degenerate} from "../utils/async";
 
@@ -43,7 +44,15 @@ export default degenerate(function* UnaryExpression (context) {
 		case "delete":
 			let deleted = true;
 			if (result && result instanceof Reference) {
-				if (!result.isUnresolved()) {
+				let resolved = !result.isUnresolved();
+				
+				if (context.env.isStrict()) {
+					if (!resolved || !(result instanceof PropertyReference) || result.unqualified) {
+						throw new SyntaxError("Delete of an unqualified identifier in strict mode.");	
+					}
+				}
+				
+				if (resolved) {
 					deleted = result.deleteBinding(result.name);
 				}
 			} else if (context.node.argument.object) {
