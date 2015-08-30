@@ -91,15 +91,13 @@ export default function ecma51 (env, config = {}) {
 				throw err;
 			}
 
-			// use the same scope unless this is an "indirect" call
-			// in which case we use the global scope
-			
 			let strictScope = env.isStrict();
 			let strictCode = strictScope || contracts.isStrictNode(ast.body);
-			let currentGlobal = env.current.parent === env.globalScope;
-			
+			let currentGlobal = env.current.parent === env.globalScope;			
 			let scope;
 			
+			// use the same scope unless this is an "indirect" call
+			// in which case we use the global scope
 			if (directCall) {
 				if (strictCode) {
 					let thisArg;

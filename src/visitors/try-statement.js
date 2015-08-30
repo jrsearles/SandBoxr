@@ -1,4 +1,5 @@
 import {degenerate} from "../utils/async";
+import * as contracts from "../utils/contracts";
 
 export default degenerate(function* TryStatement (context) {
 	var result, uncaughtError;
@@ -8,29 +9,18 @@ export default degenerate(function* TryStatement (context) {
 	} catch (err) {
 		if (context.node.handler) {
 			let caughtError = err && err.wrappedError || context.env.objectFactory.createPrimitive(err);
-			
-			var scope = context.env.createScope();
-			// context.env.initScope(context.node.handler);
-			// scope.init(context.node.handler.body);
-			
 			let errVar = context.node.handler.param.name;
-			// let hasVariable = context.env.hasVariable(errVar);
+
+			contracts.assertIsValidIdentifier(errVar, context.env.isStrict());
 			
-			// if (!hasVariable) {
+			let scope = context.env.createScope();
 			context.env.createVariable(errVar);
-			// }
-			
 			context.env.putValue(errVar, caughtError);
 			
 			try {
 				result = yield context.create(context.node.handler.body, context.node.handler).execute();
 			} catch (catchError) {
-				// scope.exitScope();
 				uncaughtError = catchError;
-			} finally {
-				// if (!hasVariable) {
-				// 	context.env.deleteVariable(errVar);
-				// }
 			}
 			
 			scope.exitScope();

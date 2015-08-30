@@ -32,12 +32,12 @@ function executeCallback (callback, thisArg, executionContext, index) {
 	var scope = executionContext.env.createScope(thisArg || executionContext.env.global);
 	scope.init(callback.node.body);
 
-	var undef = executionContext.env.global.getProperty("undefined").getValue();
+	var undef = executionContext.env.global.getValue("undefined");
 	var objectFactory = executionContext.env.objectFactory;
 	var args = [executionContext.node.getProperty(index).getValue(), objectFactory.createPrimitive(index), arr];
 	var executionResult;
 
-	func.loadArguments(executionContext.env, callback.node.params, args);
+	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
 	try {
 		executionResult = executionContext.create(callback.node.body, callback.node).execute();
@@ -55,12 +55,12 @@ function executeAccumulator (callback, priorValue, executionContext, index) {
 	var scope = executionContext.env.createScope();
 	scope.init(callback.node.body);
 
-	var undef = executionContext.env.global.getProperty("undefined").getValue();
+	var undef = executionContext.env.global.getValue("undefined");
 	var objectFactory = executionContext.env.objectFactory;
 	var args = [priorValue || undef, executionContext.node.getProperty(index).getValue() || undef, objectFactory.createPrimitive(index), arr];
 	var executionResult;
 
-	func.loadArguments(executionContext.env, callback.node.params, args);
+	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
 	try {
 		executionResult = executionContext.create(callback.node.body, callback.node).execute();
@@ -85,7 +85,7 @@ function createIndexProperty (value) {
 export default function arrayApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
-	var undef = globalObject.getProperty("undefined").getValue();
+	var undef = globalObject.getValue("undefined");
 
 	var arrayClass = objectFactory.createFunction(function (length) {
 		var newArray = objectFactory.create("Array");
@@ -587,7 +587,7 @@ export default function arrayApi (env) {
 				var scope = env.createScope(undef);
 				scope.init(compareFunction.node.body);
 
-				func.loadArguments(env, compareFunction.node.params, [a, b]);
+				func.loadArguments(env, compareFunction.node.params, [a, b], compareFunction);
 				var executionResult;
 
 				try {

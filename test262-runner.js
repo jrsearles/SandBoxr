@@ -32,14 +32,14 @@ if (chapter) {
 } else {
 	testGlobs = [
 		root + "suite/ch06/**/*.js", 	// passed! +s
-		root + "suite/ch07/**/*.js",	// passed!
-		root + "suite/ch08/**/*.js",	// passed! *
-		root + "suite/ch09/**/*.js",	// passed!
-		root + "suite/ch10/**/*.js",	// passed! *
-		root + "suite/ch11/**/*.js",	// passed!
-		root + "suite/ch12/**/*.js",
+		root + "suite/ch07/**/*.js",	// passed! +s
+		root + "suite/ch08/**/*.js",	// passed! +s
+		root + "suite/ch09/**/*.js",	// passed! +s
+		root + "suite/ch10/**/*.js",	// passed! +s
+		root + "suite/ch11/**/*.js",	// passed! +s
+		root + "suite/ch12/**/*.js",	// passed! +s
 		root + "suite/ch13/**/*.js",	// functions	-- passed!
-		root + "suite/ch14/**/*.js",	// program	-- passed!
+		root + "suite/ch14/**/*.js",	// program	-- passed! +s
 		root + "suite/ch15/15.1/**/*.js",	// global	-- passed
 		root + "suite/ch15/15.2/**/*.js",	// object	-- passed
 		root + "suite/ch15/15.3/**/*.js",	// function	-- passed
@@ -146,7 +146,8 @@ function runTests (config) {
 				// need to verify if strict is used at top level and move to top if so
 				var code = parser.parse(contents);
 				var node = code.body[0];
-				if (node.type === "ExpressionStatement"
+				if (node 
+					&& node.type === "ExpressionStatement"
 					&& node.expression.type === "Literal"
 					&& node.expression.value === "use strict") {
 					prefix = "\"use strict\";";

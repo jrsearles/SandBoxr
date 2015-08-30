@@ -2,7 +2,7 @@ import * as operators from "../utils/operators";
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* BinaryExpression (context) {
-	var undef = context.env.global.getProperty("undefined").getValue();
+	var undef = context.env.global.getValue("undefined");
 	var left = (yield context.create(context.node.left).execute()).result;
 	var leftValue = left.getValue() || undef;
 

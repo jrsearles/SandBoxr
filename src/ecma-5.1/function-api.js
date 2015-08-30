@@ -84,7 +84,8 @@ export default function functionApi (env, options) {
 			};
 
 			wrappedFunc.nativeLength = callee.params.length;
-			funcInstance = objectFactory.createFunction(wrappedFunc);
+			wrappedFunc.strict = strict;
+			funcInstance = objectFactory.createFunction(wrappedFunc, null, null, strict);
 			funcInstance.bindScope(env.globalScope);
 		} else {
 			funcInstance = objectFactory.createFunction(function () {});
@@ -142,35 +143,22 @@ export default function functionApi (env, options) {
 	}, 2, "Function.prototype.apply"));
 
 	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg, ...args) {
-		var fn = this.node;
-		var params = fn.native ? [] : fn.node.params;
-		var callee = fn.native ? fn : fn.node;
+		let fn = this.node;
+		let params = fn.native ? [] : fn.node.params;
+		let callee = fn.native ? fn : fn.node;
 		thisArg = defineThis(env, this.node, thisArg);
 
-		var thrower = function () { throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them"); };
-		var throwProperties = {
-			get: undefined,
-			getter: thrower,
-			set: undefined,
-			setter: thrower,
-			enumerable: false,
-			configurable: false
-		};
-
-		var nativeFunc = function (...additionArgs) {
+		let nativeFunc = function (...additionArgs) {
 			var mergedArgs = args.concat(additionArgs);
 			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
-		var boundFunc = objectFactory.createFunction(nativeFunc);
-
-		boundFunc.defineOwnProperty("caller", throwProperties);
-		boundFunc.defineOwnProperty("arguments", throwProperties);
-		boundFunc.defineOwnProperty("callee", throwProperties);
+		nativeFunc.strict = env.isStrict() || fn.native && contracts.isStrictNode(fn.node.body.body);
+		
+		let boundFunc = objectFactory.createFunction(nativeFunc);
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
-
 		return boundFunc;
 	}, 1, "Function.prototype.bind"));
 }

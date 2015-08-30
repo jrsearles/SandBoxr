@@ -64,7 +64,7 @@ export function	loadArguments (env, params, args, callee) {
 	params.forEach(function (param, index) {
 		contracts.assertIsValidParameterName(param.name, strict);
 		
-		if (!callee.isStrict() && !env.current.hasVariable(param.name)) {
+		if (!callee.isStrict() && !env.current.hasProperty(param.name)) {
 			var descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
 				argumentList.mapProperty(index, descriptor);

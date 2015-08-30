@@ -14,7 +14,12 @@ export default class NativeFunctionType extends FunctionType {
 		if ("nativeLength" in this.nativeFunction) {
 			length = this.nativeFunction.nativeLength;
 		}
-	
+		
+		if ("strict" in this.nativeFunction) {
+			this.strict = this.nativeFunction.strict;
+		}
+		
+		this.initStrict(objectFactory);
 		this.defineOwnProperty("length", {
 			value: objectFactory.createPrimitive(length),
 			configurable: false,

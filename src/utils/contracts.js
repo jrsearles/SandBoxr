@@ -1,9 +1,12 @@
 import keywords from "../keywords";
 
-const objectRgx = /\[object (\w+)\]/;
-const integerRgx = /^-?\d+$/;
+const objectPattern = /\[object (\w+)\]/;
+const integerPattern = /^-?\d+$/;
+const octalPattern = /^-?0[0-7]/;
+const octalEscapePattern = /^([^\\]|\\[^0-7])*\\([0-3][0-7]{1,2}|[4-7][0-7]|[0-7])/;
+const useStrictPattern = /^\s*(?:'use strict'|"use strict")\s*;?\s*$/;
 
-export function assertIsObject (obj, methodName, message) {
+export function assertIsObject (obj, methodName) {
 	if (!isObject(obj)) {
 		throw new TypeError(`${methodName} called on non-object`);
 	}
@@ -44,7 +47,9 @@ export function assertIsValidAssignment (left, strict) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
 	
-	assertIsValidName(left.name, strict);
+	if (left && left.base === left.env.global) {
+		assertIsValidName(left.name, strict);
+	}
 }
 
 export function	assertIsValidParameterName (name, strict) {
@@ -55,7 +60,7 @@ export function	assertIsValidParameterName (name, strict) {
 	assertIsValidName(name, strict);
 }
 
-function assertIsValidName (name, strict) {
+export function assertIsValidName (name, strict) {
 	if (strict && (name === "arguments" || name === "eval")) {
 		throw new SyntaxError("Unexpected eval or arguments in strict mode");	
 	}
@@ -77,6 +82,18 @@ export function assertIsValidIdentifier (name, strict) {
 	}
 }
 
+export function assertAreValidArguments (params, strict) {
+	if (strict) {
+		params.forEach((param, index) => {
+			assertIsValidName(param.name, strict);
+			
+			if (params.some((p, i) => index !== i && param.name === p.name)) {
+				throw new SyntaxError("Strict mode function may not have duplicate parameter names");
+			}
+		});
+	}
+}
+
 export function	isValidArrayLength (length) {
 	return isInteger(length) && length >= 0 && length < 4294967296;
 }
@@ -93,8 +110,26 @@ export function	isObject (obj) {
 	return true;
 }
 
+export function isOctalLiteral (rawValue, actualValue) {
+	if (typeof actualValue === "number" && octalPattern.test(rawValue)) {
+		return true;
+	}
+	
+	if (typeof actualValue === "string") {
+		let match = rawValue.match(octalEscapePattern);
+		if (match) {
+			// \0 is actually not considered an octal
+			if (match[2] !== "0" || typeof match[3] !== "undefined") {
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
 export function	getType (obj) {
-	return objectRgx.exec(Object.prototype.toString.call(obj))[1];
+	return objectPattern.exec(Object.prototype.toString.call(obj))[1];
 }
 
 export function	isNullOrUndefined (obj) {
@@ -111,7 +146,7 @@ export function	isNull (obj) {
 
 export function	isInteger (value) {
 	if (typeof value === "string") {
-		return integerRgx.test(value);
+		return integerPattern.test(value);
 	}
 
 	if (typeof value === "number") {
@@ -121,13 +156,24 @@ export function	isInteger (value) {
 	return false;
 }
 
-export function isStrictNode (node) {
-	if (Array.isArray(node)) {
-		return isStrictNode(node[0]);
-	}
-
-	return node
-		&& node.type === "ExpressionStatement"
+function isDirective (node) {
+	return node.type === "ExpressionStatement"
 		&& node.expression.type === "Literal"
-		&& node.expression.value === "use strict";	
+		&& typeof node.expression.value === "string";
+}
+
+export function isStrictNode (nodes) {
+	if (Array.isArray(nodes)) {
+		for (let node of nodes) {
+			if (!isDirective(node)) {
+				return false;
+			}
+			
+			if (node.expression.value === "use strict" && useStrictPattern.test(node.expression.raw)) {
+				return true;
+			}
+		}
+	}
+	
+	return false;
 }

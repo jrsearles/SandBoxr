@@ -19,6 +19,6 @@ export default degenerate(function* AssignmentExpression (context) {
 		newValue = context.env.objectFactory.createPrimitive(rawValue);
 	}
 
-	left.putValue(newValue);
+	left.setValue(newValue);
 	return context.result(newValue);
 });

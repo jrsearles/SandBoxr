@@ -12,8 +12,7 @@ import * as contracts from "../utils/contracts";
 
 var parentless = {
 	"Undefined": true,
-	"Null": true,
-	"Function": true
+	"Null": true
 };
 
 var orphans = Object.create(null);
@@ -124,7 +123,7 @@ ObjectFactory.prototype = {
 
 		if (parent !== null) {
 			if (parent) {
-				instance.setPrototype(parent && parent.getProperty("prototype").getValue());
+				instance.setPrototype(parent && parent.getValue("prototype"));
 			} else {
 				setProto("Object", instance, this.env);
 			}
@@ -138,31 +137,14 @@ ObjectFactory.prototype = {
 		var instance = new ArgumentType();
 		var objectClass = this.env.global.getValue("Object");
 
-		instance.init(this, objectClass, objectClass.proto);
+		instance.init(this, objectClass, objectClass.getPrototype());
 		instance.setPrototype(objectClass.getValue("prototype"));
 
 		if (strict) {
-			let thrower = function () {
-				throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-			};
+			let throwerProps = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
 			
-			instance.defineOwnProperty("callee", {
-				configurable: false,
-				enumerable: false,
-				get: thrower,
-				getter: thrower,
-				set: thrower,
-				setter: thrower
-			});
-			
-			instance.defineOwnProperty("caller", {
-				configurable: false,
-				enumerable: false,
-				get: thrower,
-				getter: thrower,
-				set: thrower,
-				setter: thrower
-			});
+			instance.defineOwnProperty("callee", throwerProps);
+			instance.defineOwnProperty("caller", throwerProps);
 		} else {
 			instance.defineOwnProperty("callee", { 
 				configurable: true, 
@@ -175,7 +157,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createFunction: function (fnOrNode, proto, descriptor) {
+	createFunction: function (fnOrNode, proto, descriptor, strict) {
 		var instance;
 
 		if (typeof fnOrNode === "function") {
@@ -184,11 +166,12 @@ ObjectFactory.prototype = {
 			instance = new FunctionType(fnOrNode);
 		}
 
-		instance.init(this, proto, descriptor);
+		instance.init(this, proto, descriptor, strict);
 
+		// setProto("Function", instance, this.env);
 		var functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
-			instance.setPrototype(functionClass.getValue().getProperty("prototype").getValue());
+			instance.setPrototype(functionClass.getValue().getValue("prototype"));
 		}
 
 		return instance;
@@ -203,10 +186,32 @@ ObjectFactory.prototype = {
 			return fn.apply(this, arguments);
 		});
 
-		instance.setPrototype(this.env.getValue("Function").getProperty("prototype").getValue());
+		setProto("Function", instance, this.env);
+		// instance.setPrototype(this.env.getValue("Function").getValue("prototype"));
 		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
+	},
+	
+	createThrower: function (message, thrower) {
+		this.throwers = this.throwers || Object.create(null);
+		if (message in this.throwers) {
+			return this.throwers[message];
+		}
+		
+		thrower = thrower || function () {
+			throw new TypeError(message);
+		};
+		
+		let throwerInstance = this.createBuiltInFunction(thrower);
+		return this.throwers[message] = {
+			get: throwerInstance,
+			getter: thrower,
+			set: throwerInstance,
+			setter: thrower,
+			enumerable: false,
+			configurable: false
+		};
 	}
 };
 

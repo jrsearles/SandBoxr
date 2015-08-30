@@ -9,6 +9,7 @@ export function visit (node, callback) {
 	}
 	
 	switch (node.type) {
+		case "Program":
 		case "BlockStatement":
 			visit(node.body, callback);
 			break;

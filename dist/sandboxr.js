@@ -74,7 +74,7 @@ var SandBoxr = (function () {
 
 exports["default"] = SandBoxr;
 module.exports = exports["default"];
-},{"./env":169,"./execution-context":173,"./polyfills":176,"./utils/async":189,"babel-runtime/core-js/promise":10,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],2:[function(require,module,exports){
+},{"./env":169,"./execution-context":174,"./polyfills":177,"./utils/async":191,"babel-runtime/core-js/promise":10,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/get-iterator"), __esModule: true };
 },{"core-js/library/fn/get-iterator":26}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/sign"), __esModule: true };
@@ -2495,12 +2495,12 @@ function executeCallback(callback, thisArg, executionContext, index) {
 	var scope = executionContext.env.createScope(thisArg || executionContext.env.global);
 	scope.init(callback.node.body);
 
-	var undef = executionContext.env.global.getProperty("undefined").getValue();
+	var undef = executionContext.env.global.getValue("undefined");
 	var objectFactory = executionContext.env.objectFactory;
 	var args = [executionContext.node.getProperty(index).getValue(), objectFactory.createPrimitive(index), arr];
 	var executionResult;
 
-	func.loadArguments(executionContext.env, callback.node.params, args);
+	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
 	try {
 		executionResult = executionContext.create(callback.node.body, callback.node).execute();
@@ -2518,12 +2518,12 @@ function executeAccumulator(callback, priorValue, executionContext, index) {
 	var scope = executionContext.env.createScope();
 	scope.init(callback.node.body);
 
-	var undef = executionContext.env.global.getProperty("undefined").getValue();
+	var undef = executionContext.env.global.getValue("undefined");
 	var objectFactory = executionContext.env.objectFactory;
 	var args = [priorValue || undef, executionContext.node.getProperty(index).getValue() || undef, objectFactory.createPrimitive(index), arr];
 	var executionResult;
 
-	func.loadArguments(executionContext.env, callback.node.params, args);
+	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
 	try {
 		executionResult = executionContext.create(callback.node.body, callback.node).execute();
@@ -2548,7 +2548,7 @@ function createIndexProperty(value) {
 function arrayApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
-	var undef = globalObject.getProperty("undefined").getValue();
+	var undef = globalObject.getValue("undefined");
 
 	var arrayClass = objectFactory.createFunction(function (length) {
 		var newArray = objectFactory.create("Array");
@@ -3062,7 +3062,7 @@ function arrayApi(env) {
 				var scope = env.createScope(undef);
 				scope.init(compareFunction.node.body);
 
-				func.loadArguments(env, compareFunction.node.params, [a, b]);
+				func.loadArguments(env, compareFunction.node.params, [a, b], compareFunction);
 				var executionResult;
 
 				try {
@@ -3132,7 +3132,7 @@ function arrayApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../types/array-type":178,"../utils/contracts":191,"../utils/convert":192,"../utils/func":193,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],155:[function(require,module,exports){
+},{"../types/array-type":180,"../utils/contracts":193,"../utils/convert":194,"../utils/func":195,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],155:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3182,7 +3182,7 @@ function booleanApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],156:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],156:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3214,7 +3214,7 @@ function consoleApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],157:[function(require,module,exports){
+},{"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],157:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3331,7 +3331,7 @@ function dateApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],158:[function(require,module,exports){
+},{"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],158:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3412,7 +3412,7 @@ function errorApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],159:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],159:[function(require,module,exports){
 "use strict";
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
@@ -3530,7 +3530,8 @@ function functionApi(env, options) {
 				};
 
 				wrappedFunc.nativeLength = callee.params.length;
-				funcInstance = objectFactory.createFunction(wrappedFunc);
+				wrappedFunc.strict = strict;
+				funcInstance = objectFactory.createFunction(wrappedFunc, null, null, strict);
 				funcInstance.bindScope(env.globalScope);
 			})();
 		} else {
@@ -3602,17 +3603,15 @@ function functionApi(env, options) {
 		var callee = fn.native ? fn : fn.node;
 		thisArg = defineThis(env, this.node, thisArg);
 
-		var thrower = function thrower() {
-			throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-		};
-		var throwProperties = {
-			get: undefined,
-			getter: thrower,
-			set: undefined,
-			setter: thrower,
-			enumerable: false,
-			configurable: false
-		};
+		// var thrower = function () { throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them"); };
+		// var throwProperties = {
+		// 	get: undefined,
+		// 	getter: thrower,
+		// 	set: undefined,
+		// 	setter: thrower,
+		// 	enumerable: false,
+		// 	configurable: false
+		// };
 
 		var nativeFunc = function nativeFunc() {
 			for (var _len4 = arguments.length, additionArgs = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
@@ -3624,11 +3623,14 @@ function functionApi(env, options) {
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
+		nativeFunc.strict = env.isStrict() || fn.native && contracts.isStrictNode(fn.node.body.body);
 		var boundFunc = objectFactory.createFunction(nativeFunc);
 
-		boundFunc.defineOwnProperty("caller", throwProperties);
-		boundFunc.defineOwnProperty("arguments", throwProperties);
-		boundFunc.defineOwnProperty("callee", throwProperties);
+		// let throwProperties = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+
+		// boundFunc.defineOwnProperty("caller", throwProperties);
+		// boundFunc.defineOwnProperty("arguments", throwProperties);
+		// boundFunc.defineOwnProperty("callee", throwProperties);
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
 
@@ -3637,7 +3639,7 @@ function functionApi(env, options) {
 }
 
 module.exports = exports["default"];
-},{"../types/native-function-type":182,"../utils/contracts":191,"../utils/convert":192,"../utils/func":193,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],160:[function(require,module,exports){
+},{"../types/native-function-type":184,"../utils/contracts":193,"../utils/convert":194,"../utils/func":195,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],160:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3795,15 +3797,13 @@ function ecma51(env) {
 				throw err;
 			}
 
-			// use the same scope unless this is an "indirect" call
-			// in which case we use the global scope
-
 			var strictScope = env.isStrict();
 			var strictCode = strictScope || contracts.isStrictNode(ast.body);
 			var currentGlobal = env.current.parent === env.globalScope;
-
 			var scope = undefined;
 
+			// use the same scope unless this is an "indirect" call
+			// in which case we use the global scope
 			if (directCall) {
 				if (strictCode) {
 					var thisArg = undefined;
@@ -3863,7 +3863,7 @@ function ecma51(env) {
 
 module.exports = exports["default"];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../env/reference":172,"../types/object-factory":183,"../types/primitive-type":185,"../utils/contracts":191,"../utils/convert":192,"./array-api":154,"./boolean-api":155,"./console-api":156,"./date-api":157,"./error-api":158,"./function-api":159,"./json-api":161,"./math-api":162,"./number-api":163,"./object-api":164,"./regex-api":165,"./string-api":166,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],161:[function(require,module,exports){
+},{"../env/reference":172,"../types/object-factory":185,"../types/primitive-type":187,"../utils/contracts":193,"../utils/convert":194,"./array-api":154,"./boolean-api":155,"./console-api":156,"./date-api":157,"./error-api":158,"./function-api":159,"./json-api":161,"./math-api":162,"./number-api":163,"./object-api":164,"./regex-api":165,"./string-api":166,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],161:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4108,7 +4108,7 @@ function createReviver(env, reviver) {
 function jsonApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 	var jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
@@ -4140,7 +4140,7 @@ function jsonApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"../utils/func":193,"babel-runtime/helpers/interop-require-wildcard":19}],162:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"../utils/func":195,"babel-runtime/helpers/interop-require-wildcard":19}],162:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4175,7 +4175,7 @@ function mathApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],163:[function(require,module,exports){
+},{"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],163:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4264,7 +4264,7 @@ function numberApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],164:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],164:[function(require,module,exports){
 "use strict";
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
@@ -4309,7 +4309,7 @@ function defineProperty(env, obj, name, descriptor) {
 		throw new TypeError("Property description must be an object: " + convert.toString(env, descriptor));
 	}
 
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 	var options = {};
 
 	if (descriptor) {
@@ -4332,7 +4332,7 @@ function defineProperty(env, obj, name, descriptor) {
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
-			var getter = descriptor.getProperty("get").getValue() || undef;
+			var getter = descriptor.getValue("get") || undef;
 			if (getter.isPrimitive && getter.value === undefined) {
 				options.get = options.getter = undefined;
 			} else {
@@ -4358,7 +4358,7 @@ function defineProperty(env, obj, name, descriptor) {
 		}
 
 		if (hasSetter) {
-			var setter = descriptor.getProperty("set").getValue() || undef;
+			var setter = descriptor.getValue("set") || undef;
 			if (setter.isPrimitive && setter.value === undefined) {
 				options.set = options.setter = undefined;
 			} else {
@@ -4394,7 +4394,7 @@ function defineProperty(env, obj, name, descriptor) {
 function objectApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
-	var undef = globalObject.getProperty("undefined").getValue();
+	var undef = globalObject.getValue("undefined");
 
 	var proto = new _typesObjectType2["default"]();
 	var objectClass = objectFactory.createFunction(function (value) {
@@ -4436,10 +4436,8 @@ function objectApi(env) {
 
 	proto.define("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		var current = obj;
-		var thisNode = this.env.current.thisNode;
-
 		while (current) {
-			if (thisNode === current) {
+			if (this.node === current) {
 				return objectFactory.createPrimitive(true);
 			}
 
@@ -4625,7 +4623,7 @@ function objectApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../types/object-type":184,"../utils/contracts":191,"../utils/convert":192,"../utils/func":193,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],165:[function(require,module,exports){
+},{"../types/object-type":186,"../utils/contracts":193,"../utils/convert":194,"../utils/func":195,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],165:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4716,7 +4714,7 @@ function regexApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19}],166:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19}],166:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4931,7 +4929,7 @@ function stringApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"../utils/func":193,"babel-runtime/helpers/interop-require-wildcard":19}],167:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"../utils/func":195,"babel-runtime/helpers/interop-require-wildcard":19}],167:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -4961,7 +4959,7 @@ var DeclarativeEnvironment = (function () {
 		this.properties = _Object$create(null);
 		this.parent = parent;
 		this.strict = parent.strict;
-		this.thisNode = thisArg;
+		this.thisBinding = thisArg;
 		this.env = env;
 	}
 
@@ -4973,19 +4971,19 @@ var DeclarativeEnvironment = (function () {
 			return ref;
 		}
 	}, {
-		key: "hasVariable",
-		value: function hasVariable(name) {
+		key: "hasProperty",
+		value: function hasProperty(name) {
 			return name in this.properties;
 		}
 	}, {
-		key: "getVariable",
-		value: function getVariable(name) {
-			return this.properties[name];
+		key: "hasOwnProperty",
+		value: function hasOwnProperty(name) {
+			return this.hasProperty(name);
 		}
 	}, {
 		key: "deleteVariable",
 		value: function deleteVariable(name) {
-			if (!this.hasVariable(name)) {
+			if (!this.hasProperty(name)) {
 				return true;
 			}
 
@@ -4999,7 +4997,7 @@ var DeclarativeEnvironment = (function () {
 	}, {
 		key: "createVariable",
 		value: function createVariable(name) {
-			if (this.hasVariable(name)) {
+			if (this.hasProperty(name)) {
 				return this.properties[name];
 			}
 
@@ -5013,7 +5011,7 @@ var DeclarativeEnvironment = (function () {
 	}, {
 		key: "putValue",
 		value: function putValue(name, value, throwOnError) {
-			if (this.hasVariable(name)) {
+			if (this.hasProperty(name)) {
 				if (!this.properties[name].writable) {
 					if (throwOnError) {
 						throw new TypeError("Cannot write to immutable binding: " + name);
@@ -5030,7 +5028,7 @@ var DeclarativeEnvironment = (function () {
 	}, {
 		key: "getValue",
 		value: function getValue(name, throwOnError) {
-			if (this.hasVariable(name)) {
+			if (this.hasProperty(name)) {
 				if (!this.properties[name].value) {
 					if (throwOnError) {
 						throw new ReferenceError(name + " is not defined");
@@ -5045,7 +5043,7 @@ var DeclarativeEnvironment = (function () {
 	}, {
 		key: "getThisBinding",
 		value: function getThisBinding() {
-			return this.thisNode;
+			return this.thisBinding;
 		}
 	}]);
 
@@ -5054,7 +5052,7 @@ var DeclarativeEnvironment = (function () {
 
 exports["default"] = DeclarativeEnvironment;
 module.exports = exports["default"];
-},{"../types/property-descriptor":186,"./reference":172,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],168:[function(require,module,exports){
+},{"../types/property-descriptor":188,"./reference":172,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],168:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5075,6 +5073,7 @@ function visit(node, callback) {
 	}
 
 	switch (node.type) {
+		case "Program":
 		case "BlockStatement":
 			visit(node.body, callback);
 			break;
@@ -5149,6 +5148,8 @@ var _createClass = require("babel-runtime/helpers/create-class")["default"];
 
 var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
 
+var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
+
 var _Object$assign = require("babel-runtime/core-js/object/assign")["default"];
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
@@ -5189,6 +5190,44 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 
 var _hoister = require("./hoister");
 
+var _estreeWalker = require("../estree-walker");
+
+var _estreeWalker2 = _interopRequireDefault(_estreeWalker);
+
+var _syntaxRules = require("../syntax-rules");
+
+var _syntaxRules2 = _interopRequireDefault(_syntaxRules);
+
+function validateSyntax(root) {
+	var walker = _estreeWalker2["default"].create(root);
+	var _iteratorNormalCompletion = true;
+	var _didIteratorError = false;
+	var _iteratorError = undefined;
+
+	try {
+		for (var _iterator = _getIterator(walker), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			var node = _step.value;
+
+			if (node.type in _syntaxRules2["default"]) {
+				_syntaxRules2["default"][node.type](node, true);
+			}
+		}
+	} catch (err) {
+		_didIteratorError = true;
+		_iteratorError = err;
+	} finally {
+		try {
+			if (!_iteratorNormalCompletion && _iterator["return"]) {
+				_iterator["return"]();
+			}
+		} finally {
+			if (_didIteratorError) {
+				throw _iteratorError;
+			}
+		}
+	}
+}
+
 var Environment = (function () {
 	function Environment() {
 		_classCallCheck(this, Environment);
@@ -5216,7 +5255,7 @@ var Environment = (function () {
 		value: function getReference(name) {
 			var scope = this.current;
 			while (scope) {
-				if (scope.hasVariable(name)) {
+				if (scope.hasOwnProperty(name)) {
 					return scope.getReference(name, true);
 				}
 
@@ -5236,14 +5275,9 @@ var Environment = (function () {
 			this.current.putValue(name, value, strict);
 		}
 	}, {
-		key: "hasVariable",
-		value: function hasVariable(name) {
-			return this.current.hasVariable(name);
-		}
-	}, {
-		key: "getVariable",
-		value: function getVariable(name) {
-			return this.current.getVariable(name);
+		key: "hasProperty",
+		value: function hasProperty(name) {
+			return this.current.hasProperty(name);
 		}
 	}, {
 		key: "deleteVariable",
@@ -5270,7 +5304,6 @@ var Environment = (function () {
 			}
 
 			return false;
-			// return this.current && this.current.strict;
 		}
 	}, {
 		key: "getThisBinding",
@@ -5299,8 +5332,8 @@ var Environment = (function () {
 		}
 	}, {
 		key: "createObjectScope",
-		value: function createObjectScope(obj) {
-			var env = new _objectEnvironment2["default"](this.current, obj, this);
+		value: function createObjectScope(obj, thisArg) {
+			var env = new _objectEnvironment2["default"](this.current, obj, thisArg, this);
 			return this.setScope(env);
 		}
 	}, {
@@ -5309,27 +5342,28 @@ var Environment = (function () {
 			var _this = this;
 
 			var undef = this.global.getValue("undefined");
-			this.current.strict = contracts.isStrictNode(node);
+			this.current.strict = contracts.isStrictNode(node.body);
+
+			var strict = this.current.strict || this.isStrict();
+			if (strict && node.type === "Program") {
+				validateSyntax(node);
+			}
 
 			(0, _hoister.visit)(node, function (decl) {
 				var name = decl.name || decl.id.name;
 				contracts.assertIsValidParameterName(name, _this.isStrict());
 
+				var value = undef;
 				if (decl.type === "FunctionDeclaration") {
 					// functions can be used before they are defined
-					var func = _this.objectFactory.createFunction(decl);
-					func.bindScope(_this.current, _this.isStrict() || contracts.isStrictNode(decl.body.body));
-
-					_this.createVariable(name, true);
-					_this.putValue(name, func);
-				} else {
-					if (_this.hasVariable(name)) {
-						// shadow variable
-						_this.putValue(name, undef);
-					} else {
-						_this.createVariable(name, true);
-					}
+					value = _this.objectFactory.createFunction(decl, null, null, strict || contracts.isStrictNode(decl.body.body));
+					value.bindScope(_this.current);
+				} else if (_this.current.hasProperty(name)) {
+					return;
 				}
+
+				var newVar = _this.createVariable(name, true);
+				newVar.setValue(value);
 			});
 		}
 	}, {
@@ -5340,7 +5374,6 @@ var Environment = (function () {
 			var env = this;
 			var priorScope = this.current || this.globalScope;
 			this.current = scope;
-			// this.current.strict = priorScope.strict;
 
 			return {
 				init: function init(node) {
@@ -5363,7 +5396,7 @@ var Environment = (function () {
 
 exports["default"] = Environment;
 module.exports = exports["default"];
-},{"../ecma-5.1":160,"../execution-context":173,"../utils/comparers":190,"../utils/contracts":191,"./declarative-environment":167,"./hoister":168,"./object-environment":170,"./reference":172,"babel-runtime/core-js/object/assign":4,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],170:[function(require,module,exports){
+},{"../ecma-5.1":160,"../estree-walker":173,"../execution-context":174,"../syntax-rules":178,"../utils/comparers":192,"../utils/contracts":193,"./declarative-environment":167,"./hoister":168,"./object-environment":170,"./reference":172,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/assign":4,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],170:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5381,12 +5414,13 @@ var _propertyReference = require("./property-reference");
 var _propertyReference2 = _interopRequireDefault(_propertyReference);
 
 var ObjectEnvironment = (function () {
-	function ObjectEnvironment(parent, obj, env) {
+	function ObjectEnvironment(parent, obj, thisArg, env) {
 		_classCallCheck(this, ObjectEnvironment);
 
 		this.parent = parent;
 		this.strict = parent && parent.strict;
-		this.object = this.thisNode = obj;
+		this.object = obj;
+		this.thisBinding = thisArg || obj;
 		this.env = env;
 	}
 
@@ -5398,8 +5432,13 @@ var ObjectEnvironment = (function () {
 			return ref;
 		}
 	}, {
-		key: "hasVariable",
-		value: function hasVariable(name) {
+		key: "hasProperty",
+		value: function hasProperty(name) {
+			return this.parent ? this.parent.hasProperty(name) : this.hasOwnProperty(name);
+		}
+	}, {
+		key: "hasOwnProperty",
+		value: function hasOwnProperty(name) {
 			return this.object.hasProperty(name);
 		}
 	}, {
@@ -5423,7 +5462,7 @@ var ObjectEnvironment = (function () {
 					configurable: immutable,
 					enumerable: true,
 					writable: true
-				}, true);
+				}, this.env.isStrict());
 
 				return this.object.getProperty(name);
 			}
@@ -5440,7 +5479,7 @@ var ObjectEnvironment = (function () {
 	}, {
 		key: "getValue",
 		value: function getValue(name, throwOnError) {
-			if (!this.hasVariable(name)) {
+			if (!this.hasOwnProperty(name)) {
 				if (throwOnError) {
 					throw new ReferenceError(name + " is not defined.");
 				}
@@ -5453,7 +5492,7 @@ var ObjectEnvironment = (function () {
 	}, {
 		key: "getThisBinding",
 		value: function getThisBinding() {
-			return this.object;
+			return this.thisBinding;
 		}
 	}]);
 
@@ -5504,8 +5543,8 @@ var PropertyReference = (function (_Reference) {
 			return prop && prop.getValue() || new _typesPrimitiveType2["default"]();
 		}
 	}, {
-		key: "putValue",
-		value: function putValue(value) {
+		key: "setValue",
+		value: function setValue(value) {
 			if (this.base.hasProperty(this.name)) {
 				this.base.putValue(this.name, value, this.strict, this.env);
 			} else {
@@ -5529,7 +5568,7 @@ var PropertyReference = (function (_Reference) {
 
 exports["default"] = PropertyReference;
 module.exports = exports["default"];
-},{"../types/primitive-type":185,"./reference":172,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],172:[function(require,module,exports){
+},{"../types/primitive-type":187,"./reference":172,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],172:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5560,8 +5599,8 @@ var Reference = (function () {
 	}
 
 	_createClass(Reference, [{
-		key: "putValue",
-		value: function putValue(value) {
+		key: "setValue",
+		value: function setValue(value) {
 			if (this.base) {
 				return this.base.putValue(this.name, value, this.strict);
 			}
@@ -5603,7 +5642,409 @@ var Reference = (function () {
 
 exports["default"] = Reference;
 module.exports = exports["default"];
-},{"../utils/contracts":191,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],173:[function(require,module,exports){
+},{"../utils/contracts":193,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],173:[function(require,module,exports){
+"use strict";
+
+var _createClass = require("babel-runtime/helpers/create-class")["default"];
+
+var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+
+var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
+
+var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
+
+var _Symbol$iterator = require("babel-runtime/core-js/symbol/iterator")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+var marked0$0 = [walk].map(_regeneratorRuntime.mark);
+
+function walk(node) {
+	var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, n;
+
+	return _regeneratorRuntime.wrap(function walk$(context$1$0) {
+		while (1) switch (context$1$0.prev = context$1$0.next) {
+			case 0:
+				if (!Array.isArray(node)) {
+					context$1$0.next = 27;
+					break;
+				}
+
+				_iteratorNormalCompletion = true;
+				_didIteratorError = false;
+				_iteratorError = undefined;
+				context$1$0.prev = 4;
+				_iterator = _getIterator(node);
+
+			case 6:
+				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+					context$1$0.next = 12;
+					break;
+				}
+
+				n = _step.value;
+				return context$1$0.delegateYield(walk(n), "t0", 9);
+
+			case 9:
+				_iteratorNormalCompletion = true;
+				context$1$0.next = 6;
+				break;
+
+			case 12:
+				context$1$0.next = 18;
+				break;
+
+			case 14:
+				context$1$0.prev = 14;
+				context$1$0.t1 = context$1$0["catch"](4);
+				_didIteratorError = true;
+				_iteratorError = context$1$0.t1;
+
+			case 18:
+				context$1$0.prev = 18;
+				context$1$0.prev = 19;
+
+				if (!_iteratorNormalCompletion && _iterator["return"]) {
+					_iterator["return"]();
+				}
+
+			case 21:
+				context$1$0.prev = 21;
+
+				if (!_didIteratorError) {
+					context$1$0.next = 24;
+					break;
+				}
+
+				throw _iteratorError;
+
+			case 24:
+				return context$1$0.finish(21);
+
+			case 25:
+				return context$1$0.finish(18);
+
+			case 26:
+				return context$1$0.abrupt("return");
+
+			case 27:
+				context$1$0.next = 29;
+				return node;
+
+			case 29:
+				context$1$0.t2 = node.type;
+				context$1$0.next = context$1$0.t2 === "ArrayExpression" ? 32 : context$1$0.t2 === "AssignmentExpression" ? 35 : context$1$0.t2 === "BinaryExpression" ? 38 : context$1$0.t2 === "LogicalExpression" ? 38 : context$1$0.t2 === "BlockStatement" ? 41 : context$1$0.t2 === "LabeledStatement" ? 41 : context$1$0.t2 === "Program" ? 41 : context$1$0.t2 === "CallExpression" ? 43 : context$1$0.t2 === "NewExpression" ? 43 : context$1$0.t2 === "CatchClause" ? 46 : context$1$0.t2 === "ConditionalExpression" ? 49 : context$1$0.t2 === "IfStatement" ? 49 : context$1$0.t2 === "DoWhileStatement" ? 54 : context$1$0.t2 === "ExpressionStatement" ? 57 : context$1$0.t2 === "ForStatement" ? 59 : context$1$0.t2 === "ForInStatement" ? 67 : context$1$0.t2 === "FunctionDeclaration" ? 71 : context$1$0.t2 === "FunctionExpression" ? 71 : context$1$0.t2 === "MemberExpression" ? 76 : context$1$0.t2 === "ObjectExpression" ? 80 : context$1$0.t2 === "Property" ? 82 : context$1$0.t2 === "ReturnStatement" ? 84 : context$1$0.t2 === "SequenceExpression" ? 87 : context$1$0.t2 === "SwitchStatement" ? 89 : context$1$0.t2 === "SwitchCase" ? 92 : context$1$0.t2 === "ThrowStatement" ? 94 : context$1$0.t2 === "UnaryExpression" ? 94 : context$1$0.t2 === "UpdateExpression" ? 94 : context$1$0.t2 === "TryStatement" ? 96 : context$1$0.t2 === "VariableDeclaration" ? 102 : context$1$0.t2 === "VariableDeclarator" ? 104 : context$1$0.t2 === "WhileStatement" ? 108 : context$1$0.t2 === "WithStatement" ? 111 : context$1$0.t2 === "BreakStatement" ? 114 : context$1$0.t2 === "ContinueStatement" ? 114 : context$1$0.t2 === "EmptyStatement" ? 114 : context$1$0.t2 === "Identifier" ? 114 : context$1$0.t2 === "Literal" ? 114 : context$1$0.t2 === "ThisExpression" ? 114 : 115;
+				break;
+
+			case 32:
+				if (!node.elements) {
+					context$1$0.next = 34;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.elements), "t3", 34);
+
+			case 34:
+				return context$1$0.abrupt("break", 115);
+
+			case 35:
+				return context$1$0.delegateYield(walk(node.right), "t4", 36);
+
+			case 36:
+				return context$1$0.delegateYield(walk(node.left), "t5", 37);
+
+			case 37:
+				return context$1$0.abrupt("break", 115);
+
+			case 38:
+				return context$1$0.delegateYield(walk(node.left), "t6", 39);
+
+			case 39:
+				return context$1$0.delegateYield(walk(node.right), "t7", 40);
+
+			case 40:
+				return context$1$0.abrupt("break", 115);
+
+			case 41:
+				return context$1$0.delegateYield(walk(node.body), "t8", 42);
+
+			case 42:
+				return context$1$0.abrupt("break", 115);
+
+			case 43:
+				return context$1$0.delegateYield(walk(node.callee), "t9", 44);
+
+			case 44:
+				return context$1$0.delegateYield(walk(node.arguments), "t10", 45);
+
+			case 45:
+				return context$1$0.abrupt("break", 115);
+
+			case 46:
+				return context$1$0.delegateYield(walk(node.param), "t11", 47);
+
+			case 47:
+				return context$1$0.delegateYield(walk(node.body), "t12", 48);
+
+			case 48:
+				return context$1$0.abrupt("break", 115);
+
+			case 49:
+				return context$1$0.delegateYield(walk(node.test), "t13", 50);
+
+			case 50:
+				return context$1$0.delegateYield(walk(node.consequent), "t14", 51);
+
+			case 51:
+				if (!node.alternate) {
+					context$1$0.next = 53;
+					break;
+				}
+
+				return context$1$0.delegateYield(node.alternate, "t15", 53);
+
+			case 53:
+				return context$1$0.abrupt("break", 115);
+
+			case 54:
+				return context$1$0.delegateYield(walk(node.body), "t16", 55);
+
+			case 55:
+				return context$1$0.delegateYield(walk(node.test), "t17", 56);
+
+			case 56:
+				return context$1$0.abrupt("break", 115);
+
+			case 57:
+				return context$1$0.delegateYield(walk(node.expression), "t18", 58);
+
+			case 58:
+				return context$1$0.abrupt("break", 115);
+
+			case 59:
+				if (!node.init) {
+					context$1$0.next = 61;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.init), "t19", 61);
+
+			case 61:
+				if (!node.test) {
+					context$1$0.next = 63;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.test), "t20", 63);
+
+			case 63:
+				return context$1$0.delegateYield(walk(node.body), "t21", 64);
+
+			case 64:
+				if (!node.update) {
+					context$1$0.next = 66;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.update), "t22", 66);
+
+			case 66:
+				return context$1$0.abrupt("break", 115);
+
+			case 67:
+				return context$1$0.delegateYield(walk(node.right), "t23", 68);
+
+			case 68:
+				return context$1$0.delegateYield(walk(node.left), "t24", 69);
+
+			case 69:
+				return context$1$0.delegateYield(walk(node.body), "t25", 70);
+
+			case 70:
+				return context$1$0.abrupt("break", 115);
+
+			case 71:
+				if (!node.id) {
+					context$1$0.next = 73;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.id), "t26", 73);
+
+			case 73:
+				return context$1$0.delegateYield(walk(node.params), "t27", 74);
+
+			case 74:
+				return context$1$0.delegateYield(walk(node.body), "t28", 75);
+
+			case 75:
+				return context$1$0.abrupt("break", 115);
+
+			case 76:
+				return context$1$0.delegateYield(walk(node.object), "t29", 77);
+
+			case 77:
+				if (!node.computed) {
+					context$1$0.next = 79;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.property), "t30", 79);
+
+			case 79:
+				return context$1$0.abrupt("break", 115);
+
+			case 80:
+				return context$1$0.delegateYield(walk(node.properties), "t31", 81);
+
+			case 81:
+				return context$1$0.abrupt("break", 115);
+
+			case 82:
+				return context$1$0.delegateYield(walk(node.value), "t32", 83);
+
+			case 83:
+				return context$1$0.abrupt("break", 115);
+
+			case 84:
+				if (!node.argument) {
+					context$1$0.next = 86;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.argument), "t33", 86);
+
+			case 86:
+				return context$1$0.abrupt("break", 115);
+
+			case 87:
+				return context$1$0.delegateYield(walk(node.expressions), "t34", 88);
+
+			case 88:
+				return context$1$0.abrupt("break", 115);
+
+			case 89:
+				return context$1$0.delegateYield(walk(node.discriminant), "t35", 90);
+
+			case 90:
+				return context$1$0.delegateYield(walk(node.cases), "t36", 91);
+
+			case 91:
+				return context$1$0.abrupt("break", 115);
+
+			case 92:
+				return context$1$0.delegateYield(walk(node.consequent), "t37", 93);
+
+			case 93:
+				return context$1$0.abrupt("break", 115);
+
+			case 94:
+				return context$1$0.delegateYield(walk(node.argument), "t38", 95);
+
+			case 95:
+				return context$1$0.abrupt("break", 115);
+
+			case 96:
+				return context$1$0.delegateYield(walk(node.block), "t39", 97);
+
+			case 97:
+				if (!node.handler) {
+					context$1$0.next = 99;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.handler), "t40", 99);
+
+			case 99:
+				if (!node.finalizer) {
+					context$1$0.next = 101;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.finalizer), "t41", 101);
+
+			case 101:
+				return context$1$0.abrupt("break", 115);
+
+			case 102:
+				return context$1$0.delegateYield(walk(node.declarations), "t42", 103);
+
+			case 103:
+				return context$1$0.abrupt("break", 115);
+
+			case 104:
+				return context$1$0.delegateYield(walk(node.id), "t43", 105);
+
+			case 105:
+				if (!node.init) {
+					context$1$0.next = 107;
+					break;
+				}
+
+				return context$1$0.delegateYield(walk(node.init), "t44", 107);
+
+			case 107:
+				return context$1$0.abrupt("break", 115);
+
+			case 108:
+				return context$1$0.delegateYield(walk(node.test), "t45", 109);
+
+			case 109:
+				return context$1$0.delegateYield(walk(node.body), "t46", 110);
+
+			case 110:
+				return context$1$0.abrupt("break", 115);
+
+			case 111:
+				return context$1$0.delegateYield(walk(node.object), "t47", 112);
+
+			case 112:
+				return context$1$0.delegateYield(walk(node.body), "t48", 113);
+
+			case 113:
+				return context$1$0.abrupt("break", 115);
+
+			case 114:
+				return context$1$0.abrupt("break", 115);
+
+			case 115:
+			case "end":
+				return context$1$0.stop();
+		}
+	}, marked0$0[0], this, [[4, 14, 18, 26], [19,, 21, 25]]);
+}
+
+var EstreeWalker = (function () {
+	function EstreeWalker(node) {
+		_classCallCheck(this, EstreeWalker);
+
+		this.root = node;
+	}
+
+	_createClass(EstreeWalker, [{
+		key: _Symbol$iterator,
+		value: function value() {
+			return walk(this.root);
+		}
+	}], [{
+		key: "create",
+		value: function create(node) {
+			return new EstreeWalker(node);
+		}
+	}]);
+
+	return EstreeWalker;
+})();
+
+exports["default"] = EstreeWalker;
+;
+module.exports = exports["default"];
+
+// right should be evaluated first
+
+// do nothing else
+},{"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/symbol/iterator":12,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/regenerator":20}],174:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -5698,7 +6139,7 @@ ExecutionContext.prototype = {
 	}
 };
 module.exports = exports["default"];
-},{"./execution-result":174,"./utils/async":189,"./visitors":210,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],174:[function(require,module,exports){
+},{"./execution-result":175,"./utils/async":191,"./visitors":212,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],175:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5766,7 +6207,7 @@ var ExecutionResult = (function () {
 
 exports["default"] = ExecutionResult;
 module.exports = exports["default"];
-},{"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14}],175:[function(require,module,exports){
+},{"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14}],176:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5788,7 +6229,7 @@ exports["default"] = {
 	}
 };
 module.exports = exports["default"];
-},{}],176:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 "use strict";
 
 require("core-js/fn/string/repeat");
@@ -5796,7 +6237,79 @@ require("core-js/fn/string/repeat");
 require("core-js/fn/math/sign");
 
 require("core-js/es6/promise");
-},{"core-js/es6/promise":23,"core-js/fn/math/sign":24,"core-js/fn/string/repeat":25}],177:[function(require,module,exports){
+},{"core-js/es6/promise":23,"core-js/fn/math/sign":24,"core-js/fn/string/repeat":25}],178:[function(require,module,exports){
+"use strict";
+
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _utilsContracts = require("./utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
+function validateAssignment(left, strict) {
+	if (strict && left.type === "Identifier") {
+		contracts.assertIsValidName(left.name, strict);
+	}
+}
+
+var syntaxRules = {
+	"AssignmentExpression": function AssignmentExpression(node, strict) {
+		validateAssignment(node.left, strict);
+	},
+
+	"CatchClause": function CatchClause(node, strict) {
+		contracts.assertIsValidName(node.param.name, strict);
+	},
+
+	"Identifier": function Identifier(node, strict) {
+		contracts.assertIsValidIdentifier(node.name, strict);
+	},
+
+	"FunctionDeclaration": function FunctionDeclaration(node, strict) {
+		contracts.assertIsValidName(node.id.name, strict);
+		contracts.assertAreValidArguments(node.params, strict);
+	},
+
+	"FunctionExpression": function FunctionExpression(node, strict) {
+		if (node.id) {
+			contracts.assertIsValidName(node.id.name, strict);
+		}
+
+		contracts.assertAreValidArguments(node.params, strict);
+	},
+
+	"Literal": function Literal(node, strict) {
+		if (!strict || !node.raw) {
+			return;
+		}
+
+		if (contracts.isOctalLiteral(node.raw, node.value)) {
+			throw new SyntaxError("Octal literals are not allowed in strict mode.");
+		}
+	},
+
+	"UpdateExpression": function UpdateExpression(node, strict) {
+		validateAssignment(node.argument, strict);
+	},
+
+	"VariableDeclarator": function VariableDeclarator(node, strict) {
+		contracts.assertIsValidName(node.id.name, strict);
+	},
+
+	"WithStatement": function WithStatement(node, strict) {
+		if (strict) {
+			throw new SyntaxError("Strict mode code may not include a with statement");
+		}
+	}
+};
+
+exports["default"] = syntaxRules;
+module.exports = exports["default"];
+},{"./utils/contracts":193,"babel-runtime/helpers/interop-require-wildcard":19}],179:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -5901,7 +6414,7 @@ var ArgumentType = (function (_ObjectType) {
 
 exports["default"] = ArgumentType;
 module.exports = exports["default"];
-},{"./object-type":184,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],178:[function(require,module,exports){
+},{"./object-type":186,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],180:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6074,7 +6587,7 @@ var ArrayType = (function (_ObjectType) {
 
 exports["default"] = ArrayType;
 module.exports = exports["default"];
-},{"../utils/contracts":191,"../utils/convert":192,"./object-type":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],179:[function(require,module,exports){
+},{"../utils/contracts":193,"../utils/convert":194,"./object-type":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],181:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6124,7 +6637,7 @@ var DateType = (function (_ObjectType) {
 
 exports["default"] = DateType;
 module.exports = exports["default"];
-},{"./object-type":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],180:[function(require,module,exports){
+},{"./object-type":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],182:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6159,7 +6672,7 @@ var ErrorType = (function (_ObjectType) {
 
 exports["default"] = ErrorType;
 module.exports = exports["default"];
-},{"./object-type":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],181:[function(require,module,exports){
+},{"./object-type":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],183:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6208,7 +6721,11 @@ var FunctionType = (function (_ObjectType) {
 
 	_createClass(FunctionType, [{
 		key: "init",
-		value: function init(objectFactory, proto, descriptor) {
+		value: function init(objectFactory, proto, descriptor, strict) {
+			if (strict !== undefined) {
+				this.strict = strict;
+			}
+
 			// set length property from the number of parameters
 			this.defineOwnProperty("length", {
 				value: objectFactory.createPrimitive(this.node.params.length),
@@ -6217,10 +6734,25 @@ var FunctionType = (function (_ObjectType) {
 				writable: false
 			});
 
+			this.initStrict(objectFactory);
+
 			// functions have a prototype
 			proto = proto || objectFactory.createObject();
-			proto.properties.constructor = new _propertyDescriptor2["default"](this, { configurable: true, enumerable: false, writable: true, value: this });
 			this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
+
+			// set the contructor property as an instance of  itself
+			proto.properties.constructor = new _propertyDescriptor2["default"](this, { configurable: true, enumerable: false, writable: true, value: this });
+		}
+	}, {
+		key: "initStrict",
+		value: function initStrict(objectFactory) {
+			if (this.isStrict()) {
+				var throwerProps = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+				this.defineOwnProperty("caller", throwerProps);
+				this.defineOwnProperty("arguments", throwerProps);
+			} else {
+				this.defineOwnProperty("caller", { value: objectFactory.createPrimitive(undefined) });
+			}
 		}
 	}, {
 		key: "getProperty",
@@ -6241,9 +6773,8 @@ var FunctionType = (function (_ObjectType) {
 		}
 	}, {
 		key: "bindScope",
-		value: function bindScope(scope, strict) {
+		value: function bindScope(scope) {
 			this.parentScope = scope;
-			this.strict = strict;
 		}
 	}, {
 		key: "isStrict",
@@ -6278,7 +6809,7 @@ var FunctionType = (function (_ObjectType) {
 			return {
 				init: function init() {
 					if (!fn.native) {
-						scope.init(fn.node.body.body);
+						scope.init(fn.node.body);
 					}
 				},
 
@@ -6332,7 +6863,7 @@ var FunctionType = (function (_ObjectType) {
 
 exports["default"] = FunctionType;
 module.exports = exports["default"];
-},{"../utils/contracts":191,"./object-type":184,"./property-descriptor":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],182:[function(require,module,exports){
+},{"../utils/contracts":193,"./object-type":186,"./property-descriptor":188,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],184:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6377,6 +6908,11 @@ var NativeFunctionType = (function (_FunctionType) {
 				length = this.nativeFunction.nativeLength;
 			}
 
+			if ("strict" in this.nativeFunction) {
+				this.strict = this.nativeFunction.strict;
+			}
+
+			this.initStrict(objectFactory);
 			this.defineOwnProperty("length", {
 				value: objectFactory.createPrimitive(length),
 				configurable: false,
@@ -6404,7 +6940,7 @@ var NativeFunctionType = (function (_FunctionType) {
 
 exports["default"] = NativeFunctionType;
 module.exports = exports["default"];
-},{"./function-type":181,"./property-descriptor":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],183:[function(require,module,exports){
+},{"./function-type":183,"./property-descriptor":188,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],185:[function(require,module,exports){
 "use strict";
 
 var _Object$create = require("babel-runtime/core-js/object/create")["default"];
@@ -6464,8 +7000,7 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 
 var parentless = {
 	"Undefined": true,
-	"Null": true,
-	"Function": true
+	"Null": true
 };
 
 var orphans = _Object$create(null);
@@ -6576,7 +7111,7 @@ ObjectFactory.prototype = {
 
 		if (parent !== null) {
 			if (parent) {
-				instance.setPrototype(parent && parent.getProperty("prototype").getValue());
+				instance.setPrototype(parent && parent.getValue("prototype"));
 			} else {
 				setProto("Object", instance, this.env);
 			}
@@ -6590,31 +7125,14 @@ ObjectFactory.prototype = {
 		var instance = new _argumentType2["default"]();
 		var objectClass = this.env.global.getValue("Object");
 
-		instance.init(this, objectClass, objectClass.proto);
+		instance.init(this, objectClass, objectClass.getPrototype());
 		instance.setPrototype(objectClass.getValue("prototype"));
 
 		if (strict) {
-			var thrower = function thrower() {
-				throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-			};
+			var throwerProps = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
 
-			instance.defineOwnProperty("callee", {
-				configurable: false,
-				enumerable: false,
-				get: thrower,
-				getter: thrower,
-				set: thrower,
-				setter: thrower
-			});
-
-			instance.defineOwnProperty("caller", {
-				configurable: false,
-				enumerable: false,
-				get: thrower,
-				getter: thrower,
-				set: thrower,
-				setter: thrower
-			});
+			instance.defineOwnProperty("callee", throwerProps);
+			instance.defineOwnProperty("caller", throwerProps);
 		} else {
 			instance.defineOwnProperty("callee", {
 				configurable: true,
@@ -6627,7 +7145,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createFunction: function createFunction(fnOrNode, proto, descriptor) {
+	createFunction: function createFunction(fnOrNode, proto, descriptor, strict) {
 		var instance;
 
 		if (typeof fnOrNode === "function") {
@@ -6636,11 +7154,12 @@ ObjectFactory.prototype = {
 			instance = new _functionType2["default"](fnOrNode);
 		}
 
-		instance.init(this, proto, descriptor);
+		instance.init(this, proto, descriptor, strict);
 
+		// setProto("Function", instance, this.env);
 		var functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
-			instance.setPrototype(functionClass.getValue().getProperty("prototype").getValue());
+			instance.setPrototype(functionClass.getValue().getValue("prototype"));
 		}
 
 		return instance;
@@ -6655,16 +7174,38 @@ ObjectFactory.prototype = {
 			return fn.apply(this, arguments);
 		});
 
-		instance.setPrototype(this.env.getValue("Function").getProperty("prototype").getValue());
+		setProto("Function", instance, this.env);
+		// instance.setPrototype(this.env.getValue("Function").getValue("prototype"));
 		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
+	},
+
+	createThrower: function createThrower(message, thrower) {
+		this.throwers = this.throwers || _Object$create(null);
+		if (message in this.throwers) {
+			return this.throwers[message];
+		}
+
+		thrower = thrower || function () {
+			throw new TypeError(message);
+		};
+
+		var throwerInstance = this.createBuiltInFunction(thrower);
+		return this.throwers[message] = {
+			get: throwerInstance,
+			getter: thrower,
+			set: throwerInstance,
+			setter: thrower,
+			enumerable: false,
+			configurable: false
+		};
 	}
 };
 
 module.exports = ObjectFactory;
 module.exports = exports["default"];
-},{"../utils/contracts":191,"./argument-type":177,"./array-type":178,"./date-type":179,"./error-type":180,"./function-type":181,"./native-function-type":182,"./object-type":184,"./primitive-type":185,"./regex-type":187,"./string-type":188,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],184:[function(require,module,exports){
+},{"../utils/contracts":193,"./argument-type":179,"./array-type":180,"./date-type":181,"./error-type":182,"./function-type":183,"./native-function-type":184,"./object-type":186,"./primitive-type":187,"./regex-type":189,"./string-type":190,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],186:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -6921,7 +7462,7 @@ var ObjectType = (function () {
 
 exports["default"] = ObjectType;
 module.exports = exports["default"];
-},{"./property-descriptor":186,"babel-runtime/core-js/object/create":5,"babel-runtime/core-js/object/keys":8,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],185:[function(require,module,exports){
+},{"./property-descriptor":188,"babel-runtime/core-js/object/create":5,"babel-runtime/core-js/object/keys":8,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],187:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6983,7 +7524,7 @@ var PrimitiveType = (function (_ObjectType) {
 
 exports["default"] = PrimitiveType;
 module.exports = exports["default"];
-},{"../utils/contracts":191,"./object-type":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],186:[function(require,module,exports){
+},{"../utils/contracts":193,"./object-type":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],188:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -7136,7 +7677,7 @@ var PropertyDescriptor = (function () {
 
 exports["default"] = PropertyDescriptor;
 module.exports = exports["default"];
-},{"../utils/comparers":190,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],187:[function(require,module,exports){
+},{"../utils/comparers":192,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],189:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -7190,7 +7731,7 @@ var RegexType = (function (_ObjectType) {
 
 exports["default"] = RegexType;
 module.exports = exports["default"];
-},{"./object-type":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],188:[function(require,module,exports){
+},{"./object-type":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],190:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -7290,7 +7831,7 @@ var StringType = (function (_PrimitiveType) {
 
 exports["default"] = StringType;
 module.exports = exports["default"];
-},{"../utils/contracts":191,"./primitive-type":185,"./property-descriptor":186,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],189:[function(require,module,exports){
+},{"../utils/contracts":193,"./primitive-type":187,"./property-descriptor":188,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],191:[function(require,module,exports){
 "use strict";
 
 var _Promise = require("babel-runtime/core-js/promise")["default"];
@@ -7364,7 +7905,7 @@ function promisify(obj) {
 
 	return _Promise.resolve(obj);
 }
-},{"../polyfills":176,"babel-runtime/core-js/promise":10}],190:[function(require,module,exports){
+},{"../polyfills":177,"babel-runtime/core-js/promise":10}],192:[function(require,module,exports){
 "use strict";
 
 var _defineProperty = require("babel-runtime/helpers/define-property")["default"];
@@ -7500,8 +8041,10 @@ var comparers = (_comparers = {
 
 exports["default"] = comparers;
 module.exports = exports["default"];
-},{"./convert":192,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],191:[function(require,module,exports){
+},{"./convert":194,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],193:[function(require,module,exports){
 "use strict";
+
+var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
 
@@ -7516,10 +8059,13 @@ exports.assertIsNotConstructor = assertIsNotConstructor;
 exports.assertIsValidArrayLength = assertIsValidArrayLength;
 exports.assertIsValidAssignment = assertIsValidAssignment;
 exports.assertIsValidParameterName = assertIsValidParameterName;
+exports.assertIsValidName = assertIsValidName;
 exports.assertIsNotGeneric = assertIsNotGeneric;
 exports.assertIsValidIdentifier = assertIsValidIdentifier;
+exports.assertAreValidArguments = assertAreValidArguments;
 exports.isValidArrayLength = isValidArrayLength;
 exports.isObject = isObject;
+exports.isOctalLiteral = isOctalLiteral;
 exports.getType = getType;
 exports.isNullOrUndefined = isNullOrUndefined;
 exports.isUndefined = isUndefined;
@@ -7531,10 +8077,13 @@ var _keywords = require("../keywords");
 
 var _keywords2 = _interopRequireDefault(_keywords);
 
-var objectRgx = /\[object (\w+)\]/;
-var integerRgx = /^-?\d+$/;
+var objectPattern = /\[object (\w+)\]/;
+var integerPattern = /^-?\d+$/;
+var octalPattern = /^-?0[0-7]/;
+var octalEscapePattern = /^([^\\]|\\[^0-7])*\\([0-3][0-7]{1,2}|[4-7][0-7]|[0-7])/;
+var useStrictPattern = /^\s*(?:'use strict'|"use strict")\s*;?\s*$/;
 
-function assertIsObject(obj, methodName, message) {
+function assertIsObject(obj, methodName) {
 	if (!isObject(obj)) {
 		throw new TypeError(methodName + " called on non-object");
 	}
@@ -7575,7 +8124,9 @@ function assertIsValidAssignment(left, strict) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
 
-	assertIsValidName(left.name, strict);
+	if (left && left.base === left.env.global) {
+		assertIsValidName(left.name, strict);
+	}
 }
 
 function assertIsValidParameterName(name, strict) {
@@ -7608,6 +8159,20 @@ function assertIsValidIdentifier(name, strict) {
 	}
 }
 
+function assertAreValidArguments(params, strict) {
+	if (strict) {
+		params.forEach(function (param, index) {
+			assertIsValidName(param.name, strict);
+
+			if (params.some(function (p, i) {
+				return index !== i && param.name === p.name;
+			})) {
+				throw new SyntaxError("Strict mode function may not have duplicate parameter names");
+			}
+		});
+	}
+}
+
 function isValidArrayLength(length) {
 	return isInteger(length) && length >= 0 && length < 4294967296;
 }
@@ -7624,8 +8189,26 @@ function isObject(obj) {
 	return true;
 }
 
+function isOctalLiteral(rawValue, actualValue) {
+	if (typeof actualValue === "number" && octalPattern.test(rawValue)) {
+		return true;
+	}
+
+	if (typeof actualValue === "string") {
+		var match = rawValue.match(octalEscapePattern);
+		if (match) {
+			// \0 is actually not considered an octal
+			if (match[2] !== "0" || typeof match[3] !== "undefined") {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 function getType(obj) {
-	return objectRgx.exec(Object.prototype.toString.call(obj))[1];
+	return objectPattern.exec(Object.prototype.toString.call(obj))[1];
 }
 
 function isNullOrUndefined(obj) {
@@ -7642,7 +8225,7 @@ function isNull(obj) {
 
 function isInteger(value) {
 	if (typeof value === "string") {
-		return integerRgx.test(value);
+		return integerPattern.test(value);
 	}
 
 	if (typeof value === "number") {
@@ -7652,23 +8235,47 @@ function isInteger(value) {
 	return false;
 }
 
-function isStrictNode(_x) {
-	var _again = true;
-
-	_function: while (_again) {
-		var node = _x;
-		_again = false;
-
-		if (Array.isArray(node)) {
-			_x = node[0];
-			_again = true;
-			continue _function;
-		}
-
-		return node && node.type === "ExpressionStatement" && node.expression.type === "Literal" && node.expression.value === "use strict";
-	}
+function isDirective(node) {
+	return node.type === "ExpressionStatement" && node.expression.type === "Literal" && typeof node.expression.value === "string";
 }
-},{"../keywords":175,"babel-runtime/helpers/interop-require-default":18}],192:[function(require,module,exports){
+
+function isStrictNode(nodes) {
+	if (Array.isArray(nodes)) {
+		var _iteratorNormalCompletion = true;
+		var _didIteratorError = false;
+		var _iteratorError = undefined;
+
+		try {
+			for (var _iterator = _getIterator(nodes), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+				var node = _step.value;
+
+				if (!isDirective(node)) {
+					return false;
+				}
+
+				if (node.expression.value === "use strict" && useStrictPattern.test(node.expression.raw)) {
+					return true;
+				}
+			}
+		} catch (err) {
+			_didIteratorError = true;
+			_iteratorError = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion && _iterator["return"]) {
+					_iterator["return"]();
+				}
+			} finally {
+				if (_didIteratorError) {
+					throw _iteratorError;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+},{"../keywords":176,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18}],194:[function(require,module,exports){
 "use strict";
 
 var _Math$sign = require("babel-runtime/core-js/math/sign")["default"];
@@ -7860,7 +8467,7 @@ function toNativeFunction(env, fn, name) {
 		return env.objectFactory.createPrimitive(value);
 	}, fn.length, name);
 }
-},{"../polyfills":176,"../utils/func":193,"babel-runtime/core-js/math/sign":3,"babel-runtime/helpers/interop-require-wildcard":19}],193:[function(require,module,exports){
+},{"../polyfills":177,"../utils/func":195,"babel-runtime/core-js/math/sign":3,"babel-runtime/helpers/interop-require-wildcard":19}],195:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -7975,7 +8582,7 @@ function loadArguments(env, params, args, callee) {
 	params.forEach(function (param, index) {
 		contracts.assertIsValidParameterName(param.name, strict);
 
-		if (!callee.isStrict() && !env.current.hasVariable(param.name)) {
+		if (!callee.isStrict() && !env.current.hasProperty(param.name)) {
 			var descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
 				argumentList.mapProperty(index, descriptor);
@@ -8039,7 +8646,7 @@ function tryCallMethod(env, obj, name) {
 
 	return false;
 }
-},{"./async":189,"./contracts":191,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],194:[function(require,module,exports){
+},{"./async":191,"./contracts":193,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],196:[function(require,module,exports){
 "use strict";
 
 var _defineProperty = require("babel-runtime/helpers/define-property")["default"];
@@ -8105,7 +8712,7 @@ exports["default"] = (_$$$$$$$$$$$in$instanceof = {}, _defineProperty(_$$$$$$$$$
 	return b.hasInstance(a);
 }), _$$$$$$$$$$$in$instanceof);
 module.exports = exports["default"];
-},{"./convert":192,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],195:[function(require,module,exports){
+},{"./convert":194,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],197:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8171,7 +8778,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ArrayExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/regenerator":20}],196:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/regenerator":20}],198:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8224,7 +8831,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 					newValue = context.env.objectFactory.createPrimitive(rawValue);
 				}
 
-				left.putValue(newValue);
+				left.setValue(newValue);
 				return context$1$0.abrupt("return", context.result(newValue));
 
 			case 12:
@@ -8236,7 +8843,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 module.exports = exports["default"];
 
 // remove equals
-},{"../utils/async":189,"../utils/contracts":191,"../utils/operators":194,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],197:[function(require,module,exports){
+},{"../utils/async":191,"../utils/contracts":193,"../utils/operators":196,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],199:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8258,7 +8865,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function BinaryExpression$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
-				undef = context.env.global.getProperty("undefined").getValue();
+				undef = context.env.global.getValue("undefined");
 				context$1$0.next = 3;
 				return context.create(context.node.left).execute();
 
@@ -8287,7 +8894,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, BinaryExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/operators":194,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],198:[function(require,module,exports){
+},{"../utils/async":191,"../utils/operators":196,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],200:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8308,7 +8915,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 			case 0:
 
 				if (context.node.type === "Program") {
-					context.env.initScope(context.node.body);
+					context.env.initScope(context.node);
 				}
 
 				_iteratorNormalCompletion = true;
@@ -8390,7 +8997,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, BlockStatement, this, [[4, 19, 23, 31], [24,, 26, 30]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],199:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],201:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8426,9 +9033,9 @@ function assignThis(env, fnMember, fn, isNew, native) {
 		return native ? null : env.objectFactory.createObject(fn);
 	}
 
-	if (fnMember instanceof _envPropertyReference2["default"] && fnMember.base !== env.global) {
-		return convert.toObject(env, fnMember.base);
-	}
+	if (fnMember instanceof _envPropertyReference2["default"] && !fnMember.unqualified /*&& fnMember.base !== env.global*/) {
+			return convert.toObject(env, fnMember.base);
+		}
 
 	return null;
 }
@@ -8538,7 +9145,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, CallExpression, this, [[10, 24, 28, 36], [29,, 31, 35]]);
 }));
 module.exports = exports["default"];
-},{"../env/property-reference":171,"../utils/async":189,"../utils/convert":192,"../utils/func":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],200:[function(require,module,exports){
+},{"../env/property-reference":171,"../utils/async":191,"../utils/convert":194,"../utils/func":195,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8551,7 +9158,7 @@ function DebuggerStatement(context) {
 }
 
 module.exports = exports["default"];
-},{}],201:[function(require,module,exports){
+},{}],203:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8630,7 +9237,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, DoWhileStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],202:[function(require,module,exports){
+},{"../utils/async":191,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],204:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8643,7 +9250,7 @@ function EmptyStatement(context) {
 }
 
 module.exports = exports["default"];
-},{}],203:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8665,7 +9272,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 			case 2:
 				executionResult = context$1$0.sent;
 				executionValue = executionResult && executionResult.result && executionResult.result.getValue();
-				return context$1$0.abrupt("return", context.result(executionValue || context.env.global.getProperty("undefined").getValue()));
+				return context$1$0.abrupt("return", context.result(executionValue || context.env.global.getValue("undefined")));
 
 			case 5:
 			case "end":
@@ -8674,7 +9281,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ExpressionStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/regenerator":20}],204:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/regenerator":20}],206:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8798,7 +9405,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 					break;
 				}
 
-				left.putValue(context.env.objectFactory.createPrimitive(prop));
+				left.setValue(context.env.objectFactory.createPrimitive(prop));
 
 				context$1$0.next = 45;
 				return context.create(context.node.body).execute();
@@ -8846,7 +9453,7 @@ module.exports = exports["default"];
 // object in the prototype chain has a property with the same name. The values of [[Enumerable]] attributes
 // are not considered when determining if a property of a prototype object is shadowed by a previous object
 // on the prototype chain.
-},{"../utils/async":189,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/regenerator":20}],205:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/regenerator":20}],207:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -8951,7 +9558,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ForStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],206:[function(require,module,exports){
+},{"../utils/async":191,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],208:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8964,7 +9571,7 @@ function FunctionDeclaration(context) {
 }
 
 module.exports = exports["default"];
-},{}],207:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -8980,9 +9587,10 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 
 function FunctionExpression(context) {
 	var objectFactory = context.env.objectFactory;
-	var func = objectFactory.createFunction(context.node);
 	var strict = context.env.isStrict() || contracts.isStrictNode(context.node.body.body);
-	func.bindScope(context.env.current, strict);
+	var func = objectFactory.createFunction(context.node, null, null, strict);
+
+	func.bindScope(context.env.current);
 
 	if (context.node.id) {
 		func.name = context.node.id.name;
@@ -8992,7 +9600,7 @@ function FunctionExpression(context) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":191,"babel-runtime/helpers/interop-require-wildcard":19}],208:[function(require,module,exports){
+},{"../utils/contracts":193,"babel-runtime/helpers/interop-require-wildcard":19}],210:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9011,7 +9619,7 @@ function Identifier(context) {
 }
 
 module.exports = exports["default"];
-},{}],209:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9069,7 +9677,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, IfStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],210:[function(require,module,exports){
+},{"../utils/async":191,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],212:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9278,7 +9886,7 @@ exports["default"] = {
 	}))
 };
 module.exports = exports["default"];
-},{"../utils/async":189,"./array-expression":195,"./assignment-expression":196,"./binary-expression":197,"./block-statement":198,"./call-expression":199,"./debugger-statement":200,"./do-while-statement.js":201,"./empty-statement":202,"./expression-statement":203,"./for-in-statement":204,"./for-statement":205,"./function-declaration":206,"./function-expression":207,"./identifier":208,"./if-statement":209,"./interrupt-statement":211,"./labeled-statement":212,"./literal":213,"./logical-expression":214,"./member-expression":215,"./object-expression":216,"./return-statement":217,"./sequence-expression":218,"./switch-statement":219,"./this-expression":220,"./throw-statement":221,"./try-statement":222,"./unary-expression":223,"./update-expression":224,"./variable-declaration":225,"./variable-declarator":226,"./with-statement":227,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],211:[function(require,module,exports){
+},{"../utils/async":191,"./array-expression":197,"./assignment-expression":198,"./binary-expression":199,"./block-statement":200,"./call-expression":201,"./debugger-statement":202,"./do-while-statement.js":203,"./empty-statement":204,"./expression-statement":205,"./for-in-statement":206,"./for-statement":207,"./function-declaration":208,"./function-expression":209,"./identifier":210,"./if-statement":211,"./interrupt-statement":213,"./labeled-statement":214,"./literal":215,"./logical-expression":216,"./member-expression":217,"./object-expression":218,"./return-statement":219,"./sequence-expression":220,"./switch-statement":221,"./this-expression":222,"./throw-statement":223,"./try-statement":224,"./unary-expression":225,"./update-expression":226,"./variable-declaration":227,"./variable-declarator":228,"./with-statement":229,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],213:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9300,7 +9908,7 @@ function InterruptStatement(context) {
 }
 
 module.exports = exports["default"];
-},{}],212:[function(require,module,exports){
+},{}],214:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9328,32 +9936,20 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, LabeledStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/regenerator":20}],213:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/regenerator":20}],215:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports["default"] = Literal;
-var octalRgx = /^0[0-7][0-7]*$/;
-
-function validateLiteral(node, strict) {
-	if (!strict || !node.raw) {
-		return;
-	}
-
-	if (typeof node.value === "number" && octalRgx.test(node.raw)) {
-		throw new SyntaxError("Octal literals are not allowed in strict mode.");
-	}
-}
 
 function Literal(context) {
-	validateLiteral(context.node, context.env.isStrict());
 	return context.result(context.env.objectFactory.createPrimitive(context.node.value));
 }
 
 module.exports = exports["default"];
-},{}],214:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9411,7 +10007,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, LogicalExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],215:[function(require,module,exports){
+},{"../utils/async":191,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],217:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9476,7 +10072,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, MemberExpression, this);
 }));
 module.exports = exports["default"];
-},{"../env/property-reference":171,"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],216:[function(require,module,exports){
+},{"../env/property-reference":171,"../utils/async":191,"../utils/convert":194,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],218:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9647,7 +10243,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ObjectExpression, this, [[5, 26, 30, 38], [31,, 33, 37]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/contracts":191,"../utils/func":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],217:[function(require,module,exports){
+},{"../utils/async":191,"../utils/contracts":193,"../utils/func":195,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],219:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9676,7 +10272,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				return context$1$0.abrupt("return", context$1$0.t0.exit.call(context$1$0.t0, context$1$0.t1));
 
 			case 6:
-				return context$1$0.abrupt("return", context.exit(context.env.global.getProperty("undefined").getValue()));
+				return context$1$0.abrupt("return", context.exit(context.env.global.getValue("undefined")));
 
 			case 7:
 			case "end":
@@ -9685,7 +10281,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ReturnStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/regenerator":20}],218:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/regenerator":20}],220:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9772,7 +10368,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, SequenceExpression, this, [[3, 15, 19, 27], [20,, 22, 26]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],219:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],221:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10005,7 +10601,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, SwitchStatement, this, [[7, 34, 38, 46], [39,, 41, 45]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],220:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],222:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10018,7 +10614,7 @@ function ThisExpression(context) {
 }
 
 module.exports = exports["default"];
-},{}],221:[function(require,module,exports){
+},{}],223:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10062,10 +10658,12 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 module.exports = exports["default"];
 
 // todo: handle more specific errors
-},{"../utils/async":189,"babel-runtime/regenerator":20}],222:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/regenerator":20}],224:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
+
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
@@ -10073,8 +10671,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _utilsAsync = require("../utils/async");
 
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function TryStatement(context) {
-	var result, uncaughtError, caughtError, scope, errVar, finalResult;
+	var result, uncaughtError, caughtError, errVar, scope, finalResult;
 	return _regeneratorRuntime.wrap(function TryStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
@@ -10084,7 +10686,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 3:
 				result = context$1$0.sent;
-				context$1$0.next = 29;
+				context$1$0.next = 28;
 				break;
 
 			case 6:
@@ -10092,100 +10694,87 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				context$1$0.t0 = context$1$0["catch"](0);
 
 				if (!context.node.handler) {
-					context$1$0.next = 28;
+					context$1$0.next = 27;
 					break;
 				}
 
 				caughtError = context$1$0.t0 && context$1$0.t0.wrappedError || context.env.objectFactory.createPrimitive(context$1$0.t0);
-				scope = context.env.createScope();
 				errVar = context.node.handler.param.name;
 
-				// let hasVariable = context.env.hasVariable(errVar);
+				contracts.assertIsValidIdentifier(errVar, context.env.isStrict());
 
-				// if (!hasVariable) {
+				scope = context.env.createScope();
+
 				context.env.createVariable(errVar);
-				// }
-
 				context.env.putValue(errVar, caughtError);
 
-				context$1$0.prev = 14;
-				context$1$0.next = 17;
+				context$1$0.prev = 15;
+				context$1$0.next = 18;
 				return context.create(context.node.handler.body, context.node.handler).execute();
 
-			case 17:
+			case 18:
 				result = context$1$0.sent;
-				context$1$0.next = 23;
+				context$1$0.next = 24;
 				break;
 
-			case 20:
-				context$1$0.prev = 20;
-				context$1$0.t1 = context$1$0["catch"](14);
+			case 21:
+				context$1$0.prev = 21;
+				context$1$0.t1 = context$1$0["catch"](15);
 
-				// scope.exitScope();
 				uncaughtError = context$1$0.t1;
 
-			case 23:
-				context$1$0.prev = 23;
-				return context$1$0.finish(23);
-
-			case 25:
-				// if (!hasVariable) {
-				// 	context.env.deleteVariable(errVar);
-				// }
+			case 24:
 
 				scope.exitScope();
-				context$1$0.next = 29;
+				context$1$0.next = 28;
 				break;
 
-			case 28:
+			case 27:
 				uncaughtError = context$1$0.t0;
 
-			case 29:
-				context$1$0.prev = 29;
+			case 28:
+				context$1$0.prev = 28;
 
 				if (!context.node.finalizer) {
-					context$1$0.next = 36;
+					context$1$0.next = 35;
 					break;
 				}
 
-				context$1$0.next = 33;
+				context$1$0.next = 32;
 				return context.create(context.node.finalizer).execute();
 
-			case 33:
+			case 32:
 				finalResult = context$1$0.sent;
 
 				if (!(finalResult && finalResult.shouldBreak(context))) {
-					context$1$0.next = 36;
+					context$1$0.next = 35;
 					break;
 				}
 
 				return context$1$0.abrupt("return", finalResult);
 
-			case 36:
-				return context$1$0.finish(29);
+			case 35:
+				return context$1$0.finish(28);
 
-			case 37:
+			case 36:
 				if (!uncaughtError) {
-					context$1$0.next = 39;
+					context$1$0.next = 38;
 					break;
 				}
 
 				throw uncaughtError;
 
-			case 39:
+			case 38:
 				return context$1$0.abrupt("return", result);
 
-			case 40:
+			case 39:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, TryStatement, this, [[0, 6, 29, 37], [14, 20, 23, 25]]);
+	}, TryStatement, this, [[0, 6, 28, 36], [15, 21]]);
 }));
 module.exports = exports["default"];
-
-// context.env.initScope(context.node.handler);
-// scope.init(context.node.handler.body);
-},{"../utils/async":189,"babel-runtime/regenerator":20}],223:[function(require,module,exports){
+},{"../utils/async":191,"../utils/contracts":193,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10320,7 +10909,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, UnaryExpression, this);
 }));
 module.exports = exports["default"];
-},{"../env/property-reference":171,"../env/reference":172,"../utils/async":189,"../utils/convert":192,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],224:[function(require,module,exports){
+},{"../env/property-reference":171,"../env/reference":172,"../utils/async":191,"../utils/convert":194,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],226:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10369,7 +10958,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 				returnValue = context.node.prefix ? newValue : originalValue;
 
-				ref.putValue(newValue);
+				ref.setValue(newValue);
 				return context$1$0.abrupt("return", context.result(returnValue));
 
 			case 13:
@@ -10379,7 +10968,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, UpdateExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"../utils/contracts":191,"../utils/convert":192,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
+},{"../utils/async":191,"../utils/contracts":193,"../utils/convert":194,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],227:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10463,7 +11052,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, VariableDeclaration, this, [[3, 14, 18, 26], [19,, 21, 25]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],226:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],228:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10508,16 +11097,22 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, VariableDeclarator, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/regenerator":20}],227:[function(require,module,exports){
+},{"../utils/async":191,"babel-runtime/regenerator":20}],229:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
+
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
 var _utilsAsync = require("../utils/async");
+
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function WithStatement(context) {
 	var obj, scope, result;
@@ -10537,37 +11132,46 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 4:
 				obj = context$1$0.sent.result.getValue();
-				scope = context.env.createObjectScope(obj);
+
+				if (!contracts.isNullOrUndefined(obj)) {
+					context$1$0.next = 7;
+					break;
+				}
+
+				throw new TypeError(obj.className + " has no properties");
+
+			case 7:
+				scope = context.env.createObjectScope(obj, context.env.getThisBinding());
 
 				scope.init(context.node.body);
 
-				context$1$0.prev = 7;
-				context$1$0.next = 10;
+				context$1$0.prev = 9;
+				context$1$0.next = 12;
 				return context.create(context.node.body).execute();
 
-			case 10:
+			case 12:
 				result = context$1$0.sent;
-				context$1$0.next = 17;
+				context$1$0.next = 19;
 				break;
 
-			case 13:
-				context$1$0.prev = 13;
-				context$1$0.t0 = context$1$0["catch"](7);
+			case 15:
+				context$1$0.prev = 15;
+				context$1$0.t0 = context$1$0["catch"](9);
 
 				scope.exitScope();
 				throw context$1$0.t0;
 
-			case 17:
+			case 19:
 
 				scope.exitScope();
 				return context$1$0.abrupt("return", result);
 
-			case 19:
+			case 21:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, WithStatement, this, [[7, 13]]);
+	}, WithStatement, this, [[9, 15]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":189,"babel-runtime/regenerator":20}]},{},[1])(1)
+},{"../utils/async":191,"../utils/contracts":193,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}]},{},[1])(1)
 });

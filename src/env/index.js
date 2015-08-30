@@ -6,6 +6,17 @@ import api from "../ecma-5.1";
 import comparers from "../utils/comparers";
 import * as contracts from "../utils/contracts";
 import {visit as hoister} from "./hoister";
+import EstreeWalker from "../estree-walker";
+import rules from "../syntax-rules";
+
+function validateSyntax (root) {
+	var walker = EstreeWalker.create(root);
+	for (let node of walker) {
+		if (node.type in rules) {
+			rules[node.type](node, true);
+		}
+	}
+}
 
 export default class Environment {
 	init (config = {}) {
@@ -24,7 +35,7 @@ export default class Environment {
 	getReference (name) {
 		var scope = this.current;
 		while (scope) {
-			if (scope.hasVariable(name)) {
+			if (scope.hasOwnProperty(name)) {
 				return scope.getReference(name, true);
 			}
 
@@ -42,12 +53,8 @@ export default class Environment {
 		this.current.putValue(name, value, strict);
 	}
 
-	hasVariable (name) {
-		return this.current.hasVariable(name);
-	}
-
-	getVariable (name) {
-		return this.current.getVariable(name);
+	hasProperty (name) {
+		return this.current.hasProperty(name);
 	}
 
 	deleteVariable (name) {
@@ -71,7 +78,6 @@ export default class Environment {
 		}
 		
 		return false;
-		// return this.current && this.current.strict;
 	}
 
 	getThisBinding () {
@@ -96,34 +102,35 @@ export default class Environment {
 		return this.setScope(env);
 	}
 
-	createObjectScope (obj) {
-		var env = new ObjectEnvironment(this.current, obj, this);
+	createObjectScope (obj, thisArg) {
+		var env = new ObjectEnvironment(this.current, obj, thisArg, this);
 		return this.setScope(env);
 	}
 
 	initScope (node) {
 		let undef = this.global.getValue("undefined");
-		this.current.strict = contracts.isStrictNode(node);
-
+		this.current.strict = contracts.isStrictNode(node.body);
+		
+		let strict = this.current.strict || this.isStrict();
+		if (strict && node.type === "Program") {
+			validateSyntax(node);
+		}
+		
 		hoister(node, decl => {
 			let name = decl.name || decl.id.name;
 			contracts.assertIsValidParameterName(name, this.isStrict());
 			
+			let value = undef;
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
-				let func = this.objectFactory.createFunction(decl);
-				func.bindScope(this.current, this.isStrict() || contracts.isStrictNode(decl.body.body));
-
-				this.createVariable(name, true);
-				this.putValue(name, func);
-			} else {
-				if (this.hasVariable(name)) {
-					// shadow variable
-					this.putValue(name, undef);
-				} else {
-					this.createVariable(name, true);
-				}
+				value = this.objectFactory.createFunction(decl, null, null, strict || contracts.isStrictNode(decl.body.body));
+				value.bindScope(this.current);
+			} else if (this.current.hasProperty(name)) {
+				return;
 			}
+			
+			let newVar = this.createVariable(name, true);
+			newVar.setValue(value);
 		});
 	}
 
@@ -133,8 +140,7 @@ export default class Environment {
 		var env = this;
 		var priorScope = this.current || this.globalScope;
 		this.current = scope;
-		// this.current.strict = priorScope.strict;
-		
+
 		return {
 			init (node) {
 				if (!node) {

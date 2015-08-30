@@ -6,7 +6,7 @@ export default class DeclarativeEnvironment {
 		this.properties = Object.create(null);
 		this.parent = parent;
 		this.strict = parent.strict;
-		this.thisNode = thisArg;
+		this.thisBinding = thisArg;
 		this.env = env;
 	}
 
@@ -16,16 +16,16 @@ export default class DeclarativeEnvironment {
 		return ref;
 	}
 
-	hasVariable (name) {
+	hasProperty (name) {
 		return name in this.properties;
 	}
-
-	getVariable (name) {
-		return this.properties[name];
+	
+	hasOwnProperty (name) {
+		return this.hasProperty(name);
 	}
 
 	deleteVariable (name) {
-		if (!this.hasVariable(name)) {
+		if (!this.hasProperty(name)) {
 			return true;
 		}
 
@@ -38,7 +38,7 @@ export default class DeclarativeEnvironment {
 	}
 
 	createVariable (name) {
-		if (this.hasVariable(name)) {
+		if (this.hasProperty(name)) {
 			return this.properties[name];
 		}
 
@@ -51,7 +51,7 @@ export default class DeclarativeEnvironment {
 	}
 
 	putValue (name, value, throwOnError) {
-		if (this.hasVariable(name)) {
+		if (this.hasProperty(name)) {
 			if (!this.properties[name].writable) {
 				if (throwOnError) {
 					throw new TypeError(`Cannot write to immutable binding: ${name}`);
@@ -67,7 +67,7 @@ export default class DeclarativeEnvironment {
 	}
 
 	getValue (name, throwOnError) {
-		if (this.hasVariable(name)) {
+		if (this.hasProperty(name)) {
 			if (!this.properties[name].value) {
 				if (throwOnError) {
 					throw new ReferenceError(`${name} is not defined`);
@@ -81,6 +81,6 @@ export default class DeclarativeEnvironment {
 	}
 
 	getThisBinding () {
-		return this.thisNode;
+		return this.thisBinding;
 	}
 }

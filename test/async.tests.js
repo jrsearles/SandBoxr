@@ -1,3 +1,4 @@
+// import SandBoxr from "../src";
 var SandBoxr = require("../dist/sandboxr");
 var expect = require("chai").expect;
 var parser = require("./ast-parser");

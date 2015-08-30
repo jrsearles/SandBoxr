@@ -1,10 +1,11 @@
 import PropertyReference from "./property-reference";
 
 export default class ObjectEnvironment {
-	constructor (parent, obj, env) {
+	constructor (parent, obj, thisArg, env) {
 		this.parent = parent;
 		this.strict = parent && parent.strict;
-		this.object = this.thisNode = obj;
+		this.object = obj;
+		this.thisBinding = thisArg || obj;
 		this.env = env;
 	}
 
@@ -14,7 +15,11 @@ export default class ObjectEnvironment {
 		return ref;
 	}
 
-	hasVariable (name) {
+	hasProperty (name) {
+		return this.parent ? this.parent.hasProperty(name) : this.hasOwnProperty(name);
+	}
+	
+	hasOwnProperty (name) {
 		return this.object.hasProperty(name);
 	}
 
@@ -35,7 +40,7 @@ export default class ObjectEnvironment {
 				configurable: immutable,
 				enumerable: true,
 				writable: true
-			}, true);
+			}, this.env.isStrict());
 
 			return this.object.getProperty(name);
 		}
@@ -50,7 +55,7 @@ export default class ObjectEnvironment {
 	}
 
 	getValue (name, throwOnError) {
-		if (!this.hasVariable(name)) {
+		if (!this.hasOwnProperty(name)) {
 			if (throwOnError) {
 				throw new ReferenceError(`${name} is not defined.`);
 			}
@@ -62,6 +67,6 @@ export default class ObjectEnvironment {
 	}
 
 	getThisBinding () {
-		return this.object;
+		return this.thisBinding;
 	}
 }

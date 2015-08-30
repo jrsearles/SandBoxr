@@ -21,6 +21,6 @@ export default degenerate(function* UpdateExpression (context) {
 
 	var returnValue = context.node.prefix ? newValue : originalValue;
 
-	ref.putValue(newValue);
+	ref.setValue(newValue);
 	return context.result(returnValue);
 });

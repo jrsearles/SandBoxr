@@ -26,7 +26,7 @@ export default degenerate(function* ForInStatement (context) {
 	while (obj) {
 		for (let prop in obj.properties) {
 			if (obj.properties[prop].enumerable && !visited[prop]) {
-				left.putValue(context.env.objectFactory.createPrimitive(prop));
+				left.setValue(context.env.objectFactory.createPrimitive(prop));
 				
 				result = yield context.create(context.node.body).execute();
 				if (result && result.shouldBreak(context, true, priorResult)) {

@@ -221,7 +221,7 @@ function createReviver (env, reviver) {
 export default function jsonApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 	var jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 

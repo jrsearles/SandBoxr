@@ -10,7 +10,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 		return native ? null : env.objectFactory.createObject(fn);
 	}
 	
-	if (fnMember instanceof PropertyReference && fnMember.base !== env.global) {
+	if (fnMember instanceof PropertyReference && !fnMember.unqualified /*&& fnMember.base !== env.global*/) {
 		return convert.toObject(env, fnMember.base);
 	}
 	

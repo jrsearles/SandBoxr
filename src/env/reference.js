@@ -11,7 +11,7 @@ export default class Reference {
 		this.strict = env.isStrict();
 	}
 	
-	putValue (value) {
+	setValue (value) {
 		if (this.base) {
 			return this.base.putValue(this.name, value, this.strict);
 		}

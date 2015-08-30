@@ -12,7 +12,7 @@ export default class PropertyReference extends Reference {
 		return prop && prop.getValue() || new PrimitiveType();
 	}
 	
-	putValue (value) {
+	setValue (value) {
 		if (this.base.hasProperty(this.name)) {
 			this.base.putValue(this.name, value, this.strict, this.env);
 		} else {

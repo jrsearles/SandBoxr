@@ -1,3 +1,4 @@
+// import SandBoxr from "../";
 var SandBoxr = require("../dist/sandboxr");
 var parser = require("./ast-parser");
 var runner = require("./test-runner");

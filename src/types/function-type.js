@@ -14,7 +14,11 @@ export default class FunctionType extends ObjectType {
 		this.boundThis = null;
 	}
 
-	init (objectFactory, proto, descriptor) {
+	init (objectFactory, proto, descriptor, strict) {
+		if (strict !== undefined) {
+			this.strict = strict;
+		}
+		
 		// set length property from the number of parameters
 		this.defineOwnProperty("length", {
 			value: objectFactory.createPrimitive(this.node.params.length),
@@ -22,11 +26,25 @@ export default class FunctionType extends ObjectType {
 			enumerable: false,
 			writable: false
 		});
-
+		
+		this.initStrict(objectFactory);
+			
 		// functions have a prototype
 		proto = proto || objectFactory.createObject();
-		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
 		this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
+		
+		// set the contructor property as an instance of  itself
+		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
+	}
+	
+	initStrict (objectFactory) {
+		if (this.isStrict()) {
+			let throwerProps = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			this.defineOwnProperty("caller", throwerProps);
+			this.defineOwnProperty("arguments", throwerProps);
+		} else {
+			this.defineOwnProperty("caller", { value: objectFactory.createPrimitive(undefined) });
+		}
 	}
 
 	getProperty (name) {
@@ -44,9 +62,8 @@ export default class FunctionType extends ObjectType {
 		this.boundThis = thisArg;
 	}
 
-	bindScope (scope, strict) {
+	bindScope (scope) {
 		this.parentScope = scope;
-		this.strict = strict;
 	}
 	
 	isStrict () {
@@ -79,7 +96,7 @@ export default class FunctionType extends ObjectType {
 		return {
 			init () {
 				if (!fn.native) {
-					scope.init(fn.node.body.body);
+					scope.init(fn.node.body);
 				}
 			},
 			

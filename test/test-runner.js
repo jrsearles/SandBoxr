@@ -1,6 +1,6 @@
 var parser = require("./ast-parser");
-var SandBoxer = require("../dist/sandboxr");
 var expect = require("chai").expect;
+var SandBoxr = require("../dist/sandboxr");
 
 module.exports = {
 	runBlock: function (code, done) {
@@ -33,7 +33,7 @@ module.exports = {
 
 	getRunner: function (code) {
 		var ast = parser.parse(code);
-		return SandBoxer.create(ast);
+		return SandBoxr.create(ast);
 	},
 
 	wrapArgs: function (args) {

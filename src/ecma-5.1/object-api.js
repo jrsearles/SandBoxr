@@ -20,7 +20,7 @@ function defineProperty (env, obj, name, descriptor) {
 		throw new TypeError("Property description must be an object: " + convert.toString(env, descriptor));
 	}
 
-	var undef = env.global.getProperty("undefined").getValue();
+	var undef = env.global.getValue("undefined");
 	var options = {};
 
 	if (descriptor) {
@@ -43,7 +43,7 @@ function defineProperty (env, obj, name, descriptor) {
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
-			var getter = descriptor.getProperty("get").getValue() || undef;
+			var getter = descriptor.getValue("get") || undef;
 			if (getter.isPrimitive && getter.value === undefined) {
 				options.get = options.getter = undefined;
 			} else {
@@ -69,7 +69,7 @@ function defineProperty (env, obj, name, descriptor) {
 		}
 
 		if (hasSetter) {
-			var setter = descriptor.getProperty("set").getValue() || undef;
+			var setter = descriptor.getValue("set") || undef;
 			if (setter.isPrimitive && setter.value === undefined) {
 				options.set = options.setter = undefined;
 			} else {
@@ -105,7 +105,7 @@ function defineProperty (env, obj, name, descriptor) {
 export default function objectApi (env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
-	var undef = globalObject.getProperty("undefined").getValue();
+	var undef = globalObject.getValue("undefined");
 
 	var proto = new ObjectType();
 	var objectClass = objectFactory.createFunction(function (value) {
@@ -147,10 +147,8 @@ export default function objectApi (env) {
 
 	proto.define("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		var current = obj;
-		var thisNode = this.env.current.thisNode;
-
 		while (current) {
-			if (thisNode === current) {
+			if (this.node === current) {
 				return objectFactory.createPrimitive(true);
 			}
 
