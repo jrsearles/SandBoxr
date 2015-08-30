@@ -83,15 +83,15 @@ export function assertIsValidIdentifier (name, strict) {
 }
 
 export function assertAreValidArguments (params, strict) {
-	if (strict) {
-		params.forEach((param, index) => {
-			assertIsValidName(param.name, strict);
-			
+	params.forEach((param, index) => {
+		assertIsValidParameterName(param.name, strict);
+
+		if (strict) {
 			if (params.some((p, i) => index !== i && param.name === p.name)) {
 				throw new SyntaxError("Strict mode function may not have duplicate parameter names");
 			}
-		});
-	}
+		}
+	});
 }
 
 export function	isValidArrayLength (length) {

@@ -3,12 +3,12 @@ import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 
 // todo: this is hacky - remove this for passed in environment
-var localObjectFactory;
+let localObjectFactory;
 
 function setIndex (env, arr, name, descriptor, throwOnError) {
-	var index = Number(name);
-	var lengthProperty = arr.getProperty("length");
-	var lengthValue = lengthProperty.getValue().value;
+	let index = Number(name);
+	let lengthProperty = arr.getProperty("length");
+	let lengthValue = lengthProperty.getValue().unwrap();
 
 	if ((!lengthProperty.canSetValue() && index >= lengthValue)
 		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, false, env)) {
@@ -21,7 +21,7 @@ function setIndex (env, arr, name, descriptor, throwOnError) {
 	}
 
 	if (index >= lengthValue) {
-		var newLength = localObjectFactory.createPrimitive(index + 1);
+		let newLength = localObjectFactory.createPrimitive(index + 1);
 		arr.defineOwnProperty("length", { value: newLength }, false, env);
 	}
 
@@ -29,14 +29,14 @@ function setIndex (env, arr, name, descriptor, throwOnError) {
 }
 
 function setLength (env, arr, name, descriptor, throwOnError) {
-	var newLengthValue = convert.toUInt32(env, descriptor.value);
+	let newLengthValue = convert.toUInt32(env, descriptor.value);
 	if (newLengthValue !== convert.toNumber(env, descriptor.value)) {
 		throw new RangeError("Array length out of range");
 	}
 
 	descriptor.value = localObjectFactory.createPrimitive(newLengthValue);
-	var newLength = descriptor.value;
-	var currentLength = arr.getProperty("length").getValue();
+	let newLength = descriptor.value;
+	let currentLength = arr.getProperty("length").getValue();
 	contracts.assertIsValidArrayLength(newLength.value);
 
 	if (newLength.value >= currentLength.value) {
@@ -51,18 +51,18 @@ function setLength (env, arr, name, descriptor, throwOnError) {
 		return false;
 	}
 
-	var notWritable = "writable" in descriptor && !descriptor.writable;
+	let notWritable = "writable" in descriptor && !descriptor.writable;
 	if (notWritable) {
 		// set to writable in case removing items fails
 		descriptor.writable = true;
 	}
 
-	var i = currentLength.value;
+	let i = currentLength.value;
 	if (!ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, throwOnError)) {
 		return false;
 	}
 
-	var succeeded = true;
+	let succeeded = true;
 	while (i > newLength.value) {
 		if (!arr.deleteProperty(--i, false)) {
 			newLength = localObjectFactory.createPrimitive(i + 1);
@@ -116,11 +116,11 @@ export default class ArrayType extends ObjectType {
 	}
 
 	unwrap () {
-		var arr = [];
+		let arr = [];
 
 		// this won't grab properties from the prototype - do we care?
 		// it's an edge case but we may want to address it
-		for (var index in this.properties) {
+		for (let index in this.properties) {
 			if (this.properties[index].enumerable) {
 				arr[Number(index)] = this.getValue(index).unwrap();
 			}

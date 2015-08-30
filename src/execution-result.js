@@ -23,7 +23,7 @@ export default class ExecutionResult {
 			return false;
 		}
 	
-		var breaking = true;
+		let breaking = true;
 		if (this.name && this.name === context.label) {
 			breaking = this.cancelled = this.cancel;
 			this.cancel = this.skip = false;

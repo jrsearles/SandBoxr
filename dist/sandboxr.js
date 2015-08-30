@@ -44,7 +44,7 @@ var SandBoxr = (function () {
 			}
 
 			this.env = env;
-			var response;
+			var response = undefined;
 
 			try {
 				response = new _executionContext2["default"](env, this.ast).execute();
@@ -2484,21 +2484,26 @@ function getEndIndex(index, length) {
 
 function getLength(env, source) {
 	if (source.hasProperty("length")) {
-		return convert.toUInt32(env, source.getProperty("length").getValue());
+		return convert.toUInt32(env, source.getValue("length"));
 	}
 
 	return 0;
 }
 
 function executeCallback(callback, thisArg, executionContext, index) {
-	var arr = convert.toObject(executionContext.env, executionContext.node);
-	var scope = executionContext.env.createScope(thisArg || executionContext.env.global);
-	scope.init(callback.node.body);
-
 	var undef = executionContext.env.global.getValue("undefined");
 	var objectFactory = executionContext.env.objectFactory;
+	var arr = convert.toObject(executionContext.env, executionContext.node);
+
+	if (!thisArg) {
+		thisArg = callback.isStrict() ? undef : executionContext.env.global;
+	}
+
+	var scope = executionContext.env.createScope(thisArg);
+	scope.init(callback.node.body);
+
 	var args = [executionContext.node.getProperty(index).getValue(), objectFactory.createPrimitive(index), arr];
-	var executionResult;
+	var executionResult = undefined;
 
 	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
@@ -2521,7 +2526,7 @@ function executeAccumulator(callback, priorValue, executionContext, index) {
 	var undef = executionContext.env.global.getValue("undefined");
 	var objectFactory = executionContext.env.objectFactory;
 	var args = [priorValue || undef, executionContext.node.getProperty(index).getValue() || undef, objectFactory.createPrimitive(index), arr];
-	var executionResult;
+	var executionResult = undefined;
 
 	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
@@ -2578,8 +2583,8 @@ function arrayApi(env) {
 	proto.define("push", objectFactory.createBuiltInFunction(function () {
 		var start = getLength(env, this.node);
 		var i = 0;
-		var length = arguments.length;
-		for (; i < length; i++) {
+
+		for (var _length = arguments.length; i < _length; i++) {
 			this.node.defineOwnProperty(start + i, createIndexProperty(arguments[i]), true, env);
 		}
 
@@ -2589,7 +2594,7 @@ function arrayApi(env) {
 	}, 1, "Array.prototype.push"));
 
 	proto.define("pop", objectFactory.createBuiltInFunction(function () {
-		var obj;
+		var obj = undefined;
 		var i = getLength(env, this.node);
 
 		if (i > 0) {
@@ -2606,7 +2611,7 @@ function arrayApi(env) {
 	}, 0, "Array.prototype.pop"));
 
 	proto.define("shift", objectFactory.createBuiltInFunction(function () {
-		var obj;
+		var obj = undefined;
 		var length = getLength(env, this.node);
 		var i = 0;
 
@@ -2635,16 +2640,17 @@ function arrayApi(env) {
 		var length = getLength(env, this.node);
 		var argCount = arguments.length;
 		var i = length;
-		var to, from;
+		var toIndex = undefined,
+		    fromIndex = undefined;
 
 		while (i > 0) {
-			from = i - 1;
-			to = i + argCount - 1;
+			fromIndex = i - 1;
+			toIndex = i + argCount - 1;
 
-			if (this.node.hasProperty(from)) {
-				this.node.putValue(to, this.node.getProperty(from).getValue(), true);
+			if (this.node.hasProperty(fromIndex)) {
+				this.node.putValue(toIndex, this.node.getProperty(fromIndex).getValue(), true);
 			} else {
-				this.node.deleteProperty(to, true);
+				this.node.deleteProperty(toIndex, true);
 			}
 
 			i--;
@@ -2747,8 +2753,7 @@ function arrayApi(env) {
 		}
 
 		k = start;
-		var i = 0;
-		for (; i < newCount; i++) {
+		for (var i = 0; i < newCount; i++) {
 			this.node.putValue(k, elements[i]);
 			k++;
 		}
@@ -2768,10 +2773,10 @@ function arrayApi(env) {
 
 		arrays.unshift(convert.toObject(env, this.node));
 
-		var current,
+		var current = undefined,
 		    index = 0,
-		    i,
-		    length;
+		    i = undefined,
+		    length = undefined;
 		while (arrays.length > 0) {
 			current = arrays.shift();
 
@@ -2796,7 +2801,7 @@ function arrayApi(env) {
 		var length = getLength(env, this.node);
 		separator = arguments.length === 0 || separator === undef ? "," : convert.toPrimitive(env, separator, "string");
 		var stringValues = [];
-		var stringValue;
+		var stringValue = undefined;
 
 		for (var i = 0; i < length; i++) {
 			stringValue = "";
@@ -2890,9 +2895,8 @@ function arrayApi(env) {
 		contracts.assertIsFunction(callback, this.node);
 
 		var newArray = objectFactory.create("Array");
-		var index = 0;
 
-		for (var i = 0; i < length; i++) {
+		for (var i = 0, index = 0; i < length; i++) {
 			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
 				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
 			}
@@ -2935,7 +2939,7 @@ function arrayApi(env) {
 		contracts.assertIsFunction(callback, this.node);
 
 		var index = 0;
-		var value;
+		var value = undefined;
 
 		if (arguments.length >= 2) {
 			value = initialValue;
@@ -2966,8 +2970,7 @@ function arrayApi(env) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
 		contracts.assertIsFunction(callback, this.node);
 
-		// length--;
-		var accumulator;
+		var accumulator = undefined;
 
 		if (length === 0 && arguments.length === 1) {
 			throw new TypeError("Reduce of empty array with no initial value");
@@ -3008,7 +3011,9 @@ function arrayApi(env) {
 		var length = getLength(env, this.node);
 		var middle = Math.floor(length / 2);
 		var lower = 0;
-		var upper, upperValue, lowerValue;
+		var upper = undefined,
+		    upperValue = undefined,
+		    lowerValue = undefined;
 
 		while (lower !== middle) {
 			upper = length - lower - 1;
@@ -3041,7 +3046,7 @@ function arrayApi(env) {
 		var length = getLength(env, arr);
 		var i = 0;
 
-		var comparer;
+		var comparer = undefined;
 		if (contracts.isNullOrUndefined(compareFunction)) {
 			comparer = function defaultComparer(a, b) {
 				a = convert.toString(env, a);
@@ -3063,7 +3068,7 @@ function arrayApi(env) {
 				scope.init(compareFunction.node.body);
 
 				func.loadArguments(env, compareFunction.node.params, [a, b], compareFunction);
-				var executionResult;
+				var executionResult = undefined;
 
 				try {
 					executionResult = executionContext.create(compareFunction.node.body, compareFunction.node).execute();
@@ -3106,7 +3111,7 @@ function arrayApi(env) {
 		var length = getLength(env, this.node);
 		var arr = new Array(length);
 		var i = 0;
-		var current;
+		var current = undefined;
 
 		while (i < length) {
 			if (this.node.hasProperty(i)) {
@@ -3153,6 +3158,7 @@ var convert = _interopRequireWildcard(_utilsConvert);
 function booleanApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+
 	var booleanClass = objectFactory.createFunction(function (obj) {
 		var booleanValue = convert.toBoolean(obj);
 
@@ -3238,7 +3244,8 @@ function dateApi(env) {
 	var objectFactory = env.objectFactory;
 
 	var dateClass = objectFactory.createFunction(function (p1, p2, p3, p4, p5, p6, p7) {
-		var dateValue, args;
+		var dateValue = undefined,
+		    args = undefined;
 
 		if (arguments.length === 0) {
 			args = [];
@@ -3369,6 +3376,7 @@ function createError(objectFactory, message, name) {
 function errorApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+
 	var errorClass = objectFactory.createFunction(function (message) {
 		return createError(objectFactory, message);
 	}, null, { configurable: false, enumerable: false, writable: false });
@@ -3380,7 +3388,7 @@ function errorApi(env) {
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
 		var name = this.node.getProperty("name").getValue();
-		var msg;
+		var msg = undefined;
 
 		if (this.node.hasProperty("message")) {
 			msg = convert.toString(env, this.node.getProperty("message").getValue());
@@ -3458,19 +3466,16 @@ function functionApi(env, options) {
 	var globalObject = env.global;
 	var undef = env.global.getValue("undefined");
 	var objectFactory = env.objectFactory;
-	var funcClass;
+	var funcClass = undefined;
 
 	var funcCtor = function funcCtor() {
 		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
 			args[_key] = arguments[_key];
 		}
 
-		var funcInstance;
+		var funcInstance = undefined;
 
 		if (options.parser && args.length > 0) {
-			var fn;
-			var wrappedFunc;
-
 			(function () {
 				var body = args.pop();
 
@@ -3491,24 +3496,21 @@ function functionApi(env, options) {
 				var strict = contracts.isStrictNode(userNode);
 
 				var params = args.map(function (arg) {
-					arg = arg.trim();
-					contracts.assertIsValidParameterName(arg);
-
 					return {
 						type: "Identifier",
-						name: arg
+						name: arg.trim()
 					};
 				});
 
+				contracts.assertAreValidArguments(params, strict);
 				var callee = {
 					type: "FunctionDeclaration",
 					params: params,
 					body: ast
 				};
 
-				fn = objectFactory.createFunction(callee);
-
-				wrappedFunc = function wrappedFunc() {
+				var fn = objectFactory.createFunction(callee);
+				var wrappedFunc = function wrappedFunc() {
 					var thisArg = undefined;
 					if (this.isNew) {
 						thisArg = objectFactory.createObject(funcInstance);
@@ -3579,7 +3581,7 @@ function functionApi(env, options) {
 
 	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
 		if (argsArray) {
-			if (argsArray.className !== "Arguments" && argsArray.className !== "Array") {
+			if (argsArray.className !== "Arguments" && argsArray.className !== "Array" && argsArray.className !== "Function") {
 				throw new TypeError("Arguments list was wrong type");
 			}
 		}
@@ -3603,36 +3605,31 @@ function functionApi(env, options) {
 		var callee = fn.native ? fn : fn.node;
 		thisArg = defineThis(env, this.node, thisArg);
 
-		// var thrower = function () { throw new TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them"); };
-		// var throwProperties = {
-		// 	get: undefined,
-		// 	getter: thrower,
-		// 	set: undefined,
-		// 	setter: thrower,
-		// 	enumerable: false,
-		// 	configurable: false
-		// };
-
 		var nativeFunc = function nativeFunc() {
-			for (var _len4 = arguments.length, additionArgs = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-				additionArgs[_key4] = arguments[_key4];
+			for (var _len4 = arguments.length, additionalArgs = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+				additionalArgs[_key4] = arguments[_key4];
 			}
 
-			var mergedArgs = args.concat(additionArgs);
+			var mergedArgs = args.concat(additionalArgs);
 			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
-		nativeFunc.strict = env.isStrict() || fn.native && contracts.isStrictNode(fn.node.body.body);
+		nativeFunc.strict = env.isStrict() || !fn.native && contracts.isStrictNode(fn.node.body.body);
+
 		var boundFunc = objectFactory.createFunction(nativeFunc);
-
-		// let throwProperties = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-
-		// boundFunc.defineOwnProperty("caller", throwProperties);
-		// boundFunc.defineOwnProperty("arguments", throwProperties);
-		// boundFunc.defineOwnProperty("callee", throwProperties);
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
+
+		if (!nativeFunc.strict) {
+			boundFunc.remove("caller");
+			boundFunc.remove("arguments");
+
+			// these will be added in strict mode, but should always be here for bound functions
+			var thrower = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			boundFunc.defineOwnProperty("caller", thrower);
+			boundFunc.defineOwnProperty("arguments", thrower);
+		}
 
 		return boundFunc;
 	}, 1, "Function.prototype.bind"));
@@ -3784,7 +3781,7 @@ function ecma51(env) {
 			}
 
 			var directCall = this.callee instanceof _envReference2["default"] && this.callee.base === globalObject;
-			var ast;
+			var ast = undefined;
 
 			try {
 				ast = config.parser(code.value);
@@ -3824,7 +3821,7 @@ function ecma51(env) {
 				}
 			}
 
-			var executionResult;
+			var executionResult = undefined;
 
 			try {
 				executionResult = this.create(ast).execute();
@@ -3915,7 +3912,7 @@ function serializePrimitive(value) {
 function serializeObject(env, stack, obj, replacer, gap, depth) {
 	var colon = gap ? ": " : ":";
 	var values = [];
-	var value;
+	var value = undefined;
 
 	for (var prop in obj.properties) {
 		if (obj.properties[prop].enumerable) {
@@ -3975,7 +3972,7 @@ function serialize(env, stack, obj, replacer, gap, depth) {
 	depth++;
 	stack.push(obj);
 
-	var jsonResult;
+	var jsonResult = undefined;
 	if (obj.className === "Array") {
 		jsonResult = serializeArray(env, stack, obj, replacer);
 	} else {
@@ -4000,26 +3997,32 @@ function createReplacer(env, replacer) {
 		}
 
 		if (replacer.className === "Array") {
-			var keys = convert.toArray(replacer).map(function (arg) {
-				if (arg.className === "String") {
-					return convert.toString(env, arg);
-				}
+			var _ret = (function () {
+				var keys = convert.toArray(replacer).map(function (arg) {
+					if (arg.className === "String") {
+						return convert.toString(env, arg);
+					}
 
-				if (arg.className === "Number") {
-					return String(convert.toNumber(env, arg));
-				}
+					if (arg.className === "Number") {
+						return String(convert.toNumber(env, arg));
+					}
 
-				return undefined;
-			});
+					return undefined;
+				});
 
-			return function (holder, key, value) {
-				// allow empty key - this will be from the root
-				if (!key || keys.indexOf(key) >= 0) {
-					return value;
-				}
+				return {
+					v: function (holder, key, value) {
+						// allow empty key - this will be from the root
+						if (!key || keys.indexOf(key) >= 0) {
+							return value;
+						}
 
-				return undefined;
-			};
+						return undefined;
+					}
+				};
+			})();
+
+			if (typeof _ret === "object") return _ret.v;
 		}
 	}
 
@@ -4074,7 +4077,7 @@ function deserialize(objectFactory, value, reviver) {
 
 		default:
 			var obj = objectFactory.createObject();
-			var propValue;
+			var propValue = undefined;
 
 			for (var prop in value) {
 				if (value.hasOwnProperty(prop)) {
@@ -4109,6 +4112,7 @@ function jsonApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
 	var undef = env.global.getValue("undefined");
+
 	var jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
@@ -4160,6 +4164,7 @@ var methods = ["abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "fl
 function mathApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+
 	var mathClass = objectFactory.createObject();
 	mathClass.className = "Math";
 
@@ -4199,6 +4204,7 @@ var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
 function numberApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+
 	var numberClass = objectFactory.createFunction(function (obj) {
 		var numberValue = Number(convert.toPrimitive(env, obj, "number"));
 
@@ -4313,79 +4319,85 @@ function defineProperty(env, obj, name, descriptor) {
 	var options = {};
 
 	if (descriptor) {
-		var hasValue = descriptor.hasProperty("value");
-		var hasGetter = descriptor.hasProperty("get");
-		var hasSetter = descriptor.hasProperty("set");
+		(function () {
+			var hasValue = descriptor.hasProperty("value");
+			var hasGetter = descriptor.hasProperty("get");
+			var hasSetter = descriptor.hasProperty("set");
 
-		if ((hasValue || descriptor.hasProperty("writable")) && (hasGetter || hasSetter)) {
-			throw new TypeError("Invalid property. A property cannot both have accessors and be writable or have a value");
-		}
-
-		["writable", "enumerable", "configurable"].forEach(function (prop) {
-			if (descriptor.hasProperty(prop)) {
-				var attrValue = descriptor.getProperty(prop).getValue();
-				options[prop] = convert.toBoolean(attrValue);
+			if ((hasValue || descriptor.hasProperty("writable")) && (hasGetter || hasSetter)) {
+				throw new TypeError("Invalid property. A property cannot both have accessors and be writable or have a value");
 			}
-		});
 
-		var currentScope = env.current;
-
-		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
-		if (hasGetter) {
-			var getter = descriptor.getValue("get") || undef;
-			if (getter.isPrimitive && getter.value === undefined) {
-				options.get = options.getter = undefined;
-			} else {
-				if (getter.className !== "Function") {
-					throw new TypeError("Getter must be a function: " + convert.toString(env, getter));
+			["writable", "enumerable", "configurable"].forEach(function (prop) {
+				if (descriptor.hasProperty(prop)) {
+					var attrValue = descriptor.getProperty(prop).getValue();
+					options[prop] = convert.toBoolean(attrValue);
 				}
+			});
 
-				options.get = getter;
-				options.getter = function () {
-					var scope = env.setScope(currentScope);
-					var thisArg = getter.isStrict() ? this : convert.toObject(env, this);
+			var currentScope = env.current;
 
-					try {
-						var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
-						scope.exitScope();
-						return getResult && getResult.exit ? getResult.result.getValue() : undef;
-					} catch (err) {
-						scope.exitScope();
-						throw err;
+			// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
+			if (hasGetter) {
+				(function () {
+					var getter = descriptor.getValue("get") || undef;
+					if (getter.isPrimitive && getter.value === undefined) {
+						options.get = options.getter = undefined;
+					} else {
+						if (getter.className !== "Function") {
+							throw new TypeError("Getter must be a function: " + convert.toString(env, getter));
+						}
+
+						options.get = getter;
+						options.getter = function () {
+							var scope = env.setScope(currentScope);
+							var thisArg = getter.isStrict() ? this : convert.toObject(env, this);
+
+							try {
+								var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
+								scope.exitScope();
+								return getResult && getResult.exit ? getResult.result.getValue() : undef;
+							} catch (err) {
+								scope.exitScope();
+								throw err;
+							}
+						};
 					}
-				};
+				})();
 			}
-		}
 
-		if (hasSetter) {
-			var setter = descriptor.getValue("set") || undef;
-			if (setter.isPrimitive && setter.value === undefined) {
-				options.set = options.setter = undefined;
-			} else {
-				if (setter.className !== "Function") {
-					throw new TypeError("Setter must be a function: " + convert.toString(env, setter));
-				}
+			if (hasSetter) {
+				(function () {
+					var setter = descriptor.getValue("set") || undef;
+					if (setter.isPrimitive && setter.value === undefined) {
+						options.set = options.setter = undefined;
+					} else {
+						if (setter.className !== "Function") {
+							throw new TypeError("Setter must be a function: " + convert.toString(env, setter));
+						}
 
-				options.set = setter;
-				options.setter = function () {
-					var scope = env.setScope(currentScope);
-					var thisArg = setter.isStrict() ? this : convert.toObject(env, this);
+						options.set = setter;
+						options.setter = function () {
+							var scope = env.setScope(currentScope);
+							var thisArg = setter.isStrict() ? this : convert.toObject(env, this);
 
-					try {
-						func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
-						scope.exitScope();
-						return undef;
-					} catch (err) {
-						scope.exitScope();
-						throw err;
+							try {
+								func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
+								scope.exitScope();
+								return undef;
+							} catch (err) {
+								scope.exitScope();
+								throw err;
+							}
+						};
 					}
-				};
+				})();
 			}
-		}
 
-		if (hasValue) {
-			options.value = descriptor.getProperty("value").getValue() || undef;
-		}
+			if (hasValue) {
+				options.value = descriptor.getProperty("value").getValue() || undef;
+			}
+		})();
 	}
 
 	obj.defineOwnProperty(name, options, true, env);
@@ -4427,7 +4439,8 @@ function objectApi(env) {
 	}, 0, "Object.prototype.valueOf"));
 
 	var toStringFunc = objectFactory.createBuiltInFunction(function () {
-		return objectFactory.createPrimitive("[object " + this.node.className + "]");
+		var className = this.node ? this.node.className : "Undefined";
+		return objectFactory.createPrimitive("[object " + className + "]");
 	}, 0, "Object.prototype.toString");
 
 	// Object.prototype.toString === Object.prototype.toLocaleString
@@ -4618,7 +4631,7 @@ function objectApi(env) {
 	}, 1, "Object.isSealed"));
 
 	// function is an object - make sure that it is in the prototype chain
-	globalObject.getProperty("Function").getValue().getPrototype().setPrototype(proto);
+	globalObject.getValue("Function").getPrototype().setPrototype(proto);
 	globalObject.define("Object", objectClass);
 }
 
@@ -4644,6 +4657,7 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 function regexApi(env) {
 	var globalObject = env.global;
 	var objectFactory = env.objectFactory;
+
 	var regexClass = objectFactory.createFunction(function (pattern, flags) {
 		if (pattern && pattern.className === "RegExp") {
 			if (!contracts.isUndefined(flags)) {
@@ -4743,6 +4757,7 @@ function stringApi(env) {
 	var globalObject = env.global;
 	var undef = globalObject.getValue("undefined");
 	var objectFactory = env.objectFactory;
+
 	var stringClass = objectFactory.createFunction(function (value) {
 		var stringValue = value ? convert.toString(env, value.getValue()) : "";
 
@@ -4763,7 +4778,7 @@ function stringApi(env) {
 
 	proto.define("search", objectFactory.createBuiltInFunction(function (regex) {
 		var stringValue = convert.toString(env, this.node);
-		var underlyingRegex;
+		var underlyingRegex = undefined;
 
 		if (regex) {
 			if (regex.className === "RegExp") {
@@ -4815,7 +4830,7 @@ function stringApi(env) {
 	proto.define("slice", objectFactory.createBuiltInFunction(function (start, end) {
 		var stringValue = convert.toString(env, this.node);
 		var startValue = convert.toInteger(env, start);
-		var endValue;
+		var endValue = undefined;
 
 		if (!contracts.isNullOrUndefined(end)) {
 			endValue = convert.toInteger(env, end);
@@ -4825,6 +4840,8 @@ function stringApi(env) {
 	}, 2, "String.prototype.slice"));
 
 	proto.define("split", objectFactory.createBuiltInFunction(function (separator, limit) {
+		var _this = this;
+
 		var stringValue = convert.toString(env, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
@@ -4834,19 +4851,21 @@ function stringApi(env) {
 		if (contracts.isUndefined(separator)) {
 			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, this);
 		} else {
-			var separatorValue;
-			if (separator.className === "RegExp") {
-				separatorValue = separator.source;
-			} else {
-				separatorValue = convert.toString(env, separator);
-			}
+			(function () {
+				var separatorValue = undefined;
+				if (separator.className === "RegExp") {
+					separatorValue = separator.source;
+				} else {
+					separatorValue = convert.toString(env, separator);
+				}
 
-			var result = stringValue.split(separatorValue, limitValue);
-			var context = this;
+				var result = stringValue.split(separatorValue, limitValue);
+				var context = _this;
 
-			result.forEach(function (value, index) {
-				arr.putValue(index, objectFactory.createPrimitive(value), false, context);
-			});
+				result.forEach(function (value, index) {
+					arr.putValue(index, objectFactory.createPrimitive(value), false, context);
+				});
+			})();
 		}
 
 		return arr;
@@ -4855,26 +4874,28 @@ function stringApi(env) {
 	proto.define("replace", objectFactory.createBuiltInFunction(function (regexOrSubstr, substrOrFn) {
 		var stringValue = convert.toString(env, this.node);
 
-		var matcher;
+		var matcher = undefined;
 		if (regexOrSubstr && regexOrSubstr.className === "RegExp") {
 			matcher = regexOrSubstr.source;
 		} else {
 			matcher = convert.toString(env, regexOrSubstr);
 		}
 
-		var replacer;
+		var replacer = undefined;
 		if (substrOrFn && substrOrFn.type === "function") {
-			var callee = substrOrFn.native ? substrOrFn : substrOrFn.node;
-			var params = callee.params || [];
+			(function () {
+				var callee = substrOrFn.native ? substrOrFn : substrOrFn.node;
+				var params = callee.params || [];
 
-			replacer = function () {
-				var thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
-				var args = slice.call(arguments).map(function (arg) {
-					return objectFactory.createPrimitive(arg);
-				});
-				var replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
-				return replacedValue ? convert.toString(env, replacedValue) : undefined;
-			};
+				replacer = function () {
+					var thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
+					var args = slice.call(arguments).map(function (arg) {
+						return objectFactory.createPrimitive(arg);
+					});
+					var replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
+					return replacedValue ? convert.toString(env, replacedValue) : undefined;
+				};
+			})();
 		} else {
 			replacer = convert.toString(env, substrOrFn);
 		}
@@ -4884,7 +4905,7 @@ function stringApi(env) {
 
 	proto.define("match", objectFactory.createBuiltInFunction(function (regex) {
 		var stringValue = convert.toString(env, this.node);
-		var actualRegex;
+		var actualRegex = undefined;
 
 		if (regex && regex.className === "RegExp") {
 			actualRegex = regex.source;
@@ -4894,15 +4915,21 @@ function stringApi(env) {
 
 		var match = stringValue.match(actualRegex);
 		if (match) {
-			var matches = objectFactory.create("Array");
+			var _ret3 = (function () {
+				var matches = objectFactory.create("Array");
 
-			match.forEach(function (value, index) {
-				matches.putValue(index, objectFactory.createPrimitive(value), false);
-			});
+				match.forEach(function (value, index) {
+					matches.putValue(index, objectFactory.createPrimitive(value), false);
+				});
 
-			matches.putValue("index", objectFactory.createPrimitive(match.index), false);
-			matches.putValue("input", objectFactory.createPrimitive(match.input), false);
-			return matches;
+				matches.putValue("index", objectFactory.createPrimitive(match.index), false);
+				matches.putValue("input", objectFactory.createPrimitive(match.input), false);
+				return {
+					v: matches
+				};
+			})();
+
+			if (typeof _ret3 === "object") return _ret3.v;
 		}
 
 		return globalObject.getProperty("null").getValue();
@@ -5199,13 +5226,12 @@ var _syntaxRules = require("../syntax-rules");
 var _syntaxRules2 = _interopRequireDefault(_syntaxRules);
 
 function validateSyntax(root) {
-	var walker = _estreeWalker2["default"].create(root);
 	var _iteratorNormalCompletion = true;
 	var _didIteratorError = false;
 	var _iteratorError = undefined;
 
 	try {
-		for (var _iterator = _getIterator(walker), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+		for (var _iterator = _getIterator(_estreeWalker2["default"].create(root)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 			var node = _step.value;
 
 			if (node.type in _syntaxRules2["default"]) {
@@ -6447,12 +6473,12 @@ var _utilsContracts = require("../utils/contracts");
 
 var contracts = _interopRequireWildcard(_utilsContracts);
 
-var localObjectFactory;
+var localObjectFactory = undefined;
 
 function setIndex(env, arr, name, descriptor, throwOnError) {
 	var index = Number(name);
 	var lengthProperty = arr.getProperty("length");
-	var lengthValue = lengthProperty.getValue().value;
+	var lengthValue = lengthProperty.getValue().unwrap();
 
 	if (!lengthProperty.canSetValue() && index >= lengthValue || !_objectType2["default"].prototype.defineOwnProperty.call(arr, name, descriptor, false, env)) {
 
@@ -6830,7 +6856,7 @@ var FunctionType = (function (_ObjectType) {
 			var visited = [];
 			var current = obj;
 
-			var proto = this.getProperty("prototype").getValue();
+			var proto = this.getValue("prototype");
 			if (contracts.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
 				throw new TypeError("Function has non-object prototype in instanceof check");
 			}
@@ -7006,7 +7032,7 @@ var parentless = {
 var orphans = _Object$create(null);
 
 function setOrphans(scope) {
-	var parent;
+	var parent = undefined;
 
 	for (var typeName in orphans) {
 		parent = scope.getValue(typeName);
@@ -7056,7 +7082,7 @@ ObjectFactory.prototype = {
 	},
 
 	create: function create(typeName, value) {
-		var instance;
+		var instance = undefined;
 
 		switch (typeName) {
 			case "String":
@@ -7129,10 +7155,9 @@ ObjectFactory.prototype = {
 		instance.setPrototype(objectClass.getValue("prototype"));
 
 		if (strict) {
-			var throwerProps = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-
-			instance.defineOwnProperty("callee", throwerProps);
-			instance.defineOwnProperty("caller", throwerProps);
+			var thrower = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			instance.defineOwnProperty("callee", thrower);
+			instance.defineOwnProperty("caller", thrower);
 		} else {
 			instance.defineOwnProperty("callee", {
 				configurable: true,
@@ -7146,7 +7171,7 @@ ObjectFactory.prototype = {
 	},
 
 	createFunction: function createFunction(fnOrNode, proto, descriptor, strict) {
-		var instance;
+		var instance = undefined;
 
 		if (typeof fnOrNode === "function") {
 			instance = new _nativeFunctionType2["default"](fnOrNode);
@@ -7175,7 +7200,6 @@ ObjectFactory.prototype = {
 		});
 
 		setProto("Function", instance, this.env);
-		// instance.setPrototype(this.env.getValue("Function").getValue("prototype"));
 		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
@@ -7191,6 +7215,8 @@ ObjectFactory.prototype = {
 			throw new TypeError(message);
 		};
 
+		// we want to keep the same instance of the throwers because there
+		// are silly tests that check for this
 		var throwerInstance = this.createBuiltInFunction(thrower);
 		return this.throwers[message] = {
 			get: throwerInstance,
@@ -7290,7 +7316,7 @@ var ObjectType = (function () {
 		}
 	}, {
 		key: "putValue",
-		value: function putValue(name, value, throwOnError) {
+		value: function putValue(name, value, throwOnError, env) {
 			if (this.isPrimitive) {
 				return;
 			}
@@ -7444,9 +7470,9 @@ var ObjectType = (function () {
 			var current = this;
 
 			while (current) {
-				for (var name in current.properties) {
-					if (current.properties[name].enumerable && !(name in unwrapped)) {
-						unwrapped[name] = current.getValue(name).unwrap();
+				for (var _name in current.properties) {
+					if (current.properties[_name].enumerable && !(_name in unwrapped)) {
+						unwrapped[_name] = current.getValue(_name).unwrap();
 					}
 				}
 
@@ -7549,9 +7575,10 @@ var defaultDescriptor = {
 
 var PropertyDescriptor = (function () {
 	function PropertyDescriptor(base, config, value) {
+		if (config === undefined) config = defaultDescriptor;
+
 		_classCallCheck(this, PropertyDescriptor);
 
-		config = config || defaultDescriptor;
 		this.base = base;
 		this.configurable = config.configurable || false;
 		this.enumerable = config.enumerable || false;
@@ -7808,8 +7835,7 @@ var StringType = (function (_PrimitiveType) {
 		key: "getOwnPropertyNames",
 		value: function getOwnPropertyNames() {
 			var props = [];
-			var ln, i;
-			for (i = 0, ln = this.value.length; i < ln; i++) {
+			for (var i = 0, ln = this.value.length; i < ln; i++) {
 				props.push(String(i));
 			}
 
@@ -7998,7 +8024,8 @@ var comparers = (_comparers = {
 	},
 
 	relationalCompare: function relationalCompare(env, a, b, leftFirst) {
-		var primitiveA, primitiveB;
+		var primitiveA = undefined,
+		    primitiveB = undefined;
 		if (leftFirst) {
 			primitiveA = convert.toPrimitive(env, a, "number");
 			primitiveB = convert.toPrimitive(env, b, "number");
@@ -8160,17 +8187,17 @@ function assertIsValidIdentifier(name, strict) {
 }
 
 function assertAreValidArguments(params, strict) {
-	if (strict) {
-		params.forEach(function (param, index) {
-			assertIsValidName(param.name, strict);
+	params.forEach(function (param, index) {
+		assertIsValidParameterName(param.name, strict);
 
+		if (strict) {
 			if (params.some(function (p, i) {
 				return index !== i && param.name === p.name;
 			})) {
 				throw new SyntaxError("Strict mode function may not have duplicate parameter names");
 			}
-		});
-	}
+		}
+	});
 }
 
 function isValidArrayLength(length) {
@@ -8352,11 +8379,9 @@ function getPrimitive(env, value) {
 }
 
 function getValues(env, args) {
-	var i = 0;
-	var ln = args.length;
 	var values = [];
 
-	for (; i < ln; i++) {
+	for (var i = 0, ln = args.length; i < ln; i++) {
 		values.push(getPrimitive(env, args[i]));
 	}
 
@@ -8382,7 +8407,7 @@ function toArray(obj, length) {
 	var arr = [];
 
 	if (obj) {
-		var ln = length >= 0 ? length : obj.getProperty("length").getValue().value;
+		var ln = length >= 0 ? length : obj.getValue("length").value;
 		var i = 0;
 
 		while (i < ln) {
@@ -8493,6 +8518,7 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
 				scope = fn.createScope(env, thisArg, false);
+				returnResult = undefined;
 
 				if (isNew) {
 					returnResult = thisArg;
@@ -8501,22 +8527,22 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 				loadArguments(env, params, args, fn);
 				scope.init();
 
-				context$1$0.prev = 4;
+				context$1$0.prev = 5;
 
 				if (!fn.native) {
-					context$1$0.next = 11;
+					context$1$0.next = 12;
 					break;
 				}
 
-				context$1$0.next = 8;
+				context$1$0.next = 9;
 				return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 
-			case 8:
+			case 9:
 				returnResult = context$1$0.sent;
-				context$1$0.next = 13;
+				context$1$0.next = 14;
 				break;
 
-			case 11:
+			case 12:
 				executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
 
 				if (executionResult && executionResult.exit && executionResult.result) {
@@ -8525,27 +8551,27 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 					}
 				}
 
-			case 13:
-				context$1$0.next = 19;
+			case 14:
+				context$1$0.next = 20;
 				break;
 
-			case 15:
-				context$1$0.prev = 15;
-				context$1$0.t0 = context$1$0["catch"](4);
+			case 16:
+				context$1$0.prev = 16;
+				context$1$0.t0 = context$1$0["catch"](5);
 
 				scope.exitScope();
 				throw context$1$0.t0;
 
-			case 19:
+			case 20:
 
 				scope.exitScope();
 				return context$1$0.abrupt("return", returnResult || env.global.getValue("undefined"));
 
-			case 21:
+			case 22:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, callee$0$0, this, [[4, 15]]);
+	}, callee$0$0, this, [[5, 16]]);
 }));
 
 exports.executeFunction = executeFunction;
@@ -8555,7 +8581,7 @@ function getFunctionResult(env, fn, params, args, thisArg, callee) {
 	loadArguments(env, params, args, fn);
 	scope.init();
 
-	var executionResult;
+	var executionResult = undefined;
 	try {
 		if (fn.native) {
 			executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
@@ -8593,9 +8619,8 @@ function loadArguments(env, params, args, callee) {
 	});
 
 	// just set value if additional, unnamed arguments are passed in
-	var length = args.length;
 	var i = callee.isStrict() ? 0 : params.length;
-	for (; i < length; i++) {
+	for (var _length = args.length; i < _length; i++) {
 		argumentList.defineOwnProperty(i, {
 			value: args[i],
 			configurable: true,
@@ -8624,7 +8649,7 @@ function tryCallMethod(env, obj, name) {
 	if (fn && fn.className === "Function") {
 		var scope = fn.createScope(env, obj);
 		scope.init();
-		var executionResult;
+		var executionResult = undefined;
 
 		try {
 			if (fn.native) {
@@ -8878,6 +8903,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 			case 7:
 				right = context$1$0.sent.result;
 				rightValue = right.getValue() || undef;
+				newValue = undefined;
 
 				if (context.node.operator in operators) {
 					newValue = operators[context.node.operator](context.env, leftValue, rightValue);
@@ -8887,7 +8913,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 				return context$1$0.abrupt("return", context.result(context.env.objectFactory.createPrimitive(newValue)));
 
-			case 11:
+			case 12:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -8913,6 +8939,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function BlockStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
+				result = undefined, priorResult = undefined;
 
 				if (context.node.type === "Program") {
 					context.env.initScope(context.node);
@@ -8921,80 +8948,80 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				_iteratorNormalCompletion = true;
 				_didIteratorError = false;
 				_iteratorError = undefined;
-				context$1$0.prev = 4;
+				context$1$0.prev = 5;
 				_iterator = _getIterator(context.node.body);
 
-			case 6:
+			case 7:
 				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-					context$1$0.next = 17;
+					context$1$0.next = 18;
 					break;
 				}
 
 				current = _step.value;
-				context$1$0.next = 10;
+				context$1$0.next = 11;
 				return context.create(current).execute();
 
-			case 10:
+			case 11:
 				result = context$1$0.sent;
 
 				if (!(result && result.shouldBreak(context, false, priorResult))) {
-					context$1$0.next = 13;
+					context$1$0.next = 14;
 					break;
 				}
 
 				return context$1$0.abrupt("return", result);
 
-			case 13:
+			case 14:
 
 				priorResult = result;
 
-			case 14:
+			case 15:
 				_iteratorNormalCompletion = true;
-				context$1$0.next = 6;
+				context$1$0.next = 7;
 				break;
 
-			case 17:
-				context$1$0.next = 23;
+			case 18:
+				context$1$0.next = 24;
 				break;
 
-			case 19:
-				context$1$0.prev = 19;
-				context$1$0.t0 = context$1$0["catch"](4);
+			case 20:
+				context$1$0.prev = 20;
+				context$1$0.t0 = context$1$0["catch"](5);
 				_didIteratorError = true;
 				_iteratorError = context$1$0.t0;
 
-			case 23:
-				context$1$0.prev = 23;
+			case 24:
 				context$1$0.prev = 24;
+				context$1$0.prev = 25;
 
 				if (!_iteratorNormalCompletion && _iterator["return"]) {
 					_iterator["return"]();
 				}
 
-			case 26:
-				context$1$0.prev = 26;
+			case 27:
+				context$1$0.prev = 27;
 
 				if (!_didIteratorError) {
-					context$1$0.next = 29;
+					context$1$0.next = 30;
 					break;
 				}
 
 				throw _iteratorError;
 
-			case 29:
-				return context$1$0.finish(26);
-
 			case 30:
-				return context$1$0.finish(23);
+				return context$1$0.finish(27);
 
 			case 31:
-				return context$1$0.abrupt("return", result);
+				return context$1$0.finish(24);
 
 			case 32:
+				return context$1$0.abrupt("return", result);
+
+			case 33:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, BlockStatement, this, [[4, 19, 23, 31], [24,, 26, 30]]);
+	}, BlockStatement, this, [[5, 20, 24, 32], [25,, 27, 31]]);
 }));
 module.exports = exports["default"];
 },{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],201:[function(require,module,exports){
@@ -9033,9 +9060,9 @@ function assignThis(env, fnMember, fn, isNew, native) {
 		return native ? null : env.objectFactory.createObject(fn);
 	}
 
-	if (fnMember instanceof _envPropertyReference2["default"] && !fnMember.unqualified /*&& fnMember.base !== env.global*/) {
-			return convert.toObject(env, fnMember.base);
-		}
+	if (fnMember instanceof _envPropertyReference2["default"] && (!fnMember.unqualified || fnMember.base !== env.global)) {
+		return convert.toObject(env, fnMember.base);
+	}
 
 	return null;
 }
@@ -9180,57 +9207,58 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function DoWhileStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
+				result = undefined, priorResult = undefined;
 				passed = true;
 
 				if (!(context.node.type === "WhileStatement")) {
-					context$1$0.next = 7;
+					context$1$0.next = 8;
 					break;
 				}
 
 				context$1$0.t0 = convert;
-				context$1$0.next = 5;
+				context$1$0.next = 6;
 				return context.create(context.node.test).execute();
 
-			case 5:
+			case 6:
 				context$1$0.t1 = context$1$0.sent.result.getValue();
 				passed = context$1$0.t0.toBoolean.call(context$1$0.t0, context$1$0.t1);
 
-			case 7:
+			case 8:
 				if (!passed) {
-					context$1$0.next = 21;
+					context$1$0.next = 22;
 					break;
 				}
 
-				context$1$0.next = 10;
+				context$1$0.next = 11;
 				return context.create(context.node.body).execute();
 
-			case 10:
+			case 11:
 				result = context$1$0.sent;
 
 				if (!(result && result.shouldBreak(context, true, priorResult))) {
-					context$1$0.next = 13;
+					context$1$0.next = 14;
 					break;
 				}
 
 				return context$1$0.abrupt("return", result);
 
-			case 13:
+			case 14:
 				context$1$0.t2 = convert;
-				context$1$0.next = 16;
+				context$1$0.next = 17;
 				return context.create(context.node.test).execute();
 
-			case 16:
+			case 17:
 				context$1$0.t3 = context$1$0.sent.result.getValue();
 				passed = context$1$0.t2.toBoolean.call(context$1$0.t2, context$1$0.t3);
 
 				priorResult = result;
-				context$1$0.next = 7;
+				context$1$0.next = 8;
 				break;
 
-			case 21:
+			case 22:
 				return context$1$0.abrupt("return", result);
 
-			case 22:
+			case 23:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -9302,145 +9330,148 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function ForInStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
+				left = undefined;
+
 				if (!(context.node.left.type === "VariableDeclaration")) {
-					context$1$0.next = 30;
+					context$1$0.next = 31;
 					break;
 				}
 
 				_iteratorNormalCompletion = true;
 				_didIteratorError = false;
 				_iteratorError = undefined;
-				context$1$0.prev = 4;
+				context$1$0.prev = 5;
 				_iterator = _getIterator(context.node.left.declarations);
 
-			case 6:
+			case 7:
 				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-					context$1$0.next = 14;
+					context$1$0.next = 15;
 					break;
 				}
 
 				decl = _step.value;
-				context$1$0.next = 10;
+				context$1$0.next = 11;
 				return context.create(decl).execute();
 
-			case 10:
+			case 11:
 				left = context$1$0.sent.result;
 
-			case 11:
+			case 12:
 				_iteratorNormalCompletion = true;
-				context$1$0.next = 6;
+				context$1$0.next = 7;
 				break;
 
-			case 14:
-				context$1$0.next = 20;
+			case 15:
+				context$1$0.next = 21;
 				break;
 
-			case 16:
-				context$1$0.prev = 16;
-				context$1$0.t0 = context$1$0["catch"](4);
+			case 17:
+				context$1$0.prev = 17;
+				context$1$0.t0 = context$1$0["catch"](5);
 				_didIteratorError = true;
 				_iteratorError = context$1$0.t0;
 
-			case 20:
-				context$1$0.prev = 20;
+			case 21:
 				context$1$0.prev = 21;
+				context$1$0.prev = 22;
 
 				if (!_iteratorNormalCompletion && _iterator["return"]) {
 					_iterator["return"]();
 				}
 
-			case 23:
-				context$1$0.prev = 23;
+			case 24:
+				context$1$0.prev = 24;
 
 				if (!_didIteratorError) {
-					context$1$0.next = 26;
+					context$1$0.next = 27;
 					break;
 				}
 
 				throw _iteratorError;
 
-			case 26:
-				return context$1$0.finish(23);
-
 			case 27:
-				return context$1$0.finish(20);
+				return context$1$0.finish(24);
 
 			case 28:
-				context$1$0.next = 33;
+				return context$1$0.finish(21);
+
+			case 29:
+				context$1$0.next = 34;
 				break;
 
-			case 30:
-				context$1$0.next = 32;
+			case 31:
+				context$1$0.next = 33;
 				return context.create(context.node.left).execute();
 
-			case 32:
+			case 33:
 				left = context$1$0.sent.result;
 
-			case 33:
-				context$1$0.next = 35;
+			case 34:
+				context$1$0.next = 36;
 				return context.create(context.node.right).execute();
 
-			case 35:
+			case 36:
 				obj = context$1$0.sent.result.getValue();
+				result = undefined, priorResult = undefined;
 				visited = _Object$create(null);
 
-			case 37:
+			case 39:
 				if (!obj) {
-					context$1$0.next = 55;
+					context$1$0.next = 57;
 					break;
 				}
 
 				context$1$0.t1 = _regeneratorRuntime.keys(obj.properties);
 
-			case 39:
+			case 41:
 				if ((context$1$0.t2 = context$1$0.t1()).done) {
-					context$1$0.next = 51;
+					context$1$0.next = 53;
 					break;
 				}
 
 				prop = context$1$0.t2.value;
 
 				if (!(obj.properties[prop].enumerable && !visited[prop])) {
-					context$1$0.next = 48;
+					context$1$0.next = 50;
 					break;
 				}
 
 				left.setValue(context.env.objectFactory.createPrimitive(prop));
 
-				context$1$0.next = 45;
+				context$1$0.next = 47;
 				return context.create(context.node.body).execute();
 
-			case 45:
+			case 47:
 				result = context$1$0.sent;
 
 				if (!(result && result.shouldBreak(context, true, priorResult))) {
-					context$1$0.next = 48;
+					context$1$0.next = 50;
 					break;
 				}
 
 				return context$1$0.abrupt("return", result);
 
-			case 48:
+			case 50:
 
 				visited[prop] = true;
-				context$1$0.next = 39;
+				context$1$0.next = 41;
 				break;
 
-			case 51:
+			case 53:
 
 				priorResult = result;
 				obj = obj.getPrototype();
-				context$1$0.next = 37;
+				context$1$0.next = 39;
 				break;
 
-			case 55:
+			case 57:
 				return context$1$0.abrupt("return", result);
 
-			case 56:
+			case 58:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, ForInStatement, this, [[4, 16, 20, 28], [21,, 23, 27]]);
+	}, ForInStatement, this, [[5, 17, 21, 29], [22,, 24, 28]]);
 }));
 module.exports = exports["default"];
 
@@ -9511,47 +9542,50 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				return context.create(context.node.init).execute();
 
 			case 3:
-				context$1$0.next = 5;
+				result = undefined, priorResult = undefined;
+
+			case 4:
+				context$1$0.next = 6;
 				return shouldContinue(context);
 
-			case 5:
+			case 6:
 				if (!context$1$0.sent) {
-					context$1$0.next = 17;
+					context$1$0.next = 18;
 					break;
 				}
 
-				context$1$0.next = 8;
+				context$1$0.next = 9;
 				return context.create(context.node.body).execute();
 
-			case 8:
+			case 9:
 				result = context$1$0.sent;
 
 				if (!(result && result.shouldBreak(context, true, priorResult))) {
-					context$1$0.next = 11;
+					context$1$0.next = 12;
 					break;
 				}
 
 				return context$1$0.abrupt("return", result);
 
-			case 11:
+			case 12:
 				if (!context.node.update) {
-					context$1$0.next = 14;
+					context$1$0.next = 15;
 					break;
 				}
 
-				context$1$0.next = 14;
+				context$1$0.next = 15;
 				return context.create(context.node.update).execute();
 
-			case 14:
+			case 15:
 
 				priorResult = result;
-				context$1$0.next = 3;
+				context$1$0.next = 4;
 				break;
 
-			case 17:
+			case 18:
 				return context$1$0.abrupt("return", result);
 
-			case 18:
+			case 19:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -9895,7 +9929,7 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = InterruptStatement;
 
 function InterruptStatement(context) {
-	var label;
+	var label = undefined;
 	if (context.node.label) {
 		label = context.node.label.name;
 	}
@@ -10040,32 +10074,33 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 2:
 				obj = context$1$0.sent.result.getValue();
+				name = undefined, value = undefined;
 
 				if (!context.node.computed) {
-					context$1$0.next = 12;
+					context$1$0.next = 13;
 					break;
 				}
 
 				context$1$0.t0 = convert;
 				context$1$0.t1 = context.env;
-				context$1$0.next = 8;
+				context$1$0.next = 9;
 				return context.create(context.node.property).execute();
 
-			case 8:
+			case 9:
 				context$1$0.t2 = context$1$0.sent.result.getValue();
 				name = context$1$0.t0.toString.call(context$1$0.t0, context$1$0.t1, context$1$0.t2);
-				context$1$0.next = 13;
+				context$1$0.next = 14;
 				break;
 
-			case 12:
+			case 13:
 				name = context.node.property.name;
 
-			case 13:
+			case 14:
 
 				value = new _envPropertyReference2["default"](name, obj, context.env);
 				return context$1$0.abrupt("return", context.result(value));
 
-			case 15:
+			case 16:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -10101,9 +10136,7 @@ function setDescriptor(env, obj, name, descriptor) {
 	var strict = env.isStrict();
 
 	if (descriptor.get) {
-		descriptor.get.node.params.forEach(function (param) {
-			return contracts.assertIsValidParameterName(param.name, strict);
-		});
+		contracts.assertAreValidArguments(descriptor.get.node.params, strict);
 		descriptor.getter = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function callee$1$0() {
 			return _regeneratorRuntime.wrap(function callee$1$0$(context$2$0) {
 				while (1) switch (context$2$0.prev = context$2$0.next) {
@@ -10123,9 +10156,7 @@ function setDescriptor(env, obj, name, descriptor) {
 	}
 
 	if (descriptor.set) {
-		descriptor.set.node.params.forEach(function (param) {
-			return contracts.assertIsValidParameterName(param.name, strict);
-		});
+		contracts.assertAreValidArguments(descriptor.set.node.params, strict);
 		descriptor.setter = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function callee$1$0() {
 			var args$2$0 = arguments;
 			return _regeneratorRuntime.wrap(function callee$1$0$(context$2$0) {
@@ -10150,7 +10181,7 @@ function createDescriptor(value) {
 }
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function ObjectExpression(context) {
-	var obj, descriptors, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, property, value, name, prop;
+	var obj, descriptors, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, property, value, _name, prop;
 
 	return _regeneratorRuntime.wrap(function ObjectExpression$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
@@ -10175,18 +10206,18 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 11:
 				value = context$1$0.sent.result.getValue();
-				name = property.key.name || property.key.value;
+				_name = property.key.name || property.key.value;
 				context$1$0.t0 = property.kind;
 				context$1$0.next = context$1$0.t0 === "get" ? 16 : context$1$0.t0 === "set" ? 16 : 19;
 				break;
 
 			case 16:
-				descriptors[name] = descriptors[name] || createDescriptor();
-				descriptors[name][property.kind] = value;
+				descriptors[_name] = descriptors[_name] || createDescriptor();
+				descriptors[_name][property.kind] = value;
 				return context$1$0.abrupt("break", 21);
 
 			case 19:
-				obj.defineOwnProperty(name, createDescriptor(value));
+				obj.defineOwnProperty(_name, createDescriptor(value));
 				return context$1$0.abrupt("break", 21);
 
 			case 21:
@@ -10300,72 +10331,73 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function SequenceExpression$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
+				value = undefined;
 				_iteratorNormalCompletion = true;
 				_didIteratorError = false;
 				_iteratorError = undefined;
-				context$1$0.prev = 3;
+				context$1$0.prev = 4;
 				_iterator = _getIterator(context.node.expressions);
 
-			case 5:
+			case 6:
 				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-					context$1$0.next = 13;
+					context$1$0.next = 14;
 					break;
 				}
 
 				expr = _step.value;
-				context$1$0.next = 9;
+				context$1$0.next = 10;
 				return context.create(expr).execute();
 
-			case 9:
+			case 10:
 				value = context$1$0.sent.result.getValue();
 
-			case 10:
+			case 11:
 				_iteratorNormalCompletion = true;
-				context$1$0.next = 5;
+				context$1$0.next = 6;
 				break;
 
-			case 13:
-				context$1$0.next = 19;
+			case 14:
+				context$1$0.next = 20;
 				break;
 
-			case 15:
-				context$1$0.prev = 15;
-				context$1$0.t0 = context$1$0["catch"](3);
+			case 16:
+				context$1$0.prev = 16;
+				context$1$0.t0 = context$1$0["catch"](4);
 				_didIteratorError = true;
 				_iteratorError = context$1$0.t0;
 
-			case 19:
-				context$1$0.prev = 19;
+			case 20:
 				context$1$0.prev = 20;
+				context$1$0.prev = 21;
 
 				if (!_iteratorNormalCompletion && _iterator["return"]) {
 					_iterator["return"]();
 				}
 
-			case 22:
-				context$1$0.prev = 22;
+			case 23:
+				context$1$0.prev = 23;
 
 				if (!_didIteratorError) {
-					context$1$0.next = 25;
+					context$1$0.next = 26;
 					break;
 				}
 
 				throw _iteratorError;
 
-			case 25:
-				return context$1$0.finish(22);
-
 			case 26:
-				return context$1$0.finish(19);
+				return context$1$0.finish(23);
 
 			case 27:
-				return context$1$0.abrupt("return", context.result(value));
+				return context$1$0.finish(20);
 
 			case 28:
+				return context$1$0.abrupt("return", context.result(value));
+
+			case 29:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, SequenceExpression, this, [[3, 15, 19, 27], [20,, 22, 26]]);
+	}, SequenceExpression, this, [[4, 16, 20, 28], [21,, 23, 27]]);
 }));
 module.exports = exports["default"];
 },{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],221:[function(require,module,exports){
@@ -10387,79 +10419,80 @@ var executeStatements = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(fun
 	return _regeneratorRuntime.wrap(function executeStatements$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
+				result = undefined;
 				_iteratorNormalCompletion = true;
 				_didIteratorError = false;
 				_iteratorError = undefined;
-				context$1$0.prev = 3;
+				context$1$0.prev = 4;
 				_iterator = _getIterator(statements);
 
-			case 5:
+			case 6:
 				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-					context$1$0.next = 15;
+					context$1$0.next = 16;
 					break;
 				}
 
 				statement = _step.value;
-				context$1$0.next = 9;
+				context$1$0.next = 10;
 				return context.create(statement).execute();
 
-			case 9:
+			case 10:
 				result = context$1$0.sent;
 
 				if (!(result && result.isCancelled())) {
-					context$1$0.next = 12;
+					context$1$0.next = 13;
 					break;
 				}
 
 				return context$1$0.abrupt("return", result);
 
-			case 12:
+			case 13:
 				_iteratorNormalCompletion = true;
-				context$1$0.next = 5;
+				context$1$0.next = 6;
 				break;
 
-			case 15:
-				context$1$0.next = 21;
+			case 16:
+				context$1$0.next = 22;
 				break;
 
-			case 17:
-				context$1$0.prev = 17;
-				context$1$0.t0 = context$1$0["catch"](3);
+			case 18:
+				context$1$0.prev = 18;
+				context$1$0.t0 = context$1$0["catch"](4);
 				_didIteratorError = true;
 				_iteratorError = context$1$0.t0;
 
-			case 21:
-				context$1$0.prev = 21;
+			case 22:
 				context$1$0.prev = 22;
+				context$1$0.prev = 23;
 
 				if (!_iteratorNormalCompletion && _iterator["return"]) {
 					_iterator["return"]();
 				}
 
-			case 24:
-				context$1$0.prev = 24;
+			case 25:
+				context$1$0.prev = 25;
 
 				if (!_didIteratorError) {
-					context$1$0.next = 27;
+					context$1$0.next = 28;
 					break;
 				}
 
 				throw _iteratorError;
 
-			case 27:
-				return context$1$0.finish(24);
-
 			case 28:
-				return context$1$0.finish(21);
+				return context$1$0.finish(25);
 
 			case 29:
-				return context$1$0.abrupt("return", result);
+				return context$1$0.finish(22);
 
 			case 30:
+				return context$1$0.abrupt("return", result);
+
+			case 31:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, executeStatements, this, [[3, 17, 21, 29], [22,, 24, 28]]);
+	}, executeStatements, this, [[4, 18, 22, 30], [23,, 25, 29]]);
 }));
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function SwitchStatement(context) {
@@ -10474,131 +10507,132 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 			case 2:
 				testValue = context$1$0.sent.result.getValue();
 				passed = false;
+				value = undefined, defaultCase = undefined;
 				_iteratorNormalCompletion2 = true;
 				_didIteratorError2 = false;
 				_iteratorError2 = undefined;
-				context$1$0.prev = 7;
+				context$1$0.prev = 8;
 				_iterator2 = _getIterator(context.node.cases);
 
-			case 9:
+			case 10:
 				if (_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done) {
-					context$1$0.next = 32;
+					context$1$0.next = 33;
 					break;
 				}
 
 				current = _step2.value;
 
 				if (passed) {
-					context$1$0.next = 22;
+					context$1$0.next = 23;
 					break;
 				}
 
 				if (!current.test) {
-					context$1$0.next = 20;
+					context$1$0.next = 21;
 					break;
 				}
 
-				context$1$0.next = 15;
+				context$1$0.next = 16;
 				return context.create(current.test).execute();
 
-			case 15:
+			case 16:
 				caseValue = context$1$0.sent.result.getValue();
 
 				if (caseValue.equals(testValue)) {
-					context$1$0.next = 18;
+					context$1$0.next = 19;
 					break;
 				}
 
-				return context$1$0.abrupt("continue", 29);
+				return context$1$0.abrupt("continue", 30);
 
-			case 18:
-				context$1$0.next = 22;
+			case 19:
+				context$1$0.next = 23;
 				break;
 
-			case 20:
+			case 21:
 				// default might not be the last case
 				defaultCase = current;
-				return context$1$0.abrupt("continue", 29);
+				return context$1$0.abrupt("continue", 30);
 
-			case 22:
+			case 23:
 
 				passed = true;
-				context$1$0.next = 25;
+				context$1$0.next = 26;
 				return executeStatements(context, current.consequent);
 
-			case 25:
+			case 26:
 				value = context$1$0.sent;
 
 				if (!(value && value.isCancelled())) {
-					context$1$0.next = 29;
+					context$1$0.next = 30;
 					break;
 				}
 
 				value.cancel = false;
 				return context$1$0.abrupt("return", value);
 
-			case 29:
+			case 30:
 				_iteratorNormalCompletion2 = true;
-				context$1$0.next = 9;
+				context$1$0.next = 10;
 				break;
 
-			case 32:
-				context$1$0.next = 38;
+			case 33:
+				context$1$0.next = 39;
 				break;
 
-			case 34:
-				context$1$0.prev = 34;
-				context$1$0.t0 = context$1$0["catch"](7);
+			case 35:
+				context$1$0.prev = 35;
+				context$1$0.t0 = context$1$0["catch"](8);
 				_didIteratorError2 = true;
 				_iteratorError2 = context$1$0.t0;
 
-			case 38:
-				context$1$0.prev = 38;
+			case 39:
 				context$1$0.prev = 39;
+				context$1$0.prev = 40;
 
 				if (!_iteratorNormalCompletion2 && _iterator2["return"]) {
 					_iterator2["return"]();
 				}
 
-			case 41:
-				context$1$0.prev = 41;
+			case 42:
+				context$1$0.prev = 42;
 
 				if (!_didIteratorError2) {
-					context$1$0.next = 44;
+					context$1$0.next = 45;
 					break;
 				}
 
 				throw _iteratorError2;
 
-			case 44:
-				return context$1$0.finish(41);
-
 			case 45:
-				return context$1$0.finish(38);
+				return context$1$0.finish(42);
 
 			case 46:
+				return context$1$0.finish(39);
+
+			case 47:
 				if (!(!passed && defaultCase && defaultCase.consequent)) {
-					context$1$0.next = 52;
+					context$1$0.next = 53;
 					break;
 				}
 
-				context$1$0.next = 49;
+				context$1$0.next = 50;
 				return executeStatements(context, defaultCase.consequent);
 
-			case 49:
+			case 50:
 				value = context$1$0.sent;
 
 				value.cancel = false;
 				return context$1$0.abrupt("return", value);
 
-			case 52:
+			case 53:
 				return context$1$0.abrupt("return", value);
 
-			case 53:
+			case 54:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, SwitchStatement, this, [[7, 34, 38, 46], [39,, 41, 45]]);
+	}, SwitchStatement, this, [[8, 35, 39, 47], [40,, 42, 46]]);
 }));
 module.exports = exports["default"];
 },{"../utils/async":191,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],222:[function(require,module,exports){
@@ -10680,21 +10714,22 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	return _regeneratorRuntime.wrap(function TryStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
-				context$1$0.prev = 0;
-				context$1$0.next = 3;
+				result = undefined, uncaughtError = undefined;
+				context$1$0.prev = 1;
+				context$1$0.next = 4;
 				return context.create(context.node.block).execute();
 
-			case 3:
+			case 4:
 				result = context$1$0.sent;
-				context$1$0.next = 28;
+				context$1$0.next = 29;
 				break;
 
-			case 6:
-				context$1$0.prev = 6;
-				context$1$0.t0 = context$1$0["catch"](0);
+			case 7:
+				context$1$0.prev = 7;
+				context$1$0.t0 = context$1$0["catch"](1);
 
 				if (!context.node.handler) {
-					context$1$0.next = 27;
+					context$1$0.next = 28;
 					break;
 				}
 
@@ -10708,70 +10743,70 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				context.env.createVariable(errVar);
 				context.env.putValue(errVar, caughtError);
 
-				context$1$0.prev = 15;
-				context$1$0.next = 18;
+				context$1$0.prev = 16;
+				context$1$0.next = 19;
 				return context.create(context.node.handler.body, context.node.handler).execute();
 
-			case 18:
+			case 19:
 				result = context$1$0.sent;
-				context$1$0.next = 24;
+				context$1$0.next = 25;
 				break;
 
-			case 21:
-				context$1$0.prev = 21;
-				context$1$0.t1 = context$1$0["catch"](15);
+			case 22:
+				context$1$0.prev = 22;
+				context$1$0.t1 = context$1$0["catch"](16);
 
 				uncaughtError = context$1$0.t1;
 
-			case 24:
+			case 25:
 
 				scope.exitScope();
-				context$1$0.next = 28;
+				context$1$0.next = 29;
 				break;
 
-			case 27:
+			case 28:
 				uncaughtError = context$1$0.t0;
 
-			case 28:
-				context$1$0.prev = 28;
+			case 29:
+				context$1$0.prev = 29;
 
 				if (!context.node.finalizer) {
-					context$1$0.next = 35;
+					context$1$0.next = 36;
 					break;
 				}
 
-				context$1$0.next = 32;
+				context$1$0.next = 33;
 				return context.create(context.node.finalizer).execute();
 
-			case 32:
+			case 33:
 				finalResult = context$1$0.sent;
 
 				if (!(finalResult && finalResult.shouldBreak(context))) {
-					context$1$0.next = 35;
+					context$1$0.next = 36;
 					break;
 				}
 
 				return context$1$0.abrupt("return", finalResult);
 
-			case 35:
-				return context$1$0.finish(28);
-
 			case 36:
+				return context$1$0.finish(29);
+
+			case 37:
 				if (!uncaughtError) {
-					context$1$0.next = 38;
+					context$1$0.next = 39;
 					break;
 				}
 
 				throw uncaughtError;
 
-			case 38:
+			case 39:
 				return context$1$0.abrupt("return", result);
 
-			case 39:
+			case 40:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, TryStatement, this, [[0, 6, 28, 36], [15, 21]]);
+	}, TryStatement, this, [[1, 7, 29, 37], [16, 22]]);
 }));
 module.exports = exports["default"];
 },{"../utils/async":191,"../utils/contracts":193,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
@@ -10802,21 +10837,22 @@ var convert = _interopRequireWildcard(_utilsConvert);
 var _utilsAsync = require("../utils/async");
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function UnaryExpression(context) {
-	var result, objectFactory, value, newValue, type, deleted, resolved;
+	var objectFactory, result, value, newValue, type, deleted, resolved;
 	return _regeneratorRuntime.wrap(function UnaryExpression$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
-				context$1$0.next = 2;
+				objectFactory = context.env.objectFactory;
+				context$1$0.next = 3;
 				return context.create(context.node.argument).execute();
 
-			case 2:
+			case 3:
 				result = context$1$0.sent.result;
-				objectFactory = context.env.objectFactory;
+				value = undefined, newValue = undefined;
 				context$1$0.t0 = context.node.operator;
-				context$1$0.next = context$1$0.t0 === "typeof" ? 7 : context$1$0.t0 === "-" ? 11 : context$1$0.t0 === "+" ? 14 : context$1$0.t0 === "!" ? 17 : context$1$0.t0 === "~" ? 20 : context$1$0.t0 === "delete" ? 23 : context$1$0.t0 === "void" ? 36 : 38;
+				context$1$0.next = context$1$0.t0 === "typeof" ? 8 : context$1$0.t0 === "-" ? 12 : context$1$0.t0 === "+" ? 15 : context$1$0.t0 === "!" ? 18 : context$1$0.t0 === "~" ? 21 : context$1$0.t0 === "delete" ? 24 : context$1$0.t0 === "void" ? 37 : 39;
 				break;
 
-			case 7:
+			case 8:
 				type = undefined;
 
 				if (result instanceof _envReference2["default"] && result.isUnresolved()) {
@@ -10827,82 +10863,82 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				}
 
 				newValue = objectFactory.createPrimitive(type);
-				return context$1$0.abrupt("break", 39);
+				return context$1$0.abrupt("break", 40);
 
-			case 11:
+			case 12:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(-convert.toNumber(context.env, value));
-				return context$1$0.abrupt("break", 39);
+				return context$1$0.abrupt("break", 40);
 
-			case 14:
+			case 15:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(+convert.toNumber(context.env, value));
-				return context$1$0.abrupt("break", 39);
+				return context$1$0.abrupt("break", 40);
 
-			case 17:
+			case 18:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(!convert.toBoolean(value));
-				return context$1$0.abrupt("break", 39);
+				return context$1$0.abrupt("break", 40);
 
-			case 20:
+			case 21:
 				value = result.getValue();
 				newValue = objectFactory.createPrimitive(~convert.toInt32(context.env, value));
-				return context$1$0.abrupt("break", 39);
+				return context$1$0.abrupt("break", 40);
 
-			case 23:
+			case 24:
 				deleted = true;
 
 				if (!(result && result instanceof _envReference2["default"])) {
-					context$1$0.next = 32;
+					context$1$0.next = 33;
 					break;
 				}
 
 				resolved = !result.isUnresolved();
 
 				if (!context.env.isStrict()) {
-					context$1$0.next = 29;
+					context$1$0.next = 30;
 					break;
 				}
 
 				if (!(!resolved || !(result instanceof _envPropertyReference2["default"]) || result.unqualified)) {
-					context$1$0.next = 29;
+					context$1$0.next = 30;
 					break;
 				}
 
 				throw new SyntaxError("Delete of an unqualified identifier in strict mode.");
 
-			case 29:
+			case 30:
 
 				if (resolved) {
 					deleted = result.deleteBinding(result.name);
 				}
-				context$1$0.next = 34;
+				context$1$0.next = 35;
 				break;
 
-			case 32:
+			case 33:
 				if (!context.node.argument.object) {
-					context$1$0.next = 34;
+					context$1$0.next = 35;
 					break;
 				}
 
 				throw new ReferenceError(context.node.argument.object.name + " is not defined");
 
-			case 34:
+			case 35:
 
 				newValue = objectFactory.createPrimitive(deleted);
-				return context$1$0.abrupt("break", 39);
+				return context$1$0.abrupt("break", 40);
 
-			case 36:
+			case 37:
 				newValue = objectFactory.createPrimitive(undefined);
-				return context$1$0.abrupt("break", 39);
-
-			case 38:
-				throw new SyntaxError("Unknown unary operator: " + context.node.operator);
+				return context$1$0.abrupt("break", 40);
 
 			case 39:
-				return context$1$0.abrupt("return", context.result(newValue));
+				throw new SyntaxError("Unknown unary operator: " + context.node.operator);
 
 			case 40:
+				return context$1$0.abrupt("return", context.result(newValue));
+
+			case 41:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -11069,19 +11105,20 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
 				name = context.node.id.name;
+				value = undefined;
 
 				if (!context.node.init) {
-					context$1$0.next = 5;
+					context$1$0.next = 6;
 					break;
 				}
 
-				context$1$0.next = 4;
+				context$1$0.next = 5;
 				return context.create(context.node.init).execute();
 
-			case 4:
+			case 5:
 				value = context$1$0.sent.result;
 
-			case 5:
+			case 6:
 
 				// variables have already been hoisted so we just need to initialize them if defined
 				if (value) {
@@ -11090,7 +11127,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 				return context$1$0.abrupt("return", context.result(context.env.getReference(name)));
 
-			case 7:
+			case 8:
 			case "end":
 				return context$1$0.stop();
 		}
@@ -11142,35 +11179,36 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 7:
 				scope = context.env.createObjectScope(obj, context.env.getThisBinding());
+				result = undefined;
 
 				scope.init(context.node.body);
 
-				context$1$0.prev = 9;
-				context$1$0.next = 12;
+				context$1$0.prev = 10;
+				context$1$0.next = 13;
 				return context.create(context.node.body).execute();
 
-			case 12:
+			case 13:
 				result = context$1$0.sent;
-				context$1$0.next = 19;
+				context$1$0.next = 20;
 				break;
 
-			case 15:
-				context$1$0.prev = 15;
-				context$1$0.t0 = context$1$0["catch"](9);
+			case 16:
+				context$1$0.prev = 16;
+				context$1$0.t0 = context$1$0["catch"](10);
 
 				scope.exitScope();
 				throw context$1$0.t0;
 
-			case 19:
+			case 20:
 
 				scope.exitScope();
 				return context$1$0.abrupt("return", result);
 
-			case 21:
+			case 22:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, WithStatement, this, [[9, 15]]);
+	}, WithStatement, this, [[10, 16]]);
 }));
 module.exports = exports["default"];
 },{"../utils/async":191,"../utils/contracts":193,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}]},{},[1])(1)

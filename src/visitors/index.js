@@ -32,7 +32,7 @@ import VariableDeclarator from "./variable-declarator";
 import WithStatement from "./with-statement";
 import {degenerate} from "../utils/async";
 
-var visitors = {
+const visitors = {
 	ArrayExpression,
 	AssignmentExpression,
 	BinaryExpression,

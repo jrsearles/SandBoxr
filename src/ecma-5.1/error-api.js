@@ -1,15 +1,15 @@
 import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 
-var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
+const errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
 function createError (objectFactory, message, name) {
-	var options = null;
+	let options = null;
 	if (name) {
 		options = { name: name };
 	}
 
-	var obj = objectFactory.create("Error", options);
+	let obj = objectFactory.create("Error", options);
 
 	if (!contracts.isNullOrUndefined(message)) {
 		obj.defineOwnProperty("message", { value: message, configurable: true, enumerable: false, writable: true }, false);
@@ -19,20 +19,21 @@ function createError (objectFactory, message, name) {
 }
 
 export default function errorApi (env) {
-	var globalObject = env.global;
-	var objectFactory = env.objectFactory;
-	var errorClass = objectFactory.createFunction(function (message) {
+	const globalObject = env.global;
+	const objectFactory = env.objectFactory;
+	
+	let errorClass = objectFactory.createFunction(function (message) {
 		return createError(objectFactory, message);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = errorClass.getProperty("prototype").getValue();
+	let proto = errorClass.getProperty("prototype").getValue();
 	proto.className = "Error";
 	proto.define("name", objectFactory.createPrimitive("Error"));
 	proto.define("message", objectFactory.createPrimitive(""));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		var name = this.node.getProperty("name").getValue();
-		var msg;
+		let name = this.node.getProperty("name").getValue();
+		let msg;
 
 		if (this.node.hasProperty("message")) {
 			msg = convert.toString(env, this.node.getProperty("message").getValue());
@@ -49,11 +50,11 @@ export default function errorApi (env) {
 	globalObject.define("Error", errorClass);
 
 	errorTypes.forEach(type => {
-		var errClass = objectFactory.createFunction(function (message) {
+		let errClass = objectFactory.createFunction(function (message) {
 			return createError(objectFactory, message, type);
 		}, null, { configurable: false, enumerable: false, writable: false });
 
-		var typeProto = errClass.getProperty("prototype").getValue();
+		let typeProto = errClass.getProperty("prototype").getValue();
 		typeProto.define("name", objectFactory.createPrimitive(type));
 
 		// add to prototype chain to represent inheritance

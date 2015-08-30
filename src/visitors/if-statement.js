@@ -2,7 +2,7 @@ import * as convert from "../utils/convert";
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* IfStatement (context) {
-	var testValue = (yield context.create(context.node.test).execute()).result.getValue();
+	let testValue = (yield context.create(context.node.test).execute()).result.getValue();
 	if (convert.toBoolean(testValue)) {
 		return yield context.create(context.node.consequent).execute();
 	}

@@ -1,8 +1,8 @@
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* VariableDeclarator (context) {
-	var name = context.node.id.name;
-	var value;
+	let name = context.node.id.name;
+	let value;
 
 	if (context.node.init) {
 		value = (yield context.create(context.node.init).execute()).result;

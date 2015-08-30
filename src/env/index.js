@@ -10,8 +10,7 @@ import EstreeWalker from "../estree-walker";
 import rules from "../syntax-rules";
 
 function validateSyntax (root) {
-	var walker = EstreeWalker.create(root);
-	for (let node of walker) {
+	for (let node of EstreeWalker.create(root)) {
 		if (node.type in rules) {
 			rules[node.type](node, true);
 		}
@@ -33,7 +32,7 @@ export default class Environment {
 	}
 
 	getReference (name) {
-		var scope = this.current;
+		let scope = this.current;
 		while (scope) {
 			if (scope.hasOwnProperty(name)) {
 				return scope.getReference(name, true);
@@ -67,7 +66,7 @@ export default class Environment {
 	}
 
 	isStrict () {
-		var scope = this.current;
+		let scope = this.current;
 		
 		while (scope) {
 			if (scope.strict) {
@@ -81,7 +80,7 @@ export default class Environment {
 	}
 
 	getThisBinding () {
-		var thisArg = this.current.getThisBinding();
+		let thisArg = this.current.getThisBinding();
 		if (thisArg) {
 			return thisArg;
 		}
@@ -98,12 +97,12 @@ export default class Environment {
 	}
 
 	createScope (thisArg) {
-		var env = new DeclarativeEnvironment(this.current, thisArg, this);
+		let env = new DeclarativeEnvironment(this.current, thisArg, this);
 		return this.setScope(env);
 	}
 
 	createObjectScope (obj, thisArg) {
-		var env = new ObjectEnvironment(this.current, obj, thisArg, this);
+		let env = new ObjectEnvironment(this.current, obj, thisArg, this);
 		return this.setScope(env);
 	}
 
@@ -137,8 +136,8 @@ export default class Environment {
 	setScope (scope) {
 		this.globalScope = this.globalScope || scope;
 
-		var env = this;
-		var priorScope = this.current || this.globalScope;
+		let env = this;
+		let priorScope = this.current || this.globalScope;
 		this.current = scope;
 
 		return {

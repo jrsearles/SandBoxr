@@ -10,7 +10,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 		return native ? null : env.objectFactory.createObject(fn);
 	}
 	
-	if (fnMember instanceof PropertyReference && !fnMember.unqualified /*&& fnMember.base !== env.global*/) {
+	if (fnMember instanceof PropertyReference && (!fnMember.unqualified || fnMember.base !== env.global)) {
 		return convert.toObject(env, fnMember.base);
 	}
 	
@@ -18,12 +18,12 @@ function assignThis (env, fnMember, fn, isNew, native) {
 }
 
 export default degenerate(function* CallExpression (context) {
-	var node = context.node;
-	var isNew = context.node.type === "NewExpression";
+	let node = context.node;
+	let isNew = context.node.type === "NewExpression";
 	
-	var fnMember = (yield context.create(node.callee).execute()).result;
-	var fn = fnMember.getValue();
-	var args = [];
+	let fnMember = (yield context.create(node.callee).execute()).result;
+	let fn = fnMember.getValue();
+	let args = [];
 	for (let arg of node.arguments) {
 		args.push((yield context.create(arg).execute()).result.getValue());
 	}
@@ -32,10 +32,10 @@ export default degenerate(function* CallExpression (context) {
 		throw new TypeError(convert.toString(context.env, fn) + " not a function");
 	}
 	
-	var native = fn.native;
-	var thisArg = assignThis(context.env, fnMember, fn, isNew, native);
-	var params = native ? [] : fn.node.params;
-	var callee = fnMember;
+	let native = fn.native;
+	let thisArg = assignThis(context.env, fnMember, fn, isNew, native);
+	let params = native ? [] : fn.node.params;
+	let callee = fnMember;
 	
 	callee.identifier = fn.name;
 	return context.result(yield func.executeFunction(context.env, fn, params, args, thisArg, callee, isNew));

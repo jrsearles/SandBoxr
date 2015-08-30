@@ -15,16 +15,16 @@ function defineThis (env, fn, thisArg) {
 	return convert.toObject(env, thisArg);
 }
 
-var frozen = { configurable: false, enumerable: false, writable: false };
+const frozen = { configurable: false, enumerable: false, writable: false };
 
 export default function functionApi (env, options) {
-	var globalObject = env.global;
-	var undef = env.global.getValue("undefined");
-	var objectFactory = env.objectFactory;
-	var funcClass;
+	const globalObject = env.global;
+	const undef = env.global.getValue("undefined");
+	const objectFactory = env.objectFactory;
+	let funcClass;
 
-	var funcCtor = function (...args) {
-		var funcInstance;
+	let funcCtor = function (...args) {
+		let funcInstance;
 
 		if (options.parser && args.length > 0) {
 			let body = args.pop();
@@ -45,24 +45,22 @@ export default function functionApi (env, options) {
 			let userNode = ast.body[0].expression.callee.object.body.body;
 			let strict = contracts.isStrictNode(userNode);
 			
-			let params = args.map(function (arg) {
-				arg = arg.trim();
-				contracts.assertIsValidParameterName(arg);
-
+			let params = args.map(arg => {
 				return {
 					type: "Identifier",
-					name: arg
+					name: arg.trim()
 				};
 			});
 
+			contracts.assertAreValidArguments(params, strict);
 			let callee = {
 				type: "FunctionDeclaration",
 				params: params,
 				body: ast
 			};
 
-			var fn = objectFactory.createFunction(callee);
-			var wrappedFunc = function () {
+			let fn = objectFactory.createFunction(callee);
+			let wrappedFunc = function () {
 				let thisArg;
 				if (this.isNew) {
 					thisArg = objectFactory.createObject(funcInstance);
@@ -74,7 +72,7 @@ export default function functionApi (env, options) {
 					}
 				}
 
-				var executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
+				let executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
 
 				if (this.isNew) {
 					return thisArg;
@@ -96,7 +94,7 @@ export default function functionApi (env, options) {
 	};
 
 	// the prototype of a function is actually callable and evaluates as a function
-	var proto = new NativeFunctionType(function () {});
+	let proto = new NativeFunctionType(function () {});
 
 	funcCtor.nativeLength = 1;
 	funcClass = objectFactory.createFunction(funcCtor, proto, frozen);
@@ -118,8 +116,8 @@ export default function functionApi (env, options) {
 	}, 0, "Function.prototype.toString"));
 
 	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg, ...args) {
-		var params = this.node.native ? [] : this.node.node.params;
-		var callee = this.node.native ? this.node : this.node.node;
+		let params = this.node.native ? [] : this.node.node.params;
+		let callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
@@ -128,14 +126,14 @@ export default function functionApi (env, options) {
 
 	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
 		if (argsArray) {
-			if (argsArray.className !== "Arguments" && argsArray.className !== "Array") {
+			if (argsArray.className !== "Arguments" && argsArray.className !== "Array" && argsArray.className !== "Function") {
 				throw new TypeError("Arguments list was wrong type");
 			}
 		}
 
-		var args = convert.toArray(argsArray);
-		var params = this.node.native ? [] : this.node.node.params;
-		var callee = this.node.native ? this.node : this.node.node;
+		let args = convert.toArray(argsArray);
+		let params = this.node.native ? [] : this.node.node.params;
+		let callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
@@ -148,17 +146,28 @@ export default function functionApi (env, options) {
 		let callee = fn.native ? fn : fn.node;
 		thisArg = defineThis(env, this.node, thisArg);
 
-		let nativeFunc = function (...additionArgs) {
-			var mergedArgs = args.concat(additionArgs);
+		let nativeFunc = function (...additionalArgs) {
+			let mergedArgs = args.concat(additionalArgs);
 			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
-		nativeFunc.strict = env.isStrict() || fn.native && contracts.isStrictNode(fn.node.body.body);
+		nativeFunc.strict = env.isStrict() || !fn.native && contracts.isStrictNode(fn.node.body.body);
 		
 		let boundFunc = objectFactory.createFunction(nativeFunc);
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
+		
+		if (!nativeFunc.strict) {
+			boundFunc.remove("caller");
+			boundFunc.remove("arguments");
+			
+			// these will be added in strict mode, but should always be here for bound functions
+			let thrower = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			boundFunc.defineOwnProperty("caller", thrower);
+			boundFunc.defineOwnProperty("arguments", thrower);	
+		}
+		
 		return boundFunc;
 	}, 1, "Function.prototype.bind"));
 }

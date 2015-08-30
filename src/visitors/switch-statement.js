@@ -1,7 +1,7 @@
 import {degenerate} from "../utils/async";
 
 let executeStatements = degenerate(function* executeStatements (context, statements) {
-	var result;
+	let result;
 	for (let statement of statements) {
 		result = yield context.create(statement).execute();
 		if (result && result.isCancelled()) {
@@ -13,9 +13,9 @@ let executeStatements = degenerate(function* executeStatements (context, stateme
 });
 
 export default degenerate(function* SwitchStatement (context) {
-	var testValue = (yield context.create(context.node.discriminant).execute()).result.getValue();
-	var passed = false;
-	var value, defaultCase;
+	let testValue = (yield context.create(context.node.discriminant).execute()).result.getValue();
+	let passed = false;
+	let value, defaultCase;
 	
 	for (let current of context.node.cases) {
 		if (!passed) {

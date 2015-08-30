@@ -1,9 +1,9 @@
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* SequenceExpression (context) {
-	var value;
+	let value;
 	
-	for (var expr of context.node.expressions) {
+	for (let expr of context.node.expressions) {
 		value = (yield context.create(expr).execute()).result.getValue();
 	}
 	

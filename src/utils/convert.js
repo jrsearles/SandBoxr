@@ -1,9 +1,9 @@
 import "../polyfills";
 import * as func from "../utils/func";
 
-var sign = Math.sign;
-var floor = Math.floor;
-var abs = Math.abs;
+const sign = Math.sign;
+const floor = Math.floor;
+const abs = Math.abs;
 
 function getString (env, value) {
 	if (!value) {
@@ -14,7 +14,7 @@ function getString (env, value) {
 		return String(value.value);
 	}
 
-	var primitiveValue = func.tryCallMethod(env, value, "toString");
+	let primitiveValue = func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
@@ -36,7 +36,7 @@ function getPrimitive (env, value) {
 		return value.value;
 	}
 
-	var primitiveValue = func.tryCallMethod(env, value, "valueOf");
+	let primitiveValue = func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return primitiveValue.value;
 	}
@@ -49,13 +49,10 @@ function getPrimitive (env, value) {
 	throw new TypeError("Cannot convert object to primitive");
 }
 
-
 function getValues (env, args) {
-	var i = 0;
-	var ln = args.length;
-	var values = [];
+	let values = [];
 
-	for (; i < ln; i++) {
+	for (let i = 0, ln = args.length; i < ln; i++) {
 		values.push(getPrimitive(env, args[i]));
 	}
 
@@ -63,7 +60,7 @@ function getValues (env, args) {
 }
 
 export function primitiveToObject (env, value) {
-	var newValue = env.objectFactory.createPrimitive(value);
+	let newValue = env.objectFactory.createPrimitive(value);
 	newValue.isPrimitive = false;
 	newValue.type = "object";
 	return newValue;
@@ -78,11 +75,11 @@ export function	toObject (env, obj) {
 }
 
 export function	toArray (obj, length) {
-	var arr = [];
+	let arr = [];
 
 	if (obj) {
-		var ln = length >= 0 ? length : obj.getProperty("length").getValue().value;
-		var i = 0;
+		let ln = length >= 0 ? length : obj.getValue("length").value;
+		let i = 0;
 
 		while (i < ln) {
 			if (obj.hasProperty(i)) {
@@ -123,7 +120,7 @@ export function	toNumber (env, obj) {
 }
 
 export function	toInteger (env, obj) {
-	var value = toNumber(env, obj);
+	let value = toNumber(env, obj);
 	if (isNaN(value)) {
 		return 0;
 	}
@@ -136,12 +133,12 @@ export function	toInteger (env, obj) {
 }
 
 export function	toInt32 (env, obj) {
-	var value = toInteger(env, obj);
+	let value = toInteger(env, obj);
 	return isFinite(value) ? value : 0;
 }
 
 export function	toUInt32 (env, obj) {
-	var value = toInt32(env, obj);
+	let value = toInt32(env, obj);
 	return value >>> 0;
 }
 
@@ -159,10 +156,10 @@ export function	toBoolean (obj) {
 
 export function	toNativeFunction (env, fn, name) {
 	return env.objectFactory.createBuiltInFunction(function () {
-		var scope = this && this.node && this.node.value;
-		var args = getValues(env, arguments);
+		let scope = this && this.node && this.node.value;
+		let args = getValues(env, arguments);
 
-		var value = fn.apply(scope, args);
+		let value = fn.apply(scope, args);
 		return env.objectFactory.createPrimitive(value);
 	}, fn.length, name);
 }

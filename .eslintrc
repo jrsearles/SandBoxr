@@ -1,6 +1,7 @@
 env:
     node: true
     mocha: true
+    browser: true
 
 rules:
     indent: [2, "tab", { "SwitchCase": 1 }]
@@ -14,6 +15,7 @@ rules:
     no-nested-ternary: 2
     no-return-assign: 0
     no-unused-vars: [2, { "args": "none" }]
+    no-var: 2
     radix: 2
     space-after-keywords: [2, "always"]
     space-before-blocks: 2

@@ -10,7 +10,7 @@ function isNextable (obj) {
 
 export function degenerate (fn) {
 	return function () {
-		var generator = fn.apply(this, arguments);
+		let generator = fn.apply(this, arguments);
 		
 		function handle (result) {
 			if (result.done) {

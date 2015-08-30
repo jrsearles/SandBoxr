@@ -24,7 +24,7 @@ export default class ObjectType {
 	getProperty (name) {
 		name = String(name);
 
-		var current = this;
+		let current = this;
 		while (current) {
 			if (name in current.properties) {
 				return current.properties[name].bind(this);
@@ -52,14 +52,14 @@ export default class ObjectType {
 		return String(name) in this.properties;
 	}
 
-	putValue (name, value, throwOnError) {
+	putValue (name, value, throwOnError, env) {
 		if (this.isPrimitive) {
 			return;
 		}
 
 		name = String(name);
 
-		var descriptor = this.getProperty(name);
+		let descriptor = this.getProperty(name);
 		if (descriptor) {
 			if (!descriptor.canSetValue()) {
 				if (throwOnError) {
@@ -93,7 +93,7 @@ export default class ObjectType {
 			return false;
 		}
 
-		var current = this.getOwnProperty(name);
+		let current = this.getOwnProperty(name);
 		if (current) {
 			if (current.canUpdate(descriptor)) {
 				current.update(descriptor);
@@ -160,7 +160,7 @@ export default class ObjectType {
 	}
 
 	freeze () {
-		for (var prop in this.properties) {
+		for (let prop in this.properties) {
 			if (this.properties[prop].dataProperty) {
 				this.defineOwnProperty(prop, { writable: false, configurable: false }, true);
 			} else {
@@ -176,7 +176,7 @@ export default class ObjectType {
 	}
 
 	seal () {
-		for (var prop in this.properties) {
+		for (let prop in this.properties) {
 			this.defineOwnProperty(prop, { configurable: false }, true);
 		}
 
@@ -192,11 +192,11 @@ export default class ObjectType {
 	}
 
 	unwrap () {
-		var unwrapped = {};
-		var current = this;
+		let unwrapped = {};
+		let current = this;
 
 		while (current) {
-			for (var name in current.properties) {
+			for (let name in current.properties) {
 				if (current.properties[name].enumerable && !(name in unwrapped)) {
 					unwrapped[name] = current.getValue(name).unwrap();
 				}

@@ -16,7 +16,7 @@ export default class SandBoxr {
 		}
 		
 		this.env = env;
-		var response;
+		let response;
 		
 		try {
 			response = new ExecutionContext(env, this.ast).execute();

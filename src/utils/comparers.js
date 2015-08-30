@@ -45,8 +45,8 @@ const comparers = {
 			return a === b;
 		}
 
-		var primitiveA = convert.toPrimitive(env, a);
-		var primitiveB = convert.toPrimitive(env, b);
+		let primitiveA = convert.toPrimitive(env, a);
+		let primitiveB = convert.toPrimitive(env, b);
 
 		if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
 			return Number(primitiveA) === Number(primitiveB);
@@ -76,7 +76,7 @@ const comparers = {
 	},
 
 	relationalCompare (env, a, b, leftFirst) {
-		var primitiveA, primitiveB;
+		let primitiveA, primitiveB;
 		if (leftFirst) {
 			primitiveA = convert.toPrimitive(env, a, "number");
 			primitiveB = convert.toPrimitive(env, b, "number");

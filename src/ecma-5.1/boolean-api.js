@@ -2,10 +2,11 @@ import * as contracts from "../utils/contracts";
 import * as convert from "../utils/convert";
 
 export default function booleanApi (env) {
-	var globalObject = env.global;
-	var objectFactory = env.objectFactory;
-	var booleanClass = objectFactory.createFunction(function (obj) {
-		var booleanValue = convert.toBoolean(obj);
+	const globalObject = env.global;
+	const objectFactory = env.objectFactory;
+	
+	let booleanClass = objectFactory.createFunction(function (obj) {
+		let booleanValue = convert.toBoolean(obj);
 
 		// called as new
 		if (this.isNew) {
@@ -15,7 +16,7 @@ export default function booleanApi (env) {
 		return objectFactory.create("Boolean", booleanValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = booleanClass.getProperty("prototype").getValue();
+	let proto = booleanClass.getProperty("prototype").getValue();
 	proto.className = "Boolean";
 	proto.value = false;
 

@@ -1,8 +1,8 @@
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* ArrayExpression (context) {
-	var objectFactory = context.env.objectFactory;
-	var arr = objectFactory.create("Array");
+	const objectFactory = context.env.objectFactory;
+	let arr = objectFactory.create("Array");
 
 	if (context.node.elements) {
 		let i = 0;
@@ -10,7 +10,7 @@ export default degenerate(function* ArrayExpression (context) {
 
 		while (i < ln) {
 			if (context.node.elements[i]) {
-				var item = (yield context.create(context.node.elements[i]).execute()).result.getValue();
+				let item = (yield context.create(context.node.elements[i]).execute()).result.getValue();
 				arr.defineOwnProperty(i, { value: item, configurable: true, enumerable: true, writable: true }, true, context.env);
 			}
 

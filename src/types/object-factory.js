@@ -10,17 +10,17 @@ import ErrorType from "./error-type";
 import ArgumentType from "./argument-type";
 import * as contracts from "../utils/contracts";
 
-var parentless = {
+const parentless = {
 	"Undefined": true,
 	"Null": true
 };
 
-var orphans = Object.create(null);
+let orphans = Object.create(null);
 
 function setOrphans (scope) {
-	var parent;
+	let parent;
 
-	for (var typeName in orphans) {
+	for (let typeName in orphans) {
 		parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
@@ -39,7 +39,7 @@ function setProto (typeName, instance, env) {
 		return;
 	}
 
-	var parent = env.getReference(typeName);
+	let parent = env.getReference(typeName);
 	if (!parent.isUnresolved()) {
 		instance.setPrototype(parent.getValue().getProperty("prototype").getValue());
 		return;
@@ -68,7 +68,7 @@ ObjectFactory.prototype = {
 	},
 
 	create: function (typeName, value) {
-		var instance;
+		let instance;
 
 		switch (typeName) {
 			case "String":
@@ -119,7 +119,7 @@ ObjectFactory.prototype = {
 	},
 
 	createObject: function (parent) {
-		var instance = new ObjectType();
+		let instance = new ObjectType();
 
 		if (parent !== null) {
 			if (parent) {
@@ -134,17 +134,16 @@ ObjectFactory.prototype = {
 	},
 
 	createArguments: function (args, callee, strict) {
-		var instance = new ArgumentType();
-		var objectClass = this.env.global.getValue("Object");
+		let instance = new ArgumentType();
+		let objectClass = this.env.global.getValue("Object");
 
 		instance.init(this, objectClass, objectClass.getPrototype());
 		instance.setPrototype(objectClass.getValue("prototype"));
 
 		if (strict) {
-			let throwerProps = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-			
-			instance.defineOwnProperty("callee", throwerProps);
-			instance.defineOwnProperty("caller", throwerProps);
+			let thrower = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
+			instance.defineOwnProperty("callee", thrower);
+			instance.defineOwnProperty("caller", thrower);
 		} else {
 			instance.defineOwnProperty("callee", { 
 				configurable: true, 
@@ -158,7 +157,7 @@ ObjectFactory.prototype = {
 	},
 
 	createFunction: function (fnOrNode, proto, descriptor, strict) {
-		var instance;
+		let instance;
 
 		if (typeof fnOrNode === "function") {
 			instance = new NativeFunctionType(fnOrNode);
@@ -169,7 +168,7 @@ ObjectFactory.prototype = {
 		instance.init(this, proto, descriptor, strict);
 
 		// setProto("Function", instance, this.env);
-		var functionClass = this.env.getReference("Function");
+		let functionClass = this.env.getReference("Function");
 		if (functionClass && !functionClass.isUnresolved()) {
 			instance.setPrototype(functionClass.getValue().getValue("prototype"));
 		}
@@ -178,7 +177,7 @@ ObjectFactory.prototype = {
 	},
 
 	createBuiltInFunction: function (fn, length, methodName) {
-		var instance = new NativeFunctionType(function () {
+		let instance = new NativeFunctionType(function () {
 			if (this.isNew) {
 				throw new TypeError(methodName + " is not a constructor");
 			}
@@ -187,7 +186,6 @@ ObjectFactory.prototype = {
 		});
 
 		setProto("Function", instance, this.env);
-		// instance.setPrototype(this.env.getValue("Function").getValue("prototype"));
 		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
@@ -203,6 +201,8 @@ ObjectFactory.prototype = {
 			throw new TypeError(message);
 		};
 		
+		// we want to keep the same instance of the throwers because there
+		// are silly tests that check for this
 		let throwerInstance = this.createBuiltInFunction(thrower);
 		return this.throwers[message] = {
 			get: throwerInstance,

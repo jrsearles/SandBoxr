@@ -20,13 +20,13 @@ function defineProperty (env, obj, name, descriptor) {
 		throw new TypeError("Property description must be an object: " + convert.toString(env, descriptor));
 	}
 
-	var undef = env.global.getValue("undefined");
-	var options = {};
+	let undef = env.global.getValue("undefined");
+	let options = {};
 
 	if (descriptor) {
-		var hasValue = descriptor.hasProperty("value");
-		var hasGetter = descriptor.hasProperty("get");
-		var hasSetter = descriptor.hasProperty("set");
+		let hasValue = descriptor.hasProperty("value");
+		let hasGetter = descriptor.hasProperty("get");
+		let hasSetter = descriptor.hasProperty("set");
 
 		if ((hasValue || descriptor.hasProperty("writable")) && (hasGetter || hasSetter)) {
 			throw new TypeError("Invalid property. A property cannot both have accessors and be writable or have a value");
@@ -34,16 +34,16 @@ function defineProperty (env, obj, name, descriptor) {
 
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
 			if (descriptor.hasProperty(prop)) {
-				var attrValue = descriptor.getProperty(prop).getValue();
+				let attrValue = descriptor.getProperty(prop).getValue();
 				options[prop] = convert.toBoolean(attrValue);
 			}
 		});
 
-		var currentScope = env.current;
+		let currentScope = env.current;
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
-			var getter = descriptor.getValue("get") || undef;
+			let getter = descriptor.getValue("get") || undef;
 			if (getter.isPrimitive && getter.value === undefined) {
 				options.get = options.getter = undefined;
 			} else {
@@ -53,11 +53,11 @@ function defineProperty (env, obj, name, descriptor) {
 
 				options.get = getter;
 				options.getter = function () {
-					var scope = env.setScope(currentScope);
-					var thisArg = getter.isStrict() ? this : convert.toObject(env, this);
+					let scope = env.setScope(currentScope);
+					let thisArg = getter.isStrict() ? this : convert.toObject(env, this);
 
 					try {
-						var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
+						let getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
 						scope.exitScope();
 						return getResult && getResult.exit ? getResult.result.getValue() : undef;
 					} catch (err) {
@@ -69,7 +69,7 @@ function defineProperty (env, obj, name, descriptor) {
 		}
 
 		if (hasSetter) {
-			var setter = descriptor.getValue("set") || undef;
+			let setter = descriptor.getValue("set") || undef;
 			if (setter.isPrimitive && setter.value === undefined) {
 				options.set = options.setter = undefined;
 			} else {
@@ -79,8 +79,8 @@ function defineProperty (env, obj, name, descriptor) {
 
 				options.set = setter;
 				options.setter = function () {
-					var scope = env.setScope(currentScope);
-					var thisArg = setter.isStrict() ? this : convert.toObject(env, this);
+					let scope = env.setScope(currentScope);
+					let thisArg = setter.isStrict() ? this : convert.toObject(env, this);
 
 					try {
 						func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
@@ -103,19 +103,19 @@ function defineProperty (env, obj, name, descriptor) {
 }
 
 export default function objectApi (env) {
-	var globalObject = env.global;
-	var objectFactory = env.objectFactory;
-	var undef = globalObject.getValue("undefined");
+	const globalObject = env.global;
+	const objectFactory = env.objectFactory;
+	const undef = globalObject.getValue("undefined");
 
-	var proto = new ObjectType();
-	var objectClass = objectFactory.createFunction(function (value) {
+	let proto = new ObjectType();
+	let objectClass = objectFactory.createFunction(function (value) {
 		if (value) {
 			if (value.isPrimitive) {
 				if (value.value == null) {
 					return objectFactory.createObject();
 				}
 
-				var objectWrapper = objectFactory.createPrimitive(value.value);
+				let objectWrapper = objectFactory.createPrimitive(value.value);
 				objectWrapper.type = "object";
 				objectWrapper.isPrimitive = false;
 				return objectWrapper;
@@ -137,8 +137,9 @@ export default function objectApi (env) {
 		return convert.toObject(env, this.node);
 	}, 0, "Object.prototype.valueOf"));
 
-	var toStringFunc = objectFactory.createBuiltInFunction(function () {
-		return objectFactory.createPrimitive("[object " + this.node.className + "]");
+	let toStringFunc = objectFactory.createBuiltInFunction(function () {
+		let className = this.node ? this.node.className : "Undefined";
+		return objectFactory.createPrimitive(`[object ${className}]`);
 	}, 0, "Object.prototype.toString");
 
 	// Object.prototype.toString === Object.prototype.toLocaleString
@@ -146,7 +147,7 @@ export default function objectApi (env) {
 	proto.define("toLocaleString", toStringFunc);
 
 	proto.define("isPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
-		var current = obj;
+		let current = obj;
 		while (current) {
 			if (this.node === current) {
 				return objectFactory.createPrimitive(true);
@@ -160,7 +161,7 @@ export default function objectApi (env) {
 
 	proto.define("propertyIsEnumerable", objectFactory.createBuiltInFunction(function (name) {
 		name = convert.toString(env, name);
-		var descriptor = this.node.getOwnProperty(name);
+		let descriptor = this.node.getOwnProperty(name);
 		return objectFactory.createPrimitive(!!(descriptor && descriptor.enumerable));
 	}, 1, "Object.propertyIsEnumerable"));
 
@@ -173,7 +174,7 @@ export default function objectApi (env) {
 			throw new TypeError("Cannot convert null or undefined to object");
 		}
 
-		var obj = objectFactory.createObject();
+		let obj = objectFactory.createObject();
 
 		if (parent) {
 			obj.setPrototype(parent);
@@ -216,9 +217,9 @@ export default function objectApi (env) {
 		prop = convert.toString(env, prop);
 
 		if (obj.hasOwnProperty(prop)) {
-			var descriptor = obj.getProperty(prop);
+			let descriptor = obj.getProperty(prop);
 
-			var result = objectFactory.createObject();
+			let result = objectFactory.createObject();
 			result.putValue("configurable", objectFactory.createPrimitive(descriptor.configurable), false);
 			result.putValue("enumerable", objectFactory.createPrimitive(descriptor.enumerable), false);
 
@@ -239,8 +240,8 @@ export default function objectApi (env) {
 	objectClass.define("keys", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj);
 
-		var arr = objectFactory.create("Array");
-		var index = 0;
+		let arr = objectFactory.create("Array");
+		let index = 0;
 
 		for (let name in obj.properties) {
 			if (obj.properties[name].enumerable) {
@@ -255,7 +256,7 @@ export default function objectApi (env) {
 	objectClass.define("getOwnPropertyNames", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getOwnPropertyNames");
 
-		var arr = objectFactory.create("Array");
+		let arr = objectFactory.create("Array");
 		obj.getOwnPropertyNames().forEach(function (name, index) {
 			arr.putValue(index, objectFactory.createPrimitive(name));
 		});
@@ -266,7 +267,7 @@ export default function objectApi (env) {
 	objectClass.define("getPrototypeOf", objectFactory.createBuiltInFunction(function (obj) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
 
-		var objProto = obj.getPrototype();
+		let objProto = obj.getPrototype();
 		return objProto || env.global.getProperty("null").getValue();
 	}, 1, "Object.getPrototypeOf"));
 
@@ -284,7 +285,7 @@ export default function objectApi (env) {
 		}
 
 		if (!obj.extensible) {
-			for (var prop in obj.properties) {
+			for (let prop in obj.properties) {
 				if (obj.properties[prop].writable || obj.properties[prop].configurable) {
 					return objectFactory.createPrimitive(false);
 				}
@@ -318,7 +319,7 @@ export default function objectApi (env) {
 		contracts.assertIsObject(obj, "Object.isSealed");
 
 		if (!obj.extensible) {
-			for (var prop in obj.properties) {
+			for (let prop in obj.properties) {
 				if (obj.properties[prop].configurable) {
 					return objectFactory.createPrimitive(false);
 				}
@@ -329,6 +330,6 @@ export default function objectApi (env) {
 	}, 1, "Object.isSealed"));
 
 	// function is an object - make sure that it is in the prototype chain
-	globalObject.getProperty("Function").getValue().getPrototype().setPrototype(proto);
+	globalObject.getValue("Function").getPrototype().setPrototype(proto);
 	globalObject.define("Object", objectClass);
 }

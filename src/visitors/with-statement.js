@@ -6,14 +6,14 @@ export default degenerate(function* WithStatement (context) {
 		throw new SyntaxError("Strict mode code may not include a with statement");
 	}
 	
-	var obj = (yield context.create(context.node.object).execute()).result.getValue();
+	let obj = (yield context.create(context.node.object).execute()).result.getValue();
 	
 	if (contracts.isNullOrUndefined(obj)) {
 		throw new TypeError(`${obj.className} has no properties`);
 	}
 	
-	var scope = context.env.createObjectScope(obj, context.env.getThisBinding());
-	var result;
+	let scope = context.env.createObjectScope(obj, context.env.getThisBinding());
+	let result;
 
 	scope.init(context.node.body);
 

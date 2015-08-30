@@ -2,8 +2,8 @@ import * as contracts from "./contracts";
 import {degenerate} from "./async";
 
 export let executeFunction = degenerate(function* (env, fn, params, args, thisArg, callee, isNew) {
-	var scope = fn.createScope(env, thisArg, false);
-	var returnResult;
+	let scope = fn.createScope(env, thisArg, false);
+	let returnResult;
 
 	if (isNew) {
 		returnResult = thisArg;
@@ -16,7 +16,7 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 		if (fn.native) {
 			returnResult = yield fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 		} else {
-			var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
+			let executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
 			if (executionResult && executionResult.exit && executionResult.result) {
 				if (!isNew || !executionResult.result.isPrimitive) {
 					returnResult = executionResult.result;
@@ -33,11 +33,11 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 });
 
 export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
-	var scope = fn.createScope(env, thisArg, false);
+	let scope = fn.createScope(env, thisArg, false);
 	loadArguments(env, params, args, fn);
 	scope.init();
 	
-	var executionResult;
+	let executionResult;
 	try {
 		if (fn.native) {
 			executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
@@ -54,10 +54,10 @@ export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
 }
 
 export function	loadArguments (env, params, args, callee) {
-	var undef = env.global.getValue("undefined");
+	let undef = env.global.getValue("undefined");
 	let strict = env.isStrict() || callee.isStrict();
 	
-	var argumentList = env.objectFactory.createArguments(args, callee, strict);
+	let argumentList = env.objectFactory.createArguments(args, callee, strict);
 	env.current.createVariable("arguments");
 	env.current.putValue("arguments", argumentList);
 
@@ -65,7 +65,7 @@ export function	loadArguments (env, params, args, callee) {
 		contracts.assertIsValidParameterName(param.name, strict);
 		
 		if (!callee.isStrict() && !env.current.hasProperty(param.name)) {
-			var descriptor = env.current.createVariable(param.name);
+			let descriptor = env.current.createVariable(param.name);
 			if (args.length > index) {
 				argumentList.mapProperty(index, descriptor);
 			}
@@ -75,9 +75,8 @@ export function	loadArguments (env, params, args, callee) {
 	});
 
 	// just set value if additional, unnamed arguments are passed in
-	var length = args.length;
 	let i = callee.isStrict() ? 0 : params.length;
-	for (; i < length; i++) {
+	for (let length = args.length; i < length; i++) {
 		argumentList.defineOwnProperty(i, {
 			value: args[i],
 			configurable: true,
@@ -95,18 +94,18 @@ export function	loadArguments (env, params, args, callee) {
 }
 
 export function	tryCallMethod (env, obj, name) {
-	var fn = obj.getProperty(name);
+	let fn = obj.getProperty(name);
 	if (!fn) {
 		return false;
 	}
 
 	fn = fn.getValue();
-	var undef = env.global.getValue("undefined");
+	let undef = env.global.getValue("undefined");
 
 	if (fn && fn.className === "Function") {
-		var scope = fn.createScope(env, obj);
+		let scope = fn.createScope(env, obj);
 		scope.init();
-		var executionResult;
+		let executionResult;
 
 		try {
 			if (fn.native) {

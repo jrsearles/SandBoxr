@@ -1,7 +1,7 @@
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* ForInStatement (context) {
-	var left;
+	let left;
 	if (context.node.left.type === "VariableDeclaration") {
 		// should only be one, but
 		// need to unwrap the declaration to get it
@@ -13,15 +13,15 @@ export default degenerate(function* ForInStatement (context) {
 		left = (yield context.create(context.node.left).execute()).result;
 	}
 	
-	var obj = (yield context.create(context.node.right).execute()).result.getValue();
-	var result, priorResult;
+	let obj = (yield context.create(context.node.right).execute()).result.getValue();
+	let result, priorResult;
 	
 	// track visited properties to prevent iterating over shadowed properties, regardless of enumerable flag
 	// 12.6.4 NOTE: a property of a prototype is not enumerated if it is “shadowed” because some previous
 	// object in the prototype chain has a property with the same name. The values of [[Enumerable]] attributes
 	// are not considered when determining if a property of a prototype object is shadowed by a previous object
 	// on the prototype chain.
-	var visited = Object.create(null);
+	let visited = Object.create(null);
 	
 	while (obj) {
 		for (let prop in obj.properties) {

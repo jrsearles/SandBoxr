@@ -1,7 +1,7 @@
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* BlockStatement (context) {
-	var result, priorResult;
+	let result, priorResult;
 	
 	if (context.node.type === "Program") {
 		context.env.initScope(context.node);

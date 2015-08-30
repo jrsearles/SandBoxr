@@ -3,17 +3,17 @@ import * as contracts from "../utils/contracts";
 import {degenerate} from "../utils/async";
 
 function setDescriptor (env, obj, name, descriptor) {
-	var strict = env.isStrict();
+	let strict = env.isStrict();
 	
 	if (descriptor.get) {
-		descriptor.get.node.params.forEach(param => contracts.assertIsValidParameterName(param.name, strict));
+		contracts.assertAreValidArguments(descriptor.get.node.params, strict);
 		descriptor.getter = degenerate(function* () {
 			return yield func.executeFunction(env, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
 		});
 	}
 	
 	if (descriptor.set) {
-		descriptor.set.node.params.forEach(param => contracts.assertIsValidParameterName(param.name, strict));
+		contracts.assertAreValidArguments(descriptor.set.node.params, strict);
 		descriptor.setter = degenerate(function* () {
 			yield func.executeFunction(env, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
 		});
@@ -27,12 +27,12 @@ function createDescriptor (value) {
 }
 
 export default degenerate(function* ObjectExpression (context) {
-	var obj = context.env.objectFactory.createObject();
-	var descriptors = Object.create(null);
+	let obj = context.env.objectFactory.createObject();
+	let descriptors = Object.create(null);
 	
 	for (let property of context.node.properties) {
-		var value = (yield context.create(property.value).execute()).result.getValue();
-		var name = property.key.name || property.key.value;
+		let value = (yield context.create(property.value).execute()).result.getValue();
+		let name = property.key.name || property.key.value;
 		
 		switch (property.kind) {
 			case "get":

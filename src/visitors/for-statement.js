@@ -14,7 +14,7 @@ export default degenerate(function* ForStatement (context) {
 		yield context.create(context.node.init).execute();
 	}
 	
-	var result, priorResult;
+	let result, priorResult;
 	while (yield shouldContinue(context)) {
 		result = yield context.create(context.node.body).execute();
 		if (result && result.shouldBreak(context, true, priorResult)) {

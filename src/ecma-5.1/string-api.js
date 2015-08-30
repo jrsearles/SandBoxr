@@ -2,15 +2,16 @@ import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 
-var protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
-var slice = Array.prototype.slice;
+const protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
+const slice = Array.prototype.slice;
 
 export default function stringApi (env) {
-	var globalObject = env.global;
-	var undef = globalObject.getValue("undefined");
-	var objectFactory = env.objectFactory;
-	var stringClass = objectFactory.createFunction(function (value) {
-		var stringValue = value ? convert.toString(env, value.getValue()) : "";
+	const globalObject = env.global;
+	const undef = globalObject.getValue("undefined");
+	const objectFactory = env.objectFactory;
+	
+	let stringClass = objectFactory.createFunction(function (value) {
+		let stringValue = value ? convert.toString(env, value.getValue()) : "";
 
 		// called as new
 		if (this.isNew) {
@@ -20,7 +21,7 @@ export default function stringApi (env) {
 		return objectFactory.createPrimitive(stringValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = stringClass.getProperty("prototype").getValue();
+	let proto = stringClass.getProperty("prototype").getValue();
 
 	// prototype can be coerced into an empty string
 	proto.value = "";
@@ -28,8 +29,8 @@ export default function stringApi (env) {
 	proto.defineOwnProperty("length", { value: objectFactory.createPrimitive(0) });
 
 	proto.define("search", objectFactory.createBuiltInFunction(function (regex) {
-		var stringValue = convert.toString(env, this.node);
-		var underlyingRegex;
+		let stringValue = convert.toString(env, this.node);
+		let underlyingRegex;
 
 		if (regex) {
 			if (regex.className === "RegExp") {
@@ -45,8 +46,8 @@ export default function stringApi (env) {
 	proto.define("substring", objectFactory.createBuiltInFunction(function (start, end) {
 		contracts.assertIsNotConstructor(this, "substring");
 
-		var value = convert.toPrimitive(env, this.node, "string");
-		var length = value.length;
+		let value = convert.toPrimitive(env, this.node, "string");
+		let length = value.length;
 
 		start = convert.toInteger(env, start);
 		end = contracts.isNullOrUndefined(end) ? length : convert.toInteger(env, end);
@@ -55,25 +56,25 @@ export default function stringApi (env) {
 	}, 2, "String.prototype.substring"));
 
 	protoMethods.forEach(name => {
-		var fn = String.prototype[name];
+		let fn = String.prototype[name];
 		if (fn) {
 			proto.define(name, objectFactory.createBuiltInFunction(function () {
-				var stringValue = convert.toString(env, this.node);
-				var args = slice.call(arguments).map(arg => convert.toPrimitive(env, arg));
+				let stringValue = convert.toString(env, this.node);
+				let args = slice.call(arguments).map(arg => convert.toPrimitive(env, arg));
 				return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
 			}, String.prototype[name].length, "String.prototype." + name));
 		}
 	});
 
 	stringClass.define("fromCharCode", objectFactory.createBuiltInFunction(function (...charCodes) {
-		var args = charCodes.map(arg => convert.toPrimitive(env, arg));
+		let args = charCodes.map(arg => convert.toPrimitive(env, arg));
 		return objectFactory.createPrimitive(String.fromCharCode.apply(null, args));
 	}, 1, "String.fromCharCode"));
 
 	proto.define("slice", objectFactory.createBuiltInFunction(function (start, end) {
-		var stringValue = convert.toString(env, this.node);
-		var startValue = convert.toInteger(env, start);
-		var endValue;
+		let stringValue = convert.toString(env, this.node);
+		let startValue = convert.toInteger(env, start);
+		let endValue;
 
 		if (!contracts.isNullOrUndefined(end)) {
 			endValue = convert.toInteger(env, end);
@@ -83,24 +84,24 @@ export default function stringApi (env) {
 	}, 2, "String.prototype.slice"));
 
 	proto.define("split", objectFactory.createBuiltInFunction(function (separator, limit) {
-		var stringValue = convert.toString(env, this.node);
+		let stringValue = convert.toString(env, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
-		var limitValue = contracts.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
+		let limitValue = contracts.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
 
-		var arr = objectFactory.create("Array");
+		let arr = objectFactory.create("Array");
 		if (contracts.isUndefined(separator)) {
 			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, this);
 		} else {
-			var separatorValue;
+			let separatorValue;
 			if (separator.className === "RegExp") {
 				separatorValue = separator.source;
 			} else {
 				separatorValue = convert.toString(env, separator);
 			}
 
-			var result = stringValue.split(separatorValue, limitValue);
-			var context = this;
+			let result = stringValue.split(separatorValue, limitValue);
+			let context = this;
 
 			result.forEach(function (value, index) {
 				arr.putValue(index, objectFactory.createPrimitive(value), false, context);
@@ -111,24 +112,24 @@ export default function stringApi (env) {
 	}, 2, "String.prototype.split"));
 
 	proto.define("replace", objectFactory.createBuiltInFunction(function (regexOrSubstr, substrOrFn) {
-		var stringValue = convert.toString(env, this.node);
+		let stringValue = convert.toString(env, this.node);
 
-		var matcher;
+		let matcher;
 		if (regexOrSubstr && regexOrSubstr.className === "RegExp") {
 			matcher = regexOrSubstr.source;
 		} else {
 			matcher = convert.toString(env, regexOrSubstr);
 		}
 
-		var replacer;
+		let replacer;
 		if (substrOrFn && substrOrFn.type === "function") {
-			var callee = substrOrFn.native ? substrOrFn : substrOrFn.node;
-			var params = callee.params || [];
+			let callee = substrOrFn.native ? substrOrFn : substrOrFn.node;
+			let params = callee.params || [];
 
 			replacer = function () {
-				var thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
-				var args = slice.call(arguments).map(arg => objectFactory.createPrimitive(arg));
-				var replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
+				let thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
+				let args = slice.call(arguments).map(arg => objectFactory.createPrimitive(arg));
+				let replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
 				return replacedValue ? convert.toString(env, replacedValue) : undefined;
 			};
 		} else {
@@ -139,8 +140,8 @@ export default function stringApi (env) {
 	}, 2, "String.prototype.replace"));
 
 	proto.define("match", objectFactory.createBuiltInFunction(function (regex) {
-		var stringValue = convert.toString(env, this.node);
-		var actualRegex;
+		let stringValue = convert.toString(env, this.node);
+		let actualRegex;
 
 		if (regex && regex.className === "RegExp") {
 			actualRegex = regex.source;
@@ -148,9 +149,9 @@ export default function stringApi (env) {
 			actualRegex = new RegExp(convert.toPrimitive(env, regex));
 		}
 
-		var match = stringValue.match(actualRegex);
+		let match = stringValue.match(actualRegex);
 		if (match) {
-			var matches = objectFactory.create("Array");
+			let matches = objectFactory.create("Array");
 
 			match.forEach(function (value, index) {
 				matches.putValue(index, objectFactory.createPrimitive(value), false);
@@ -167,7 +168,7 @@ export default function stringApi (env) {
 	proto.define("trim", objectFactory.createBuiltInFunction(function () {
 		contracts.assertIsNotNullOrUndefined(this.node, "String.prototype.trim");
 
-		var stringValue = convert.toPrimitive(env, this.node, "string");
+		let stringValue = convert.toPrimitive(env, this.node, "string");
 		return objectFactory.createPrimitive(stringValue.trim());
 	}, 0, "String.prototype.trim"));
 

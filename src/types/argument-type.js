@@ -15,7 +15,7 @@ export default class ArgumentType extends ObjectType {
 	}
 
 	getProperty (name) {
-		var ownProperty = this.getOwnProperty(name);
+		let ownProperty = this.getOwnProperty(name);
 		if (ownProperty) {
 			return ownProperty;
 		}
@@ -27,8 +27,8 @@ export default class ArgumentType extends ObjectType {
 		name = String(name);
 
 		if (name in this.parameterMap) {
-			var mappedProperty = this.properties[name];
-			var linkedProperty = this.parameterMap[name];
+			let mappedProperty = this.properties[name];
+			let linkedProperty = this.parameterMap[name];
 
 			mappedProperty.value = linkedProperty.getValue();
 			mappedProperty.setValue = linkedProperty.setValue.bind(linkedProperty);
@@ -41,7 +41,7 @@ export default class ArgumentType extends ObjectType {
 	defineOwnProperty (name, descriptor, throwOnError) {
 		name = String(name);
 
-		var allowed = super.defineOwnProperty.apply(this, arguments);
+		let allowed = super.defineOwnProperty.apply(this, arguments);
 		if (allowed && name in this.parameterMap) {
 			if ("set" in descriptor || "get" in descriptor) {
 				delete this.parameterMap[name];

@@ -10,7 +10,7 @@ export default class NativeFunctionType extends FunctionType {
 	}
 
 	init (objectFactory, proto, descriptor) {
-		var length = this.nativeFunction.length;
+		let length = this.nativeFunction.length;
 		if ("nativeLength" in this.nativeFunction) {
 			length = this.nativeFunction.nativeLength;
 		}
@@ -31,7 +31,7 @@ export default class NativeFunctionType extends FunctionType {
 		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
 	
 		descriptor = descriptor || { configurable: false, enumerable: false, writable: true };
-		var protoDescriptor = {
+		let protoDescriptor = {
 			value: proto,
 			configurable: descriptor.configurable,
 			enumerable: descriptor.enumerable,

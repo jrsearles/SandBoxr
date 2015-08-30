@@ -2,7 +2,7 @@ import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";
 
-var primitives = {
+const primitives = {
 	"String": true,
 	"Number": true,
 	"Boolean": true,
@@ -18,8 +18,8 @@ function formatValues (values, gap, depth) {
 		return values.join(",");
 	}
 
-	var indent = "\n" + gap.repeat(depth);
-	var joinedValues = values.join(indent + ",");
+	let indent = "\n" + gap.repeat(depth);
+	let joinedValues = values.join(indent + ",");
 
 	// remove indent on closing
 	return indent + joinedValues + "\n" + gap.repeat(depth - 1);
@@ -30,11 +30,11 @@ function serializePrimitive (value) {
 }
 
 function serializeObject (env, stack, obj, replacer, gap, depth) {
-	var colon = gap ? ": " : ":";
-	var values = [];
-	var value;
+	let colon = gap ? ": " : ":";
+	let values = [];
+	let value;
 
-	for (var prop in obj.properties) {
+	for (let prop in obj.properties) {
 		if (obj.properties[prop].enumerable) {
 			value = replacer(obj, prop, obj.getProperty(prop).getValue());
 			if (!contracts.isNullOrUndefined(value)) {
@@ -47,8 +47,8 @@ function serializeObject (env, stack, obj, replacer, gap, depth) {
 }
 
 function serializeArray (env, stack, arr, replacer, gap, depth) {
-	var length = arr.getValue("length").unwrap();
-	var values = [];
+	let length = arr.getValue("length").unwrap();
+	let values = [];
 
 	for (let i = 0; i < length; i++) {
 		let value = undefined;
@@ -80,7 +80,7 @@ function serialize (env, stack, obj, replacer, gap, depth) {
 		return undefined;
 	}
 
-	var jsonString = func.tryCallMethod(env, obj, "toJSON");
+	let jsonString = func.tryCallMethod(env, obj, "toJSON");
 	if (jsonString) {
 		return serializePrimitive(jsonString.value);
 	}
@@ -92,7 +92,7 @@ function serialize (env, stack, obj, replacer, gap, depth) {
 	depth++;
 	stack.push(obj);
 
-	var jsonResult;
+	let jsonResult;
 	if (obj.className === "Array") {
 		jsonResult = serializeArray(env, stack, obj, replacer);
 	} else {
@@ -108,16 +108,16 @@ function createReplacer (env, replacer) {
 	if (replacer) {
 		if (replacer.className === "Function") {
 			return function (holder, key, value) {
-				var args = [env.objectFactory.createPrimitive(key), value];
-				var params = replacer.native ? [] : replacer.node.params;
-				var callee = replacer.native ? replacer : replacer.node;
+				let args = [env.objectFactory.createPrimitive(key), value];
+				let params = replacer.native ? [] : replacer.node.params;
+				let callee = replacer.native ? replacer : replacer.node;
 
 				return func.executeFunction(env, replacer, params, args, holder, callee);
 			};
 		}
 
 		if (replacer.className === "Array") {
-			var keys = convert.toArray(replacer).map(function (arg) {
+			let keys = convert.toArray(replacer).map(function (arg) {
 				if (arg.className === "String") {
 					return convert.toString(env, arg);
 				}
@@ -166,7 +166,7 @@ function getSpacer (env, spacer) {
 }
 
 function deserialize (objectFactory, value, reviver) {
-	var valueType = contracts.getType(value);
+	let valueType = contracts.getType(value);
 	switch (valueType) {
 		// these are the only types supported by JSON.parse - sad face...
 		case "Undefined":
@@ -177,9 +177,9 @@ function deserialize (objectFactory, value, reviver) {
 			return objectFactory.create(valueType, value);
 
 		case "Array":
-			var arr = objectFactory.create("Array");
+			let arr = objectFactory.create("Array");
 			value.forEach(function (element, index) {
-				var elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
+				let elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
 				if (!contracts.isUndefined(elementValue)) {
 					arr.defineOwnProperty(index, { value: deserialize(objectFactory, element), configurable: true, enumerable: true, writable: true });
 				}
@@ -188,10 +188,10 @@ function deserialize (objectFactory, value, reviver) {
 			return arr;
 
 		default:
-			var obj = objectFactory.createObject();
-			var propValue;
+			let obj = objectFactory.createObject();
+			let propValue;
 
-			for (var prop in value) {
+			for (let prop in value) {
 				if (value.hasOwnProperty(prop)) {
 					propValue = reviver(obj, prop, deserialize(objectFactory, value[prop], reviver));
 					if (!contracts.isUndefined(propValue)) {
@@ -207,9 +207,9 @@ function deserialize (objectFactory, value, reviver) {
 function createReviver (env, reviver) {
 	if (reviver && reviver.className === "Function") {
 		return function (holder, key, value) {
-			var args = [env.objectFactory.createPrimitive(key), value];
-			var params = reviver.native ? [] : reviver.node.params;
-			var callee = reviver.native ? reviver : reviver.node;
+			let args = [env.objectFactory.createPrimitive(key), value];
+			let params = reviver.native ? [] : reviver.node.params;
+			let callee = reviver.native ? reviver : reviver.node;
 
 			return func.executeFunction(env, reviver, params, args, holder, callee);
 		};
@@ -219,10 +219,11 @@ function createReviver (env, reviver) {
 }
 
 export default function jsonApi (env) {
-	var globalObject = env.global;
-	var objectFactory = env.objectFactory;
-	var undef = env.global.getValue("undefined");
-	var jsonClass = objectFactory.createObject();
+	const globalObject = env.global;
+	const objectFactory = env.objectFactory;
+	const undef = env.global.getValue("undefined");
+	
+	let jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
 	jsonClass.define("stringify", objectFactory.createBuiltInFunction(function (obj, replacer, spacer) {
@@ -235,16 +236,16 @@ export default function jsonApi (env) {
 			return undef;
 		}
 
-		var stack = [];
+		let stack = [];
 		return objectFactory.createPrimitive(serialize(env, stack, obj, replacer, spacer, 0));
 	}, 3, "JSON.stringify"));
 
 	jsonClass.define("parse", objectFactory.createBuiltInFunction(function (str, reviver) {
 		reviver = createReviver(env, reviver);
 
-		var stringValue = convert.toString(env, str);
-		var parsedObject = JSON.parse(stringValue);
-		var deserializedObject = deserialize(objectFactory, parsedObject, reviver);
+		let stringValue = convert.toString(env, str);
+		let parsedObject = JSON.parse(stringValue);
+		let deserializedObject = deserialize(objectFactory, parsedObject, reviver);
 
 		return reviver(deserializedObject, "", deserializedObject) || undef;
 	}, 2, "JSON.parse"));

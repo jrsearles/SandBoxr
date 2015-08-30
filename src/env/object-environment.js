@@ -10,7 +10,7 @@ export default class ObjectEnvironment {
 	}
 
 	getReference (name, unqualified) {
-		var ref = new PropertyReference(name, this.object, this.env);
+		let ref = new PropertyReference(name, this.object, this.env);
 		ref.unqualified = unqualified;
 		return ref;
 	}

@@ -2,8 +2,8 @@ import * as convert from "../utils/convert";
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* DoWhileStatement (context) {
-	var result, priorResult;
-	var passed = true;
+	let result, priorResult;
+	let passed = true;
 	
 	if (context.node.type === "WhileStatement") {
 		passed = convert.toBoolean((yield context.create(context.node.test).execute()).result.getValue());

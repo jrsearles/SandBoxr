@@ -5,7 +5,7 @@ import * as contracts from "../utils/contracts";
 function getCharacter (source, position) {
 	if (position < source.value.length) {
 		// todo: need to set length
-		var character = new StringType(source.value[position]);
+		let character = new StringType(source.value[position]);
 		character.setPrototype(source.getPrototype());
 		return character;
 	}
@@ -29,7 +29,7 @@ export default class StringType extends PrimitiveType {
 
 	getProperty (name) {
 		if (contracts.isInteger(name)) {
-			var position = Number(name);
+			let position = Number(name);
 			if (position < this.value.length) {
 				return new PropertyDescriptor(this, { configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
 			}
@@ -39,9 +39,8 @@ export default class StringType extends PrimitiveType {
 	}
 
 	getOwnPropertyNames () {
-		var props = [];
-		var ln, i;
-		for (i = 0, ln = this.value.length; i < ln; i++) {
+		let props = [];
+		for (let i = 0, ln = this.value.length; i < ln; i++) {
 			props.push(String(i));
 		}
 

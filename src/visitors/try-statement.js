@@ -2,7 +2,7 @@ import {degenerate} from "../utils/async";
 import * as contracts from "../utils/contracts";
 
 export default degenerate(function* TryStatement (context) {
-	var result, uncaughtError;
+	let result, uncaughtError;
 	
 	try {
 		result = yield context.create(context.node.block).execute();

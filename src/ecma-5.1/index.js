@@ -16,18 +16,18 @@ import consoleAPI from "./console-api";
 import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 
-var frozen = { configurable: false, enumerable: false, writable: false };
+const frozen = { configurable: false, enumerable: false, writable: false };
 
 export default function ecma51 (env, config = {}) {
-	var objectFactory = env.objectFactory = new ObjectFactory(env);
-	var globalObject = env.global = objectFactory.createObject();
+	const objectFactory = env.objectFactory = new ObjectFactory(env);
+	const globalObject = env.global = objectFactory.createObject();
 
 	env.createObjectScope(globalObject);
 
-	var undefinedClass = new PrimitiveType();
+	let undefinedClass = new PrimitiveType();
 	globalObject.define("undefined", undefinedClass, frozen);
 
-	var nullClass = new PrimitiveType(null);
+	let nullClass = new PrimitiveType(null);
 	globalObject.define("null", nullClass, frozen);
 
 	globalObject.define("Infinity", objectFactory.createPrimitive(Infinity), frozen);
@@ -51,7 +51,7 @@ export default function ecma51 (env, config = {}) {
 
 	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(name => {
 		globalObject.define(name, objectFactory.createBuiltInFunction(function (value) {
-			var stringValue = convert.toString(env, value);
+			let stringValue = convert.toString(env, value);
 			return objectFactory.createPrimitive(global[name](stringValue));
 		}, 1, name));
 	});
@@ -61,14 +61,14 @@ export default function ecma51 (env, config = {}) {
 	});
 
 	globalObject.define("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
-		var stringValue = convert.toString(env, value);
+		let stringValue = convert.toString(env, value);
 		radix = convert.toPrimitive(env, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"));
 
 	if (config.parser) {
-		var evalFunc = objectFactory.createBuiltInFunction(function (code) {
+		let evalFunc = objectFactory.createBuiltInFunction(function (code) {
 			if (!code) {
 				return undefinedClass;
 			}
@@ -77,8 +77,8 @@ export default function ecma51 (env, config = {}) {
 				return code;
 			}
 
-			var directCall = this.callee instanceof Reference && this.callee.base === globalObject;
-			var ast;
+			let directCall = this.callee instanceof Reference && this.callee.base === globalObject;
+			let ast;
 
 			try {
 				ast = config.parser(code.value);
@@ -118,7 +118,7 @@ export default function ecma51 (env, config = {}) {
 				}
 			}
 			
-			var executionResult;
+			let executionResult;
 
 			try {
 				executionResult = this.create(ast).execute();
@@ -138,8 +138,8 @@ export default function ecma51 (env, config = {}) {
 	
 	if (config.exclude && config.exclude.length > 0) {
 		config.exclude.forEach(name => {
-			var segments = name.split(".");
-			var parent = globalObject;
+			let segments = name.split(".");
+			let parent = globalObject;
 			
 			while (segments.length > 1) {
 				parent = parent.getValue(segments.shift());

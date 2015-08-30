@@ -8,7 +8,7 @@ export default class PropertyReference extends Reference {
 	}
 	
 	getValue () {
-		var prop = this.base.getProperty(this.name);
+		let prop = this.base.getProperty(this.name);
 		return prop && prop.getValue() || new PrimitiveType();
 	}
 	

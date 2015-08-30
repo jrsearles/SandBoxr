@@ -1,5 +1,5 @@
 export default function InterruptStatement (context) {
-	var label;
+	let label;
 	if (context.node.label) {
 		label = context.node.label.name;
 	}

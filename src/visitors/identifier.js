@@ -1,5 +1,5 @@
 export default function Identifier (context) {
-	var name = context.node.name;
+	let name = context.node.name;
 
 	if (context.callee && context.callee.identifier === name) {
 		return context.result(context.callee);

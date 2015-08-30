@@ -1,14 +1,13 @@
 import * as comparers from "../utils/comparers";
 
-var defaultDescriptor = {
+const defaultDescriptor = {
 	configurable: false,
 	enumerable: false,
 	writable: false
 };
 
 export default class PropertyDescriptor {
-	constructor (base, config, value) {
-		config = config || defaultDescriptor;
+	constructor (base, config = defaultDescriptor, value) {
 		this.base = base;
 		this.configurable = config.configurable || false;
 		this.enumerable = config.enumerable || false;
@@ -32,7 +31,7 @@ export default class PropertyDescriptor {
 	}
 	
 	update (descriptor) {
-		for (var prop in descriptor) {
+		for (let prop in descriptor) {
 			if (descriptor.hasOwnProperty(prop)) {
 				this[prop] = descriptor[prop];
 			}

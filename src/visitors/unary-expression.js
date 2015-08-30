@@ -4,9 +4,9 @@ import * as convert from "../utils/convert";
 import {degenerate} from "../utils/async";
 
 export default degenerate(function* UnaryExpression (context) {
-	var result = (yield context.create(context.node.argument).execute()).result;
-	var objectFactory = context.env.objectFactory;
-	var value, newValue;
+	const objectFactory = context.env.objectFactory;
+	let result = (yield context.create(context.node.argument).execute()).result;
+	let value, newValue;
 
 	switch (context.node.operator) {
 		case "typeof":

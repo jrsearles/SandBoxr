@@ -48,10 +48,10 @@ export default class FunctionType extends ObjectType {
 	}
 
 	getProperty (name) {
-		var prop = super.getProperty.apply(this, arguments);
+		let prop = super.getProperty.apply(this, arguments);
 		if (!prop && name !== "prototype") {
 			// since a function instance is itself a function look at our own prototype
-			var proto = this.getProperty("prototype");
+			let proto = this.getProperty("prototype");
 			return proto && proto.getValue().getProperty(name);
 		}
 
@@ -80,19 +80,19 @@ export default class FunctionType extends ObjectType {
 
 	createScope (env, thisArg) {
 		// if a parent scope is defined we need to limit the scope to that scope
-		var priorScope = env.current;
-		var fn = this;
+		let priorScope = env.current;
+		let fn = this;
 		
 		if (this.parentScope) {
 			env.current = this.parentScope;
 		}
 	
-		var args = Array.prototype.slice.call(arguments, 1);
+		let args = Array.prototype.slice.call(arguments, 1);
 		if (this.boundThis) {
 			args[0] = this.boundThis;
 		}
 	
-		var scope = env.createScope.apply(env, args);
+		let scope = env.createScope.apply(env, args);
 		return {
 			init () {
 				if (!fn.native) {
@@ -113,10 +113,10 @@ export default class FunctionType extends ObjectType {
 			return false;
 		}
 
-		var visited = [];
-		var current = obj;
+		let visited = [];
+		let current = obj;
 
-		var proto = this.getProperty("prototype").getValue();
+		let proto = this.getValue("prototype");
 		if (contracts.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
 			throw new TypeError("Function has non-object prototype in instanceof check");
 		}

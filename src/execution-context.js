@@ -21,25 +21,25 @@ ExecutionContext.prototype = {
 	}),
 	
 	create (node, callee, isNew) {
-		var context = new ExecutionContext(this.env, node, callee || this.callee, isNew);
+		let context = new ExecutionContext(this.env, node, callee || this.callee, isNew);
 		context.value = this.value;
 		return context;
 	},
 	
 	createLabel (node, label) {
-		var context = this.create(node);
+		let context = this.create(node);
 		context.label = label;
 		return context;
 	},
 	
 	cancel (label) {
-		var result = this.result(this.value, label);
+		let result = this.result(this.value, label);
 		result.cancel = true;
 		return result;
 	},
 	
 	skip (label) {
-		var result = this.result(this.value, label);
+		let result = this.result(this.value, label);
 		result.skip = true;
 		return result;
 	},
@@ -47,7 +47,7 @@ ExecutionContext.prototype = {
 	exit (value) {
 		this.callee = null;
 	
-		var result = this.result(value);
+		let result = this.result(value);
 		result.exit = true;
 		return result;
 	},

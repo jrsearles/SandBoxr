@@ -1,14 +1,15 @@
 import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 
-var constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
-var protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
+const constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
+const protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
 
 export default function numberApi (env) {
-	var globalObject = env.global;
-	var objectFactory = env.objectFactory;
-	var numberClass = objectFactory.createFunction(function (obj) {
-		var numberValue = Number(convert.toPrimitive(env, obj, "number"));
+	const globalObject = env.global;
+	const objectFactory = env.objectFactory;
+	
+	let numberClass = objectFactory.createFunction(function (obj) {
+		let numberValue = Number(convert.toPrimitive(env, obj, "number"));
 
 		if (this.isNew) {
 			return convert.primitiveToObject(env, numberValue);
@@ -17,14 +18,14 @@ export default function numberApi (env) {
 		return objectFactory.create("Number", numberValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = numberClass.getProperty("prototype").getValue();
+	let proto = numberClass.getProperty("prototype").getValue();
 	proto.className = "Number";
 	proto.value = 0;
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
 		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toString");
 
-		var radixValue = 10;
+		let radixValue = 10;
 		if (radix) {
 			radixValue = convert.toPrimitive(env, radix, "number");
 			if (radixValue < 2 || radixValue > 36) {
@@ -38,7 +39,7 @@ export default function numberApi (env) {
 	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
 		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toFixed");
 		
-		var digits = 0;
+		let digits = 0;
 		if (fractionDigits) {
 			digits = convert.toNumber(env, fractionDigits);
 		}
@@ -56,7 +57,7 @@ export default function numberApi (env) {
 	});
 
 	protoMethods.forEach(name => {
-		var fn = Number.prototype[name];
+		let fn = Number.prototype[name];
 		if (fn) {
 			let methodName = `Number.prototype.${name}`;
 			proto.define(name, objectFactory.createBuiltInFunction(function () {
