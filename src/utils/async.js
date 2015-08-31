@@ -1,11 +1,16 @@
 import "../polyfills";
 
+const objectOrFunctionTypes = { "object": true, "function": true };
+function isObjectOrFunction (obj) {
+	return  typeof obj in objectOrFunctionTypes;
+}
+
 function isThenable (obj) {
-	return obj && (typeof obj === "object" || typeof obj === "function") && typeof obj.then === "function";
+	return obj && isObjectOrFunction(obj) && typeof obj.then === "function";
 }
 
 function isNextable (obj) {
-	return obj && typeof obj === "object" && typeof obj.next === "function";
+	return obj && isObjectOrFunction(obj) && typeof obj.next === "function";
 }
 
 export function degenerate (fn) {
@@ -35,15 +40,13 @@ export function promisify (obj) {
 	
 	if (isNextable(obj)) {
 		let result;
-		while (result = obj.next()) {
-			if (isThenable(result.value)) {
-				return result.value;
-			}
-			
-			if (result.done) {
-				return Promise.resolve(result.value);
+		for (result of obj) {
+			if (isThenable(result)) {
+				return result;
 			}
 		}
+		
+		return Promise.resolve(result);
 	}
 	
 	return Promise.resolve(obj);

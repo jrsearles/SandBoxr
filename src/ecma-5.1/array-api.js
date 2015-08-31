@@ -2,6 +2,7 @@ import ArrayType from "../types/array-type";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";
+import {iterate} from "../utils/arrays";
 
 function getStartIndex (index, length) {
 	if (index < 0) {
@@ -27,7 +28,7 @@ function getLength (env, source) {
 	return 0;
 }
 
-function executeCallback (callback, thisArg, executionContext, index) {
+function executeCallback (callback, thisArg, executionContext, entry) {
 	let undef = executionContext.env.global.getValue("undefined");
 	let objectFactory = executionContext.env.objectFactory;
 	let arr = convert.toObject(executionContext.env, executionContext.node);
@@ -39,43 +40,50 @@ function executeCallback (callback, thisArg, executionContext, index) {
 	let scope = executionContext.env.createScope(thisArg);
 	scope.init(callback.node.body);
 
-	let args = [executionContext.node.getProperty(index).getValue(), objectFactory.createPrimitive(index), arr];
-	let executionResult;
-
+	let args = [entry.value, objectFactory.createPrimitive(entry.index), arr];
 	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
-	try {
-		executionResult = executionContext.create(callback.node.body, callback.node).execute();
+	return scope.use(() => {
+		let executionResult = executionContext.create(callback.node.body, callback.node).execute();
 		return executionResult ? executionResult.result : undef;
-	} catch (err) {
-		scope.exitScope();
-		throw err;
-	}
+	});
+	
+	// try {
+	// 	executionResult = executionContext.create(callback.node.body, callback.node).execute();
+	// 	return executionResult ? executionResult.result : undef;
+	// } catch (err) {
+	// 	scope.exitScope();
+	// 	throw err;
+	// }
 
-	scope.exitScope();
+	// scope.exitScope();
 }
 
-function executeAccumulator (callback, priorValue, executionContext, index) {
+function executeAccumulator (callback, priorValue, executionContext, entry) {
 	let arr = convert.toObject(executionContext.env, executionContext.node);
 	let scope = executionContext.env.createScope();
 	scope.init(callback.node.body);
 
 	let undef = executionContext.env.global.getValue("undefined");
 	let objectFactory = executionContext.env.objectFactory;
-	let args = [priorValue || undef, executionContext.node.getProperty(index).getValue() || undef, objectFactory.createPrimitive(index), arr];
-	let executionResult;
+	let args = [priorValue || undef, entry.value || undef, objectFactory.createPrimitive(entry.index), arr];
 
 	func.loadArguments(executionContext.env, callback.node.params, args, callback);
 
-	try {
-		executionResult = executionContext.create(callback.node.body, callback.node).execute();
+	return scope.use(() => {
+		let executionResult = executionContext.create(callback.node.body, callback.node).execute();
 		return executionResult ? executionResult.result : undef;
-	} catch (err) {
-		scope.exitScope();
-		throw err;
-	}
+	});
+	
+	// try {
+	// 	executionResult = executionContext.create(callback.node.body, callback.node).execute();
+	// 	return executionResult ? executionResult.result : undef;
+	// } catch (err) {
+	// 	scope.exitScope();
+	// 	throw err;
+	// }
 
-	scope.exitScope();
+	// scope.exitScope();
 }
 
 function createIndexProperty (value) {
@@ -389,11 +397,15 @@ export default function arrayApi (env) {
 		let length = getLength(env, this.node);
 		contracts.assertIsFunction(callback, this.node);
 
-		for (let i = 0; i < length; i++) {
-			if (this.node.hasProperty(i)) {
-				executeCallback(callback, thisArg, this, i);
-			}
+		for (let entry of iterate(env, this.node, length)) {
+			executeCallback(callback, thisArg, this, entry);
 		}
+		
+		// for (let i = 0; i < length; i++) {
+		// 	if (this.node.hasProperty(i)) {
+		// 		executeCallback(callback, thisArg, this, i);
+		// 	}
+		// }
 	}, 1, "Array.prototype.forEach"));
 
 	proto.define("map", objectFactory.createBuiltInFunction(function (callback, thisArg) {

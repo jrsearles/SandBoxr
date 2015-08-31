@@ -9,6 +9,10 @@ import {visit as hoister} from "./hoister";
 import EstreeWalker from "../estree-walker";
 import rules from "../syntax-rules";
 
+let defaultOptions = {
+	allowDebugger: false	
+};
+
 function validateSyntax (root) {
 	for (let node of EstreeWalker.create(root)) {
 		if (node.type in rules) {
@@ -18,16 +22,20 @@ function validateSyntax (root) {
 }
 
 export default class Environment {
-	init (config = {}) {
+	init (options = defaultOptions) {
 		// clear state in case of re-init
 		this.current = null;
 		this.globalScope = null;
 
-		api(this, config);
-		this.ops = Object.assign(comparers, config.comparers);
+		options = Object.assign({}, defaultOptions, options);
+		api(this, options);
+		
+		// todo: improve this
+		this.ops = Object.assign(comparers, options.comparers);
 	}
 
 	evaluate (left, right, operator) {
+		// todo: improve this - why do we need this here?
 		return this.ops[operator](this, left, right);
 	}
 
@@ -147,6 +155,17 @@ export default class Environment {
 				}
 
 				env.initScope(node);
+			},
+			
+			use (func) {
+				try {
+					let result = func();
+					env.setScope(priorScope);
+					return result;
+				} catch (err) {
+					env.setScope(priorScope);
+					throw err;
+				}
 			},
 
 			exitScope () {

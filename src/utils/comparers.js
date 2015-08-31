@@ -37,6 +37,7 @@ const comparers = {
 	},
 
 	implicitEquals (env, a, b) {
+		/* eslint-disable eqeqeq */
 		if (a.isPrimitive && b.isPrimitive) {
 			return a.value == b.value;
 		}
@@ -60,7 +61,9 @@ const comparers = {
 			return convert.toPrimitive(env, a, "string") === primitiveB;
 		}
 
+		// use native implicit comarison
 		return primitiveA == primitiveB;
+		/* eslint-enable eqeqeq */
 	},
 
 	strictEquals (env, a, b) {

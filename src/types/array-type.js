@@ -96,7 +96,7 @@ export default class ArrayType extends ObjectType {
 
 	putValue (name, value, throwOnError, env) {
 		if (name === "length") {
-			setLength(env, this, name, { value: value }, throwOnError);
+			setLength(env, this, name, { value }, throwOnError);
 			return;
 		}
 

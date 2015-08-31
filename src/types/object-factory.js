@@ -59,15 +59,15 @@ export default function ObjectFactory (env) {
 ObjectFactory.prototype = {
 	constructor: ObjectFactory,
 
-	init: function () {
+	init () {
 		setOrphans(this.env);
 	},
 
-	createPrimitive: function (value) {
+	createPrimitive (value) {
 		return this.create(contracts.getType(value), value);
 	},
 
-	create: function (typeName, value) {
+	create (typeName, value) {
 		let instance;
 
 		switch (typeName) {
@@ -118,7 +118,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createObject: function (parent) {
+	createObject (parent) {
 		let instance = new ObjectType();
 
 		if (parent !== null) {
@@ -133,7 +133,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createArguments: function (args, callee, strict) {
+	createArguments (args, callee, strict) {
 		let instance = new ArgumentType();
 		let objectClass = this.env.global.getValue("Object");
 
@@ -156,7 +156,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createFunction: function (fnOrNode, proto, descriptor, strict) {
+	createFunction (fnOrNode, proto, descriptor, strict) {
 		let instance;
 
 		if (typeof fnOrNode === "function") {
@@ -176,7 +176,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 
-	createBuiltInFunction: function (fn, length, methodName) {
+	createBuiltInFunction (fn, length, methodName) {
 		let instance = new NativeFunctionType(function () {
 			if (this.isNew) {
 				throw new TypeError(methodName + " is not a constructor");
@@ -191,7 +191,7 @@ ObjectFactory.prototype = {
 		return instance;
 	},
 	
-	createThrower: function (message, thrower) {
+	createThrower (message, thrower) {
 		this.throwers = this.throwers || Object.create(null);
 		if (message in this.throwers) {
 			return this.throwers[message];
