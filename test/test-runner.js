@@ -12,9 +12,7 @@ module.exports = {
 			.then(function (result) {
 				expect(result.unwrap()).to.be.true;
 				done();
-			}, function (err){
-				throw err;
-			});
+			}, done);
 	},
 	
 	confirmError: function (code, errType, done) {

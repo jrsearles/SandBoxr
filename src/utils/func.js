@@ -76,7 +76,9 @@ export function	loadArguments (env, params, args, callee) {
 
 	// just set value if additional, unnamed arguments are passed in
 	let i = callee.isStrict() ? 0 : params.length;
-	for (let length = args.length; i < length; i++) {
+	let length = args.length;
+	
+	for (; i < length; i++) {
 		argumentList.defineOwnProperty(i, {
 			value: args[i],
 			configurable: true,

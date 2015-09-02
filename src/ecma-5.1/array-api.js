@@ -2,7 +2,7 @@ import ArrayType from "../types/array-type";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";
-import {iterate} from "../utils/arrays";
+import {iterator,reverseIterator} from "../utils/arrays";
 
 function getStartIndex (index, length) {
 	if (index < 0) {
@@ -28,77 +28,49 @@ function getLength (env, source) {
 	return 0;
 }
 
-function executeCallback (callback, thisArg, executionContext, entry) {
-	let undef = executionContext.env.global.getValue("undefined");
-	let objectFactory = executionContext.env.objectFactory;
-	let arr = convert.toObject(executionContext.env, executionContext.node);
-	
-	if (!thisArg) {
-		thisArg = callback.isStrict() ? undef : executionContext.env.global;
-	}
-	
-	let scope = executionContext.env.createScope(thisArg);
-	scope.init(callback.node.body);
-
-	let args = [entry.value, objectFactory.createPrimitive(entry.index), arr];
-	func.loadArguments(executionContext.env, callback.node.params, args, callback);
-
-	return scope.use(() => {
-		let executionResult = executionContext.create(callback.node.body, callback.node).execute();
-		return executionResult ? executionResult.result : undef;
-	});
-	
-	// try {
-	// 	executionResult = executionContext.create(callback.node.body, callback.node).execute();
-	// 	return executionResult ? executionResult.result : undef;
-	// } catch (err) {
-	// 	scope.exitScope();
-	// 	throw err;
-	// }
-
-	// scope.exitScope();
-}
-
-function executeAccumulator (callback, priorValue, executionContext, entry) {
-	let arr = convert.toObject(executionContext.env, executionContext.node);
-	let scope = executionContext.env.createScope();
-	scope.init(callback.node.body);
-
-	let undef = executionContext.env.global.getValue("undefined");
-	let objectFactory = executionContext.env.objectFactory;
-	let args = [priorValue || undef, entry.value || undef, objectFactory.createPrimitive(entry.index), arr];
-
-	func.loadArguments(executionContext.env, callback.node.params, args, callback);
-
-	return scope.use(() => {
-		let executionResult = executionContext.create(callback.node.body, callback.node).execute();
-		return executionResult ? executionResult.result : undef;
-	});
-	
-	// try {
-	// 	executionResult = executionContext.create(callback.node.body, callback.node).execute();
-	// 	return executionResult ? executionResult.result : undef;
-	// } catch (err) {
-	// 	scope.exitScope();
-	// 	throw err;
-	// }
-
-	// scope.exitScope();
-}
-
-function createIndexProperty (value) {
-	return {
-		value: value,
-		configurable: true,
-		enumerable: true,
-		writable: true
-	};
-}
-
 export default function arrayApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
 	const undef = globalObject.getValue("undefined");
+
+	function executeCallback (callback, entry, thisArg, arr) {
+		if (!thisArg) {
+			thisArg = callback.isStrict() ? undef : env.global;
+		}
+		
+		let scope = env.createScope(thisArg);
+		scope.init(callback.node.body);
+	
+		let args = [entry.value, objectFactory.createPrimitive(entry.index), arr];
+		func.loadArguments(env, callback.node.params, args, callback);
+	
+		return scope.use(() => {
+			let executionResult = env.createExecutionContext(callback.node.body, callback.node).execute();
+			return executionResult ? executionResult.result : undef;
+		});
+	}
+	
+	function executeAccumulator (callback, priorValue, index, arr) {
+		let scope = env.createScope();
+		scope.init(callback.node.body);
+	
+		let args = [priorValue || undef, arr.getValue(index) || undef, objectFactory.createPrimitive(index), arr];
+		func.loadArguments(env, callback.node.params, args, callback);
+	
+		return scope.use(() => {
+			let executionResult = env.createExecutionContext(callback.node.body, callback.node).execute();
+			return executionResult ? executionResult.result : undef;
+		});
+	}
+
+	function createIndexProperty (value) {
+		return {
+			value: value,
+			configurable: true,
+			enumerable: true,
+			writable: true
+		};
+	}
 
 	let arrayClass = objectFactory.createFunction(function (length) {
 		let newArray = objectFactory.create("Array");
@@ -366,9 +338,9 @@ export default function arrayApi (env) {
 
 		index = getStartIndex(index, length);
 
-		for (; index < length; index++) {
-			if (this.node.hasProperty(index) && searchElement.equals(this.node.getProperty(index).getValue() || undef)) {
-				return objectFactory.createPrimitive(index);
+		for (let entry of iterator(env, this.node, length, index)) {
+			if (searchElement.equals(entry.value || undef)) {
+				return objectFactory.createPrimitive(entry.index);
 			}
 		}
 
@@ -383,43 +355,44 @@ export default function arrayApi (env) {
 		if (index < 0) {
 			index = length - Math.abs(index);
 		}
-
-		for (; index >= 0; index--) {
-			if (this.node.hasProperty(index) && searchElement.equals(this.node.getProperty(index).getValue() || undef)) {
-				return objectFactory.createPrimitive(index);
+		
+		for (let entry of reverseIterator(env, this.node, index)) {
+			if (searchElement.equals(entry.value || undef)) {
+				return objectFactory.createPrimitive(entry.index);
 			}
 		}
+
+		// for (; index >= 0; index--) {
+		// 	if (this.node.hasProperty(index) && searchElement.equals(this.node.getProperty(index).getValue() || undef)) {
+		// 		return objectFactory.createPrimitive(index);
+		// 	}
+		// }
 
 		return objectFactory.createPrimitive(-1);
 	}, 1, "Array.prototype.lastIndexOf"));
 
 	proto.define("forEach", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		let length = getLength(env, this.node);
-		contracts.assertIsFunction(callback, this.node);
+		let arr = convert.toObject(env, this.node);
+		let length = getLength(env, arr);
+		contracts.assertIsFunction(callback, arr);
 
-		for (let entry of iterate(env, this.node, length)) {
-			executeCallback(callback, thisArg, this, entry);
+		for (let entry of iterator(env, arr, length)) {
+			executeCallback(callback, entry, thisArg, arr);
 		}
-		
-		// for (let i = 0; i < length; i++) {
-		// 	if (this.node.hasProperty(i)) {
-		// 		executeCallback(callback, thisArg, this, i);
-		// 	}
-		// }
 	}, 1, "Array.prototype.forEach"));
 
 	proto.define("map", objectFactory.createBuiltInFunction(function (callback, thisArg) {
-		let length = getLength(env, this.node);
-		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.map");
-		contracts.assertIsFunction(callback, this.node);
+		let arr = convert.toObject(env, this.node);
+		let length = getLength(env, arr);
+		contracts.assertIsNotNullOrUndefined(arr, "Array.prototype.map");
+		contracts.assertIsFunction(callback, arr);
 
 		let newArray = objectFactory.create("Array");
 		newArray.putValue("length", objectFactory.createPrimitive(length));
 
-		for (let i = 0; i < length; i++) {
-			if (this.node.hasProperty(i)) {
-				newArray.defineOwnProperty(i, createIndexProperty(executeCallback(callback, thisArg, this, i)), true, env);
-			}
+		for (let entry of iterator(env, arr, length)) {
+			let value = executeCallback(callback, entry, thisArg, arr);
+			newArray.defineOwnProperty(entry.index, createIndexProperty(value), true, env);
 		}
 
 		return newArray;
@@ -427,14 +400,17 @@ export default function arrayApi (env) {
 
 	proto.define("filter", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.filter");
-		let length = getLength(env, this.node);
-		contracts.assertIsFunction(callback, this.node);
+		let arr = convert.toObject(env, this.node);
+		let length = getLength(env, arr);
+		contracts.assertIsFunction(callback, arr);
 
 		let newArray = objectFactory.create("Array");
-
-		for (let i = 0, index = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
-				newArray.defineOwnProperty(index++, createIndexProperty(this.node.getProperty(i).getValue()), true, env);
+		let index = 0;
+		
+		for (let entry of iterator(env, arr, length)) {
+			let passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
+			if (passed) {
+				newArray.defineOwnProperty(index++, createIndexProperty(entry.value), true, env);	
 			}
 		}
 
@@ -443,11 +419,13 @@ export default function arrayApi (env) {
 
 	proto.define("every", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.every");
-		let length = getLength(env, this.node);
-		contracts.assertIsFunction(callback, this.node);
+		let arr = convert.toObject(env, this.node);
+		let length = getLength(env, arr);
+		contracts.assertIsFunction(callback, arr);
 
-		for (let i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && !convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
+		for (let entry of iterator(env, arr, length)) {
+			let passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
+			if (!passed) {
 				return objectFactory.createPrimitive(false);
 			}
 		}
@@ -457,11 +435,13 @@ export default function arrayApi (env) {
 
 	proto.define("some", objectFactory.createBuiltInFunction(function (callback, thisArg) {
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.some");
+		let arr = convert.toObject(env, this.node);
 		let length = getLength(env, this.node);
 		contracts.assertIsFunction(callback, this.node);
 
-		for (let i = 0; i < length; i++) {
-			if (this.node.hasProperty(i) && convert.toBoolean(executeCallback(callback, thisArg, this, i))) {
+		for (let entry of iterator(env, arr, length)) {
+			let passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
+			if (passed) {
 				return objectFactory.createPrimitive(true);
 			}
 		}
@@ -470,9 +450,10 @@ export default function arrayApi (env) {
 	}, 1, "Array.prototype.some"));
 
 	proto.define("reduce", objectFactory.createBuiltInFunction(function (callback, initialValue) {
-		let length = getLength(env, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduce");
-		contracts.assertIsFunction(callback, this.node);
+		let arr = convert.toObject(env, this.node);
+		let length = getLength(env, arr);
+		contracts.assertIsFunction(callback, arr);
 
 		let index = 0;
 		let value;
@@ -481,7 +462,7 @@ export default function arrayApi (env) {
 			value = initialValue;
 		} else {
 			// make sure array isn't empty
-			while (index < length && !(this.node.hasProperty(index))) {
+			while (index < length && !(arr.hasProperty(index))) {
 				index++;
 			}
 
@@ -489,12 +470,12 @@ export default function arrayApi (env) {
 				throw new TypeError("Reduce of empty array with no initial value");
 			}
 
-			value = this.node.getProperty(index++).getValue();
+			value = arr.getProperty(index++).getValue();
 		}
 
 		for (; index < length; index++) {
-			if (this.node.hasProperty(index)) {
-				value = executeAccumulator(callback, value, this, index);
+			if (arr.hasProperty(index)) {
+				value = executeAccumulator(callback, value, index, arr);
 			}
 		}
 
@@ -504,7 +485,8 @@ export default function arrayApi (env) {
 	proto.define("reduceRight", objectFactory.createBuiltInFunction(function (callback, initialValue) {
 		let length = getLength(env, this.node);
 		contracts.assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
-		contracts.assertIsFunction(callback, this.node);
+		let arr = convert.toObject(env, this.node);
+		contracts.assertIsFunction(callback, arr);
 
 		let accumulator;
 
@@ -519,9 +501,9 @@ export default function arrayApi (env) {
 			// make sure array isn't empty
 			let hasElements = false;
 			while (k >= 0 && !hasElements) {
-				hasElements = this.node.hasProperty(k);
+				hasElements = arr.hasProperty(k);
 				if (hasElements) {
-					accumulator = this.node.getProperty(k).getValue();
+					accumulator = arr.getProperty(k).getValue();
 				}
 
 				k--;
@@ -533,8 +515,8 @@ export default function arrayApi (env) {
 		}
 
 		while (k >= 0) {
-			if (this.node.hasProperty(k)) {
-				accumulator = executeAccumulator(callback, accumulator, this, k);
+			if (arr.hasProperty(k)) {
+				accumulator = executeAccumulator(callback, accumulator, k, arr);
 			}
 
 			k--;

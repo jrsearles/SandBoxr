@@ -152,7 +152,7 @@ export default class ObjectType {
 	}
 
 	getValue (name) {
-		if (name) {
+		if (arguments.length > 0) {
 			return this.getProperty(name).getValue();
 		}
 
