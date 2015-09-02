@@ -1,7 +1,7 @@
 import * as contracts from "./contracts";
 import "../polyfills";
 
-function createPropertyMap (obj, start, end) {
+function createPropertyMap (obj, start, end, step) {
 	let version = 0;
 	let protoStack = [];
 	let map = Object.create(null);
@@ -34,15 +34,15 @@ function createPropertyMap (obj, start, end) {
 	};
 }
 
-function* sparseIterator (obj, start, length) {
-	let map = createPropertyMap(obj, start, length - 1);
+function* sparseIterator (obj, start, end, step = 1) {
+	let map = createPropertyMap(obj, start, end, step);
 	
-	for (let i = 0, ln = map.keys.length; i < ln; i++) {
+	for (let i = 0, ln = map.keys.length; i < ln; i + step) {
 		let index = map.keys[i];
 		yield { value: map.props[index].getValue(), index: index };
 		
 		if (map.changed()) {
-			yield* sparseIterator(obj, index++, length);
+			yield* sparseIterator(obj, index + step, length);
 			break;
 		}
 	}
