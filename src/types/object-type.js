@@ -8,6 +8,7 @@ export default class ObjectType {
 		this.properties = Object.create(null);
 		this.extensible = true;
 
+		this.version = 0;
 		this.primitiveHint = "number";
 	}
 
@@ -19,6 +20,7 @@ export default class ObjectType {
 
 	setPrototype (proto) {
 		this.proto = proto;
+		this.version++;
 	}
 
 	getProperty (name) {
@@ -76,6 +78,8 @@ export default class ObjectType {
 					enumerable: descriptor.enumerable,
 					writable: descriptor.writable
 				});
+				
+				this.version++;
 			} else {
 				descriptor.setValue(value);
 			}
@@ -84,7 +88,7 @@ export default class ObjectType {
 		}
 	}
 
-	defineOwnProperty (name, descriptor, throwOnError) {
+	defineOwnProperty (name, descriptor, throwOnError, env) {
 		if (this.isPrimitive) {
 			if (throwOnError) {
 				throw new TypeError(`Cannot define property: ${name}, object is not extensible`);
@@ -114,6 +118,7 @@ export default class ObjectType {
 		}
 
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
+		this.version++;
 		return true;
 	}
 
@@ -132,6 +137,7 @@ export default class ObjectType {
 			}
 		}
 
+		this.version++;
 		return delete this.properties[name];
 	}
 
@@ -143,12 +149,14 @@ export default class ObjectType {
 		descriptor.value = value;
 
 		this.properties[name] = new PropertyDescriptor(this, descriptor);
+		this.version++;
 	}
 
 	remove (name) {
 		// this method is intended for external usage only - it provides a way to remove
 		// properties even if they are not normally able to be deleted
 		delete this.properties[name];
+		this.version++;
 	}
 
 	getValue (name) {
