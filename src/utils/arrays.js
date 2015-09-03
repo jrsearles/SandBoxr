@@ -26,7 +26,7 @@ function createPropertyMap (obj, start, end, step) {
 	}
 
 	return {
-		keys: keys.sort(),
+		keys: keys.sort((a, b) => (a - b) * step),
 		props: map,
 		changed () {
 			return protoStack.reduce((value, item) => value + item.version, 0) > version;

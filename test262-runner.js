@@ -72,7 +72,12 @@ var exclusions = [
 	/15\.4\.4\.21-3-14\.js$/i,
 	/15\.4\.4\.22-3-14\.js/i,
 	/S15\.4\.5\.2_A3_T4\.js/i,
-	/S15\.1\.3\.1_A2\.5_T1\.js/i
+	/S15\.1\.2\.2_A8\.js$/i,
+	/S15\.1\.2\.3_A6\.js$/i,
+	/S15\.1\.3\.1_A2\.5_T1\.js$/i,
+	/S15\.1\.3\.1_A2\.1_T1\.js$/i,
+	/S15\.1\.3\.2_A2\.1_T1\.js$/i,
+	/S15\.1\.3\.2_A2\.5_T1\.js$/i
 ];
 
 var descriptionRgx = /\*.*@description\s+(.*)\s*\n/i;
@@ -139,6 +144,7 @@ function runTests (config) {
 				return cb(null, result);
 			}
 		
+			var startTime = Date.now();
 			var descriptionMatch = descriptionRgx.exec(contents);
 			var description = descriptionMatch && descriptionMatch[1];
 			testStarting(logger, file, description);
@@ -160,11 +166,15 @@ function runTests (config) {
 			var runner = SandBoxr.create(ast, { parser: parser.parse });
 		
 			runner.execute().then(function () {
+				var duration = Date.now() - startTime;
+				
 				result.passed = true;
-				testPassed(logger, file, description);
+				testPassed(logger, file, description, duration);
 				cb(null, result);
 			}, function (err) {
-				testFailed(logger, file, description, err);
+				var duration = Date.now() - startTime;
+				
+				testFailed(logger, file, description, err, duration);
 				cb(stopOnFail ? err : null, result);
 			});
 		});
@@ -197,14 +207,14 @@ function testStarting (logger, name, desc) {
 	logger.verbose("starting: %s (%s)", name, desc);
 }
 
-function testPassed (logger, name, desc) {
-	logger.verbose("passed: %s (%s)", name, desc);
+function testPassed (logger, name, desc, duration) {
+	logger.verbose("passed: %s (%s) - (%s ms)", name, desc, duration);
 }
 
 function testFailed (logger, name, desc, err) {
 	logger.error("failed: %s (%s)", name, desc);
 }
 
-function testSkipped (logger, name, reason) {
-	logger.verbose("skipped: %s (%s)", name, reason);
+function testSkipped (logger, name, reason, duration) {
+	logger.verbose("skipped: %s (%s) - (%s ms)", name, reason, duration);
 }
