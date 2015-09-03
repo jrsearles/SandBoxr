@@ -1,6 +1,53 @@
 import * as contracts from "./contracts";
 import "../polyfills";
 
+function createPropertyMap (obj, start, end, step) {
+	let version = 0;
+	let protoStack = [];
+	let map = Object.create(null);
+	let keys = [];
+	
+	let current = obj;
+	while (current) {
+		protoStack.push(current);
+		version += current.version;
+		
+		for (let name in current.properties) {
+			if (!(name in map) && contracts.isInteger(name)) {
+				let index = Number(name);
+				if (index >= start && index <= end) {
+					map[name] = current.properties[name];
+					keys.push(index);
+				}
+			}
+		}
+		
+		current = current.getPrototype();
+	}
+
+	return {
+		keys: keys.sort((a, b) => (a - b) * step),
+		props: map,
+		changed () {
+			return protoStack.reduce((value, item) => value + item.version, 0) > version;
+		}
+	};
+}
+
+function* sparseIterator (obj, start, end, step = 1) {
+	let map = createPropertyMap(obj, start, end, step);
+	
+	for (let i = 0, ln = map.keys.length; i < ln; i + step) {
+		let index = map.keys[i];
+		yield { value: map.props[index].getValue(), index: index };
+		
+		if (map.changed()) {
+			yield* sparseIterator(obj, index + step, length);
+			break;
+		}
+	}
+}
+
 const SPARE_ARRAY_DENSITY = 0.8;
 const ascending = (a, b) => a - b;
 const descending = (a, b) => b - a;
