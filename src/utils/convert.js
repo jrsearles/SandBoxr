@@ -46,7 +46,7 @@ function getPrimitive (env, value) {
 		return primitiveValue.value;
 	}
 
-	throw new TypeError("Cannot convert object to primitive");
+	throw new TypeError("Cannot convert object to primitive value.");
 }
 
 function getValues (env, args) {
@@ -78,12 +78,12 @@ export function	toArray (obj, length) {
 	let arr = [];
 
 	if (obj) {
-		let ln = length >= 0 ? length : obj.getValue("length").value;
+		let ln = length >= 0 ? length : obj.getValue("length").unwrap();
 		let i = 0;
 
 		while (i < ln) {
 			if (obj.hasProperty(i)) {
-				arr[i] = obj.getProperty(i).getValue();
+				arr[i] = obj.getValue(i);
 			}
 
 			i++;
@@ -156,7 +156,7 @@ export function	toBoolean (obj) {
 
 export function	toNativeFunction (env, fn, name) {
 	return env.objectFactory.createBuiltInFunction(function () {
-		let scope = this && this.node && this.node.value;
+		let scope = this && this.node && this.node.unwrap();
 		let args = getValues(env, arguments);
 
 		let value = fn.apply(scope, args);

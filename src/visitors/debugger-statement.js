@@ -1,4 +1,8 @@
 export default function DebuggerStatement (context) {
-	debugger;
+	if (context.env.options.allowDebugger) {
+		/* eslint no-debugger: 0 */
+		debugger;
+	}
+
 	return context.empty();
 }

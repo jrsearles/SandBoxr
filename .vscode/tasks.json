@@ -12,6 +12,7 @@
       "isBuildCommand": true,
       "isWatching": false,
       "problemMatcher": [
+        "$eslint-compact",
         "$eslint-stylish"
       ]
     },
@@ -25,6 +26,7 @@
       "args": [],
       "isWatching": false,
       "problemMatcher": [
+        "$eslint-compact",
         "$eslint-stylish"
       ]
     }

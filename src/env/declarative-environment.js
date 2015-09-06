@@ -19,7 +19,7 @@ export default class DeclarativeEnvironment {
 	hasProperty (name) {
 		return name in this.properties;
 	}
-	
+
 	hasOwnProperty (name) {
 		return this.hasProperty(name);
 	}
@@ -62,7 +62,7 @@ export default class DeclarativeEnvironment {
 
 			this.properties[name].setValue(value);
 		} else {
-			this.parent.putValue.apply(this.parent, arguments);
+			this.parent.putValue(...arguments);
 		}
 	}
 

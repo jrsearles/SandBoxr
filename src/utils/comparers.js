@@ -102,11 +102,11 @@ const comparers = {
 		return primitiveA < primitiveB;
 	},
 
-	["=="] () { return this.implicitEquals.apply(this, arguments); },
-	["!="] () { return !this.implicitEquals.apply(this, arguments); },
+	["=="] () { return this.implicitEquals(...arguments); },
+	["!="] () { return !this.implicitEquals(...arguments); },
 
-	["==="] () { return this.strictEquals.apply(this, arguments); },
-	["!=="] () { return !this.strictEquals.apply(this, arguments); },
+	["==="] () { return this.strictEquals(...arguments); },
+	["!=="] () { return !this.strictEquals(...arguments); },
 
 	["<"] (env, a, b) { return !!this.relationalCompare(env, a, b, true); },
 	["<="] (env, a, b) { return negate(this.relationalCompare(env, b, a, false)); },

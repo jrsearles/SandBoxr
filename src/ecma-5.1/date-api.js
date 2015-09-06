@@ -3,7 +3,6 @@ import * as convert from "../utils/convert";
 const staticMethods = ["now"];
 const protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString"];
 const setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
-const slice = Array.prototype.slice;
 
 export default function dateApi (env) {
 	const globalObject = env.global;
@@ -26,7 +25,7 @@ export default function dateApi (env) {
 				args = [primitiveValue];
 			}
 		} else {
-			args = slice.call(arguments).map(arg => convert.toPrimitive(env, arg, "number"));
+			args = [...arguments].map(arg => convert.toPrimitive(env, arg, "number"));
 		}
 
 		if (this.isNew) {
@@ -46,14 +45,14 @@ export default function dateApi (env) {
 						args[i++] = i === 3 ? 1 : 0;
 					}
 
-					dateValue = new Date(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+					dateValue = new Date(...args);
 					break;
 			}
 
 			return objectFactory.create("Date", dateValue);
 		}
 
-		dateValue = Date.apply(null, args);
+		dateValue = Date(...args);
 		return objectFactory.createPrimitive(dateValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
@@ -64,7 +63,7 @@ export default function dateApi (env) {
 	}, 1, "Date.prototype.parse"));
 
 	dateClass.define("UTC", objectFactory.createBuiltInFunction(function (p1, p2, p3, p4, p5, p6, p7) {
-		let args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg, "number"); });
+		let args = [...arguments].map(function (arg) { return convert.toPrimitive(env, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, 7, "Date.prototype.UTC"));
 
@@ -82,7 +81,7 @@ export default function dateApi (env) {
 
 	setters.forEach(name => {
 		function setter () {
-			let args = slice.call(arguments).map(function (arg) { return convert.toPrimitive(env, arg); });
+			let args = [...arguments].map(function (arg) { return convert.toPrimitive(env, arg); });
 			Date.prototype[name].apply(this.node.value, args);
 		}
 

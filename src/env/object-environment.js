@@ -33,7 +33,7 @@ export default class ObjectEnvironment {
 
 	createVariable (name, immutable) {
 		if (this.parent) {
-			return this.parent.createVariable.apply(this.parent, arguments);
+			return this.parent.createVariable(...arguments);
 		} else {
 			this.object.defineOwnProperty(name, {
 				value: undefined,
@@ -48,7 +48,7 @@ export default class ObjectEnvironment {
 
 	putValue (name, value, throwOnError) {
 		if (this.parent && !this.object.hasProperty(name)) {
-			this.parent.putValue.apply(this.parent, arguments);
+			this.parent.putValue(...arguments);
 		} else {
 			this.object.putValue(name, value, throwOnError);
 		}
