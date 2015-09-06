@@ -84,7 +84,7 @@ export default class ObjectType {
 				descriptor.setValue(value);
 			}
 		} else {
-			this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
+			this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError, env);
 		}
 	}
 

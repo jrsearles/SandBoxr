@@ -1,5 +1,4 @@
 var runner = require("./test-runner");
-var expect = require("chai").expect;
 
 describe("Prototype tests", function () {
 	it("should create a new object", function (done) {

@@ -5,21 +5,12 @@ import Reference from "./reference";
 import api from "../ecma-5.1";
 import comparers from "../utils/comparers";
 import * as contracts from "../utils/contracts";
-import {visit as hoister} from "./hoister";
-import EstreeWalker from "../estree-walker";
-import rules from "../syntax-rules";
+import Scope from "./scope";
 
 let defaultOptions = {
-	allowDebugger: false	
+	allowDebugger: false,
+	useStrict: false
 };
-
-function validateSyntax (root) {
-	for (let node of EstreeWalker.create(root)) {
-		if (node.type in rules) {
-			rules[node.type](node, true);
-		}
-	}
-}
 
 export default class Environment {
 	init (options = defaultOptions) {
@@ -27,9 +18,9 @@ export default class Environment {
 		this.current = null;
 		this.globalScope = null;
 
-		options = Object.assign({}, defaultOptions, options);
-		api(this, options);
-		
+		this.options = Object.assign(this.options || {}, defaultOptions, options);
+		api(this);
+
 		// todo: improve this
 		this.ops = Object.assign(comparers, options.comparers);
 	}
@@ -40,7 +31,7 @@ export default class Environment {
 	}
 
 	getReference (name) {
-		let scope = this.current;
+		let scope = this.current && this.current.scope;
 		while (scope) {
 			if (scope.hasOwnProperty(name)) {
 				return scope.getReference(name, true);
@@ -57,46 +48,49 @@ export default class Environment {
 	}
 
 	putValue (name, value, strict) {
-		this.current.putValue(name, value, strict);
+		this.current.scope.putValue(name, value, strict);
 	}
 
 	hasProperty (name) {
-		return this.current.hasProperty(name);
+		return this.current.scope.hasProperty(name);
 	}
 
 	deleteVariable (name) {
-		this.current.deleteVariable(name);
+		this.current.scope.deleteVariable(name);
 	}
 
 	createVariable (name, immutable) {
 		contracts.assertIsValidIdentifier(name, this.isStrict());
-		return this.current.createVariable(name, !immutable);
+		return this.current.scope.createVariable(name, !immutable);
 	}
 
 	isStrict () {
-		let scope = this.current;
-		
+		if (this.options.useStrict) {
+			return true;
+		}
+
+		let scope = this.current && this.current.scope;
 		while (scope) {
 			if (scope.strict) {
 				return true;
 			}
-			
+
 			scope = scope.parent;
 		}
-		
+
 		return false;
 	}
 
 	getThisBinding () {
-		let thisArg = this.current.getThisBinding();
+		let thisArg = this.current.scope.getThisBinding();
 		if (thisArg) {
 			return thisArg;
 		}
-		
+
 		if (this.isStrict()) {
 			return this.global.getValue("undefined");
 		}
-		
+
 		return this.global;
 	}
 
@@ -105,72 +99,14 @@ export default class Environment {
 	}
 
 	createScope (thisArg) {
-		let env = new DeclarativeEnvironment(this.current, thisArg, this);
-		return this.setScope(env);
+		return this.setScope(new DeclarativeEnvironment(this.current, thisArg, this));
 	}
 
 	createObjectScope (obj, thisArg) {
-		let env = new ObjectEnvironment(this.current, obj, thisArg, this);
-		return this.setScope(env);
-	}
-
-	initScope (node) {
-		let undef = this.global.getValue("undefined");
-		this.current.strict = contracts.isStrictNode(node.body);
-		
-		let strict = this.current.strict || this.isStrict();
-		if (strict && node.type === "Program") {
-			validateSyntax(node);
-		}
-		
-		hoister(node, decl => {
-			let name = decl.name || decl.id.name;
-			contracts.assertIsValidParameterName(name, this.isStrict());
-			
-			let value = undef;
-			if (decl.type === "FunctionDeclaration") {
-				// functions can be used before they are defined
-				value = this.objectFactory.createFunction(decl, null, null, strict || contracts.isStrictNode(decl.body.body));
-				value.bindScope(this.current);
-			} else if (this.current.hasProperty(name)) {
-				return;
-			}
-			
-			let newVar = this.createVariable(name, true);
-			newVar.setValue(value);
-		});
+		return this.setScope(new ObjectEnvironment(this.current, obj, thisArg, this));
 	}
 
 	setScope (scope) {
-		this.globalScope = this.globalScope || scope;
-
-		let env = this;
-		let priorScope = this.current || this.globalScope;
-		this.current = scope;
-
-		return {
-			init (node) {
-				if (!node) {
-					return;
-				}
-
-				env.initScope(node);
-			},
-			
-			use (func) {
-				try {
-					let result = func();
-					env.setScope(priorScope);
-					return result;
-				} catch (err) {
-					env.setScope(priorScope);
-					throw err;
-				}
-			},
-
-			exitScope () {
-				env.setScope(priorScope);
-			}
-		};
+		return this.current = new Scope(this, scope);
 	}
 }

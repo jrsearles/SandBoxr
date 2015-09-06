@@ -9,7 +9,7 @@ export default function stringApi (env) {
 	const globalObject = env.global;
 	const undef = globalObject.getValue("undefined");
 	const objectFactory = env.objectFactory;
-	
+
 	let stringClass = objectFactory.createFunction(function (value) {
 		let stringValue = value ? convert.toString(env, value.getValue()) : "";
 
@@ -21,7 +21,7 @@ export default function stringApi (env) {
 		return objectFactory.createPrimitive(stringValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	let proto = stringClass.getProperty("prototype").getValue();
+	let proto = stringClass.getValue("prototype");
 
 	// prototype can be coerced into an empty string
 	proto.value = "";
@@ -91,7 +91,7 @@ export default function stringApi (env) {
 
 		let arr = objectFactory.create("Array");
 		if (contracts.isUndefined(separator)) {
-			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, this);
+			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, env);
 		} else {
 			let separatorValue;
 			if (separator.className === "RegExp") {
@@ -101,10 +101,8 @@ export default function stringApi (env) {
 			}
 
 			let result = stringValue.split(separatorValue, limitValue);
-			let context = this;
-
 			result.forEach(function (value, index) {
-				arr.putValue(index, objectFactory.createPrimitive(value), false, context);
+				arr.putValue(index, objectFactory.createPrimitive(value), false, env);
 			});
 		}
 
@@ -154,15 +152,15 @@ export default function stringApi (env) {
 			let matches = objectFactory.create("Array");
 
 			match.forEach(function (value, index) {
-				matches.putValue(index, objectFactory.createPrimitive(value), false);
+				matches.putValue(index, objectFactory.createPrimitive(value), false, env);
 			});
 
-			matches.putValue("index", objectFactory.createPrimitive(match.index), false);
-			matches.putValue("input", objectFactory.createPrimitive(match.input), false);
+			matches.putValue("index", objectFactory.createPrimitive(match.index), false, env);
+			matches.putValue("input", objectFactory.createPrimitive(match.input), false, env);
 			return matches;
 		}
 
-		return globalObject.getProperty("null").getValue();
+		return globalObject.getValue("null");
 	}, 1, "String.prototype.match"));
 
 	proto.define("trim", objectFactory.createBuiltInFunction(function () {

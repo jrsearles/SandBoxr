@@ -36,7 +36,7 @@ function serializeObject (env, stack, obj, replacer, gap, depth) {
 
 	for (let prop in obj.properties) {
 		if (obj.properties[prop].enumerable) {
-			value = replacer(obj, prop, obj.getProperty(prop).getValue());
+			value = replacer(obj, prop, obj.getValue(prop));
 			if (!contracts.isNullOrUndefined(value)) {
 				values.push(serializePrimitive(prop) + colon + serialize(env, stack, value, replacer, gap, depth));
 			}
@@ -53,7 +53,7 @@ function serializeArray (env, stack, arr, replacer, gap, depth) {
 	for (let i = 0; i < length; i++) {
 		let value = undefined;
 		if (arr.hasProperty(i)) {
-			value = replacer(arr, String(i), arr.getProperty(i).getValue());
+			value = replacer(arr, String(i), arr.getValue(i));
 		}
 
 		if (contracts.isNullOrUndefined(value)) {
@@ -165,7 +165,8 @@ function getSpacer (env, spacer) {
 	return "";
 }
 
-function deserialize (objectFactory, value, reviver) {
+function deserialize (env, value, reviver) {
+	let objectFactory = env.objectFactory;
 	let valueType = contracts.getType(value);
 	switch (valueType) {
 		// these are the only types supported by JSON.parse - sad face...
@@ -179,9 +180,9 @@ function deserialize (objectFactory, value, reviver) {
 		case "Array":
 			let arr = objectFactory.create("Array");
 			value.forEach(function (element, index) {
-				let elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
+				let elementValue = reviver(arr, String(index), deserialize(env, element, reviver));
 				if (!contracts.isUndefined(elementValue)) {
-					arr.defineOwnProperty(index, { value: deserialize(objectFactory, element), configurable: true, enumerable: true, writable: true });
+					arr.defineOwnProperty(index, { value: deserialize(env, element), configurable: true, enumerable: true, writable: true }, true, env);
 				}
 			});
 
@@ -193,9 +194,9 @@ function deserialize (objectFactory, value, reviver) {
 
 			for (let prop in value) {
 				if (value.hasOwnProperty(prop)) {
-					propValue = reviver(obj, prop, deserialize(objectFactory, value[prop], reviver));
+					propValue = reviver(obj, prop, deserialize(env, value[prop], reviver));
 					if (!contracts.isUndefined(propValue)) {
-						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
+						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true }, true, env);
 					}
 				}
 			}
@@ -222,7 +223,7 @@ export default function jsonApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
 	const undef = env.global.getValue("undefined");
-	
+
 	let jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
 
@@ -245,7 +246,7 @@ export default function jsonApi (env) {
 
 		let stringValue = convert.toString(env, str);
 		let parsedObject = JSON.parse(stringValue);
-		let deserializedObject = deserialize(objectFactory, parsedObject, reviver);
+		let deserializedObject = deserialize(env, parsedObject, reviver);
 
 		return reviver(deserializedObject, "", deserializedObject) || undef;
 	}, 2, "JSON.parse"));

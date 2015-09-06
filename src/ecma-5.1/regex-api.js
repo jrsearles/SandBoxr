@@ -4,7 +4,7 @@ import * as contracts from "../utils/contracts";
 export default function regexApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	
+
 	let regexClass = objectFactory.createFunction(function (pattern, flags) {
 		if (pattern && pattern.className === "RegExp") {
 			if (!contracts.isUndefined(flags)) {
@@ -20,15 +20,15 @@ export default function regexApi (env) {
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	let proto = regexClass.getProperty("prototype").getValue();
+	let proto = regexClass.getValue("prototype");
 	proto.className = "RegExp";
 
 	proto.define("test", objectFactory.createBuiltInFunction(function (str) {
 		let stringValue = convert.toString(env, str);
 
-		this.node.source.lastIndex = convert.toInt32(env, this.node.getProperty("lastIndex").getValue());
+		this.node.source.lastIndex = convert.toInt32(env, this.node.getValue("lastIndex"));
 		let testValue = this.node.source.test(stringValue);
-		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
+		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex), true, env);
 
 		return objectFactory.createPrimitive(testValue);
 	}, 1, "RegExp.prototype.test"));
@@ -37,27 +37,27 @@ export default function regexApi (env) {
 		let stringValue = convert.toString(env, str);
 
 		// update underlying regex in case the index was manually updated
-		this.node.source.lastIndex = convert.toInt32(env, this.node.getProperty("lastIndex").getValue());
+		this.node.source.lastIndex = convert.toInt32(env, this.node.getValue("lastIndex"));
 
 		// get match from underlying regex
 		let match = this.node.source.exec(stringValue);
 
 		// update the last index from the underlying regex
-		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
+		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex), true, env);
 
 		if (match) {
 			let arr = objectFactory.create("Array");
 			for (let i = 0, ln = match.length; i < ln; i++) {
-				arr.putValue(i, objectFactory.createPrimitive(match[i]));
+				arr.putValue(i, objectFactory.createPrimitive(match[i]), true, env);
 			}
 
 			// extra properties are added to the array
-			arr.putValue("index", objectFactory.createPrimitive(match.index), false, this);
-			arr.putValue("input", objectFactory.createPrimitive(match.input), false, this);
+			arr.putValue("index", objectFactory.createPrimitive(match.index), false, env);
+			arr.putValue("input", objectFactory.createPrimitive(match.input), false, env);
 			return arr;
 		}
 
-		return this.env.global.getProperty("null").getValue();
+		return this.env.global.getValue("null");
 	}, 1, "RegExp.prototype.exec"));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {

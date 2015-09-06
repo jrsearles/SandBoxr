@@ -4,7 +4,7 @@ import * as convert from "../utils/convert";
 export default function booleanApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	
+
 	let booleanClass = objectFactory.createFunction(function (obj) {
 		let booleanValue = convert.toBoolean(obj);
 
@@ -16,7 +16,7 @@ export default function booleanApi (env) {
 		return objectFactory.create("Boolean", booleanValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	let proto = booleanClass.getProperty("prototype").getValue();
+	let proto = booleanClass.getValue("prototype");
 	proto.className = "Boolean";
 	proto.value = false;
 

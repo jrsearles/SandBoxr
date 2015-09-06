@@ -68,7 +68,7 @@ export default function dateApi (env) {
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, 7, "Date.prototype.UTC"));
 
-	let proto = dateClass.getProperty("prototype").getValue();
+	let proto = dateClass.getValue("prototype");
 	proto.className = "Date";
 	proto.value = new Date(Date.prototype);
 

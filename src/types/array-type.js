@@ -1,9 +1,7 @@
 import ObjectType from "./object-type";
 import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
-
-// todo: this is hacky - remove this for passed in environment
-let localObjectFactory;
+import iterate from "../iterators";
 
 function setIndex (env, arr, name, descriptor, throwOnError) {
 	let index = Number(name);
@@ -21,7 +19,7 @@ function setIndex (env, arr, name, descriptor, throwOnError) {
 	}
 
 	if (index >= lengthValue) {
-		let newLength = localObjectFactory.createPrimitive(index + 1);
+		let newLength = env.objectFactory.createPrimitive(index + 1);
 		arr.defineOwnProperty("length", { value: newLength }, false, env);
 	}
 
@@ -34,7 +32,7 @@ function setLength (env, arr, name, descriptor, throwOnError) {
 		throw new RangeError("Array length out of range");
 	}
 
-	descriptor.value = localObjectFactory.createPrimitive(newLengthValue);
+	descriptor.value = env.objectFactory.createPrimitive(newLengthValue);
 	let newLength = descriptor.value;
 	let currentLength = arr.getProperty("length").getValue();
 	contracts.assertIsValidArrayLength(newLength.value);
@@ -63,12 +61,15 @@ function setLength (env, arr, name, descriptor, throwOnError) {
 	}
 
 	let succeeded = true;
-	while (i > newLength.value) {
-		if (!arr.deleteProperty(--i, false)) {
-			newLength = localObjectFactory.createPrimitive(i + 1);
-			arr.defineOwnProperty("length", { value: newLength }, false);
-			succeeded = false;
-			break;
+
+	if (i > newLength.value) {
+		for (let entry of iterate.reverse(env, arr, i - 1, newLength.value)) {
+			if (!arr.deleteProperty(entry.index, false)) {
+				newLength = env.objectFactory.createPrimitive(entry.index + 1);
+				arr.defineOwnProperty("length", { value: newLength}, false, env);
+				succeeded = false;
+				break;
+			}
 		}
 	}
 
@@ -90,7 +91,6 @@ export default class ArrayType extends ObjectType {
 	}
 
 	init (objectFactory) {
-		localObjectFactory = objectFactory;
 		this.defineOwnProperty("length", { value: objectFactory.createPrimitive(0), configurable: false, enumerable: false, writable: true });
 	}
 

@@ -2,7 +2,7 @@ import PropertyReference from "./property-reference";
 
 export default class ObjectEnvironment {
 	constructor (parent, obj, thisArg, env) {
-		this.parent = parent;
+		this.parent = parent && parent.scope;
 		this.strict = parent && parent.strict;
 		this.object = obj;
 		this.thisBinding = thisArg || obj;
@@ -18,7 +18,7 @@ export default class ObjectEnvironment {
 	hasProperty (name) {
 		return this.parent ? this.parent.hasProperty(name) : this.hasOwnProperty(name);
 	}
-	
+
 	hasOwnProperty (name) {
 		return this.object.hasProperty(name);
 	}
@@ -63,7 +63,7 @@ export default class ObjectEnvironment {
 			return undefined;
 		}
 
-		return this.object.getProperty(name).getValue();
+		return this.object.getValue(name);
 	}
 
 	getThisBinding () {

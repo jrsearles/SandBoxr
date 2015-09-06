@@ -13,17 +13,20 @@ export default degenerate(function* WithStatement (context) {
 	}
 	
 	let scope = context.env.createObjectScope(obj, context.env.getThisBinding());
-	let result;
+	// let result;
 
 	scope.init(context.node.body);
+	return yield scope.use(() => {
+		return context.create(context.node.body).execute();
+	});
+	
+	// try {
+	// 	result = yield context.create(context.node.body).execute();
+	// } catch (err) {
+	// 	scope.exitScope();
+	// 	throw err;
+	// }
 
-	try {
-		result = yield context.create(context.node.body).execute();
-	} catch (err) {
-		scope.exitScope();
-		throw err;
-	}
-
-	scope.exitScope();
-	return result;
+	// scope.exitScope();
+	// return result;
 });

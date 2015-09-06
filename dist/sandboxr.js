@@ -74,7 +74,7 @@ var SandBoxr = (function () {
 
 exports["default"] = SandBoxr;
 module.exports = exports["default"];
-},{"./env":181,"./execution-context":186,"./polyfills":189,"./utils/async":204,"babel-runtime/core-js/promise":10,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],2:[function(require,module,exports){
+},{"./env":181,"./execution-context":187,"./polyfills":194,"./utils/async":208,"babel-runtime/core-js/promise":10,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/get-iterator"), __esModule: true };
 },{"core-js/library/fn/get-iterator":27}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/sign"), __esModule: true };
@@ -2516,18 +2516,14 @@ if(HTC && !(ITERATOR in HTCProto))hide(HTCProto, ITERATOR, ArrayValues);
 
 var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
 
-var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
-
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
+var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports["default"] = arrayApi;
-
-var _typesArrayType = require("../types/array-type");
-
-var _typesArrayType2 = _interopRequireDefault(_typesArrayType);
 
 var _utilsContracts = require("../utils/contracts");
 
@@ -2541,7 +2537,9 @@ var _utilsConvert = require("../utils/convert");
 
 var convert = _interopRequireWildcard(_utilsConvert);
 
-var _utilsArrays = require("../utils/arrays");
+var _iterators = require("../iterators");
+
+var _iterators2 = _interopRequireDefault(_iterators);
 
 function getStartIndex(index, length) {
 	if (index < 0) {
@@ -2581,7 +2579,7 @@ function arrayApi(env) {
 		scope.init(callback.node.body);
 
 		var args = [entry.value, objectFactory.createPrimitive(entry.index), arr];
-		func.loadArguments(env, callback.node.params, args, callback);
+		scope.loadArgs(callback.node.params, args, callback);
 
 		return scope.use(function () {
 			var executionResult = env.createExecutionContext(callback.node.body, callback.node).execute();
@@ -2589,12 +2587,12 @@ function arrayApi(env) {
 		});
 	}
 
-	function executeAccumulator(callback, priorValue, index, arr) {
+	function executeAccumulator(callback, priorValue, entry, arr) {
 		var scope = env.createScope();
 		scope.init(callback.node.body);
 
-		var args = [priorValue || undef, arr.getValue(index) || undef, objectFactory.createPrimitive(index), arr];
-		func.loadArguments(env, callback.node.params, args, callback);
+		var args = [priorValue || undef, entry.value || undef, objectFactory.createPrimitive(entry.index), arr];
+		scope.loadArgs(callback.node.params, args, callback);
 
 		return scope.use(function () {
 			var executionResult = env.createExecutionContext(callback.node.body, callback.node).execute();
@@ -2617,7 +2615,7 @@ function arrayApi(env) {
 		if (arguments.length > 0) {
 			if (arguments.length === 1 && length.type === "number") {
 				contracts.assertIsValidArrayLength(arguments[0].value);
-				newArray.putValue("length", length, false, this);
+				newArray.putValue("length", length, false, env);
 			} else {
 				for (var i = 0, ln = arguments.length; i < ln; i++) {
 					newArray.defineOwnProperty(i, createIndexProperty(arguments[i]), false, env);
@@ -2628,7 +2626,7 @@ function arrayApi(env) {
 		return newArray;
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = arrayClass.getProperty("prototype").getValue();
+	var proto = arrayClass.getValue("prototype");
 	proto.className = "Array";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
@@ -2640,12 +2638,16 @@ function arrayApi(env) {
 		var start = getLength(env, this.node);
 		var i = 0;
 
-		for (var _length = arguments.length; i < _length; i++) {
-			this.node.defineOwnProperty(start + i, createIndexProperty(arguments[i]), true, env);
+		for (var _len = arguments.length, items = Array(_len), _key = 0; _key < _len; _key++) {
+			items[_key] = arguments[_key];
+		}
+
+		for (var _length = items.length; i < _length; i++) {
+			this.node.defineOwnProperty(start + i, createIndexProperty(items[i]), true, env);
 		}
 
 		var newLength = objectFactory.createPrimitive(start + i);
-		this.node.putValue("length", newLength, true);
+		this.node.putValue("length", newLength, true, env);
 		return newLength;
 	}, 1, "Array.prototype.push"));
 
@@ -2657,12 +2659,12 @@ function arrayApi(env) {
 			i--;
 
 			if (this.node.hasProperty(i)) {
-				obj = this.node.getProperty(i).getValue();
+				obj = this.node.getValue(i);
 				this.node.deleteProperty(i, true);
 			}
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(i));
+		this.node.putValue("length", objectFactory.createPrimitive(i), true, env);
 		return obj || undef;
 	}, 0, "Array.prototype.pop"));
 
@@ -2673,13 +2675,13 @@ function arrayApi(env) {
 
 		if (length > 0) {
 			if (this.node.hasProperty(i)) {
-				obj = this.node.getProperty(i).getValue();
+				obj = this.node.getValue(i);
 				this.node.deleteProperty(i);
 			}
 
 			while (++i < length) {
 				if (this.node.hasProperty(i)) {
-					this.node.putValue(i - 1, this.node.getProperty(i).getValue());
+					this.node.putValue(i - 1, this.node.getValue(i), true, env);
 				} else {
 					this.node.deleteProperty(i);
 				}
@@ -2688,13 +2690,18 @@ function arrayApi(env) {
 			this.node.deleteProperty(length - 1);
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length));
+		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length), true, env);
 		return obj || undef;
 	}, 0, "Array.prototype.shift"));
 
 	proto.define("unshift", objectFactory.createBuiltInFunction(function () {
 		var length = getLength(env, this.node);
-		var argCount = arguments.length;
+
+		for (var _len2 = arguments.length, items = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+			items[_key2] = arguments[_key2];
+		}
+
+		var argCount = items.length;
 		var i = length;
 		var toIndex = undefined,
 		    fromIndex = undefined;
@@ -2704,7 +2711,7 @@ function arrayApi(env) {
 			toIndex = i + argCount - 1;
 
 			if (this.node.hasProperty(fromIndex)) {
-				this.node.putValue(toIndex, this.node.getProperty(fromIndex).getValue(), true);
+				this.node.putValue(toIndex, this.node.getValue(fromIndex), true, env);
 			} else {
 				this.node.deleteProperty(toIndex, true);
 			}
@@ -2713,11 +2720,11 @@ function arrayApi(env) {
 		}
 
 		for (i = 0; i < argCount; i++) {
-			this.node.putValue(i, arguments[i], true);
+			this.node.putValue(i, items[i], true, env);
 		}
 
 		var newLength = objectFactory.createPrimitive(argCount + length);
-		this.node.putValue("length", newLength, true);
+		this.node.putValue("length", newLength, true, env);
 		return newLength;
 	}, 1, "Array.prototype.unshift"));
 
@@ -2739,7 +2746,7 @@ function arrayApi(env) {
 		end = getEndIndex(end, length);
 
 		for (var i = begin; i < end; i++) {
-			arr.defineOwnProperty(index++, createIndexProperty(source.getProperty(i).getValue()), true, env);
+			arr.defineOwnProperty(index++, createIndexProperty(source.getValue(i)), true, env);
 		}
 
 		return arr;
@@ -2767,14 +2774,14 @@ function arrayApi(env) {
 		var k = 0;
 		while (k < deleteCount) {
 			if (this.node.hasProperty(k + start)) {
-				removed.defineOwnProperty(k, createIndexProperty(this.node.getProperty(k + start).getValue()), true, env);
+				removed.defineOwnProperty(k, createIndexProperty(this.node.getValue(k + start)), true, env);
 			}
 
 			k++;
 		}
 
-		for (var _len = arguments.length, elements = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-			elements[_key - 2] = arguments[_key];
+		for (var _len3 = arguments.length, elements = Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
+			elements[_key3 - 2] = arguments[_key3];
 		}
 
 		var newCount = elements.length;
@@ -2783,7 +2790,7 @@ function arrayApi(env) {
 
 			while (k < length - deleteCount) {
 				if (this.node.hasProperty(k + deleteCount)) {
-					this.node.putValue(k + newCount, this.node.getProperty(k + deleteCount).getValue());
+					this.node.putValue(k + newCount, this.node.getValue(k + deleteCount));
 				} else {
 					this.node.deleteProperty(k + deleteCount);
 				}
@@ -2799,7 +2806,7 @@ function arrayApi(env) {
 			k = length - start;
 			while (k > start) {
 				if (this.node.hasProperty(k + deleteCount - 1)) {
-					this.node.putValue(k + newCount - 1, this.node.getProperty(k + deleteCount - 1).getValue());
+					this.node.putValue(k + newCount - 1, this.node.getValue(k + deleteCount - 1), true, env);
 				} else {
 					this.node.deleteProperty(k + newCount - 1);
 				}
@@ -2810,11 +2817,11 @@ function arrayApi(env) {
 
 		k = start;
 		for (var i = 0; i < newCount; i++) {
-			this.node.putValue(k, elements[i]);
+			this.node.putValue(k, elements[i], true, env);
 			k++;
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(length - deleteCount + newCount));
+		this.node.putValue("length", objectFactory.createPrimitive(length - deleteCount + newCount), true, env);
 		return removed;
 	}, 2, "Array.prototype.splice"));
 
@@ -2823,8 +2830,8 @@ function arrayApi(env) {
 
 		// add "this" array to bunch
 
-		for (var _len2 = arguments.length, arrays = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-			arrays[_key2] = arguments[_key2];
+		for (var _len4 = arguments.length, arrays = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+			arrays[_key4] = arguments[_key4];
 		}
 
 		arrays.unshift(convert.toObject(env, this.node));
@@ -2836,10 +2843,10 @@ function arrayApi(env) {
 		while (arrays.length > 0) {
 			current = arrays.shift();
 
-			if (current instanceof _typesArrayType2["default"]) {
-				for (i = 0, length = current.getProperty("length").getValue().value; i < length; i++) {
+			if (current.className === "Array") {
+				for (i = 0, length = current.getValue("length").unwrap(); i < length; i++) {
 					if (current.hasProperty(i)) {
-						newArray.defineOwnProperty(index, createIndexProperty(current.getProperty(i).getValue()), true, env);
+						newArray.defineOwnProperty(index, createIndexProperty(current.getValue(i)), true, env);
 					}
 
 					index++;
@@ -2849,7 +2856,7 @@ function arrayApi(env) {
 			}
 		}
 
-		newArray.putValue("length", objectFactory.createPrimitive(index), true);
+		newArray.putValue("length", objectFactory.createPrimitive(index), true, env);
 		return newArray;
 	}, 1, "Array.prototype.concat"));
 
@@ -2862,7 +2869,7 @@ function arrayApi(env) {
 		for (var i = 0; i < length; i++) {
 			stringValue = "";
 			if (this.node.hasProperty(i)) {
-				stringValue = this.node.getProperty(i).getValue();
+				stringValue = this.node.getValue(i);
 				if (contracts.isNullOrUndefined(stringValue)) {
 					stringValue = "";
 				} else {
@@ -2895,7 +2902,7 @@ function arrayApi(env) {
 		var _iteratorError = undefined;
 
 		try {
-			for (var _iterator = _getIterator((0, _utilsArrays.iterator)(env, this.node, length, index)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			for (var _iterator = _getIterator(_iterators2["default"].forward(env, this.node, index, length)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 				var entry = _step.value;
 
 				if (searchElement.equals(entry.value || undef)) {
@@ -2934,19 +2941,13 @@ function arrayApi(env) {
 		var _iteratorError2 = undefined;
 
 		try {
-			for (var _iterator2 = _getIterator((0, _utilsArrays.reverseIterator)(env, this.node, index)), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+			for (var _iterator2 = _getIterator(_iterators2["default"].reverse(env, this.node, index)), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 				var entry = _step2.value;
 
 				if (searchElement.equals(entry.value || undef)) {
 					return objectFactory.createPrimitive(entry.index);
 				}
 			}
-
-			// for (; index >= 0; index--) {
-			// 	if (this.node.hasProperty(index) && searchElement.equals(this.node.getProperty(index).getValue() || undef)) {
-			// 		return objectFactory.createPrimitive(index);
-			// 	}
-			// }
 		} catch (err) {
 			_didIteratorError2 = true;
 			_iteratorError2 = err;
@@ -2975,7 +2976,7 @@ function arrayApi(env) {
 		var _iteratorError3 = undefined;
 
 		try {
-			for (var _iterator3 = _getIterator((0, _utilsArrays.iterator)(env, arr, length)), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+			for (var _iterator3 = _getIterator(_iterators2["default"].forward(env, arr, 0, length)), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 				var entry = _step3.value;
 
 				executeCallback(callback, entry, thisArg, arr);
@@ -3003,14 +3004,14 @@ function arrayApi(env) {
 		contracts.assertIsFunction(callback, arr);
 
 		var newArray = objectFactory.create("Array");
-		newArray.putValue("length", objectFactory.createPrimitive(length));
+		newArray.putValue("length", objectFactory.createPrimitive(length), true, env);
 
 		var _iteratorNormalCompletion4 = true;
 		var _didIteratorError4 = false;
 		var _iteratorError4 = undefined;
 
 		try {
-			for (var _iterator4 = _getIterator((0, _utilsArrays.iterator)(env, arr, length)), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+			for (var _iterator4 = _getIterator(_iterators2["default"].forward(env, arr, 0, length)), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
 				var entry = _step4.value;
 
 				var value = executeCallback(callback, entry, thisArg, arr);
@@ -3048,7 +3049,7 @@ function arrayApi(env) {
 		var _iteratorError5 = undefined;
 
 		try {
-			for (var _iterator5 = _getIterator((0, _utilsArrays.iterator)(env, arr, length)), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+			for (var _iterator5 = _getIterator(_iterators2["default"].forward(env, arr, 0, length)), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
 				var entry = _step5.value;
 
 				var passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
@@ -3085,7 +3086,7 @@ function arrayApi(env) {
 		var _iteratorError6 = undefined;
 
 		try {
-			for (var _iterator6 = _getIterator((0, _utilsArrays.iterator)(env, arr, length)), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+			for (var _iterator6 = _getIterator(_iterators2["default"].forward(env, arr, 0, length)), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
 				var entry = _step6.value;
 
 				var passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
@@ -3122,7 +3123,7 @@ function arrayApi(env) {
 		var _iteratorError7 = undefined;
 
 		try {
-			for (var _iterator7 = _getIterator((0, _utilsArrays.iterator)(env, arr, length)), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+			for (var _iterator7 = _getIterator(_iterators2["default"].forward(env, arr, 0, length)), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
 				var entry = _step7.value;
 
 				var passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
@@ -3154,28 +3155,53 @@ function arrayApi(env) {
 		var length = getLength(env, arr);
 		contracts.assertIsFunction(callback, arr);
 
-		var index = 0;
+		var hasInitialValue = false;
 		var value = undefined;
 
-		if (arguments.length >= 2) {
+		if (arguments.length > 1) {
 			value = initialValue;
-		} else {
-			// make sure array isn't empty
-			while (index < length && !arr.hasProperty(index)) {
-				index++;
-			}
-
-			if (index >= length) {
-				throw new TypeError("Reduce of empty array with no initial value");
-			}
-
-			value = arr.getProperty(index++).getValue();
+			hasInitialValue = true;
 		}
 
-		for (; index < length; index++) {
-			if (arr.hasProperty(index)) {
-				value = executeAccumulator(callback, value, index, arr);
+		var hasElements = false;
+		if (length > 0) {
+			var _iteratorNormalCompletion8 = true;
+			var _didIteratorError8 = false;
+			var _iteratorError8 = undefined;
+
+			try {
+				for (var _iterator8 = _getIterator(_iterators2["default"].forward(env, arr, 0, length)), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+					var entry = _step8.value;
+
+					if (!hasElements) {
+						hasElements = true;
+
+						if (!hasInitialValue) {
+							value = entry.value;
+							continue;
+						}
+					}
+
+					value = executeAccumulator(callback, value, entry, arr);
+				}
+			} catch (err) {
+				_didIteratorError8 = true;
+				_iteratorError8 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion8 && _iterator8["return"]) {
+						_iterator8["return"]();
+					}
+				} finally {
+					if (_didIteratorError8) {
+						throw _iteratorError8;
+					}
+				}
 			}
+		}
+
+		if (!hasElements && !hasInitialValue) {
+			throw new TypeError("Reduce of empty array with no initial value");
 		}
 
 		return value;
@@ -3188,37 +3214,52 @@ function arrayApi(env) {
 		contracts.assertIsFunction(callback, arr);
 
 		var accumulator = undefined;
+		var hasInitialValue = false;
 
-		if (length === 0 && arguments.length === 1) {
-			throw new TypeError("Reduce of empty array with no initial value");
-		}
-
-		var k = length - 1;
-		if (arguments.length >= 2) {
+		if (arguments.length > 1) {
 			accumulator = initialValue;
-		} else {
-			// make sure array isn't empty
-			var hasElements = false;
-			while (k >= 0 && !hasElements) {
-				hasElements = arr.hasProperty(k);
-				if (hasElements) {
-					accumulator = arr.getProperty(k).getValue();
+			hasInitialValue = true;
+		}
+
+		var hasElements = false;
+		if (length > 0) {
+			var _iteratorNormalCompletion9 = true;
+			var _didIteratorError9 = false;
+			var _iteratorError9 = undefined;
+
+			try {
+				for (var _iterator9 = _getIterator(_iterators2["default"].reverse(env, arr, length - 1)), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+					var entry = _step9.value;
+
+					if (!hasElements) {
+						hasElements = true;
+
+						if (!hasInitialValue) {
+							accumulator = entry.value;
+							continue;
+						}
+					}
+
+					accumulator = executeAccumulator(callback, accumulator, entry, arr);
 				}
-
-				k--;
-			}
-
-			if (!hasElements) {
-				throw new TypeError("Reduce of empty array with no initial value");
+			} catch (err) {
+				_didIteratorError9 = true;
+				_iteratorError9 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion9 && _iterator9["return"]) {
+						_iterator9["return"]();
+					}
+				} finally {
+					if (_didIteratorError9) {
+						throw _iteratorError9;
+					}
+				}
 			}
 		}
 
-		while (k >= 0) {
-			if (arr.hasProperty(k)) {
-				accumulator = executeAccumulator(callback, accumulator, k, arr);
-			}
-
-			k--;
+		if (!hasElements && !hasInitialValue) {
+			throw new TypeError("Reduce of empty array with no initial value");
 		}
 
 		return accumulator;
@@ -3234,15 +3275,15 @@ function arrayApi(env) {
 
 		while (lower !== middle) {
 			upper = length - lower - 1;
-			lowerValue = this.node.hasProperty(lower) && this.node.getProperty(lower).getValue();
-			upperValue = this.node.hasProperty(upper) && this.node.getProperty(upper).getValue();
+			lowerValue = this.node.hasProperty(lower) && this.node.getValue(lower);
+			upperValue = this.node.hasProperty(upper) && this.node.getValue(upper);
 
 			if (upperValue) {
-				this.node.putValue(lower, upperValue, true);
+				this.node.putValue(lower, upperValue, true, env);
 			}
 
 			if (lowerValue) {
-				this.node.putValue(upper, lowerValue, true);
+				this.node.putValue(upper, lowerValue, true, env);
 			}
 
 			if (upperValue && !lowerValue) {
@@ -3284,17 +3325,10 @@ function arrayApi(env) {
 				var scope = env.createScope(undef);
 				scope.init(compareFunction.node.body);
 
-				func.loadArguments(env, compareFunction.node.params, [a, b], compareFunction);
-				var executionResult = undefined;
-
-				try {
-					executionResult = executionContext.create(compareFunction.node.body, compareFunction.node).execute();
-				} catch (err) {
-					scope.exitScope();
-					throw err;
-				}
-
-				scope.exitScope();
+				scope.loadArgs(compareFunction.node.params, [a, b], compareFunction);
+				var executionResult = scope.use(function () {
+					return executionContext.create(compareFunction.node.body, compareFunction.node).execute();
+				});
 
 				if (executionResult && executionResult.exit && executionResult.result) {
 					return executionResult.result.getValue().value;
@@ -3332,7 +3366,7 @@ function arrayApi(env) {
 
 		while (i < length) {
 			if (this.node.hasProperty(i)) {
-				current = this.node.getProperty(i).getValue();
+				current = this.node.getValue(i);
 
 				if (contracts.isNullOrUndefined(current)) {
 					arr[i] = "";
@@ -3354,7 +3388,7 @@ function arrayApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../types/array-type":192,"../utils/arrays":203,"../utils/contracts":206,"../utils/convert":207,"../utils/func":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],167:[function(require,module,exports){
+},{"../iterators":190,"../utils/contracts":210,"../utils/convert":211,"../utils/func":212,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],167:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3387,7 +3421,7 @@ function booleanApi(env) {
 		return objectFactory.create("Boolean", booleanValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = booleanClass.getProperty("prototype").getValue();
+	var proto = booleanClass.getValue("prototype");
 	proto.className = "Boolean";
 	proto.value = false;
 
@@ -3405,7 +3439,7 @@ function booleanApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],168:[function(require,module,exports){
+},{"../utils/contracts":210,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],168:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3437,7 +3471,7 @@ function consoleApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],169:[function(require,module,exports){
+},{"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],169:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3524,7 +3558,7 @@ function dateApi(env) {
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, 7, "Date.prototype.UTC"));
 
-	var proto = dateClass.getProperty("prototype").getValue();
+	var proto = dateClass.getValue("prototype");
 	proto.className = "Date";
 	proto.value = new Date(Date.prototype);
 
@@ -3555,7 +3589,7 @@ function dateApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],170:[function(require,module,exports){
+},{"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],170:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -3598,17 +3632,17 @@ function errorApi(env) {
 		return createError(objectFactory, message);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = errorClass.getProperty("prototype").getValue();
+	var proto = errorClass.getValue("prototype");
 	proto.className = "Error";
 	proto.define("name", objectFactory.createPrimitive("Error"));
 	proto.define("message", objectFactory.createPrimitive(""));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		var name = this.node.getProperty("name").getValue();
+		var name = this.node.getValue("name");
 		var msg = undefined;
 
 		if (this.node.hasProperty("message")) {
-			msg = convert.toString(env, this.node.getProperty("message").getValue());
+			msg = convert.toString(env, this.node.getValue("message"));
 		}
 
 		name = name && convert.toString(env, name);
@@ -3626,7 +3660,7 @@ function errorApi(env) {
 			return createError(objectFactory, message, type);
 		}, null, { configurable: false, enumerable: false, writable: false });
 
-		var typeProto = errClass.getProperty("prototype").getValue();
+		var typeProto = errClass.getValue("prototype");
 		typeProto.define("name", objectFactory.createPrimitive(type));
 
 		// add to prototype chain to represent inheritance
@@ -3637,7 +3671,7 @@ function errorApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],171:[function(require,module,exports){
+},{"../utils/contracts":210,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],171:[function(require,module,exports){
 "use strict";
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
@@ -3679,10 +3713,12 @@ function defineThis(env, fn, thisArg) {
 
 var frozen = { configurable: false, enumerable: false, writable: false };
 
-function functionApi(env, options) {
+function functionApi(env) {
+	var options = env.options;
 	var globalObject = env.global;
 	var undef = env.global.getValue("undefined");
 	var objectFactory = env.objectFactory;
+
 	var funcClass = undefined;
 
 	var funcCtor = function funcCtor() {
@@ -3853,7 +3889,7 @@ function functionApi(env, options) {
 }
 
 module.exports = exports["default"];
-},{"../types/native-function-type":196,"../utils/contracts":206,"../utils/convert":207,"../utils/func":208,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],172:[function(require,module,exports){
+},{"../types/native-function-type":201,"../utils/contracts":210,"../utils/convert":211,"../utils/func":212,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],172:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -3937,8 +3973,7 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 var frozen = { configurable: false, enumerable: false, writable: false };
 
 function ecma51(env) {
-	var config = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
+	var options = env.options;
 	var objectFactory = env.objectFactory = new _typesObjectFactory2["default"](env);
 	var globalObject = env.global = objectFactory.createObject();
 
@@ -3956,18 +3991,18 @@ function ecma51(env) {
 	// todo: node vs browser - do we care?
 	globalObject.define("window", globalObject, frozen);
 
-	(0, _functionApi2["default"])(env, config);
-	(0, _objectApi2["default"])(env, config);
-	(0, _arrayApi2["default"])(env, config);
-	(0, _booleanApi2["default"])(env, config);
-	(0, _numberApi2["default"])(env, config);
-	(0, _stringApi2["default"])(env, config);
-	(0, _dateApi2["default"])(env, config);
-	(0, _regexApi2["default"])(env, config);
-	(0, _mathApi2["default"])(env, config);
-	(0, _errorApi2["default"])(env, config);
-	(0, _jsonApi2["default"])(env, config);
-	(0, _consoleApi2["default"])(env, config);
+	(0, _functionApi2["default"])(env, options);
+	(0, _objectApi2["default"])(env, options);
+	(0, _arrayApi2["default"])(env, options);
+	(0, _booleanApi2["default"])(env, options);
+	(0, _numberApi2["default"])(env, options);
+	(0, _stringApi2["default"])(env, options);
+	(0, _dateApi2["default"])(env, options);
+	(0, _regexApi2["default"])(env, options);
+	(0, _mathApi2["default"])(env, options);
+	(0, _errorApi2["default"])(env, options);
+	(0, _jsonApi2["default"])(env, options);
+	(0, _consoleApi2["default"])(env, options);
 
 	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(function (name) {
 		globalObject.define(name, objectFactory.createBuiltInFunction(function (value) {
@@ -3987,8 +4022,10 @@ function ecma51(env) {
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"));
 
-	if (config.parser) {
+	if (options.parser) {
 		var evalFunc = objectFactory.createBuiltInFunction(function (code) {
+			var _this = this;
+
 			if (!code) {
 				return undefinedClass;
 			}
@@ -4001,7 +4038,7 @@ function ecma51(env) {
 			var ast = undefined;
 
 			try {
-				ast = config.parser(code.value);
+				ast = options.parser(code.value);
 			} catch (err) {
 				if (err instanceof SyntaxError && /assigning to rvalue/i.test(err.message)) {
 					// hack because acorn throws syntax error
@@ -4013,7 +4050,7 @@ function ecma51(env) {
 
 			var strictScope = env.isStrict();
 			var strictCode = strictScope || contracts.isStrictNode(ast.body);
-			var currentGlobal = env.current.parent === env.globalScope;
+			var currentGlobal = env.current.scope.parent === env.globalScope.scope;
 			var scope = undefined;
 
 			// use the same scope unless this is an "indirect" call
@@ -4024,30 +4061,24 @@ function ecma51(env) {
 					if (strictScope) {
 						thisArg = currentGlobal ? globalObject : undefinedClass;
 					} else {
-						thisArg = env.current.getThisBinding() || globalObject;
+						thisArg = env.getThisBinding() || globalObject;
 					}
 
 					scope = env.createScope(thisArg);
 				} else {
-					scope = env.setScope(env.current.parent);
+					scope = env.setScope(env.current.scope.parent);
 				}
 			} else {
-				scope = env.setScope(env.globalScope);
+				scope = env.setScope(env.globalScope.scope);
 				if (strictCode) {
 					scope = env.createScope(globalObject);
 				}
 			}
 
-			var executionResult = undefined;
+			var executionResult = scope.use(function () {
+				return _this.create(ast).execute();
+			});
 
-			try {
-				executionResult = this.create(ast).execute();
-			} catch (err) {
-				scope.exitScope();
-				throw err;
-			}
-
-			scope.exitScope();
 			return executionResult && executionResult.result ? executionResult.result.getValue() : undefinedClass;
 		}, 1, "eval");
 
@@ -4056,8 +4087,8 @@ function ecma51(env) {
 
 	objectFactory.init();
 
-	if (config.exclude && config.exclude.length > 0) {
-		config.exclude.forEach(function (name) {
+	if (options.exclude && options.exclude.length > 0) {
+		options.exclude.forEach(function (name) {
 			var segments = name.split(".");
 			var parent = globalObject;
 
@@ -4077,7 +4108,7 @@ function ecma51(env) {
 
 module.exports = exports["default"];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../env/reference":184,"../types/object-factory":197,"../types/primitive-type":199,"../utils/contracts":206,"../utils/convert":207,"./array-api":166,"./boolean-api":167,"./console-api":168,"./date-api":169,"./error-api":170,"./function-api":171,"./json-api":173,"./math-api":174,"./number-api":175,"./object-api":176,"./regex-api":177,"./string-api":178,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],173:[function(require,module,exports){
+},{"../env/reference":184,"../types/object-factory":202,"../types/primitive-type":204,"../utils/contracts":210,"../utils/convert":211,"./array-api":166,"./boolean-api":167,"./console-api":168,"./date-api":169,"./error-api":170,"./function-api":171,"./json-api":173,"./math-api":174,"./number-api":175,"./object-api":176,"./regex-api":177,"./string-api":178,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],173:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4133,7 +4164,7 @@ function serializeObject(env, stack, obj, replacer, gap, depth) {
 
 	for (var prop in obj.properties) {
 		if (obj.properties[prop].enumerable) {
-			value = replacer(obj, prop, obj.getProperty(prop).getValue());
+			value = replacer(obj, prop, obj.getValue(prop));
 			if (!contracts.isNullOrUndefined(value)) {
 				values.push(serializePrimitive(prop) + colon + serialize(env, stack, value, replacer, gap, depth));
 			}
@@ -4150,7 +4181,7 @@ function serializeArray(env, stack, arr, replacer, gap, depth) {
 	for (var i = 0; i < length; i++) {
 		var value = undefined;
 		if (arr.hasProperty(i)) {
-			value = replacer(arr, String(i), arr.getProperty(i).getValue());
+			value = replacer(arr, String(i), arr.getValue(i));
 		}
 
 		if (contracts.isNullOrUndefined(value)) {
@@ -4270,7 +4301,8 @@ function getSpacer(env, spacer) {
 	return "";
 }
 
-function deserialize(objectFactory, value, reviver) {
+function deserialize(env, value, reviver) {
+	var objectFactory = env.objectFactory;
 	var valueType = contracts.getType(value);
 	switch (valueType) {
 		// these are the only types supported by JSON.parse - sad face...
@@ -4284,9 +4316,9 @@ function deserialize(objectFactory, value, reviver) {
 		case "Array":
 			var arr = objectFactory.create("Array");
 			value.forEach(function (element, index) {
-				var elementValue = reviver(arr, String(index), deserialize(objectFactory, element, reviver));
+				var elementValue = reviver(arr, String(index), deserialize(env, element, reviver));
 				if (!contracts.isUndefined(elementValue)) {
-					arr.defineOwnProperty(index, { value: deserialize(objectFactory, element), configurable: true, enumerable: true, writable: true });
+					arr.defineOwnProperty(index, { value: deserialize(env, element), configurable: true, enumerable: true, writable: true }, true, env);
 				}
 			});
 
@@ -4298,9 +4330,9 @@ function deserialize(objectFactory, value, reviver) {
 
 			for (var prop in value) {
 				if (value.hasOwnProperty(prop)) {
-					propValue = reviver(obj, prop, deserialize(objectFactory, value[prop], reviver));
+					propValue = reviver(obj, prop, deserialize(env, value[prop], reviver));
 					if (!contracts.isUndefined(propValue)) {
-						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
+						obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true }, true, env);
 					}
 				}
 			}
@@ -4352,7 +4384,7 @@ function jsonApi(env) {
 
 		var stringValue = convert.toString(env, str);
 		var parsedObject = JSON.parse(stringValue);
-		var deserializedObject = deserialize(objectFactory, parsedObject, reviver);
+		var deserializedObject = deserialize(env, parsedObject, reviver);
 
 		return reviver(deserializedObject, "", deserializedObject) || undef;
 	}, 2, "JSON.parse"));
@@ -4361,7 +4393,7 @@ function jsonApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"../utils/func":208,"babel-runtime/helpers/interop-require-wildcard":19}],174:[function(require,module,exports){
+},{"../utils/contracts":210,"../utils/convert":211,"../utils/func":212,"babel-runtime/helpers/interop-require-wildcard":19}],174:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4397,7 +4429,7 @@ function mathApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],175:[function(require,module,exports){
+},{"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],175:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4432,7 +4464,7 @@ function numberApi(env) {
 		return objectFactory.create("Number", numberValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = numberClass.getProperty("prototype").getValue();
+	var proto = numberClass.getValue("prototype");
 	proto.className = "Number";
 	proto.value = 0;
 
@@ -4487,7 +4519,7 @@ function numberApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],176:[function(require,module,exports){
+},{"../utils/contracts":210,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],176:[function(require,module,exports){
 "use strict";
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
@@ -4547,12 +4579,12 @@ function defineProperty(env, obj, name, descriptor) {
 
 			["writable", "enumerable", "configurable"].forEach(function (prop) {
 				if (descriptor.hasProperty(prop)) {
-					var attrValue = descriptor.getProperty(prop).getValue();
+					var attrValue = descriptor.getValue(prop);
 					options[prop] = convert.toBoolean(attrValue);
 				}
 			});
 
-			var currentScope = env.current;
+			var currentScope = env.current.scope;
 
 			// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 			if (hasGetter) {
@@ -4570,14 +4602,10 @@ function defineProperty(env, obj, name, descriptor) {
 							var scope = env.setScope(currentScope);
 							var thisArg = getter.isStrict() ? this : convert.toObject(env, this);
 
-							try {
+							return scope.use(function () {
 								var getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
-								scope.exitScope();
 								return getResult && getResult.exit ? getResult.result.getValue() : undef;
-							} catch (err) {
-								scope.exitScope();
-								throw err;
-							}
+							});
 						};
 					}
 				})();
@@ -4595,24 +4623,22 @@ function defineProperty(env, obj, name, descriptor) {
 
 						options.set = setter;
 						options.setter = function () {
+							var _arguments = arguments;
+
 							var scope = env.setScope(currentScope);
 							var thisArg = setter.isStrict() ? this : convert.toObject(env, this);
 
-							try {
-								func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
-								scope.exitScope();
+							return scope.use(function () {
+								func.executeFunction(env, setter, setter.node.params, _arguments, thisArg, setter.node);
 								return undef;
-							} catch (err) {
-								scope.exitScope();
-								throw err;
-							}
+							});
 						};
 					}
 				})();
 			}
 
 			if (hasValue) {
-				options.value = descriptor.getProperty("value").getValue() || undef;
+				options.value = descriptor.getValue("value") || undef;
 			}
 		})();
 	}
@@ -4701,7 +4727,7 @@ function objectApi(env) {
 		if (descriptors) {
 			for (var prop in descriptors.properties) {
 				if (descriptors.properties[prop].enumerable) {
-					defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
+					defineProperty(env, obj, prop, descriptors.getValue(prop));
 				}
 			}
 		}
@@ -4722,7 +4748,7 @@ function objectApi(env) {
 
 		for (var prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
-				defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
+				defineProperty(env, obj, prop, descriptors.getValue(prop));
 			}
 		}
 
@@ -4738,15 +4764,15 @@ function objectApi(env) {
 			var descriptor = obj.getProperty(prop);
 
 			var result = objectFactory.createObject();
-			result.putValue("configurable", objectFactory.createPrimitive(descriptor.configurable), false);
-			result.putValue("enumerable", objectFactory.createPrimitive(descriptor.enumerable), false);
+			result.putValue("configurable", objectFactory.createPrimitive(descriptor.configurable), false, env);
+			result.putValue("enumerable", objectFactory.createPrimitive(descriptor.enumerable), false, env);
 
 			if (descriptor.dataProperty) {
-				result.putValue("value", descriptor.value, false);
-				result.putValue("writable", objectFactory.createPrimitive(descriptor.writable), false);
+				result.putValue("value", descriptor.value, false, env);
+				result.putValue("writable", objectFactory.createPrimitive(descriptor.writable), false, env);
 			} else {
-				result.putValue("get", descriptor.get || undef, false);
-				result.putValue("set", descriptor.set || undef, false);
+				result.putValue("get", descriptor.get || undef, false, env);
+				result.putValue("set", descriptor.set || undef, false, env);
 			}
 
 			return result;
@@ -4776,7 +4802,7 @@ function objectApi(env) {
 
 		var arr = objectFactory.create("Array");
 		obj.getOwnPropertyNames().forEach(function (name, index) {
-			arr.putValue(index, objectFactory.createPrimitive(name));
+			arr.putValue(index, objectFactory.createPrimitive(name), true, env);
 		});
 
 		return arr;
@@ -4786,7 +4812,7 @@ function objectApi(env) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
 
 		var objProto = obj.getPrototype();
-		return objProto || env.global.getProperty("null").getValue();
+		return objProto || env.global.getValue("null");
 	}, 1, "Object.getPrototypeOf"));
 
 	objectClass.define("freeze", objectFactory.createBuiltInFunction(function (obj) {
@@ -4853,7 +4879,7 @@ function objectApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../types/object-type":198,"../utils/contracts":206,"../utils/convert":207,"../utils/func":208,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],177:[function(require,module,exports){
+},{"../types/object-type":203,"../utils/contracts":210,"../utils/convert":211,"../utils/func":212,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],177:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4890,15 +4916,15 @@ function regexApi(env) {
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = regexClass.getProperty("prototype").getValue();
+	var proto = regexClass.getValue("prototype");
 	proto.className = "RegExp";
 
 	proto.define("test", objectFactory.createBuiltInFunction(function (str) {
 		var stringValue = convert.toString(env, str);
 
-		this.node.source.lastIndex = convert.toInt32(env, this.node.getProperty("lastIndex").getValue());
+		this.node.source.lastIndex = convert.toInt32(env, this.node.getValue("lastIndex"));
 		var testValue = this.node.source.test(stringValue);
-		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
+		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex), true, env);
 
 		return objectFactory.createPrimitive(testValue);
 	}, 1, "RegExp.prototype.test"));
@@ -4907,27 +4933,27 @@ function regexApi(env) {
 		var stringValue = convert.toString(env, str);
 
 		// update underlying regex in case the index was manually updated
-		this.node.source.lastIndex = convert.toInt32(env, this.node.getProperty("lastIndex").getValue());
+		this.node.source.lastIndex = convert.toInt32(env, this.node.getValue("lastIndex"));
 
 		// get match from underlying regex
 		var match = this.node.source.exec(stringValue);
 
 		// update the last index from the underlying regex
-		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex));
+		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex), true, env);
 
 		if (match) {
 			var arr = objectFactory.create("Array");
 			for (var i = 0, ln = match.length; i < ln; i++) {
-				arr.putValue(i, objectFactory.createPrimitive(match[i]));
+				arr.putValue(i, objectFactory.createPrimitive(match[i]), true, env);
 			}
 
 			// extra properties are added to the array
-			arr.putValue("index", objectFactory.createPrimitive(match.index), false, this);
-			arr.putValue("input", objectFactory.createPrimitive(match.input), false, this);
+			arr.putValue("index", objectFactory.createPrimitive(match.index), false, env);
+			arr.putValue("input", objectFactory.createPrimitive(match.input), false, env);
 			return arr;
 		}
 
-		return this.env.global.getProperty("null").getValue();
+		return this.env.global.getValue("null");
 	}, 1, "RegExp.prototype.exec"));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
@@ -4945,7 +4971,7 @@ function regexApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19}],178:[function(require,module,exports){
+},{"../utils/contracts":210,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19}],178:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -4986,7 +5012,7 @@ function stringApi(env) {
 		return objectFactory.createPrimitive(stringValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	var proto = stringClass.getProperty("prototype").getValue();
+	var proto = stringClass.getValue("prototype");
 
 	// prototype can be coerced into an empty string
 	proto.value = "";
@@ -5057,8 +5083,6 @@ function stringApi(env) {
 	}, 2, "String.prototype.slice"));
 
 	proto.define("split", objectFactory.createBuiltInFunction(function (separator, limit) {
-		var _this = this;
-
 		var stringValue = convert.toString(env, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
@@ -5066,23 +5090,19 @@ function stringApi(env) {
 
 		var arr = objectFactory.create("Array");
 		if (contracts.isUndefined(separator)) {
-			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, this);
+			arr.putValue(0, objectFactory.createPrimitive(stringValue), false, env);
 		} else {
-			(function () {
-				var separatorValue = undefined;
-				if (separator.className === "RegExp") {
-					separatorValue = separator.source;
-				} else {
-					separatorValue = convert.toString(env, separator);
-				}
+			var separatorValue = undefined;
+			if (separator.className === "RegExp") {
+				separatorValue = separator.source;
+			} else {
+				separatorValue = convert.toString(env, separator);
+			}
 
-				var result = stringValue.split(separatorValue, limitValue);
-				var context = _this;
-
-				result.forEach(function (value, index) {
-					arr.putValue(index, objectFactory.createPrimitive(value), false, context);
-				});
-			})();
+			var result = stringValue.split(separatorValue, limitValue);
+			result.forEach(function (value, index) {
+				arr.putValue(index, objectFactory.createPrimitive(value), false, env);
+			});
 		}
 
 		return arr;
@@ -5132,24 +5152,24 @@ function stringApi(env) {
 
 		var match = stringValue.match(actualRegex);
 		if (match) {
-			var _ret3 = (function () {
+			var _ret2 = (function () {
 				var matches = objectFactory.create("Array");
 
 				match.forEach(function (value, index) {
-					matches.putValue(index, objectFactory.createPrimitive(value), false);
+					matches.putValue(index, objectFactory.createPrimitive(value), false, env);
 				});
 
-				matches.putValue("index", objectFactory.createPrimitive(match.index), false);
-				matches.putValue("input", objectFactory.createPrimitive(match.input), false);
+				matches.putValue("index", objectFactory.createPrimitive(match.index), false, env);
+				matches.putValue("input", objectFactory.createPrimitive(match.input), false, env);
 				return {
 					v: matches
 				};
 			})();
 
-			if (typeof _ret3 === "object") return _ret3.v;
+			if (typeof _ret2 === "object") return _ret2.v;
 		}
 
-		return globalObject.getProperty("null").getValue();
+		return globalObject.getValue("null");
 	}, 1, "String.prototype.match"));
 
 	proto.define("trim", objectFactory.createBuiltInFunction(function () {
@@ -5173,7 +5193,7 @@ function stringApi(env) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"../utils/func":208,"babel-runtime/helpers/interop-require-wildcard":19}],179:[function(require,module,exports){
+},{"../utils/contracts":210,"../utils/convert":211,"../utils/func":212,"babel-runtime/helpers/interop-require-wildcard":19}],179:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5201,7 +5221,7 @@ var DeclarativeEnvironment = (function () {
 		_classCallCheck(this, DeclarativeEnvironment);
 
 		this.properties = _Object$create(null);
-		this.parent = parent;
+		this.parent = parent && parent.scope;
 		this.strict = parent.strict;
 		this.thisBinding = thisArg;
 		this.env = env;
@@ -5296,7 +5316,8 @@ var DeclarativeEnvironment = (function () {
 
 exports["default"] = DeclarativeEnvironment;
 module.exports = exports["default"];
-},{"../types/property-descriptor":200,"./reference":184,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],180:[function(require,module,exports){
+},{"../types/property-descriptor":205,"./reference":184,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],180:[function(require,module,exports){
+// todo: switch to estree-walker
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5392,8 +5413,6 @@ var _createClass = require("babel-runtime/helpers/create-class")["default"];
 
 var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
 
-var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
-
 var _Object$assign = require("babel-runtime/core-js/object/assign")["default"];
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
@@ -5432,48 +5451,14 @@ var _utilsContracts = require("../utils/contracts");
 
 var contracts = _interopRequireWildcard(_utilsContracts);
 
-var _hoister = require("./hoister");
+var _scope = require("./scope");
 
-var _estreeWalker = require("../estree-walker");
-
-var _estreeWalker2 = _interopRequireDefault(_estreeWalker);
-
-var _syntaxRules = require("../syntax-rules");
-
-var _syntaxRules2 = _interopRequireDefault(_syntaxRules);
+var _scope2 = _interopRequireDefault(_scope);
 
 var defaultOptions = {
-	allowDebugger: false
+	allowDebugger: false,
+	useStrict: false
 };
-
-function validateSyntax(root) {
-	var _iteratorNormalCompletion = true;
-	var _didIteratorError = false;
-	var _iteratorError = undefined;
-
-	try {
-		for (var _iterator = _getIterator(_estreeWalker2["default"].create(root)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-			var node = _step.value;
-
-			if (node.type in _syntaxRules2["default"]) {
-				_syntaxRules2["default"][node.type](node, true);
-			}
-		}
-	} catch (err) {
-		_didIteratorError = true;
-		_iteratorError = err;
-	} finally {
-		try {
-			if (!_iteratorNormalCompletion && _iterator["return"]) {
-				_iterator["return"]();
-			}
-		} finally {
-			if (_didIteratorError) {
-				throw _iteratorError;
-			}
-		}
-	}
-}
 
 var Environment = (function () {
 	function Environment() {
@@ -5489,8 +5474,8 @@ var Environment = (function () {
 			this.current = null;
 			this.globalScope = null;
 
-			options = _Object$assign({}, defaultOptions, options);
-			(0, _ecma512["default"])(this, options);
+			this.options = _Object$assign(this.options || {}, defaultOptions, options);
+			(0, _ecma512["default"])(this);
 
 			// todo: improve this
 			this.ops = _Object$assign(_utilsComparers2["default"], options.comparers);
@@ -5504,7 +5489,7 @@ var Environment = (function () {
 	}, {
 		key: "getReference",
 		value: function getReference(name) {
-			var scope = this.current;
+			var scope = this.current && this.current.scope;
 			while (scope) {
 				if (scope.hasOwnProperty(name)) {
 					return scope.getReference(name, true);
@@ -5523,29 +5508,32 @@ var Environment = (function () {
 	}, {
 		key: "putValue",
 		value: function putValue(name, value, strict) {
-			this.current.putValue(name, value, strict);
+			this.current.scope.putValue(name, value, strict);
 		}
 	}, {
 		key: "hasProperty",
 		value: function hasProperty(name) {
-			return this.current.hasProperty(name);
+			return this.current.scope.hasProperty(name);
 		}
 	}, {
 		key: "deleteVariable",
 		value: function deleteVariable(name) {
-			this.current.deleteVariable(name);
+			this.current.scope.deleteVariable(name);
 		}
 	}, {
 		key: "createVariable",
 		value: function createVariable(name, immutable) {
 			contracts.assertIsValidIdentifier(name, this.isStrict());
-			return this.current.createVariable(name, !immutable);
+			return this.current.scope.createVariable(name, !immutable);
 		}
 	}, {
 		key: "isStrict",
 		value: function isStrict() {
-			var scope = this.current;
+			if (this.options.useStrict) {
+				return true;
+			}
 
+			var scope = this.current && this.current.scope;
 			while (scope) {
 				if (scope.strict) {
 					return true;
@@ -5559,7 +5547,7 @@ var Environment = (function () {
 	}, {
 		key: "getThisBinding",
 		value: function getThisBinding() {
-			var thisArg = this.current.getThisBinding();
+			var thisArg = this.current.scope.getThisBinding();
 			if (thisArg) {
 				return thisArg;
 			}
@@ -5578,78 +5566,17 @@ var Environment = (function () {
 	}, {
 		key: "createScope",
 		value: function createScope(thisArg) {
-			var env = new _declarativeEnvironment2["default"](this.current, thisArg, this);
-			return this.setScope(env);
+			return this.setScope(new _declarativeEnvironment2["default"](this.current, thisArg, this));
 		}
 	}, {
 		key: "createObjectScope",
 		value: function createObjectScope(obj, thisArg) {
-			var env = new _objectEnvironment2["default"](this.current, obj, thisArg, this);
-			return this.setScope(env);
-		}
-	}, {
-		key: "initScope",
-		value: function initScope(node) {
-			var _this = this;
-
-			var undef = this.global.getValue("undefined");
-			this.current.strict = contracts.isStrictNode(node.body);
-
-			var strict = this.current.strict || this.isStrict();
-			if (strict && node.type === "Program") {
-				validateSyntax(node);
-			}
-
-			(0, _hoister.visit)(node, function (decl) {
-				var name = decl.name || decl.id.name;
-				contracts.assertIsValidParameterName(name, _this.isStrict());
-
-				var value = undef;
-				if (decl.type === "FunctionDeclaration") {
-					// functions can be used before they are defined
-					value = _this.objectFactory.createFunction(decl, null, null, strict || contracts.isStrictNode(decl.body.body));
-					value.bindScope(_this.current);
-				} else if (_this.current.hasProperty(name)) {
-					return;
-				}
-
-				var newVar = _this.createVariable(name, true);
-				newVar.setValue(value);
-			});
+			return this.setScope(new _objectEnvironment2["default"](this.current, obj, thisArg, this));
 		}
 	}, {
 		key: "setScope",
 		value: function setScope(scope) {
-			this.globalScope = this.globalScope || scope;
-
-			var env = this;
-			var priorScope = this.current || this.globalScope;
-			this.current = scope;
-
-			return {
-				init: function init(node) {
-					if (!node) {
-						return;
-					}
-
-					env.initScope(node);
-				},
-
-				use: function use(func) {
-					try {
-						var result = func();
-						env.setScope(priorScope);
-						return result;
-					} catch (err) {
-						env.setScope(priorScope);
-						throw err;
-					}
-				},
-
-				exitScope: function exitScope() {
-					env.setScope(priorScope);
-				}
-			};
+			return this.current = new _scope2["default"](this, scope);
 		}
 	}]);
 
@@ -5658,7 +5585,7 @@ var Environment = (function () {
 
 exports["default"] = Environment;
 module.exports = exports["default"];
-},{"../ecma-5.1":172,"../estree-walker":185,"../execution-context":186,"../syntax-rules":190,"../utils/comparers":205,"../utils/contracts":206,"./declarative-environment":179,"./hoister":180,"./object-environment":182,"./reference":184,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/assign":4,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],182:[function(require,module,exports){
+},{"../ecma-5.1":172,"../execution-context":187,"../utils/comparers":209,"../utils/contracts":210,"./declarative-environment":179,"./object-environment":182,"./reference":184,"./scope":185,"babel-runtime/core-js/object/assign":4,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],182:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5679,7 +5606,7 @@ var ObjectEnvironment = (function () {
 	function ObjectEnvironment(parent, obj, thisArg, env) {
 		_classCallCheck(this, ObjectEnvironment);
 
-		this.parent = parent;
+		this.parent = parent && parent.scope;
 		this.strict = parent && parent.strict;
 		this.object = obj;
 		this.thisBinding = thisArg || obj;
@@ -5749,7 +5676,7 @@ var ObjectEnvironment = (function () {
 				return undefined;
 			}
 
-			return this.object.getProperty(name).getValue();
+			return this.object.getValue(name);
 		}
 	}, {
 		key: "getThisBinding",
@@ -5830,7 +5757,7 @@ var PropertyReference = (function (_Reference) {
 
 exports["default"] = PropertyReference;
 module.exports = exports["default"];
-},{"../types/primitive-type":199,"./reference":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],184:[function(require,module,exports){
+},{"../types/primitive-type":204,"./reference":184,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],184:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -5904,7 +5831,183 @@ var Reference = (function () {
 
 exports["default"] = Reference;
 module.exports = exports["default"];
-},{"../utils/contracts":206,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],185:[function(require,module,exports){
+},{"../utils/contracts":210,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],185:[function(require,module,exports){
+"use strict";
+
+var _createClass = require("babel-runtime/helpers/create-class")["default"];
+
+var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+
+var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
+
+var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
+
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _estreeWalker = require("../estree-walker");
+
+var _estreeWalker2 = _interopRequireDefault(_estreeWalker);
+
+var _hoister = require("./hoister");
+
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
+var _syntaxRules = require("../syntax-rules");
+
+var _syntaxRules2 = _interopRequireDefault(_syntaxRules);
+
+function validateSyntax(root) {
+	var _iteratorNormalCompletion = true;
+	var _didIteratorError = false;
+	var _iteratorError = undefined;
+
+	try {
+		for (var _iterator = _getIterator(_estreeWalker2["default"].create(root)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			var node = _step.value;
+
+			if (node.type in _syntaxRules2["default"]) {
+				_syntaxRules2["default"][node.type](node, true);
+			}
+		}
+	} catch (err) {
+		_didIteratorError = true;
+		_iteratorError = err;
+	} finally {
+		try {
+			if (!_iteratorNormalCompletion && _iterator["return"]) {
+				_iterator["return"]();
+			}
+		} finally {
+			if (_didIteratorError) {
+				throw _iteratorError;
+			}
+		}
+	}
+}
+
+var Scope = (function () {
+	function Scope(env, scope) {
+		_classCallCheck(this, Scope);
+
+		env.globalScope = env.globalScope || this;
+
+		this.scope = scope;
+		this.env = env;
+		this.priorScope = (env.current || env.globalScope).scope;
+	}
+
+	_createClass(Scope, [{
+		key: "init",
+		value: function init(node) {
+			var _this = this;
+
+			if (!node) {
+				return;
+			}
+
+			var env = this.env;
+			var undef = env.global.getValue("undefined");
+			this.scope.strict = contracts.isStrictNode(node.body);
+
+			var strict = this.scope.strict || env.isStrict();
+			if (strict && node.type === "Program") {
+				validateSyntax(node);
+			}
+
+			(0, _hoister.visit)(node, function (decl) {
+				var name = decl.name || decl.id.name;
+				contracts.assertIsValidParameterName(name, strict);
+
+				var value = undef;
+				if (decl.type === "FunctionDeclaration") {
+					// functions can be used before they are defined
+					value = env.objectFactory.createFunction(decl, null, null, strict || contracts.isStrictNode(decl.body.body));
+					value.bindScope(_this);
+				} else if (_this.scope.hasProperty(name)) {
+					return;
+				}
+
+				var newVar = env.createVariable(name, true);
+				newVar.setValue(value);
+			});
+		}
+	}, {
+		key: "loadArgs",
+		value: function loadArgs(params, args, callee) {
+			var env = this.env;
+			var scope = this.scope;
+
+			var undef = env.global.getValue("undefined");
+			var strict = env.isStrict() || callee.isStrict();
+
+			var argumentList = env.objectFactory.createArguments(args, callee, strict);
+			scope.createVariable("arguments");
+			scope.putValue("arguments", argumentList);
+
+			params.forEach(function (param, index) {
+				contracts.assertIsValidParameterName(param.name, strict);
+
+				if (!callee.isStrict() && !scope.hasProperty(param.name)) {
+					var descriptor = scope.createVariable(param.name);
+					if (args.length > index) {
+						argumentList.mapProperty(index, descriptor);
+					}
+				}
+
+				scope.putValue(param.name, args[index] || undef);
+			});
+
+			// just set value if additional, unnamed arguments are passed in
+			var i = callee.isStrict() ? 0 : params.length;
+			var length = args.length;
+
+			for (; i < length; i++) {
+				argumentList.defineOwnProperty(i, {
+					value: args[i],
+					configurable: true,
+					enumerable: true,
+					writable: true
+				});
+			}
+
+			argumentList.defineOwnProperty("length", {
+				value: env.objectFactory.createPrimitive(length),
+				configurable: true,
+				enumerable: false,
+				writable: true
+			});
+		}
+	}, {
+		key: "use",
+		value: function use(inner) {
+			try {
+				var result = inner();
+				this.exit();
+				return result;
+			} catch (err) {
+				this.exit();
+				throw err;
+			}
+		}
+	}, {
+		key: "exit",
+		value: function exit() {
+			this.env.setScope(this.priorScope);
+		}
+	}]);
+
+	return Scope;
+})();
+
+exports["default"] = Scope;
+module.exports = exports["default"];
+},{"../estree-walker":186,"../syntax-rules":195,"../utils/contracts":210,"./hoister":180,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],186:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -6306,7 +6409,7 @@ module.exports = exports["default"];
 // right should be evaluated first
 
 // do nothing else
-},{"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/symbol/iterator":12,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/regenerator":20}],186:[function(require,module,exports){
+},{"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/symbol/iterator":12,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/regenerator":20}],187:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -6401,7 +6504,7 @@ ExecutionContext.prototype = {
 	}
 };
 module.exports = exports["default"];
-},{"./execution-result":187,"./utils/async":204,"./visitors":225,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],187:[function(require,module,exports){
+},{"./execution-result":188,"./utils/async":208,"./visitors":229,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],188:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -6469,7 +6572,365 @@ var ExecutionResult = (function () {
 
 exports["default"] = ExecutionResult;
 module.exports = exports["default"];
-},{"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14}],188:[function(require,module,exports){
+},{"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14}],189:[function(require,module,exports){
+"use strict";
+
+var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+var marked0$0 = [ascIterator, descIterator, yieldIndex].map(_regeneratorRuntime.mark);
+
+function ascIterator(source, lo, hi) {
+	var index;
+	return _regeneratorRuntime.wrap(function ascIterator$(context$1$0) {
+		while (1) switch (context$1$0.prev = context$1$0.next) {
+			case 0:
+				index = lo;
+
+			case 1:
+				if (!(index < hi)) {
+					context$1$0.next = 6;
+					break;
+				}
+
+				return context$1$0.delegateYield(yieldIndex(source, index), "t0", 3);
+
+			case 3:
+				index++;
+				context$1$0.next = 1;
+				break;
+
+			case 6:
+			case "end":
+				return context$1$0.stop();
+		}
+	}, marked0$0[0], this);
+}
+
+function descIterator(source, lo, hi) {
+	var index;
+	return _regeneratorRuntime.wrap(function descIterator$(context$1$0) {
+		while (1) switch (context$1$0.prev = context$1$0.next) {
+			case 0:
+				index = hi;
+
+			case 1:
+				if (!(index >= lo)) {
+					context$1$0.next = 6;
+					break;
+				}
+
+				return context$1$0.delegateYield(yieldIndex(source, index), "t0", 3);
+
+			case 3:
+				index--;
+				context$1$0.next = 1;
+				break;
+
+			case 6:
+			case "end":
+				return context$1$0.stop();
+		}
+	}, marked0$0[1], this);
+}
+
+function yieldIndex(source, index) {
+	var prop, value;
+	return _regeneratorRuntime.wrap(function yieldIndex$(context$1$0) {
+		while (1) switch (context$1$0.prev = context$1$0.next) {
+			case 0:
+				prop = source.getProperty(index);
+
+				if (!prop) {
+					context$1$0.next = 5;
+					break;
+				}
+
+				value = prop.getValue();
+				context$1$0.next = 5;
+				return { value: value, index: index };
+
+			case 5:
+			case "end":
+				return context$1$0.stop();
+		}
+	}, marked0$0[2], this);
+}
+
+var ArrayIterator = {
+	create: function create(obj, lo, hi, desc) {
+		return (desc ? descIterator : ascIterator)(obj, lo, hi);
+	}
+};
+
+exports["default"] = ArrayIterator;
+module.exports = exports["default"];
+},{"babel-runtime/regenerator":20}],190:[function(require,module,exports){
+"use strict";
+
+var _Object$keys = require("babel-runtime/core-js/object/keys")["default"];
+
+var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _stringIterator = require("./string-iterator");
+
+var _stringIterator2 = _interopRequireDefault(_stringIterator);
+
+var _sparseIterator = require("./sparse-iterator");
+
+var _sparseIterator2 = _interopRequireDefault(_sparseIterator);
+
+var _arrayIterator = require("./array-iterator");
+
+var _arrayIterator2 = _interopRequireDefault(_arrayIterator);
+
+require("../polyfills");
+
+var SPARE_ARRAY_DENSITY = 0.8;
+
+function arrayIsSparse(arr, length) {
+	var ownPropertyCount = _Object$keys(arr.properties).length;
+
+	// this is just to roughly estimate how dense the array is
+	var density = (ownPropertyCount - 1) / length;
+	return density < SPARE_ARRAY_DENSITY;
+}
+
+var iterate = {
+	forward: function forward(env, obj, lo, hi) {
+		// string will never be dense
+		if (obj.className === "String") {
+			return _stringIterator2["default"].create(env.objectFactory, obj, lo);
+		}
+
+		if (arrayIsSparse(obj, hi)) {
+			return _sparseIterator2["default"].create(obj, lo, hi - 1);
+		}
+
+		return _arrayIterator2["default"].create(obj, lo, hi);
+	},
+
+	reverse: function reverse(env, obj, hi) {
+		var lo = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
+
+		if (obj.className === "String") {
+			return _stringIterator2["default"].create(env.objectFactory, obj, hi, true);
+		}
+
+		if (arrayIsSparse(obj, hi)) {
+			return _sparseIterator2["default"].create(obj, lo, hi, true);
+		}
+
+		return _arrayIterator2["default"].create(obj, lo, hi, true);
+	}
+};
+
+exports["default"] = iterate;
+module.exports = exports["default"];
+},{"../polyfills":194,"./array-iterator":189,"./sparse-iterator":191,"./string-iterator":192,"babel-runtime/core-js/object/keys":8,"babel-runtime/helpers/interop-require-default":18}],191:[function(require,module,exports){
+"use strict";
+
+var _createClass = require("babel-runtime/helpers/create-class")["default"];
+
+var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+
+var _Symbol$iterator = require("babel-runtime/core-js/symbol/iterator")["default"];
+
+var _Object$create = require("babel-runtime/core-js/object/create")["default"];
+
+var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _utilsContracts = require("../utils/contracts");
+
+var contracts = _interopRequireWildcard(_utilsContracts);
+
+require("../polyfills");
+
+var SparseIterator = (function () {
+	function SparseIterator(obj, start, end, desc) {
+		_classCallCheck(this, SparseIterator);
+
+		this.object = obj;
+		this.start = start;
+		this.end = end;
+		this.asc = !desc;
+		this.version = 0;
+	}
+
+	_createClass(SparseIterator, [{
+		key: _Symbol$iterator,
+		value: function value() {
+			return this;
+		}
+	}, {
+		key: "reset",
+		value: function reset() {
+			this.version = 0;
+			this.prototypes = [];
+			this.props = _Object$create(null);
+			this.keys = [];
+
+			var current = this.object;
+
+			while (current) {
+				this.prototypes.push(current);
+				this.version += current.version;
+
+				for (var _name in current.properties) {
+					if (!(_name in this.props) && contracts.isInteger(_name)) {
+						var index = Number(_name);
+
+						if (index >= this.start && index <= this.end) {
+							this.props[_name] = current.getOwnProperty(_name);
+							this.keys.push(index);
+						}
+					}
+				}
+
+				current = current.getPrototype();
+			}
+
+			this.keys.sort();
+		}
+	}, {
+		key: "next",
+		value: function next() {
+			if (!this.version || this.shouldReset()) {
+				this.reset();
+			}
+
+			if (this.keys.length > 0) {
+				var index = this.position = this.keys[this.asc ? "shift" : "pop"]();
+				var value = this.props[index].getValue();
+
+				return {
+					value: { value: value, index: index },
+					done: false
+				};
+			}
+
+			return {
+				done: true
+			};
+		}
+	}, {
+		key: "shouldReset",
+		value: function shouldReset() {
+			var currentVersion = this.prototypes.reduce(function (v, o) {
+				return o.version + v;
+			}, 0);
+			if (currentVersion !== this.version) {
+				if (this.asc) {
+					this.start = this.position + 1;
+				} else {
+					this.end = this.position - 1;
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+	}], [{
+		key: "create",
+		value: function create(arr, start, end, desc) {
+			return new SparseIterator(arr, start, end, desc);
+		}
+	}]);
+
+	return SparseIterator;
+})();
+
+exports["default"] = SparseIterator;
+module.exports = exports["default"];
+},{"../polyfills":194,"../utils/contracts":210,"babel-runtime/core-js/object/create":5,"babel-runtime/core-js/symbol/iterator":12,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],192:[function(require,module,exports){
+"use strict";
+
+var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+var marked0$0 = [ascIterator, descIterator].map(_regeneratorRuntime.mark);
+function ascIterator(factory, stringValue, start) {
+	var index, _length, value;
+
+	return _regeneratorRuntime.wrap(function ascIterator$(context$1$0) {
+		while (1) switch (context$1$0.prev = context$1$0.next) {
+			case 0:
+				index = start, _length = stringValue.length;
+
+			case 1:
+				if (!(index < _length)) {
+					context$1$0.next = 8;
+					break;
+				}
+
+				value = factory.createPrimitive(stringValue[index]);
+				context$1$0.next = 5;
+				return { value: value, index: index };
+
+			case 5:
+				index++;
+				context$1$0.next = 1;
+				break;
+
+			case 8:
+			case "end":
+				return context$1$0.stop();
+		}
+	}, marked0$0[0], this);
+}
+
+function descIterator(factory, stringValue, start) {
+	var index, value;
+	return _regeneratorRuntime.wrap(function descIterator$(context$1$0) {
+		while (1) switch (context$1$0.prev = context$1$0.next) {
+			case 0:
+				index = start;
+
+			case 1:
+				if (!(index >= 0)) {
+					context$1$0.next = 8;
+					break;
+				}
+
+				value = factory.createPrimitive(stringValue[index]);
+				context$1$0.next = 5;
+				return { value: value, index: index };
+
+			case 5:
+				index--;
+				context$1$0.next = 1;
+				break;
+
+			case 8:
+			case "end":
+				return context$1$0.stop();
+		}
+	}, marked0$0[1], this);
+}
+
+var StringIterator = {
+	create: function create(objectFactory, value, start, desc) {
+		var stringValue = value.unwrap();
+		return (desc ? descIterator : ascIterator)(objectFactory, stringValue, start);
+	}
+};
+
+exports["default"] = StringIterator;
+module.exports = exports["default"];
+},{"babel-runtime/regenerator":20}],193:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6491,7 +6952,7 @@ exports["default"] = {
 	}
 };
 module.exports = exports["default"];
-},{}],189:[function(require,module,exports){
+},{}],194:[function(require,module,exports){
 "use strict";
 
 require("core-js/fn/string/repeat");
@@ -6501,7 +6962,7 @@ require("core-js/fn/math/sign");
 require("core-js/es6/promise");
 
 require("core-js/es6/symbol");
-},{"core-js/es6/promise":23,"core-js/es6/symbol":24,"core-js/fn/math/sign":25,"core-js/fn/string/repeat":26}],190:[function(require,module,exports){
+},{"core-js/es6/promise":23,"core-js/es6/symbol":24,"core-js/fn/math/sign":25,"core-js/fn/string/repeat":26}],195:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -6571,7 +7032,7 @@ var rules = {
 
 exports["default"] = rules;
 module.exports = exports["default"];
-},{"./utils/contracts":206,"babel-runtime/helpers/interop-require-wildcard":19}],191:[function(require,module,exports){
+},{"./utils/contracts":210,"babel-runtime/helpers/interop-require-wildcard":19}],196:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6621,7 +7082,7 @@ var ArgumentType = (function (_ObjectType) {
 				return ownProperty;
 			}
 
-			return _get(Object.getPrototypeOf(ArgumentType.prototype), "getProperty", this).apply(this, arguments);
+			return _get(Object.getPrototypeOf(ArgumentType.prototype), "getProperty", this).call(this, name);
 		}
 	}, {
 		key: "getOwnProperty",
@@ -6637,7 +7098,7 @@ var ArgumentType = (function (_ObjectType) {
 				return mappedProperty;
 			}
 
-			return _get(Object.getPrototypeOf(ArgumentType.prototype), "getOwnProperty", this).apply(this, arguments);
+			return _get(Object.getPrototypeOf(ArgumentType.prototype), "getOwnProperty", this).call(this, name);
 		}
 	}, {
 		key: "defineOwnProperty",
@@ -6676,7 +7137,7 @@ var ArgumentType = (function (_ObjectType) {
 
 exports["default"] = ArgumentType;
 module.exports = exports["default"];
-},{"./object-type":198,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],192:[function(require,module,exports){
+},{"./object-type":203,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],197:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6686,6 +7147,8 @@ var _inherits = require("babel-runtime/helpers/inherits")["default"];
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
 
 var _classCallCheck = require("babel-runtime/helpers/class-call-check")["default"];
+
+var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
 
 var _interopRequireDefault = require("babel-runtime/helpers/interop-require-default")["default"];
 
@@ -6707,8 +7170,9 @@ var _utilsContracts = require("../utils/contracts");
 
 var contracts = _interopRequireWildcard(_utilsContracts);
 
-// todo: this is hacky - remove this for passed in environment
-var localObjectFactory = undefined;
+var _iterators = require("../iterators");
+
+var _iterators2 = _interopRequireDefault(_iterators);
 
 function setIndex(env, arr, name, descriptor, throwOnError) {
 	var index = Number(name);
@@ -6725,7 +7189,7 @@ function setIndex(env, arr, name, descriptor, throwOnError) {
 	}
 
 	if (index >= lengthValue) {
-		var newLength = localObjectFactory.createPrimitive(index + 1);
+		var newLength = env.objectFactory.createPrimitive(index + 1);
 		arr.defineOwnProperty("length", { value: newLength }, false, env);
 	}
 
@@ -6738,7 +7202,7 @@ function setLength(env, arr, name, descriptor, throwOnError) {
 		throw new RangeError("Array length out of range");
 	}
 
-	descriptor.value = localObjectFactory.createPrimitive(newLengthValue);
+	descriptor.value = env.objectFactory.createPrimitive(newLengthValue);
 	var newLength = descriptor.value;
 	var currentLength = arr.getProperty("length").getValue();
 	contracts.assertIsValidArrayLength(newLength.value);
@@ -6767,12 +7231,36 @@ function setLength(env, arr, name, descriptor, throwOnError) {
 	}
 
 	var succeeded = true;
-	while (i > newLength.value) {
-		if (!arr.deleteProperty(--i, false)) {
-			newLength = localObjectFactory.createPrimitive(i + 1);
-			arr.defineOwnProperty("length", { value: newLength }, false);
-			succeeded = false;
-			break;
+
+	if (i > newLength.value) {
+		var _iteratorNormalCompletion = true;
+		var _didIteratorError = false;
+		var _iteratorError = undefined;
+
+		try {
+			for (var _iterator = _getIterator(_iterators2["default"].reverse(env, arr, i - 1, newLength.value)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+				var entry = _step.value;
+
+				if (!arr.deleteProperty(entry.index, false)) {
+					newLength = env.objectFactory.createPrimitive(entry.index + 1);
+					arr.defineOwnProperty("length", { value: newLength }, false, env);
+					succeeded = false;
+					break;
+				}
+			}
+		} catch (err) {
+			_didIteratorError = true;
+			_iteratorError = err;
+		} finally {
+			try {
+				if (!_iteratorNormalCompletion && _iterator["return"]) {
+					_iterator["return"]();
+				}
+			} finally {
+				if (_didIteratorError) {
+					throw _iteratorError;
+				}
+			}
 		}
 	}
 
@@ -6800,7 +7288,6 @@ var ArrayType = (function (_ObjectType) {
 	_createClass(ArrayType, [{
 		key: "init",
 		value: function init(objectFactory) {
-			localObjectFactory = objectFactory;
 			this.defineOwnProperty("length", { value: objectFactory.createPrimitive(0), configurable: false, enumerable: false, writable: true });
 		}
 	}, {
@@ -6848,7 +7335,7 @@ var ArrayType = (function (_ObjectType) {
 
 exports["default"] = ArrayType;
 module.exports = exports["default"];
-},{"../utils/contracts":206,"../utils/convert":207,"./object-type":198,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],193:[function(require,module,exports){
+},{"../iterators":190,"../utils/contracts":210,"../utils/convert":211,"./object-type":203,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],198:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6898,7 +7385,7 @@ var DateType = (function (_ObjectType) {
 
 exports["default"] = DateType;
 module.exports = exports["default"];
-},{"./object-type":198,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],194:[function(require,module,exports){
+},{"./object-type":203,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],199:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6933,7 +7420,7 @@ var ErrorType = (function (_ObjectType) {
 
 exports["default"] = ErrorType;
 module.exports = exports["default"];
-},{"./object-type":198,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],195:[function(require,module,exports){
+},{"./object-type":203,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],200:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -6976,7 +7463,7 @@ var FunctionType = (function (_ObjectType) {
 		this.native = false;
 		this.node = node;
 
-		this.parentScope = null;
+		this.boundScope = null;
 		this.boundThis = null;
 	}
 
@@ -7001,7 +7488,7 @@ var FunctionType = (function (_ObjectType) {
 			proto = proto || objectFactory.createObject();
 			this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
 
-			// set the contructor property as an instance of  itself
+			// set the contructor property as an instance of itself
 			proto.properties.constructor = new _propertyDescriptor2["default"](this, { configurable: true, enumerable: false, writable: true, value: this });
 		}
 	}, {
@@ -7018,7 +7505,7 @@ var FunctionType = (function (_ObjectType) {
 	}, {
 		key: "getProperty",
 		value: function getProperty(name) {
-			var prop = _get(Object.getPrototypeOf(FunctionType.prototype), "getProperty", this).apply(this, arguments);
+			var prop = _get(Object.getPrototypeOf(FunctionType.prototype), "getProperty", this).call(this, name);
 			if (!prop && name !== "prototype") {
 				// since a function instance is itself a function look at our own prototype
 				var proto = this.getProperty("prototype");
@@ -7035,7 +7522,7 @@ var FunctionType = (function (_ObjectType) {
 	}, {
 		key: "bindScope",
 		value: function bindScope(scope) {
-			this.parentScope = scope;
+			this.boundScope = scope;
 		}
 	}, {
 		key: "isStrict",
@@ -7054,31 +7541,36 @@ var FunctionType = (function (_ObjectType) {
 		key: "createScope",
 		value: function createScope(env, thisArg) {
 			// if a parent scope is defined we need to limit the scope to that scope
-			var priorScope = env.current;
-			var fn = this;
+			var priorScope = env.current.scope;
+			// let fn = this;
 
-			if (this.parentScope) {
-				env.current = this.parentScope;
+			if (this.boundScope) {
+				env.setScope(this.boundScope.scope);
+				// env.current = this.boundScope;
 			}
 
-			var args = Array.prototype.slice.call(arguments, 1);
-			if (this.boundThis) {
-				args[0] = this.boundThis;
-			}
+			// let args = Array.prototype.slice.call(arguments, 1);
+			// thisArg = this.boundThis || thisArg;
+			// if (this.boundThis) {
+			// 	args[0] = this.boundThis;
+			// }
 
-			var scope = env.createScope.apply(env, args);
-			return {
-				init: function init() {
-					if (!fn.native) {
-						scope.init(fn.node.body);
-					}
-				},
+			var scope = env.createScope(this.boundThis || thisArg, priorScope);
+			scope.priorScope = priorScope;
+			return scope;
+			// let scope = env.createScope.apply(env, args);
+			// return {
+			// 	init () {
+			// 		if (!fn.native) {
+			// 			scope.init(fn.node.body);
+			// 		}
+			// 	},
 
-				exitScope: function exitScope() {
-					scope.exitScope();
-					env.current = priorScope;
-				}
-			};
+			// 	exitScope () {
+			// 		scope.exitScope();
+			// 		env.current = priorScope;
+			// 	}
+			// };
 		}
 	}, {
 		key: "hasInstance",
@@ -7124,7 +7616,7 @@ var FunctionType = (function (_ObjectType) {
 
 exports["default"] = FunctionType;
 module.exports = exports["default"];
-},{"../utils/contracts":206,"./object-type":198,"./property-descriptor":200,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],196:[function(require,module,exports){
+},{"../utils/contracts":210,"./object-type":203,"./property-descriptor":205,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],201:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -7201,7 +7693,7 @@ var NativeFunctionType = (function (_FunctionType) {
 
 exports["default"] = NativeFunctionType;
 module.exports = exports["default"];
-},{"./function-type":195,"./property-descriptor":200,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],197:[function(require,module,exports){
+},{"./function-type":200,"./property-descriptor":205,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],202:[function(require,module,exports){
 "use strict";
 
 var _Object$create = require("babel-runtime/core-js/object/create")["default"];
@@ -7466,7 +7958,7 @@ ObjectFactory.prototype = {
 
 module.exports = ObjectFactory;
 module.exports = exports["default"];
-},{"../utils/contracts":206,"./argument-type":191,"./array-type":192,"./date-type":193,"./error-type":194,"./function-type":195,"./native-function-type":196,"./object-type":198,"./primitive-type":199,"./regex-type":201,"./string-type":202,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],198:[function(require,module,exports){
+},{"../utils/contracts":210,"./argument-type":196,"./array-type":197,"./date-type":198,"./error-type":199,"./function-type":200,"./native-function-type":201,"./object-type":203,"./primitive-type":204,"./regex-type":206,"./string-type":207,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],203:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -7497,6 +7989,7 @@ var ObjectType = (function () {
 		this.properties = _Object$create(null);
 		this.extensible = true;
 
+		this.version = 0;
 		this.primitiveHint = "number";
 	}
 
@@ -7512,6 +8005,7 @@ var ObjectType = (function () {
 		key: "setPrototype",
 		value: function setPrototype(proto) {
 			this.proto = proto;
+			this.version++;
 		}
 	}, {
 		key: "getProperty",
@@ -7575,16 +8069,18 @@ var ObjectType = (function () {
 						enumerable: descriptor.enumerable,
 						writable: descriptor.writable
 					});
+
+					this.version++;
 				} else {
 					descriptor.setValue(value);
 				}
 			} else {
-				this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
+				this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError, env);
 			}
 		}
 	}, {
 		key: "defineOwnProperty",
-		value: function defineOwnProperty(name, descriptor, throwOnError) {
+		value: function defineOwnProperty(name, descriptor, throwOnError, env) {
 			if (this.isPrimitive) {
 				if (throwOnError) {
 					throw new TypeError("Cannot define property: " + name + ", object is not extensible");
@@ -7614,6 +8110,7 @@ var ObjectType = (function () {
 			}
 
 			this.properties[name] = new _propertyDescriptor2["default"](this, descriptor);
+			this.version++;
 			return true;
 		}
 	}, {
@@ -7633,6 +8130,7 @@ var ObjectType = (function () {
 				}
 			}
 
+			this.version++;
 			return delete this.properties[name];
 		}
 	}, {
@@ -7645,6 +8143,7 @@ var ObjectType = (function () {
 			descriptor.value = value;
 
 			this.properties[name] = new _propertyDescriptor2["default"](this, descriptor);
+			this.version++;
 		}
 	}, {
 		key: "remove",
@@ -7652,6 +8151,7 @@ var ObjectType = (function () {
 			// this method is intended for external usage only - it provides a way to remove
 			// properties even if they are not normally able to be deleted
 			delete this.properties[name];
+			this.version++;
 		}
 	}, {
 		key: "getValue",
@@ -7723,7 +8223,7 @@ var ObjectType = (function () {
 
 exports["default"] = ObjectType;
 module.exports = exports["default"];
-},{"./property-descriptor":200,"babel-runtime/core-js/object/create":5,"babel-runtime/core-js/object/keys":8,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],199:[function(require,module,exports){
+},{"./property-descriptor":205,"babel-runtime/core-js/object/create":5,"babel-runtime/core-js/object/keys":8,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-default":18}],204:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -7785,7 +8285,7 @@ var PrimitiveType = (function (_ObjectType) {
 
 exports["default"] = PrimitiveType;
 module.exports = exports["default"];
-},{"../utils/contracts":206,"./object-type":198,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],200:[function(require,module,exports){
+},{"../utils/contracts":210,"./object-type":203,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],205:[function(require,module,exports){
 "use strict";
 
 var _createClass = require("babel-runtime/helpers/create-class")["default"];
@@ -7939,7 +8439,7 @@ var PropertyDescriptor = (function () {
 
 exports["default"] = PropertyDescriptor;
 module.exports = exports["default"];
-},{"../utils/comparers":205,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],201:[function(require,module,exports){
+},{"../utils/comparers":209,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/interop-require-wildcard":19}],206:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -7993,7 +8493,7 @@ var RegexType = (function (_ObjectType) {
 
 exports["default"] = RegexType;
 module.exports = exports["default"];
-},{"./object-type":198,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],202:[function(require,module,exports){
+},{"./object-type":203,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18}],207:[function(require,module,exports){
 "use strict";
 
 var _get = require("babel-runtime/helpers/get")["default"];
@@ -8092,334 +8592,7 @@ var StringType = (function (_PrimitiveType) {
 
 exports["default"] = StringType;
 module.exports = exports["default"];
-},{"../utils/contracts":206,"./primitive-type":199,"./property-descriptor":200,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],203:[function(require,module,exports){
-"use strict";
-
-var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
-
-var _Object$create = require("babel-runtime/core-js/object/create")["default"];
-
-var _Object$keys = require("babel-runtime/core-js/object/keys")["default"];
-
-var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-exports.iterator = iterator;
-exports.reverseIterator = reverseIterator;
-var marked0$0 = [sparseArrayIterator, reverseSparseArrayIterator, arrayIterator, reverseArrayIterator, stringIterator, reverseStringIterator].map(_regeneratorRuntime.mark);
-
-var _contracts = require("./contracts");
-
-var contracts = _interopRequireWildcard(_contracts);
-
-require("../polyfills");
-
-var SPARE_ARRAY_DENSITY = 0.8;
-var ascending = function ascending(a, b) {
-	return a - b;
-};
-var descending = function descending(a, b) {
-	return b - a;
-};
-
-function getIndices(source, length, start, asc) {
-	var indices = _Object$create(null);
-
-	while (source) {
-		source.getOwnPropertyNames().forEach(function (name) {
-			if (contracts.isInteger(name) && name >= start && name <= length) {
-				indices[name] = 1;
-			}
-		});
-
-		source = source.getPrototype();
-	}
-
-	return _Object$keys(indices).sort(asc ? ascending : descending);
-}
-
-function sparseArrayIterator(source, length, start) {
-	var indices, ln, i, index, nextIndex, prop;
-	return _regeneratorRuntime.wrap(function sparseArrayIterator$(context$1$0) {
-		while (1) switch (context$1$0.prev = context$1$0.next) {
-			case 0:
-				indices = getIndices(source, length - 1, start, true);
-				ln = indices.length;
-				i = 0;
-
-			case 3:
-				if (!(i < ln)) {
-					context$1$0.next = 16;
-					break;
-				}
-
-				index = Number(indices[i]);
-				nextIndex = indices[++i] || length;
-
-			case 6:
-				if (!(index < nextIndex)) {
-					context$1$0.next = 14;
-					break;
-				}
-
-				prop = source.getProperty(index);
-
-				if (!prop) {
-					context$1$0.next = 11;
-					break;
-				}
-
-				context$1$0.next = 11;
-				return { value: prop.getValue(), index: index };
-
-			case 11:
-
-				index++;
-				context$1$0.next = 6;
-				break;
-
-			case 14:
-				context$1$0.next = 3;
-				break;
-
-			case 16:
-			case "end":
-				return context$1$0.stop();
-		}
-	}, marked0$0[0], this);
-}
-
-function reverseSparseArrayIterator(source, start) {
-	var indices, ln, i, index, nextIndex, prop;
-	return _regeneratorRuntime.wrap(function reverseSparseArrayIterator$(context$1$0) {
-		while (1) switch (context$1$0.prev = context$1$0.next) {
-			case 0:
-				indices = getIndices(source, start, 0, false);
-				ln = indices.length;
-				i = 0;
-
-			case 3:
-				if (!(i < ln)) {
-					context$1$0.next = 17;
-					break;
-				}
-
-				index = Number(indices[i]);
-				nextIndex = indices[++i];
-
-				if (nextIndex === undefined) {
-					nextIndex = -1;
-				}
-
-				// todo: add way to determine whether a property was added
-				// during an iteration so we don't have to manually check
-				// the gaps
-
-			case 7:
-				if (!(index > nextIndex)) {
-					context$1$0.next = 15;
-					break;
-				}
-
-				prop = source.getProperty(index);
-
-				if (!prop) {
-					context$1$0.next = 12;
-					break;
-				}
-
-				context$1$0.next = 12;
-				return { value: prop.getValue(), index: index };
-
-			case 12:
-
-				index--;
-				context$1$0.next = 7;
-				break;
-
-			case 15:
-				context$1$0.next = 3;
-				break;
-
-			case 17:
-			case "end":
-				return context$1$0.stop();
-		}
-	}, marked0$0[1], this);
-}
-
-function arrayIterator(source, length, index) {
-	var prop;
-	return _regeneratorRuntime.wrap(function arrayIterator$(context$1$0) {
-		while (1) switch (context$1$0.prev = context$1$0.next) {
-			case 0:
-				if (!(index < length)) {
-					context$1$0.next = 8;
-					break;
-				}
-
-				prop = source.getProperty(index);
-
-				if (!prop) {
-					context$1$0.next = 5;
-					break;
-				}
-
-				context$1$0.next = 5;
-				return { value: prop.getValue(), index: index };
-
-			case 5:
-				index++;
-				context$1$0.next = 0;
-				break;
-
-			case 8:
-			case "end":
-				return context$1$0.stop();
-		}
-	}, marked0$0[2], this);
-}
-
-function reverseArrayIterator(source, index) {
-	var prop;
-	return _regeneratorRuntime.wrap(function reverseArrayIterator$(context$1$0) {
-		while (1) switch (context$1$0.prev = context$1$0.next) {
-			case 0:
-				if (!(index >= 0)) {
-					context$1$0.next = 8;
-					break;
-				}
-
-				prop = source.getProperty(index);
-
-				if (!prop) {
-					context$1$0.next = 5;
-					break;
-				}
-
-				context$1$0.next = 5;
-				return { value: prop.getValue(), index: index };
-
-			case 5:
-				index--;
-				context$1$0.next = 0;
-				break;
-
-			case 8:
-			case "end":
-				return context$1$0.stop();
-		}
-	}, marked0$0[3], this);
-}
-
-function stringIterator(env, source, i) {
-	var objectFactory, stringValue, ln;
-	return _regeneratorRuntime.wrap(function stringIterator$(context$1$0) {
-		while (1) switch (context$1$0.prev = context$1$0.next) {
-			case 0:
-				objectFactory = env.objectFactory;
-				stringValue = source.unwrap();
-				ln = stringValue.length;
-
-			case 3:
-				if (!(i < ln)) {
-					context$1$0.next = 9;
-					break;
-				}
-
-				context$1$0.next = 6;
-				return { value: objectFactory.createPrimitive(stringValue[i]), index: i };
-
-			case 6:
-				i++;
-				context$1$0.next = 3;
-				break;
-
-			case 9:
-			case "end":
-				return context$1$0.stop();
-		}
-	}, marked0$0[4], this);
-}
-
-function reverseStringIterator(env, source, index) {
-	var objectFactory, stringValue;
-	return _regeneratorRuntime.wrap(function reverseStringIterator$(context$1$0) {
-		while (1) switch (context$1$0.prev = context$1$0.next) {
-			case 0:
-				objectFactory = env.objectFactory;
-				stringValue = source.unwrap();
-
-			case 2:
-				if (!(index >= 0)) {
-					context$1$0.next = 8;
-					break;
-				}
-
-				context$1$0.next = 5;
-				return { value: objectFactory.createPrimitive(stringValue[index]), index: index };
-
-			case 5:
-				index--;
-				context$1$0.next = 2;
-				break;
-
-			case 8:
-			case "end":
-				return context$1$0.stop();
-		}
-	}, marked0$0[5], this);
-}
-
-function arrayIsSparse(arr, length) {
-	var ownPropertyCount = _Object$keys(arr.properties).length;
-
-	// this is just to roughly estimate how dense the array is
-	var density = (ownPropertyCount - 1) / length;
-	return density < SPARE_ARRAY_DENSITY;
-}
-
-function iterator(env, obj, length) {
-	var start = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
-
-	// string will never be dense
-	if (obj.className === "String") {
-		return stringIterator(env, obj, start);
-	}
-
-	if (arrayIsSparse(obj, length)) {
-		return sparseArrayIterator(obj, length, start);
-	}
-
-	return arrayIterator(obj, length, start);
-}
-
-function reverseIterator(env, obj, start) {
-	if (obj.className === "String") {
-		return reverseStringIterator(env, obj, start);
-	}
-
-	if (arrayIsSparse(obj, start)) {
-		return reverseSparseArrayIterator(obj, start);
-	}
-
-	return reverseArrayIterator(obj, start);
-}
-
-// todo: add way to determine whether a property was added
-// during an iteration so we don't have to manually check
-// the gaps
-
-// we still need to verify the existence in case the
-// index was deleted during the processing of a prior
-// iteration
-
-// we still need to verify the existence in case the
-// index was deleted during the processing of a prior
-// iteration
-},{"../polyfills":189,"./contracts":206,"babel-runtime/core-js/object/create":5,"babel-runtime/core-js/object/keys":8,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],204:[function(require,module,exports){
+},{"../utils/contracts":210,"./primitive-type":204,"./property-descriptor":205,"babel-runtime/helpers/class-call-check":13,"babel-runtime/helpers/create-class":14,"babel-runtime/helpers/get":16,"babel-runtime/helpers/inherits":17,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19}],208:[function(require,module,exports){
 "use strict";
 
 var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
@@ -8519,7 +8692,7 @@ function promisify(obj) {
 
 	return _Promise.resolve(obj);
 }
-},{"../polyfills":189,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/promise":10}],205:[function(require,module,exports){
+},{"../polyfills":194,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/promise":10}],209:[function(require,module,exports){
 "use strict";
 
 var _defineProperty = require("babel-runtime/helpers/define-property")["default"];
@@ -8659,7 +8832,7 @@ var comparers = (_comparers = {
 
 exports["default"] = comparers;
 module.exports = exports["default"];
-},{"./convert":207,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],206:[function(require,module,exports){
+},{"./convert":211,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],210:[function(require,module,exports){
 "use strict";
 
 var _getIterator = require("babel-runtime/core-js/get-iterator")["default"];
@@ -8893,7 +9066,7 @@ function isStrictNode(nodes) {
 
 	return false;
 }
-},{"../keywords":188,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18}],207:[function(require,module,exports){
+},{"../keywords":193,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18}],211:[function(require,module,exports){
 "use strict";
 
 var _Math$sign = require("babel-runtime/core-js/math/sign")["default"];
@@ -9083,7 +9256,7 @@ function toNativeFunction(env, fn, name) {
 		return env.objectFactory.createPrimitive(value);
 	}, fn.length, name);
 }
-},{"../polyfills":189,"../utils/func":208,"babel-runtime/core-js/math/sign":3,"babel-runtime/helpers/interop-require-wildcard":19}],208:[function(require,module,exports){
+},{"../polyfills":194,"../utils/func":212,"babel-runtime/core-js/math/sign":3,"babel-runtime/helpers/interop-require-wildcard":19}],212:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9094,7 +9267,6 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.getFunctionResult = getFunctionResult;
-exports.loadArguments = loadArguments;
 exports.tryCallMethod = tryCallMethod;
 
 var _contracts = require("./contracts");
@@ -9104,7 +9276,7 @@ var contracts = _interopRequireWildcard(_contracts);
 var _async = require("./async");
 
 var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function callee$0$0(env, fn, params, args, thisArg, callee, isNew) {
-	var scope, returnResult, executionResult;
+	var scope, returnResult;
 	return _regeneratorRuntime.wrap(function callee$0$0$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
@@ -9115,120 +9287,107 @@ var executeFunction = (0, _async.degenerate)(_regeneratorRuntime.mark(function c
 					returnResult = thisArg;
 				}
 
-				loadArguments(env, params, args, fn);
-				scope.init();
+				scope.loadArgs(params, args, fn);
+				scope.init(fn.node && fn.node.body);
 
-				context$1$0.prev = 5;
+				context$1$0.next = 7;
+				return scope.use(function () {
+					if (fn.native) {
+						return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
+					} else {
+						var executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
+						if (executionResult && executionResult.exit && executionResult.result) {
+							if (!isNew || !executionResult.result.isPrimitive) {
+								return executionResult.result;
+							}
+						}
 
-				if (!fn.native) {
-					context$1$0.next = 12;
-					break;
-				}
-
-				context$1$0.next = 9;
-				return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
-
-			case 9:
-				returnResult = context$1$0.sent;
-				context$1$0.next = 14;
-				break;
-
-			case 12:
-				executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
-
-				if (executionResult && executionResult.exit && executionResult.result) {
-					if (!isNew || !executionResult.result.isPrimitive) {
-						returnResult = executionResult.result;
+						return returnResult;
 					}
-				}
+				});
 
-			case 14:
-				context$1$0.next = 20;
-				break;
-
-			case 16:
-				context$1$0.prev = 16;
-				context$1$0.t0 = context$1$0["catch"](5);
-
-				scope.exitScope();
-				throw context$1$0.t0;
-
-			case 20:
-
-				scope.exitScope();
+			case 7:
+				returnResult = context$1$0.sent;
 				return context$1$0.abrupt("return", returnResult || env.global.getValue("undefined"));
 
-			case 22:
+			case 9:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, callee$0$0, this, [[5, 16]]);
+	}, callee$0$0, this);
 }));
 
 exports.executeFunction = executeFunction;
 
 function getFunctionResult(env, fn, params, args, thisArg, callee) {
 	var scope = fn.createScope(env, thisArg, false);
-	loadArguments(env, params, args, fn);
-	scope.init();
+	scope.loadArgs(params, args, fn);
+	scope.init(fn.node && fn.node.body);
 
-	var executionResult = undefined;
-	try {
+	return scope.use(function () {
 		if (fn.native) {
-			executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
-		} else {
-			executionResult = env.createExecutionContext(fn.node.body, callee).execute();
-		}
-	} catch (err) {
-		scope.exitScope();
-		throw err;
-	}
-
-	scope.exitScope();
-	return executionResult;
-}
-
-function loadArguments(env, params, args, callee) {
-	var undef = env.global.getValue("undefined");
-	var strict = env.isStrict() || callee.isStrict();
-
-	var argumentList = env.objectFactory.createArguments(args, callee, strict);
-	env.current.createVariable("arguments");
-	env.current.putValue("arguments", argumentList);
-
-	params.forEach(function (param, index) {
-		contracts.assertIsValidParameterName(param.name, strict);
-
-		if (!callee.isStrict() && !env.current.hasProperty(param.name)) {
-			var descriptor = env.current.createVariable(param.name);
-			if (args.length > index) {
-				argumentList.mapProperty(index, descriptor);
-			}
+			return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
 		}
 
-		env.current.putValue(param.name, args[index] || undef);
+		return env.createExecutionContext(fn.node.body, callee).execute();
 	});
 
-	// just set value if additional, unnamed arguments are passed in
-	var i = callee.isStrict() ? 0 : params.length;
-	var length = args.length;
+	// try {
+	// 	if (fn.native) {
+	// 		executionResult = fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
+	// 	} else {
+	// 		executionResult = env.createExecutionContext(fn.node.body, callee).execute();
+	// 	}
+	// } catch (err) {
+	// 	scope.exitScope();
+	// 	throw err;
+	// }
 
-	for (; i < length; i++) {
-		argumentList.defineOwnProperty(i, {
-			value: args[i],
-			configurable: true,
-			enumerable: true,
-			writable: true
-		});
-	}
-
-	argumentList.defineOwnProperty("length", {
-		value: env.objectFactory.createPrimitive(length),
-		configurable: true,
-		enumerable: false,
-		writable: true
-	});
+	// scope.exitScope();
+	// return executionResult;
 }
+
+// export function	loadArguments (env, params, args, callee) {
+// 	let undef = env.global.getValue("undefined");
+// 	let strict = env.isStrict() || callee.isStrict();
+
+// 	let argumentList = env.objectFactory.createArguments(args, callee, strict);
+// 	env.current.createVariable("arguments");
+// 	env.current.putValue("arguments", argumentList);
+
+// 	params.forEach(function (param, index) {
+// 		contracts.assertIsValidParameterName(param.name, strict);
+
+// 		if (!callee.isStrict() && !env.current.hasProperty(param.name)) {
+// 			let descriptor = env.current.createVariable(param.name);
+// 			if (args.length > index) {
+// 				argumentList.mapProperty(index, descriptor);
+// 			}
+// 		}
+
+// 		env.current.putValue(param.name, args[index] || undef);
+// 	});
+
+// 	// just set value if additional, unnamed arguments are passed in
+// 	let i = callee.isStrict() ? 0 : params.length;
+// 	let length = args.length;
+
+// 	for (; i < length; i++) {
+// 		argumentList.defineOwnProperty(i, {
+// 			value: args[i],
+// 			configurable: true,
+// 			enumerable: true,
+// 			writable: true
+// 		});
+// 	}
+
+// 	argumentList.defineOwnProperty("length", {
+// 		value: env.objectFactory.createPrimitive(length),
+// 		configurable: true,
+// 		enumerable: false,
+// 		writable: true
+// 	});
+// }
 
 function tryCallMethod(env, obj, name) {
 	var fn = obj.getProperty(name);
@@ -9237,34 +9396,68 @@ function tryCallMethod(env, obj, name) {
 	}
 
 	fn = fn.getValue();
-	var undef = env.global.getValue("undefined");
 
 	if (fn && fn.className === "Function") {
-		var scope = fn.createScope(env, obj);
-		scope.init();
-		var executionResult = undefined;
+		var _ret = (function () {
+			var undef = env.global.getValue("undefined");
+			var scope = fn.createScope(env, obj);
+			scope.init(fn.node && fn.node.body);
 
-		try {
-			if (fn.native) {
-				executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
-			} else {
-				loadArguments(env, fn.node.params, [], fn);
+			var executionResult = scope.use(function () {
+				if (fn.native) {
+					return fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
+				}
 
-				executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
-				executionResult = executionResult && executionResult.result;
-			}
-		} catch (err) {
-			scope.exitScope();
-			throw err;
-		}
+				scope.loadArgs(fn.node.params, [], fn);
 
-		scope.exitScope();
-		return executionResult ? executionResult.getValue() : undef;
+				var result = env.createExecutionContext(fn.node.body, fn.node).execute();
+				return result && result.result;
+			});
+
+			// try {
+			// 	if (fn.native) {
+			// 		executionResult = fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
+			// 	} else {
+			// 		scope.loadArgs(env, fn.node.params, [], fn);
+
+			// 		executionResult = env.createExecutionContext(fn.node.body, fn.node).execute();
+			// 		executionResult = executionResult && executionResult.result;
+			// 	}
+			// } catch (err) {
+			// 	scope.exitScope();
+			// 	throw err;
+			// }
+
+			// scope.exitScope();
+			return {
+				v: executionResult ? executionResult.getValue() : undef
+			};
+		})();
+
+		if (typeof _ret === "object") return _ret.v;
 	}
 
 	return false;
 }
-},{"./async":204,"./contracts":206,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],209:[function(require,module,exports){
+
+// try {
+// 	if (fn.native) {
+// 		returnResult = yield fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
+// 	} else {
+// 		let executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
+// 		if (executionResult && executionResult.exit && executionResult.result) {
+// 			if (!isNew || !executionResult.result.isPrimitive) {
+// 				returnResult = executionResult.result;
+// 			}
+// 		}
+// 	}
+// } catch (err) {
+// 	scope.exitScope();
+// 	throw err;
+// }
+
+// scope.exitScope();
+},{"./async":208,"./contracts":210,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],213:[function(require,module,exports){
 "use strict";
 
 var _defineProperty = require("babel-runtime/helpers/define-property")["default"];
@@ -9330,7 +9523,7 @@ exports["default"] = (_$$$$$$$$$$$in$instanceof = {}, _defineProperty(_$$$$$$$$$
 	return b.hasInstance(a);
 }), _$$$$$$$$$$$in$instanceof);
 module.exports = exports["default"];
-},{"./convert":207,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],210:[function(require,module,exports){
+},{"./convert":211,"babel-runtime/helpers/define-property":15,"babel-runtime/helpers/interop-require-wildcard":19}],214:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9384,7 +9577,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 14:
 
-				arr.putValue("length", objectFactory.createPrimitive(ln), false, context);
+				arr.putValue("length", objectFactory.createPrimitive(ln), false, context.env);
 
 			case 15:
 				return context$1$0.abrupt("return", context.result(arr));
@@ -9396,7 +9589,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ArrayExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/regenerator":20}],211:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/regenerator":20}],215:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9461,7 +9654,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 module.exports = exports["default"];
 
 // remove equals
-},{"../utils/async":204,"../utils/contracts":206,"../utils/operators":209,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],212:[function(require,module,exports){
+},{"../utils/async":208,"../utils/contracts":210,"../utils/operators":213,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],216:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9513,7 +9706,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, BinaryExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/operators":209,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],213:[function(require,module,exports){
+},{"../utils/async":208,"../utils/operators":213,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],217:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9535,7 +9728,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				result = undefined, priorResult = undefined;
 
 				if (context.node.type === "Program") {
-					context.env.initScope(context.node);
+					context.env.current.init(context.node);
 				}
 
 				_iteratorNormalCompletion = true;
@@ -9617,7 +9810,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, BlockStatement, this, [[5, 20, 24, 32], [25,, 27, 31]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],214:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],218:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9765,7 +9958,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, CallExpression, this, [[10, 24, 28, 36], [29,, 31, 35]]);
 }));
 module.exports = exports["default"];
-},{"../env/property-reference":183,"../utils/async":204,"../utils/convert":207,"../utils/func":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],215:[function(require,module,exports){
+},{"../env/property-reference":183,"../utils/async":208,"../utils/convert":211,"../utils/func":212,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],219:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9774,11 +9967,12 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = DebuggerStatement;
 
 function DebuggerStatement(context) {
+	debugger;
 	return context.empty();
 }
 
 module.exports = exports["default"];
-},{}],216:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9858,7 +10052,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, DoWhileStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],217:[function(require,module,exports){
+},{"../utils/async":208,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],221:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9871,7 +10065,7 @@ function EmptyStatement(context) {
 }
 
 module.exports = exports["default"];
-},{}],218:[function(require,module,exports){
+},{}],222:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -9902,7 +10096,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ExpressionStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/regenerator":20}],219:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/regenerator":20}],223:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10077,7 +10271,7 @@ module.exports = exports["default"];
 // object in the prototype chain has a property with the same name. The values of [[Enumerable]] attributes
 // are not considered when determining if a property of a prototype object is shadowed by a previous object
 // on the prototype chain.
-},{"../utils/async":204,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/regenerator":20}],220:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/regenerator":20}],224:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10185,7 +10379,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ForStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],221:[function(require,module,exports){
+},{"../utils/async":208,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10198,7 +10392,7 @@ function FunctionDeclaration(context) {
 }
 
 module.exports = exports["default"];
-},{}],222:[function(require,module,exports){
+},{}],226:[function(require,module,exports){
 "use strict";
 
 var _interopRequireWildcard = require("babel-runtime/helpers/interop-require-wildcard")["default"];
@@ -10227,7 +10421,7 @@ function FunctionExpression(context) {
 }
 
 module.exports = exports["default"];
-},{"../utils/contracts":206,"babel-runtime/helpers/interop-require-wildcard":19}],223:[function(require,module,exports){
+},{"../utils/contracts":210,"babel-runtime/helpers/interop-require-wildcard":19}],227:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10246,7 +10440,7 @@ function Identifier(context) {
 }
 
 module.exports = exports["default"];
-},{}],224:[function(require,module,exports){
+},{}],228:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10304,7 +10498,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, IfStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],225:[function(require,module,exports){
+},{"../utils/async":208,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],229:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10513,7 +10707,7 @@ exports["default"] = {
 	}))
 };
 module.exports = exports["default"];
-},{"../utils/async":204,"./array-expression":210,"./assignment-expression":211,"./binary-expression":212,"./block-statement":213,"./call-expression":214,"./debugger-statement":215,"./do-while-statement.js":216,"./empty-statement":217,"./expression-statement":218,"./for-in-statement":219,"./for-statement":220,"./function-declaration":221,"./function-expression":222,"./identifier":223,"./if-statement":224,"./interrupt-statement":226,"./labeled-statement":227,"./literal":228,"./logical-expression":229,"./member-expression":230,"./object-expression":231,"./return-statement":232,"./sequence-expression":233,"./switch-statement":234,"./this-expression":235,"./throw-statement":236,"./try-statement":237,"./unary-expression":238,"./update-expression":239,"./variable-declaration":240,"./variable-declarator":241,"./with-statement":242,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],226:[function(require,module,exports){
+},{"../utils/async":208,"./array-expression":214,"./assignment-expression":215,"./binary-expression":216,"./block-statement":217,"./call-expression":218,"./debugger-statement":219,"./do-while-statement.js":220,"./empty-statement":221,"./expression-statement":222,"./for-in-statement":223,"./for-statement":224,"./function-declaration":225,"./function-expression":226,"./identifier":227,"./if-statement":228,"./interrupt-statement":230,"./labeled-statement":231,"./literal":232,"./logical-expression":233,"./member-expression":234,"./object-expression":235,"./return-statement":236,"./sequence-expression":237,"./switch-statement":238,"./this-expression":239,"./throw-statement":240,"./try-statement":241,"./unary-expression":242,"./update-expression":243,"./variable-declaration":244,"./variable-declarator":245,"./with-statement":246,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/regenerator":20}],230:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10535,7 +10729,7 @@ function InterruptStatement(context) {
 }
 
 module.exports = exports["default"];
-},{}],227:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10563,7 +10757,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, LabeledStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/regenerator":20}],228:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/regenerator":20}],232:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10576,7 +10770,7 @@ function Literal(context) {
 }
 
 module.exports = exports["default"];
-},{}],229:[function(require,module,exports){
+},{}],233:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10634,7 +10828,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, LogicalExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],230:[function(require,module,exports){
+},{"../utils/async":208,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],234:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10700,7 +10894,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, MemberExpression, this);
 }));
 module.exports = exports["default"];
-},{"../env/property-reference":183,"../utils/async":204,"../utils/convert":207,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],231:[function(require,module,exports){
+},{"../env/property-reference":183,"../utils/async":208,"../utils/convert":211,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],235:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10867,7 +11061,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ObjectExpression, this, [[5, 26, 30, 38], [31,, 33, 37]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/contracts":206,"../utils/func":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],232:[function(require,module,exports){
+},{"../utils/async":208,"../utils/contracts":210,"../utils/func":212,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":5,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],236:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10905,7 +11099,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, ReturnStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/regenerator":20}],233:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/regenerator":20}],237:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -10993,7 +11187,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, SequenceExpression, this, [[4, 16, 20, 28], [21,, 23, 27]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],234:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],238:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11228,7 +11422,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, SwitchStatement, this, [[8, 35, 39, 47], [40,, 42, 46]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],235:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],239:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11241,7 +11435,7 @@ function ThisExpression(context) {
 }
 
 module.exports = exports["default"];
-},{}],236:[function(require,module,exports){
+},{}],240:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11285,7 +11479,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 module.exports = exports["default"];
 
 // todo: handle more specific errors
-},{"../utils/async":204,"babel-runtime/regenerator":20}],237:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/regenerator":20}],241:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11314,7 +11508,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 4:
 				result = context$1$0.sent;
-				context$1$0.next = 29;
+				context$1$0.next = 22;
 				break;
 
 			case 7:
@@ -11322,7 +11516,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				context$1$0.t0 = context$1$0["catch"](1);
 
 				if (!context.node.handler) {
-					context$1$0.next = 28;
+					context$1$0.next = 21;
 					break;
 				}
 
@@ -11336,73 +11530,66 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 				context.env.createVariable(errVar);
 				context.env.putValue(errVar, caughtError);
 
-				context$1$0.prev = 16;
-				context$1$0.next = 19;
-				return context.create(context.node.handler.body, context.node.handler).execute();
+				context$1$0.next = 18;
+				return scope.use(function () {
+					try {
+						return context.create(context.node.handler.body, context.node.handler).execute();
+					} catch (catchError) {
+						uncaughtError = catchError;
+					}
+				});
 
-			case 19:
+			case 18:
 				result = context$1$0.sent;
-				context$1$0.next = 25;
+				context$1$0.next = 22;
 				break;
+
+			case 21:
+				uncaughtError = context$1$0.t0;
 
 			case 22:
 				context$1$0.prev = 22;
-				context$1$0.t1 = context$1$0["catch"](16);
-
-				uncaughtError = context$1$0.t1;
-
-			case 25:
-
-				scope.exitScope();
-				context$1$0.next = 29;
-				break;
-
-			case 28:
-				uncaughtError = context$1$0.t0;
-
-			case 29:
-				context$1$0.prev = 29;
 
 				if (!context.node.finalizer) {
-					context$1$0.next = 36;
+					context$1$0.next = 29;
 					break;
 				}
 
-				context$1$0.next = 33;
+				context$1$0.next = 26;
 				return context.create(context.node.finalizer).execute();
 
-			case 33:
+			case 26:
 				finalResult = context$1$0.sent;
 
 				if (!(finalResult && finalResult.shouldBreak(context))) {
-					context$1$0.next = 36;
+					context$1$0.next = 29;
 					break;
 				}
 
 				return context$1$0.abrupt("return", finalResult);
 
-			case 36:
-				return context$1$0.finish(29);
+			case 29:
+				return context$1$0.finish(22);
 
-			case 37:
+			case 30:
 				if (!uncaughtError) {
-					context$1$0.next = 39;
+					context$1$0.next = 32;
 					break;
 				}
 
 				throw uncaughtError;
 
-			case 39:
+			case 32:
 				return context$1$0.abrupt("return", result);
 
-			case 40:
+			case 33:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, TryStatement, this, [[1, 7, 29, 37], [16, 22]]);
+	}, TryStatement, this, [[1, 7, 22, 30]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/contracts":206,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],238:[function(require,module,exports){
+},{"../utils/async":208,"../utils/contracts":210,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],242:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11538,7 +11725,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, UnaryExpression, this);
 }));
 module.exports = exports["default"];
-},{"../env/property-reference":183,"../env/reference":184,"../utils/async":204,"../utils/convert":207,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],239:[function(require,module,exports){
+},{"../env/property-reference":183,"../env/reference":184,"../utils/async":208,"../utils/convert":211,"babel-runtime/helpers/interop-require-default":18,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],243:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11597,7 +11784,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, UpdateExpression, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/contracts":206,"../utils/convert":207,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],240:[function(require,module,exports){
+},{"../utils/async":208,"../utils/contracts":210,"../utils/convert":211,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}],244:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11681,7 +11868,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, VariableDeclaration, this, [[3, 14, 18, 26], [19,, 21, 25]]);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],241:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":20}],245:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11727,7 +11914,7 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 	}, VariableDeclarator, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"babel-runtime/regenerator":20}],242:[function(require,module,exports){
+},{"../utils/async":208,"babel-runtime/regenerator":20}],246:[function(require,module,exports){
 "use strict";
 
 var _regeneratorRuntime = require("babel-runtime/regenerator")["default"];
@@ -11745,7 +11932,7 @@ var _utilsContracts = require("../utils/contracts");
 var contracts = _interopRequireWildcard(_utilsContracts);
 
 exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(function WithStatement(context) {
-	var obj, scope, result;
+	var obj, scope;
 	return _regeneratorRuntime.wrap(function WithStatement$(context$1$0) {
 		while (1) switch (context$1$0.prev = context$1$0.next) {
 			case 0:
@@ -11772,37 +11959,34 @@ exports["default"] = (0, _utilsAsync.degenerate)(_regeneratorRuntime.mark(functi
 
 			case 7:
 				scope = context.env.createObjectScope(obj, context.env.getThisBinding());
-				result = undefined;
+
+				// let result;
 
 				scope.init(context.node.body);
+				context$1$0.next = 11;
+				return scope.use(function () {
+					return context.create(context.node.body).execute();
+				});
 
-				context$1$0.prev = 10;
-				context$1$0.next = 13;
-				return context.create(context.node.body).execute();
+			case 11:
+				return context$1$0.abrupt("return", context$1$0.sent);
 
-			case 13:
-				result = context$1$0.sent;
-				context$1$0.next = 20;
-				break;
-
-			case 16:
-				context$1$0.prev = 16;
-				context$1$0.t0 = context$1$0["catch"](10);
-
-				scope.exitScope();
-				throw context$1$0.t0;
-
-			case 20:
-
-				scope.exitScope();
-				return context$1$0.abrupt("return", result);
-
-			case 22:
+			case 12:
 			case "end":
 				return context$1$0.stop();
 		}
-	}, WithStatement, this, [[10, 16]]);
+	}, WithStatement, this);
 }));
 module.exports = exports["default"];
-},{"../utils/async":204,"../utils/contracts":206,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}]},{},[1])(1)
+
+// try {
+// 	result = yield context.create(context.node.body).execute();
+// } catch (err) {
+// 	scope.exitScope();
+// 	throw err;
+// }
+
+// scope.exitScope();
+// return result;
+},{"../utils/async":208,"../utils/contracts":210,"babel-runtime/helpers/interop-require-wildcard":19,"babel-runtime/regenerator":20}]},{},[1])(1)
 });

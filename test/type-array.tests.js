@@ -1,5 +1,4 @@
 var runner = require("./test-runner");
-var expect = require("chai").expect;
 
 describe("Type: Array", function() {
 	it("should create an array for an array literal", function (done) {

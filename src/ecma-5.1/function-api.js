@@ -17,10 +17,12 @@ function defineThis (env, fn, thisArg) {
 
 const frozen = { configurable: false, enumerable: false, writable: false };
 
-export default function functionApi (env, options) {
+export default function functionApi (env) {
+	const options = env.options;
 	const globalObject = env.global;
 	const undef = env.global.getValue("undefined");
 	const objectFactory = env.objectFactory;
+	
 	let funcClass;
 
 	let funcCtor = function (...args) {
@@ -44,7 +46,7 @@ export default function functionApi (env, options) {
 			let ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
 			let userNode = ast.body[0].expression.callee.object.body.body;
 			let strict = contracts.isStrictNode(userNode);
-			
+
 			let params = args.map(arg => {
 				return {
 					type: "Identifier",
@@ -66,7 +68,7 @@ export default function functionApi (env, options) {
 					thisArg = objectFactory.createObject(funcInstance);
 				} else {
 					thisArg = this.node;
-					
+
 					if (!thisArg) {
 						thisArg = strict ? undef : globalObject;
 					}
@@ -153,21 +155,21 @@ export default function functionApi (env, options) {
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
 		nativeFunc.strict = env.isStrict() || !fn.native && contracts.isStrictNode(fn.node.body.body);
-		
+
 		let boundFunc = objectFactory.createFunction(nativeFunc);
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
-		
+
 		if (!nativeFunc.strict) {
 			boundFunc.remove("caller");
 			boundFunc.remove("arguments");
-			
+
 			// these will be added in strict mode, but should always be here for bound functions
 			let thrower = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
 			boundFunc.defineOwnProperty("caller", thrower);
-			boundFunc.defineOwnProperty("arguments", thrower);	
+			boundFunc.defineOwnProperty("arguments", thrower);
 		}
-		
+
 		return boundFunc;
 	}, 1, "Function.prototype.bind"));
 }

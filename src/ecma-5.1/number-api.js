@@ -7,7 +7,7 @@ const protoMethods = ["toExponential", "toPrecision", "toLocaleString"];
 export default function numberApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	
+
 	let numberClass = objectFactory.createFunction(function (obj) {
 		let numberValue = Number(convert.toPrimitive(env, obj, "number"));
 
@@ -18,7 +18,7 @@ export default function numberApi (env) {
 		return objectFactory.create("Number", numberValue);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	let proto = numberClass.getProperty("prototype").getValue();
+	let proto = numberClass.getValue("prototype");
 	proto.className = "Number";
 	proto.value = 0;
 
@@ -38,7 +38,7 @@ export default function numberApi (env) {
 
 	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
 		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toFixed");
-		
+
 		let digits = 0;
 		if (fractionDigits) {
 			digits = convert.toNumber(env, fractionDigits);

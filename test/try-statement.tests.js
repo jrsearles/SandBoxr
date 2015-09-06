@@ -1,5 +1,4 @@
 var runner = require("./test-runner");
-var expect = require("chai").expect;
 
 describe("Try-Catch-Finally", function () {
 	it("should not throw an exception if an error occurs in a try-block", function (done) {

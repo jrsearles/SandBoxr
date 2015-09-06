@@ -33,7 +33,7 @@ describe("Type: String", function () {
 
 		{ source: "The morning is upon us.", fn: "search", args: [/morn/] },
 		{ source: "The morning is upon us.", fn: "search", args: [/[0-9]/] },
-		
+
 		{ source: "The morning is upon us.", fn: "slice", args: [4, -2] },
 		{ source: "The morning is upon us.", fn: "slice", args: [-3] },
 		{ source: "The morning is upon us.", fn: "slice", args: [-3, -1] },
@@ -71,9 +71,9 @@ describe("Type: String", function () {
 			var source = testCase.source || "Foo";
 			var expected = source[testCase.fn].apply(source, testCase.args);
 			var code = "'" + source + "'." + testCase.fn + "(" + runner.wrapArgs(testCase.args) + ");";
-			
+
 			runner.runBlock(code).then(function (result) {
-	
+
 				if (Array.isArray(expected)) {
 					expect(result.getProperty("length").getValue().value).to.equal(expected.length);
 					expected.forEach(function (value, index) {
@@ -82,7 +82,7 @@ describe("Type: String", function () {
 				} else {
 					expect(result.getValue().value).to.equal(expected);
 				}
-				
+
 				done();
 			});
 		});
@@ -127,7 +127,7 @@ describe("Type: String", function () {
 			runner.confirmError("var a = {toString:function() { return {}; } };String(a);", TypeError, done);
 		});
 	});
-	
+
 	describe("as object", function () {
 		it("should show typeof `object` when creating use `new`", function (done) {
 			runner.confirmBlock("typeof new String('foo') == 'object';", done);

@@ -4,7 +4,7 @@ export default degenerate(function* BlockStatement (context) {
 	let result, priorResult;
 	
 	if (context.node.type === "Program") {
-		context.env.initScope(context.node);
+		context.env.current.init(context.node);
 	}
 	
 	for (let current of context.node.body) {

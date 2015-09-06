@@ -17,13 +17,13 @@ export default degenerate(function* TryStatement (context) {
 			context.env.createVariable(errVar);
 			context.env.putValue(errVar, caughtError);
 			
-			try {
-				result = yield context.create(context.node.handler.body, context.node.handler).execute();
-			} catch (catchError) {
-				uncaughtError = catchError;
-			}
-			
-			scope.exitScope();
+			result = yield scope.use(() => {
+				try {
+					return context.create(context.node.handler.body, context.node.handler).execute();
+				} catch (catchError) {
+					uncaughtError = catchError;
+				}
+			});
 		} else {
 			uncaughtError = err;
 		}

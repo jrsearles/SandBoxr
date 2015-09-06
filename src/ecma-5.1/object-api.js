@@ -34,12 +34,12 @@ function defineProperty (env, obj, name, descriptor) {
 
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
 			if (descriptor.hasProperty(prop)) {
-				let attrValue = descriptor.getProperty(prop).getValue();
+				let attrValue = descriptor.getValue(prop);
 				options[prop] = convert.toBoolean(attrValue);
 			}
 		});
 
-		let currentScope = env.current;
+		let currentScope = env.current.scope;
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
@@ -56,14 +56,10 @@ function defineProperty (env, obj, name, descriptor) {
 					let scope = env.setScope(currentScope);
 					let thisArg = getter.isStrict() ? this : convert.toObject(env, this);
 
-					try {
+					return scope.use(() => {
 						let getResult = func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
-						scope.exitScope();
 						return getResult && getResult.exit ? getResult.result.getValue() : undef;
-					} catch (err) {
-						scope.exitScope();
-						throw err;
-					}
+					});
 				};
 			}
 		}
@@ -82,20 +78,16 @@ function defineProperty (env, obj, name, descriptor) {
 					let scope = env.setScope(currentScope);
 					let thisArg = setter.isStrict() ? this : convert.toObject(env, this);
 
-					try {
+					return scope.use(() => {
 						func.executeFunction(env, setter, setter.node.params, arguments, thisArg, setter.node);
-						scope.exitScope();
 						return undef;
-					} catch (err) {
-						scope.exitScope();
-						throw err;
-					}
+					});
 				};
 			}
 		}
 
 		if (hasValue) {
-			options.value = descriptor.getProperty("value").getValue() || undef;
+			options.value = descriptor.getValue("value") || undef;
 		}
 	}
 
@@ -183,7 +175,7 @@ export default function objectApi (env) {
 		if (descriptors) {
 			for (let prop in descriptors.properties) {
 				if (descriptors.properties[prop].enumerable) {
-					defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
+					defineProperty(env, obj, prop, descriptors.getValue(prop));
 				}
 			}
 		}
@@ -204,7 +196,7 @@ export default function objectApi (env) {
 
 		for (let prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
-				defineProperty(env, obj, prop, descriptors.getProperty(prop).getValue());
+				defineProperty(env, obj, prop, descriptors.getValue(prop));
 			}
 		}
 
@@ -220,15 +212,15 @@ export default function objectApi (env) {
 			let descriptor = obj.getProperty(prop);
 
 			let result = objectFactory.createObject();
-			result.putValue("configurable", objectFactory.createPrimitive(descriptor.configurable), false);
-			result.putValue("enumerable", objectFactory.createPrimitive(descriptor.enumerable), false);
+			result.putValue("configurable", objectFactory.createPrimitive(descriptor.configurable), false,env );
+			result.putValue("enumerable", objectFactory.createPrimitive(descriptor.enumerable), false, env);
 
 			if (descriptor.dataProperty) {
-				result.putValue("value", descriptor.value, false);
-				result.putValue("writable", objectFactory.createPrimitive(descriptor.writable), false);
+				result.putValue("value", descriptor.value, false, env);
+				result.putValue("writable", objectFactory.createPrimitive(descriptor.writable), false, env);
 			} else {
-				result.putValue("get", descriptor.get || undef, false);
-				result.putValue("set", descriptor.set || undef, false);
+				result.putValue("get", descriptor.get || undef, false, env);
+				result.putValue("set", descriptor.set || undef, false, env);
 			}
 
 			return result;
@@ -258,7 +250,7 @@ export default function objectApi (env) {
 
 		let arr = objectFactory.create("Array");
 		obj.getOwnPropertyNames().forEach(function (name, index) {
-			arr.putValue(index, objectFactory.createPrimitive(name));
+			arr.putValue(index, objectFactory.createPrimitive(name), true, env);
 		});
 
 		return arr;
@@ -268,7 +260,7 @@ export default function objectApi (env) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
 
 		let objProto = obj.getPrototype();
-		return objProto || env.global.getProperty("null").getValue();
+		return objProto || env.global.getValue("null");
 	}, 1, "Object.getPrototypeOf"));
 
 	objectClass.define("freeze", objectFactory.createBuiltInFunction(function (obj) {

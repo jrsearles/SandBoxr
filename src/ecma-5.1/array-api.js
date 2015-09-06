@@ -1,8 +1,7 @@
-import ArrayType from "../types/array-type";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";
-import {iterator,reverseIterator} from "../utils/arrays";
+import iterate from "../iterators";
 
 function getStartIndex (index, length) {
 	if (index < 0) {
@@ -37,26 +36,26 @@ export default function arrayApi (env) {
 		if (!thisArg) {
 			thisArg = callback.isStrict() ? undef : env.global;
 		}
-		
+
 		let scope = env.createScope(thisArg);
 		scope.init(callback.node.body);
-	
+
 		let args = [entry.value, objectFactory.createPrimitive(entry.index), arr];
-		func.loadArguments(env, callback.node.params, args, callback);
-	
+		scope.loadArgs(callback.node.params, args, callback);
+
 		return scope.use(() => {
 			let executionResult = env.createExecutionContext(callback.node.body, callback.node).execute();
 			return executionResult ? executionResult.result : undef;
 		});
 	}
-	
-	function executeAccumulator (callback, priorValue, index, arr) {
+
+	function executeAccumulator (callback, priorValue, entry, arr) {
 		let scope = env.createScope();
 		scope.init(callback.node.body);
-	
-		let args = [priorValue || undef, arr.getValue(index) || undef, objectFactory.createPrimitive(index), arr];
-		func.loadArguments(env, callback.node.params, args, callback);
-	
+
+		let args = [priorValue || undef, entry.value || undef, objectFactory.createPrimitive(entry.index), arr];
+		scope.loadArgs(callback.node.params, args, callback);
+
 		return scope.use(() => {
 			let executionResult = env.createExecutionContext(callback.node.body, callback.node).execute();
 			return executionResult ? executionResult.result : undef;
@@ -78,7 +77,7 @@ export default function arrayApi (env) {
 		if (arguments.length > 0) {
 			if (arguments.length === 1 && length.type === "number") {
 				contracts.assertIsValidArrayLength(arguments[0].value);
-				newArray.putValue("length", length, false, this);
+				newArray.putValue("length", length, false, env);
 			} else {
 				for (let i = 0, ln = arguments.length; i < ln; i++) {
 					newArray.defineOwnProperty(i, createIndexProperty(arguments[i]), false, env);
@@ -89,7 +88,7 @@ export default function arrayApi (env) {
 		return newArray;
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	let proto = arrayClass.getProperty("prototype").getValue();
+	let proto = arrayClass.getValue("prototype");
 	proto.className = "Array";
 	proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
@@ -97,16 +96,16 @@ export default function arrayApi (env) {
 		return objectFactory.createPrimitive(!!(obj && obj.className === "Array"));
 	}, 1, "Array.isArray"));
 
-	proto.define("push", objectFactory.createBuiltInFunction(function () {
+	proto.define("push", objectFactory.createBuiltInFunction(function (...items) {
 		let start = getLength(env, this.node);
 		let i = 0;
-		
-		for (let length = arguments.length; i < length; i++) {
-			this.node.defineOwnProperty(start + i, createIndexProperty(arguments[i]), true, env);
+
+		for (let length = items.length; i < length; i++) {
+			this.node.defineOwnProperty(start + i, createIndexProperty(items[i]), true, env);
 		}
 
 		let newLength = objectFactory.createPrimitive(start + i);
-		this.node.putValue("length", newLength, true);
+		this.node.putValue("length", newLength, true, env);
 		return newLength;
 	}, 1, "Array.prototype.push"));
 
@@ -118,12 +117,12 @@ export default function arrayApi (env) {
 			i--;
 
 			if (this.node.hasProperty(i)) {
-				obj = this.node.getProperty(i).getValue();
+				obj = this.node.getValue(i);
 				this.node.deleteProperty(i, true);
 			}
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(i));
+		this.node.putValue("length", objectFactory.createPrimitive(i), true, env);
 		return obj || undef;
 	}, 0, "Array.prototype.pop"));
 
@@ -134,13 +133,13 @@ export default function arrayApi (env) {
 
 		if (length > 0) {
 			if (this.node.hasProperty(i)) {
-				obj = this.node.getProperty(i).getValue();
+				obj = this.node.getValue(i);
 				this.node.deleteProperty(i);
 			}
 
 			while (++i < length) {
 				if (this.node.hasProperty(i)) {
-					this.node.putValue(i - 1, this.node.getProperty(i).getValue());
+					this.node.putValue(i - 1, this.node.getValue(i), true, env);
 				} else {
 					this.node.deleteProperty(i);
 				}
@@ -149,13 +148,13 @@ export default function arrayApi (env) {
 			this.node.deleteProperty(length - 1);
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length));
+		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length), true, env);
 		return obj || undef;
 	}, 0, "Array.prototype.shift"));
 
-	proto.define("unshift", objectFactory.createBuiltInFunction(function () {
+	proto.define("unshift", objectFactory.createBuiltInFunction(function (...items) {
 		let length = getLength(env, this.node);
-		let argCount = arguments.length;
+		let argCount = items.length;
 		let i = length;
 		let toIndex, fromIndex;
 
@@ -164,7 +163,7 @@ export default function arrayApi (env) {
 			toIndex = i + argCount - 1;
 
 			if (this.node.hasProperty(fromIndex)) {
-				this.node.putValue(toIndex, this.node.getProperty(fromIndex).getValue(), true);
+				this.node.putValue(toIndex, this.node.getValue(fromIndex), true, env);
 			} else {
 				this.node.deleteProperty(toIndex, true);
 			}
@@ -173,11 +172,11 @@ export default function arrayApi (env) {
 		}
 
 		for (i = 0; i < argCount; i++) {
-			this.node.putValue(i, arguments[i], true);
+			this.node.putValue(i, items[i], true, env);
 		}
 
 		let newLength = objectFactory.createPrimitive(argCount + length);
-		this.node.putValue("length", newLength, true);
+		this.node.putValue("length", newLength, true, env);
 		return newLength;
 	}, 1, "Array.prototype.unshift"));
 
@@ -199,7 +198,7 @@ export default function arrayApi (env) {
 		end = getEndIndex(end, length);
 
 		for (let i = begin; i < end; i++) {
-			arr.defineOwnProperty(index++, createIndexProperty(source.getProperty(i).getValue()), true, env);
+			arr.defineOwnProperty(index++, createIndexProperty(source.getValue(i)), true, env);
 		}
 
 		return arr;
@@ -227,7 +226,7 @@ export default function arrayApi (env) {
 		let k = 0;
 		while (k < deleteCount) {
 			if (this.node.hasProperty(k + start)) {
-				removed.defineOwnProperty(k, createIndexProperty(this.node.getProperty(k + start).getValue()), true, env);
+				removed.defineOwnProperty(k, createIndexProperty(this.node.getValue(k + start)), true, env);
 			}
 
 			k++;
@@ -239,7 +238,7 @@ export default function arrayApi (env) {
 
 			while (k < length - deleteCount) {
 				if (this.node.hasProperty(k + deleteCount)) {
-					this.node.putValue(k + newCount, this.node.getProperty(k + deleteCount).getValue());
+					this.node.putValue(k + newCount, this.node.getValue(k + deleteCount));
 				} else {
 					this.node.deleteProperty(k + deleteCount);
 				}
@@ -255,7 +254,7 @@ export default function arrayApi (env) {
 			k = length - start;
 			while (k > start) {
 				if (this.node.hasProperty(k + deleteCount - 1)) {
-					this.node.putValue(k + newCount - 1, this.node.getProperty(k + deleteCount - 1).getValue());
+					this.node.putValue(k + newCount - 1, this.node.getValue(k + deleteCount - 1), true, env);
 				} else {
 					this.node.deleteProperty(k + newCount - 1);
 				}
@@ -266,11 +265,11 @@ export default function arrayApi (env) {
 
 		k = start;
 		for (let i = 0; i < newCount; i++) {
-			this.node.putValue(k, elements[i]);
+			this.node.putValue(k, elements[i], true, env);
 			k++;
 		}
 
-		this.node.putValue("length", objectFactory.createPrimitive(length - deleteCount + newCount));
+		this.node.putValue("length", objectFactory.createPrimitive(length - deleteCount + newCount), true, env);
 		return removed;
 	}, 2, "Array.prototype.splice"));
 
@@ -284,10 +283,10 @@ export default function arrayApi (env) {
 		while (arrays.length > 0) {
 			current = arrays.shift();
 
-			if (current instanceof ArrayType) {
-				for (i = 0, length = current.getProperty("length").getValue().value; i < length; i++) {
+			if (current.className === "Array") {
+				for (i = 0, length = current.getValue("length").unwrap(); i < length; i++) {
 					if (current.hasProperty(i)) {
-						newArray.defineOwnProperty(index, createIndexProperty(current.getProperty(i).getValue()), true, env);
+						newArray.defineOwnProperty(index, createIndexProperty(current.getValue(i)), true, env);
 					}
 
 					index++;
@@ -297,7 +296,7 @@ export default function arrayApi (env) {
 			}
 		}
 
-		newArray.putValue("length", objectFactory.createPrimitive(index), true);
+		newArray.putValue("length", objectFactory.createPrimitive(index), true, env);
 		return newArray;
 	}, 1, "Array.prototype.concat"));
 
@@ -310,7 +309,7 @@ export default function arrayApi (env) {
 		for (let i = 0; i < length; i++) {
 			stringValue = "";
 			if (this.node.hasProperty(i)) {
-				stringValue = this.node.getProperty(i).getValue();
+				stringValue = this.node.getValue(i);
 				if (contracts.isNullOrUndefined(stringValue)) {
 					stringValue = "";
 				} else {
@@ -338,7 +337,7 @@ export default function arrayApi (env) {
 
 		index = getStartIndex(index, length);
 
-		for (let entry of iterator(env, this.node, length, index)) {
+		for (let entry of iterate.forward(env, this.node, index, length)) {
 			if (searchElement.equals(entry.value || undef)) {
 				return objectFactory.createPrimitive(entry.index);
 			}
@@ -355,18 +354,12 @@ export default function arrayApi (env) {
 		if (index < 0) {
 			index = length - Math.abs(index);
 		}
-		
-		for (let entry of reverseIterator(env, this.node, index)) {
+
+		for (let entry of iterate.reverse(env, this.node, index)) {
 			if (searchElement.equals(entry.value || undef)) {
 				return objectFactory.createPrimitive(entry.index);
 			}
 		}
-
-		// for (; index >= 0; index--) {
-		// 	if (this.node.hasProperty(index) && searchElement.equals(this.node.getProperty(index).getValue() || undef)) {
-		// 		return objectFactory.createPrimitive(index);
-		// 	}
-		// }
 
 		return objectFactory.createPrimitive(-1);
 	}, 1, "Array.prototype.lastIndexOf"));
@@ -376,7 +369,7 @@ export default function arrayApi (env) {
 		let length = getLength(env, arr);
 		contracts.assertIsFunction(callback, arr);
 
-		for (let entry of iterator(env, arr, length)) {
+		for (let entry of iterate.forward(env, arr, 0, length)) {
 			executeCallback(callback, entry, thisArg, arr);
 		}
 	}, 1, "Array.prototype.forEach"));
@@ -388,9 +381,9 @@ export default function arrayApi (env) {
 		contracts.assertIsFunction(callback, arr);
 
 		let newArray = objectFactory.create("Array");
-		newArray.putValue("length", objectFactory.createPrimitive(length));
+		newArray.putValue("length", objectFactory.createPrimitive(length), true, env);
 
-		for (let entry of iterator(env, arr, length)) {
+		for (let entry of iterate.forward(env, arr, 0, length)) {
 			let value = executeCallback(callback, entry, thisArg, arr);
 			newArray.defineOwnProperty(entry.index, createIndexProperty(value), true, env);
 		}
@@ -406,11 +399,11 @@ export default function arrayApi (env) {
 
 		let newArray = objectFactory.create("Array");
 		let index = 0;
-		
-		for (let entry of iterator(env, arr, length)) {
+
+		for (let entry of iterate.forward(env, arr, 0, length)) {
 			let passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
 			if (passed) {
-				newArray.defineOwnProperty(index++, createIndexProperty(entry.value), true, env);	
+				newArray.defineOwnProperty(index++, createIndexProperty(entry.value), true, env);
 			}
 		}
 
@@ -423,7 +416,7 @@ export default function arrayApi (env) {
 		let length = getLength(env, arr);
 		contracts.assertIsFunction(callback, arr);
 
-		for (let entry of iterator(env, arr, length)) {
+		for (let entry of iterate.forward(env, arr, 0, length)) {
 			let passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
 			if (!passed) {
 				return objectFactory.createPrimitive(false);
@@ -439,7 +432,7 @@ export default function arrayApi (env) {
 		let length = getLength(env, this.node);
 		contracts.assertIsFunction(callback, this.node);
 
-		for (let entry of iterator(env, arr, length)) {
+		for (let entry of iterate.forward(env, arr, 0, length)) {
 			let passed = convert.toBoolean(executeCallback(callback, entry, thisArg, arr));
 			if (passed) {
 				return objectFactory.createPrimitive(true);
@@ -455,28 +448,32 @@ export default function arrayApi (env) {
 		let length = getLength(env, arr);
 		contracts.assertIsFunction(callback, arr);
 
-		let index = 0;
+		let hasInitialValue = false;
 		let value;
 
-		if (arguments.length >= 2) {
+		if (arguments.length > 1) {
 			value = initialValue;
-		} else {
-			// make sure array isn't empty
-			while (index < length && !(arr.hasProperty(index))) {
-				index++;
-			}
-
-			if (index >= length) {
-				throw new TypeError("Reduce of empty array with no initial value");
-			}
-
-			value = arr.getProperty(index++).getValue();
+			hasInitialValue = true;
 		}
 
-		for (; index < length; index++) {
-			if (arr.hasProperty(index)) {
-				value = executeAccumulator(callback, value, index, arr);
+		let hasElements = false;
+		if (length > 0) {
+			for (let entry of iterate.forward(env, arr, 0, length)) {
+				if (!hasElements) {
+					hasElements = true;
+
+					if (!hasInitialValue) {
+						value = entry.value;
+						continue;
+					}
+				}
+
+				value = executeAccumulator(callback, value, entry, arr);
 			}
+		}
+
+		if (!hasElements && !hasInitialValue) {
+			throw new TypeError("Reduce of empty array with no initial value");
 		}
 
 		return value;
@@ -489,37 +486,31 @@ export default function arrayApi (env) {
 		contracts.assertIsFunction(callback, arr);
 
 		let accumulator;
+		let hasInitialValue = false;
 
-		if (length === 0 && arguments.length === 1) {
-			throw new TypeError("Reduce of empty array with no initial value");
+		if (arguments.length > 1) {
+			accumulator = initialValue;
+			hasInitialValue = true;
 		}
 
-		let k = length - 1;
-		if (arguments.length >= 2) {
-			accumulator = initialValue;
-		} else {
-			// make sure array isn't empty
-			let hasElements = false;
-			while (k >= 0 && !hasElements) {
-				hasElements = arr.hasProperty(k);
-				if (hasElements) {
-					accumulator = arr.getProperty(k).getValue();
+		let hasElements = false;
+		if (length > 0) {
+			for (let entry of iterate.reverse(env, arr, length - 1)) {
+				if (!hasElements) {
+					hasElements = true;
+
+					if (!hasInitialValue) {
+						accumulator = entry.value;
+						continue;
+					}
 				}
 
-				k--;
-			}
-
-			if (!hasElements) {
-				throw new TypeError("Reduce of empty array with no initial value");
+				accumulator = executeAccumulator(callback, accumulator, entry, arr);
 			}
 		}
 
-		while (k >= 0) {
-			if (arr.hasProperty(k)) {
-				accumulator = executeAccumulator(callback, accumulator, k, arr);
-			}
-
-			k--;
+		if (!hasElements && !hasInitialValue) {
+			throw new TypeError("Reduce of empty array with no initial value");
 		}
 
 		return accumulator;
@@ -533,15 +524,15 @@ export default function arrayApi (env) {
 
 		while (lower !== middle) {
 			upper = length - lower - 1;
-			lowerValue = this.node.hasProperty(lower) && this.node.getProperty(lower).getValue();
-			upperValue = this.node.hasProperty(upper) && this.node.getProperty(upper).getValue();
+			lowerValue = this.node.hasProperty(lower) && this.node.getValue(lower);
+			upperValue = this.node.hasProperty(upper) && this.node.getValue(upper);
 
 			if (upperValue) {
-				this.node.putValue(lower, upperValue, true);
+				this.node.putValue(lower, upperValue, true, env);
 			}
 
 			if (lowerValue) {
-				this.node.putValue(upper, lowerValue, true);
+				this.node.putValue(upper, lowerValue, true, env);
 			}
 
 			if (upperValue && !lowerValue) {
@@ -583,17 +574,10 @@ export default function arrayApi (env) {
 				let scope = env.createScope(undef);
 				scope.init(compareFunction.node.body);
 
-				func.loadArguments(env, compareFunction.node.params, [a, b], compareFunction);
-				let executionResult;
-
-				try {
-					executionResult = executionContext.create(compareFunction.node.body, compareFunction.node).execute();
-				} catch (err) {
-					scope.exitScope();
-					throw err;
-				}
-
-				scope.exitScope();
+				scope.loadArgs(compareFunction.node.params, [a, b], compareFunction);
+				let executionResult = scope.use(() => {
+					return executionContext.create(compareFunction.node.body, compareFunction.node).execute();
+				});
 
 				if (executionResult && executionResult.exit && executionResult.result) {
 					return executionResult.result.getValue().value;
@@ -606,7 +590,7 @@ export default function arrayApi (env) {
 		// convert to array, run the wrapped comparer, then re-assign indexes
 		let sortedArray = convert.toArray(arr, length)
 			// undefined positions are handled by the underlying sort algorithm, so replace them with the raw primitive value
-			.map(el => { return el.isPrimitive && el.value === undefined ? undefined : el })
+			.map(el => { return el.isPrimitive && el.value === undefined ? undefined : el; })
 			.sort(comparer);
 
 		while (i < length) {
@@ -630,7 +614,7 @@ export default function arrayApi (env) {
 
 		while (i < length) {
 			if (this.node.hasProperty(i)) {
-				current = this.node.getProperty(i).getValue();
+				current = this.node.getValue(i);
 
 				if (contracts.isNullOrUndefined(current)) {
 					arr[i] = "";

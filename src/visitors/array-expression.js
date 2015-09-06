@@ -17,7 +17,7 @@ export default degenerate(function* ArrayExpression (context) {
 			i++;
 		}
 
-		arr.putValue("length", objectFactory.createPrimitive(ln), false, context);
+		arr.putValue("length", objectFactory.createPrimitive(ln), false, context.env);
 	}
 
 	return context.result(arr);

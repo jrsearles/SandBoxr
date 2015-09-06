@@ -18,7 +18,8 @@ import * as contracts from "../utils/contracts";
 
 const frozen = { configurable: false, enumerable: false, writable: false };
 
-export default function ecma51 (env, config = {}) {
+export default function ecma51 (env) {
+	const options = env.options;
 	const objectFactory = env.objectFactory = new ObjectFactory(env);
 	const globalObject = env.global = objectFactory.createObject();
 
@@ -36,18 +37,18 @@ export default function ecma51 (env, config = {}) {
 	// todo: node vs browser - do we care?
 	globalObject.define("window", globalObject, frozen);
 
-	functionAPI(env, config);
-	objectAPI(env, config);
-	arrayAPI(env, config);
-	booleanAPI(env, config);
-	numberAPI(env, config);
-	stringAPI(env, config);
-	dateAPI(env, config);
-	regexAPI(env, config);
-	mathAPI(env, config);
-	errorAPI(env, config);
-	jsonAPI(env, config);
-	consoleAPI(env, config);
+	functionAPI(env, options);
+	objectAPI(env, options);
+	arrayAPI(env, options);
+	booleanAPI(env, options);
+	numberAPI(env, options);
+	stringAPI(env, options);
+	dateAPI(env, options);
+	regexAPI(env, options);
+	mathAPI(env, options);
+	errorAPI(env, options);
+	jsonAPI(env, options);
+	consoleAPI(env, options);
 
 	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(name => {
 		globalObject.define(name, objectFactory.createBuiltInFunction(function (value) {
@@ -67,7 +68,7 @@ export default function ecma51 (env, config = {}) {
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"));
 
-	if (config.parser) {
+	if (options.parser) {
 		let evalFunc = objectFactory.createBuiltInFunction(function (code) {
 			if (!code) {
 				return undefinedClass;
@@ -81,7 +82,7 @@ export default function ecma51 (env, config = {}) {
 			let ast;
 
 			try {
-				ast = config.parser(code.value);
+				ast = options.parser(code.value);
 			} catch (err) {
 				if (err instanceof SyntaxError && /assigning to rvalue/i.test(err.message)) {
 					// hack because acorn throws syntax error
@@ -93,9 +94,9 @@ export default function ecma51 (env, config = {}) {
 
 			let strictScope = env.isStrict();
 			let strictCode = strictScope || contracts.isStrictNode(ast.body);
-			let currentGlobal = env.current.parent === env.globalScope;			
+			let currentGlobal = env.current.scope.parent === env.globalScope.scope;
 			let scope;
-			
+
 			// use the same scope unless this is an "indirect" call
 			// in which case we use the global scope
 			if (directCall) {
@@ -104,30 +105,24 @@ export default function ecma51 (env, config = {}) {
 					if (strictScope) {
 						thisArg = currentGlobal ? globalObject : undefinedClass;
 					} else {
-						thisArg = env.current.getThisBinding() || globalObject;
+						thisArg = env.getThisBinding() || globalObject;
 					}
-					
+
 					scope = env.createScope(thisArg);
 				} else {
-					scope = env.setScope(env.current.parent);
+					scope = env.setScope(env.current.scope.parent);
 				}
 			} else {
-				scope = env.setScope(env.globalScope);
+				scope = env.setScope(env.globalScope.scope);
 				if (strictCode) {
 					scope = env.createScope(globalObject);
 				}
 			}
-			
-			let executionResult;
 
-			try {
-				executionResult = this.create(ast).execute();
-			} catch (err) {
-				scope.exitScope();
-				throw err;
-			}
+			let executionResult = scope.use(() => {
+				return this.create(ast).execute();
+			});
 
-			scope.exitScope();
 			return executionResult && executionResult.result ? executionResult.result.getValue() : undefinedClass;
 		}, 1, "eval");
 
@@ -135,21 +130,21 @@ export default function ecma51 (env, config = {}) {
 	}
 
 	objectFactory.init();
-	
-	if (config.exclude && config.exclude.length > 0) {
-		config.exclude.forEach(name => {
+
+	if (options.exclude && options.exclude.length > 0) {
+		options.exclude.forEach(name => {
 			let segments = name.split(".");
 			let parent = globalObject;
-			
+
 			while (segments.length > 1) {
 				parent = parent.getValue(segments.shift());
-				
+
 				// api not defined - assume user error?
 				if (!parent) {
 					return;
-				}	
+				}
 			}
-			
+
 			parent.remove(segments.shift());
 		});
 	}

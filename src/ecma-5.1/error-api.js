@@ -21,22 +21,22 @@ function createError (objectFactory, message, name) {
 export default function errorApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	
+
 	let errorClass = objectFactory.createFunction(function (message) {
 		return createError(objectFactory, message);
 	}, null, { configurable: false, enumerable: false, writable: false });
 
-	let proto = errorClass.getProperty("prototype").getValue();
+	let proto = errorClass.getValue("prototype");
 	proto.className = "Error";
 	proto.define("name", objectFactory.createPrimitive("Error"));
 	proto.define("message", objectFactory.createPrimitive(""));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {
-		let name = this.node.getProperty("name").getValue();
+		let name = this.node.getValue("name");
 		let msg;
 
 		if (this.node.hasProperty("message")) {
-			msg = convert.toString(env, this.node.getProperty("message").getValue());
+			msg = convert.toString(env, this.node.getValue("message"));
 		}
 
 		name = name && convert.toString(env, name);
@@ -54,7 +54,7 @@ export default function errorApi (env) {
 			return createError(objectFactory, message, type);
 		}, null, { configurable: false, enumerable: false, writable: false });
 
-		let typeProto = errClass.getProperty("prototype").getValue();
+		let typeProto = errClass.getValue("prototype");
 		typeProto.define("name", objectFactory.createPrimitive(type));
 
 		// add to prototype chain to represent inheritance

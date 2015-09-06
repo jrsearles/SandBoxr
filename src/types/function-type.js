@@ -10,7 +10,7 @@ export default class FunctionType extends ObjectType {
 		this.native = false;
 		this.node = node;
 
-		this.parentScope = null;
+		this.boundScope = null;
 		this.boundThis = null;
 	}
 
@@ -18,7 +18,7 @@ export default class FunctionType extends ObjectType {
 		if (strict !== undefined) {
 			this.strict = strict;
 		}
-		
+
 		// set length property from the number of parameters
 		this.defineOwnProperty("length", {
 			value: objectFactory.createPrimitive(this.node.params.length),
@@ -26,17 +26,17 @@ export default class FunctionType extends ObjectType {
 			enumerable: false,
 			writable: false
 		});
-		
+
 		this.initStrict(objectFactory);
-			
+
 		// functions have a prototype
 		proto = proto || objectFactory.createObject();
 		this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
-		
-		// set the contructor property as an instance of  itself
+
+		// set the contructor property as an instance of itself
 		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
 	}
-	
+
 	initStrict (objectFactory) {
 		if (this.isStrict()) {
 			let throwerProps = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
@@ -48,7 +48,7 @@ export default class FunctionType extends ObjectType {
 	}
 
 	getProperty (name) {
-		let prop = super.getProperty.apply(this, arguments);
+		let prop = super.getProperty(name);
 		if (!prop && name !== "prototype") {
 			// since a function instance is itself a function look at our own prototype
 			let proto = this.getProperty("prototype");
@@ -63,48 +63,53 @@ export default class FunctionType extends ObjectType {
 	}
 
 	bindScope (scope) {
-		this.parentScope = scope;
+		this.boundScope = scope;
 	}
-	
+
 	isStrict () {
 		if ("strict" in this) {
 			return this.strict;
 		}
-		
+
 		if (this.native) {
 			return false;
 		}
-		
+
 		return (this.strict = contracts.isStrictNode(this.node.body.body));
 	}
 
 	createScope (env, thisArg) {
 		// if a parent scope is defined we need to limit the scope to that scope
-		let priorScope = env.current;
-		let fn = this;
-		
-		if (this.parentScope) {
-			env.current = this.parentScope;
+		let priorScope = env.current.scope;
+		// let fn = this;
+
+		if (this.boundScope) {
+			env.setScope(this.boundScope.scope);
+			// env.current = this.boundScope;
 		}
-	
-		let args = Array.prototype.slice.call(arguments, 1);
-		if (this.boundThis) {
-			args[0] = this.boundThis;
-		}
-	
-		let scope = env.createScope.apply(env, args);
-		return {
-			init () {
-				if (!fn.native) {
-					scope.init(fn.node.body);
-				}
-			},
-			
-			exitScope () {
-				scope.exitScope();
-				env.current = priorScope;
-			}
-		};
+
+		// let args = Array.prototype.slice.call(arguments, 1);
+		// thisArg = this.boundThis || thisArg;
+		// if (this.boundThis) {
+		// 	args[0] = this.boundThis;
+		// }
+
+		let scope = env.createScope(this.boundThis || thisArg, priorScope);
+		scope.priorScope = priorScope;
+		return scope;
+		// let scope = env.createScope.apply(env, args);
+		// return {
+		// 	init () {
+		// 		if (!fn.native) {
+		// 			scope.init(fn.node.body);
+		// 		}
+		// 	},
+
+		// 	exitScope () {
+		// 		scope.exitScope();
+		// 		env.current = priorScope;
+		// 	}
+		// };
 	}
 
 	hasInstance (obj) {

@@ -5,15 +5,15 @@ describe("Scope", function () {
 	describe("strict mode", function () {
 		it("should detect 'use strict' literal and set scope to strict mode", function () {
 			var scope = runner.getScope("'use strict';");
-			expect(scope.current.strict).to.be.true;
+			expect(scope.isStrict()).to.be.true;
 		});
-		
+
 		it("should inherit strict mode in `eval`", function (done) {
 			var code = "(function() { 'use strict';\neval('var public = 1'); })();";
 			runner.confirmError(code, SyntaxError, done);
 		});
 	});
-	
+
 	describe("Global variables", function () {
 		it("undefined exists", function (done) {
 			runner.confirmBlock("typeof undefined==='undefined';", done);
@@ -53,7 +53,7 @@ describe("Scope", function () {
 		it("should create functions before they are called", function (done) {
 			runner.confirmBlock("function f() { var x;return x;function x() {}\n}\ntypeof f() === 'function'", done);
 		});
-		
+
 		it("should ignore debugger statements", function (done) {
 			runner.confirmBlock("debugger;1==1;", done);
 		});

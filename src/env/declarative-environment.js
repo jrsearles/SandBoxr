@@ -4,7 +4,7 @@ import PropertyDescriptor from "../types/property-descriptor";
 export default class DeclarativeEnvironment {
 	constructor (parent, thisArg, env) {
 		this.properties = Object.create(null);
-		this.parent = parent;
+		this.parent = parent && parent.scope;
 		this.strict = parent.strict;
 		this.thisBinding = thisArg;
 		this.env = env;

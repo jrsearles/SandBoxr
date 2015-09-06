@@ -19,8 +19,8 @@ export default class ArgumentType extends ObjectType {
 		if (ownProperty) {
 			return ownProperty;
 		}
-	
-		return super.getProperty.apply(this, arguments);
+
+		return super.getProperty(name);
 	}
 
 	getOwnProperty (name) {
@@ -35,7 +35,7 @@ export default class ArgumentType extends ObjectType {
 			return mappedProperty;
 		}
 
-		return super.getOwnProperty.apply(this, arguments);
+		return super.getOwnProperty(name);
 	}
 
 	defineOwnProperty (name, descriptor, throwOnError) {
