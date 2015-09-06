@@ -6,10 +6,8 @@
 ## TODO for 1.0
 - ~~Finish implementation!~~
 - ~~Finalize API, including extension points~~
-- Strict mode (may end up in next version)
+- ~~Strict mode~~
 - ~~Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)~~
-- Add some sensible detection of infinite loops
-- Improve try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward.)
 - Docs & Examples - see beginnings below as API becomes stable
 - ~~Battle testing in production~~
 - ~~Port the library to ES6 - this will likely take the pain away from some of the async implementation~~
@@ -18,6 +16,8 @@
 ## TODO vNext
 - Begin implementing [ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html). This may be done as a plugin - not sure yet.
 - Performance measurements/optimizations
+- Add detection of infinite loops
+- Improve try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward.)
 - Possible: allow stepping/pausing of code execution
 - Possible: directly integrate external parser (with ability to override)
 
@@ -25,11 +25,11 @@
 
 ## Purpose
 
-The purpose of this library is to safely allow user generated code to be run in an isolated environment. Code executed through the runner cannot alter state or maliciously exploit the executing context. The primary intent is browser usage, though it works in non-browser environments as well.
+The purpose of this library is to safely allow user generated code to be run in an isolated environment. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary intended usage is targetted towards the browser, though it works in non-browser environments as well.
 
 This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). To simplify development, the stepping mechanisms in `JS Interpreter` are not present here, though using ES6 generators should allow these to be incorporated at some point.
 
-Upon discovering the [Test 262 conformance suite](test262.md) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
+Upon discovering the [Test 262 conformance suite](test262.md) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
 
 ## Usage
 
@@ -46,10 +46,32 @@ sandbox.execute().then(function (result) {
 });
 ```
 
-Want to remove certain APIs? Use the `exclude` option which accepts an array of strings indicating objects or functions to exclude:
+### Options
+
+#### options.parser
+Type: `Function`
+Default: `undefined`
+
+Support for dynamic code compilation of `eval` and `Function(string)` are not supported unless a parsing function is indicated in the config. Example using [Acorn](https://github.com/marijnh/acorn):
 
 ```js
-var sandbox = SandBoxr.create(ast, { 
+var sandbox = SandBoxr.create(ast, { parser: acorn.parse });
+```
+
+#### options.useStrict
+Type: `Boolean`
+Default: `false`
+
+Forces the runner to execute all code in *[strict mode](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode)*.
+
+#### options.exclude
+Type: `Array<String>`
+Default: `undefined`
+
+Use the `exclude` option which accepts an array of strings indicating objects or functions to exclude:
+
+```js
+var sandbox = SandBoxr.create(ast, {
 	exclude: [
 		// remove JSON support
 		"JSON",
@@ -57,17 +79,18 @@ var sandbox = SandBoxr.create(ast, {
 		"console",
 		// remove specific methods
 		"String.prototype.match"
-	] 
+	]
 });
 ```
-
 *Be careful with removing primitives - don't expect to get very far without `String` or `Number` for example!*
 
-Support for dynamic code compilation of `eval` and `Function(string)` are not supported unless a parsing function is indicated in the config. Example using [Acorn](https://github.com/marijnh/acorn):
+#### options.allowDebugger
+Type: `Boolean`
+Default: `false`
 
-```js
-var sandbox = SandBoxr.create(ast, { parser: acorn.parse });
-```
+Allows `debugger` statements to be used. When enabled a `debugger` statement is generated when the statement is hit. (Otherwise `debugger` statements are ignored.)
+
+#### Extending available APIs
 
 To add additional objects or functions into the execution function, create the environment and add them:
 
@@ -82,10 +105,10 @@ a.setValue(env.objectFactory.createPrimitive(99));
 var obj = env.objectFactory.createObject();
 obj.define("doSomething", env.objectFactory.createFunction(function () {
 	// all arguments will be wrapped objects
-	
+
 	// `this` is available via `this.node`
 	this.node == obj; // true
-	
+
 	// todo: more documentation on available APIs
 });
 
@@ -102,7 +125,7 @@ Async support is easy - just return a Promise (or any "thenable") from your meth
 
 ```js
 var env = SandBoxr.createEnvironment();
-		
+
 var fooFunc = env.objectFactory.createFunction(function () {
 	return $.get("/some/server/request").then(function (res) {
 		// remember that anything you pass back needs to be wrapped
@@ -125,6 +148,7 @@ foo.setValue(fooFunc);
 ### Compatibility
 
 All browsers that implement support for ECMAScript 5.1 should support this library. This includes IE9+ and other modern browsers.
+
 ## License
 
 [Apache 2.0](LICENSE)
