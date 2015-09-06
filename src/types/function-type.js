@@ -47,16 +47,16 @@ export default class FunctionType extends ObjectType {
 		}
 	}
 
-	getProperty (name) {
-		let prop = super.getProperty(name);
-		if (!prop && name !== "prototype") {
-			// since a function instance is itself a function look at our own prototype
-			let proto = this.getProperty("prototype");
-			return proto && proto.getValue().getProperty(name);
-		}
+	// getProperty (name) {
+	// 	let prop = super.getProperty(name);
+	// 	if (!prop && name !== "prototype") {
+	// 		// since a function instance is itself a function look at our own prototype
+	// 		let proto = this.getProperty("prototype");
+	// 		return proto && proto.getValue().getProperty(name);
+	// 	}
 
-		return prop;
-	}
+	// 	return prop;
+	// }
 
 	bindThis (thisArg) {
 		this.boundThis = thisArg;

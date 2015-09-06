@@ -1,6 +1,9 @@
 import * as contracts from "../utils/contracts";
 import "../polyfills";
 
+const ASCENDING = (a, b) => a - b;
+const DESCENDING = (a, b) => b - a;
+
 export default class SparseIterator {
 	constructor (obj, start, end, desc) {
 		this.object = obj;
@@ -40,7 +43,7 @@ export default class SparseIterator {
 			current = current.getPrototype();
 		}
 
-		this.keys.sort();
+		this.keys.sort(this.asc ? ASCENDING : DESCENDING);
 	}
 
 	next () {
@@ -49,7 +52,7 @@ export default class SparseIterator {
 		}
 
 		if (this.keys.length > 0) {
-			let index = this.position = this.keys[this.asc ? "shift" : "pop"]();
+			let index = this.position = this.keys.shift();
 			let value = this.props[index].getValue();
 
 			return {

@@ -6756,6 +6756,13 @@ var contracts = _interopRequireWildcard(_utilsContracts);
 
 require("../polyfills");
 
+var ASCENDING = function ASCENDING(a, b) {
+	return a - b;
+};
+var DESCENDING = function DESCENDING(a, b) {
+	return b - a;
+};
+
 var SparseIterator = (function () {
 	function SparseIterator(obj, start, end, desc) {
 		_classCallCheck(this, SparseIterator);
@@ -6800,7 +6807,7 @@ var SparseIterator = (function () {
 				current = current.getPrototype();
 			}
 
-			this.keys.sort();
+			this.keys.sort(this.asc ? ASCENDING : DESCENDING);
 		}
 	}, {
 		key: "next",
@@ -6810,7 +6817,7 @@ var SparseIterator = (function () {
 			}
 
 			if (this.keys.length > 0) {
-				var index = this.position = this.keys[this.asc ? "shift" : "pop"]();
+				var index = this.position = this.keys.shift();
 				var value = this.props[index].getValue();
 
 				return {
@@ -7502,18 +7509,18 @@ var FunctionType = (function (_ObjectType) {
 				this.defineOwnProperty("caller", { value: objectFactory.createPrimitive(undefined) });
 			}
 		}
-	}, {
-		key: "getProperty",
-		value: function getProperty(name) {
-			var prop = _get(Object.getPrototypeOf(FunctionType.prototype), "getProperty", this).call(this, name);
-			if (!prop && name !== "prototype") {
-				// since a function instance is itself a function look at our own prototype
-				var proto = this.getProperty("prototype");
-				return proto && proto.getValue().getProperty(name);
-			}
 
-			return prop;
-		}
+		// getProperty (name) {
+		// 	let prop = super.getProperty(name);
+		// 	if (!prop && name !== "prototype") {
+		// 		// since a function instance is itself a function look at our own prototype
+		// 		let proto = this.getProperty("prototype");
+		// 		return proto && proto.getValue().getProperty(name);
+		// 	}
+
+		// 	return prop;
+		// }
+
 	}, {
 		key: "bindThis",
 		value: function bindThis(thisArg) {

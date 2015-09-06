@@ -7,11 +7,6 @@ describe("Scope", function () {
 			var scope = runner.getScope("'use strict';");
 			expect(scope.isStrict()).to.be.true;
 		});
-
-		it("should inherit strict mode in `eval`", function (done) {
-			var code = "(function() { 'use strict';\neval('var public = 1'); })();";
-			runner.confirmError(code, SyntaxError, done);
-		});
 	});
 
 	describe("Global variables", function () {
