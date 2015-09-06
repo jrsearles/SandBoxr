@@ -25,7 +25,7 @@
 
 ## Purpose
 
-The purpose of this library is to safely allow user generated code to be run in an isolated environment. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary intended usage is targetted towards the browser, though it works in non-browser environments as well.
+The purpose of this library is to safely allow user generated code to be run in isolation. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary intended usage is targetted towards the browser, though it works in non-browser environments as well.
 
 This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). To simplify development, the stepping mechanisms in `JS Interpreter` are not present here, though using ES6 generators should allow these to be incorporated at some point.
 

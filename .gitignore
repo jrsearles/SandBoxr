@@ -1,6 +1,6 @@
 node_modules
 test262/
 test262.log
-typings/
+typings
 jsconfig.json
 .settings
