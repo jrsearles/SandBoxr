@@ -27,6 +27,7 @@ rules:
     prefer-spread: 1
     #prefer-template: 2
     radix: 2
+    semi: 2
     space-after-keywords: [2, "always"]
     space-before-blocks: 2
     space-before-function-paren: [2, "always"]

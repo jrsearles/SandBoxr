@@ -1,1 +1,2 @@
-export {SandBoxr} from "./src";
+import {SandBoxr} from "./src";
+export default SandBoxr;

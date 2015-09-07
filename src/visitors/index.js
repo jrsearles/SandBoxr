@@ -3,7 +3,7 @@ import AssignmentExpression from "./assignment-expression";
 import BinaryExpression from "./binary-expression";
 import BlockStatement from "./block-statement";
 import BreakStatement from "./interrupt-statement";
-import CallExpression from "./call-expression"
+import CallExpression from "./call-expression";
 import ConditionalExpression from "./if-statement";
 import DebuggerStatement from "./debugger-statement";
 import DoWhileStatement from "./do-while-statement.js";

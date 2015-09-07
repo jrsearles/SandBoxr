@@ -10,21 +10,47 @@ var rename = require("gulp-rename");
 var streamify = require("gulp-streamify");
 var sourcemaps = require("gulp-sourcemaps");
 
+var header = [
+	"/*!",
+	" * SandBoxr JavaScript library v<#= pkg.version #>",
+	" * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr",
+	" * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)",
+	" */",
+	""
+].join("\n");
+
 gulp.task("build", ["lint"], function () {
-	return browserify({ standalone: "SandBoxr" })
+	// return browserify({ standalone: "SandBoxr", debug: true })
+	// 	.transform(babelify.configure({ optional: ["runtime"], sourceMaps: true }))
+	// 	.require("./src/", { entry: true })
+	// 	.bundle()
+	// 	.pipe(source("sandboxr.js"))
+	// 	.pipe(buffer())
+	// 	.pipe(gulp.dest("./dist/"))
+
+	// 	// minified copy
+	// 	.pipe(streamify(uglify()))
+	// 	.pipe(rename("sandboxr.min.js"))
+	// 	.pipe(gulp.dest("./dist/"));
+
+	return browserify({ standalone: "SandBoxr", debug: true })
 		.transform(babelify.configure({ optional: ["runtime"], sourceMaps: true }))
-		.require("./src/", { entry: true })
+		.require("./", { entry: true })
 		.bundle()
 		.pipe(source("sandboxr.js"))
 		.pipe(buffer())
 		.pipe(gulp.dest("./dist/"))
 
 		// minified copy
-		// .pipe(sourcemaps.init({ loadMaps: true }))
+		.pipe(sourcemaps.init({ loadMaps: true }))
 		.pipe(streamify(uglify()))
-		// .pipe(sourcemaps.write("./"))
+		.pipe(sourcemaps.write("./"))
 		.pipe(rename("sandboxr.min.js"))
 		.pipe(gulp.dest("./dist/"));
+});
+
+gulp.task("watch", ["lint"], function () {
+	gulp.watch("./src/**/*", ["build"]);
 });
 
 gulp.task("test", function () {
@@ -35,11 +61,8 @@ gulp.task("test", function () {
 gulp.task("lint", function () {
 	return gulp.src(["./src/**/*.js"])
 		.pipe(eslint())
-		.pipe(eslint.format());
+		.pipe(eslint.format())
+		.pipe(eslint.failAfterError());
 });
 
 gulp.task("default", ["build"]);
-
-gulp.task("watch", function () {
-	gulp.watch("./src/**/*.js", ["build", "test"]);
-});

@@ -46,7 +46,7 @@ export function assertIsValidAssignment (left, strict) {
 	if (left && !left.isReference) {
 		throw new ReferenceError("Invalid left-hand side in assignment");
 	}
-	
+
 	if (left && left.base === left.env.global) {
 		assertIsValidName(left.name, strict);
 	}
@@ -56,19 +56,19 @@ export function	assertIsValidParameterName (name, strict) {
 	if (/^\d|[;\(\)"']/.test(name)) {
 		throw new SyntaxError(`Unexpected token in ${name}`);
 	}
-	
+
 	assertIsValidName(name, strict);
 }
 
 export function assertIsValidName (name, strict) {
 	if (strict && (name === "arguments" || name === "eval")) {
-		throw new SyntaxError("Unexpected eval or arguments in strict mode");	
+		throw new SyntaxError("Unexpected eval or arguments in strict mode");
 	}
 }
 
 export function	assertIsNotGeneric (obj, expectedClass, methodName) {
 	if (!obj || obj.className !== expectedClass) {
-		throw new TypeError(`${methodName} is not generic`)
+		throw new TypeError(`${methodName} is not generic`);
 	}
 }
 
@@ -114,7 +114,7 @@ export function isOctalLiteral (rawValue, actualValue) {
 	if (typeof actualValue === "number" && octalPattern.test(rawValue)) {
 		return true;
 	}
-	
+
 	if (typeof actualValue === "string") {
 		let match = rawValue.match(octalEscapePattern);
 		if (match) {
@@ -124,7 +124,7 @@ export function isOctalLiteral (rawValue, actualValue) {
 			}
 		}
 	}
-	
+
 	return false;
 }
 
@@ -168,12 +168,12 @@ export function isStrictNode (nodes) {
 			if (!isDirective(node)) {
 				return false;
 			}
-			
+
 			if (node.expression.value === "use strict" && useStrictPattern.test(node.expression.raw)) {
 				return true;
 			}
 		}
 	}
-	
+
 	return false;
 }

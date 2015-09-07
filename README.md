@@ -3,21 +3,24 @@
 
 -----
 
+The current release can be considered a release candidate. Barring some low-level API changes and further documentation the release is now feature complete.
+
 ## TODO for 1.0
 - ~~Finish implementation!~~
 - ~~Finalize API, including extension points~~
 - ~~Strict mode~~
 - ~~Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)~~
-- Docs & Examples - see beginnings below as API becomes stable
 - ~~Battle testing in production~~
 - ~~Port the library to ES6 - this will likely take the pain away from some of the async implementation~~
 - ~~Async support~~ (excluding timers)
+- Docs & Examples / Stabilize API
 
 ## TODO vNext
-- Begin implementing [ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html). This may be done as a plugin - not sure yet.
+- Begin implementing [ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html). This may be done as a plugin - not sure yet. This will become more clear as implementation begins.
 - Performance measurements/optimizations
 - Add detection of infinite loops
-- Improve try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward.)
+- Refactor execution results, try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward and we'd be better off returning a response and let exceptions bubble up without actually throwing where possible.)
+- Split out some of the code into separate packages
 - Possible: allow stepping/pausing of code execution
 - Possible: directly integrate external parser (with ability to override)
 
