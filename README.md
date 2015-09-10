@@ -32,7 +32,7 @@ The purpose of this library is to safely allow user generated code to be run in 
 
 This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). To simplify development, the stepping mechanisms in `JS Interpreter` are not present here, though using ES6 generators should allow these to be incorporated at some point.
 
-Upon discovering the [Test 262 conformance suite](test262.md) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
+Upon discovering the [Test 262 conformance suite](https://github.com/tc39/test262) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
 
 ## Usage
 

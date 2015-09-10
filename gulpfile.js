@@ -10,6 +10,8 @@ var rename = require("gulp-rename");
 var streamify = require("gulp-streamify");
 var sourcemaps = require("gulp-sourcemaps");
 
+require("./tasks/test262");
+
 var header = [
 	"/*!",
 	" * SandBoxr JavaScript library v<#= pkg.version #>",
@@ -20,19 +22,6 @@ var header = [
 ].join("\n");
 
 gulp.task("build", ["lint"], function () {
-	// return browserify({ standalone: "SandBoxr", debug: true })
-	// 	.transform(babelify.configure({ optional: ["runtime"], sourceMaps: true }))
-	// 	.require("./src/", { entry: true })
-	// 	.bundle()
-	// 	.pipe(source("sandboxr.js"))
-	// 	.pipe(buffer())
-	// 	.pipe(gulp.dest("./dist/"))
-
-	// 	// minified copy
-	// 	.pipe(streamify(uglify()))
-	// 	.pipe(rename("sandboxr.min.js"))
-	// 	.pipe(gulp.dest("./dist/"));
-
 	return browserify({ standalone: "SandBoxr", debug: true })
 		.transform(babelify.configure({ optional: ["runtime"], sourceMaps: true }))
 		.require("./", { entry: true })
@@ -49,7 +38,9 @@ gulp.task("build", ["lint"], function () {
 		.pipe(gulp.dest("./dist/"));
 });
 
-gulp.task("watch", ["lint"], function () {
+gulp.task("release", ["build", "test262"]);
+
+gulp.task("watch", function () {
 	gulp.watch("./src/**/*", ["build"]);
 });
 
