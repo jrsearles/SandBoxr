@@ -8,8 +8,8 @@ export default function numberApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
 
-	let numberClass = objectFactory.createFunction(function (obj) {
-		let numberValue = Number(convert.toPrimitive(env, obj, "number"));
+	let numberClass = objectFactory.createFunction(function* (obj) {
+		let numberValue = Number(yield convert.toPrimitive(env, obj, "number"));
 
 		if (this.isNew) {
 			return convert.primitiveToObject(env, numberValue);
@@ -22,26 +22,26 @@ export default function numberApi (env) {
 	proto.className = "Number";
 	proto.value = 0;
 
-	proto.define("toString", objectFactory.createBuiltInFunction(function (radix) {
+	proto.define("toString", objectFactory.createBuiltInFunction(function* (radix) {
 		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toString");
 
 		let radixValue = 10;
 		if (radix) {
-			radixValue = convert.toPrimitive(env, radix, "number");
+			radixValue = yield convert.toPrimitive(env, radix, "number");
 			if (radixValue < 2 || radixValue > 36) {
-				throw new RangeError("toString() radix argument must be between 2 and 36");
+				return this.raise(new RangeError("toString() radix argument must be between 2 and 36"));
 			}
 		}
 
 		return objectFactory.createPrimitive(this.node.value == null ? "0" : this.node.value.toString(radixValue));
 	}, 1, "Number.prototype.toString"));
 
-	proto.define("toFixed", objectFactory.createBuiltInFunction(function (fractionDigits) {
+	proto.define("toFixed", objectFactory.createBuiltInFunction(function* (fractionDigits) {
 		contracts.assertIsNotGeneric(this.node, "Number", "Number.prototype.toFixed");
 
 		let digits = 0;
 		if (fractionDigits) {
-			digits = convert.toNumber(env, fractionDigits);
+			digits = yield convert.toNumber(env, fractionDigits);
 		}
 
 		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.value, digits));

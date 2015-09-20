@@ -4,7 +4,7 @@ describe("Functions", function () {
 	it("Function should have a prototype of function", function (done) {
 		runner.confirmBlock("Object.getPrototypeOf(Function)===Function.prototype;", done);
 	});
-	
+
 	it("should return a value from a named function", function (done) {
 		runner.confirmBlock("function a() { return 50; }\na()==50;", done);
 	});
@@ -44,7 +44,7 @@ describe("Functions", function () {
 	it("should link arguments object to the named parameters", function (done) {
 		runner.confirmBlock("(function (a) { a++;return a===arguments[0]; })(1)==true;", done);
 	});
-	
+
 	it("should allow function prototype to be called", function (done) {
 		runner.confirmBlock("Function.prototype()===undefined;", done);
 	});

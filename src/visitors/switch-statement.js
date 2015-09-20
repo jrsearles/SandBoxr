@@ -1,6 +1,4 @@
-import {degenerate} from "../utils/async";
-
-let executeStatements = degenerate(function* executeStatements (context, statements) {
+function* executeStatements (context, statements) {
 	let result;
 	for (let statement of statements) {
 		result = yield context.create(statement).execute();
@@ -8,15 +6,15 @@ let executeStatements = degenerate(function* executeStatements (context, stateme
 			return result;
 		}
 	}
-	
-	return result;
-});
 
-export default degenerate(function* SwitchStatement (context) {
+	return result;
+}
+
+export default function* SwitchStatement (context) {
 	let testValue = (yield context.create(context.node.discriminant).execute()).result.getValue();
 	let passed = false;
 	let value, defaultCase;
-	
+
 	for (let current of context.node.cases) {
 		if (!passed) {
 			if (current.test) {
@@ -30,7 +28,7 @@ export default degenerate(function* SwitchStatement (context) {
 				continue;
 			}
 		}
-		
+
 		passed = true;
 		value = yield executeStatements(context, current.consequent);
 		if (value && value.isCancelled()) {
@@ -38,7 +36,7 @@ export default degenerate(function* SwitchStatement (context) {
 			return value;
 		}
 	}
-	
+
 	if (!passed && defaultCase && defaultCase.consequent) {
 		value = yield executeStatements(context, defaultCase.consequent);
 		value.cancel = false;
@@ -46,4 +44,4 @@ export default degenerate(function* SwitchStatement (context) {
 	}
 
 	return value;
-});
+}

@@ -6,4 +6,8 @@ export default class ErrorType extends ObjectType {
 		this.source = source;
 		this.className = "Error";
 	}
+
+	unwrap () {
+		return this.source;
+	}
 }

@@ -39,8 +39,8 @@
     "yargs": "^3.10.0"
   },
   "dependencies": {
-    "babel-runtime": "^5.8.20",
-    "core-js": "^1.0.1",
-    "regenerator": "^0.8.36"
+    "babel-runtime": "^5.8.24",
+    "core-js": "~1.1.4",
+    "regenerator": "^0.8.38"
   }
 }

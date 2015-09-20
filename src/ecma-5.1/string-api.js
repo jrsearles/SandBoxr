@@ -1,6 +1,7 @@
 import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
+import {exhaust as x, map as asyncMap} from "../utils/async";
 
 const protoMethods = ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"];
 const slice = Array.prototype.slice;
@@ -10,8 +11,8 @@ export default function stringApi (env) {
 	const undef = globalObject.getValue("undefined");
 	const objectFactory = env.objectFactory;
 
-	let stringClass = objectFactory.createFunction(function (value) {
-		let stringValue = value ? convert.toString(env, value.getValue()) : "";
+	let stringClass = objectFactory.createFunction(function* (value) {
+		let stringValue = value ? (yield convert.toString(env, value.getValue())) : "";
 
 		// called as new
 		if (this.isNew) {
@@ -28,29 +29,29 @@ export default function stringApi (env) {
 	proto.className = "String";
 	proto.defineOwnProperty("length", { value: objectFactory.createPrimitive(0) });
 
-	proto.define("search", objectFactory.createBuiltInFunction(function (regex) {
-		let stringValue = convert.toString(env, this.node);
+	proto.define("search", objectFactory.createBuiltInFunction(function* (regex) {
+		let stringValue = yield convert.toString(env, this.node);
 		let underlyingRegex;
 
 		if (regex) {
 			if (regex.className === "RegExp") {
 				underlyingRegex = regex.source;
 			} else {
-				underlyingRegex = new RegExp(convert.toString(env, regex));
+				underlyingRegex = new RegExp(yield convert.toString(env, regex));
 			}
 		}
 
 		return objectFactory.createPrimitive(stringValue.search(underlyingRegex));
 	}, 1, "String.prototype.search"));
 
-	proto.define("substring", objectFactory.createBuiltInFunction(function (start, end) {
+	proto.define("substring", objectFactory.createBuiltInFunction(function* (start, end) {
 		contracts.assertIsNotConstructor(this, "substring");
 
-		let value = convert.toPrimitive(env, this.node, "string");
+		let value = yield convert.toPrimitive(env, this.node, "string");
 		let length = value.length;
 
-		start = convert.toInteger(env, start);
-		end = contracts.isNullOrUndefined(end) ? length : convert.toInteger(env, end);
+		start = yield convert.toInteger(env, start);
+		end = contracts.isNullOrUndefined(end) ? length : (yield convert.toInteger(env, end));
 
 		return objectFactory.createPrimitive(value.substring(start, end));
 	}, 2, "String.prototype.substring"));
@@ -58,36 +59,37 @@ export default function stringApi (env) {
 	protoMethods.forEach(name => {
 		let fn = String.prototype[name];
 		if (fn) {
-			proto.define(name, objectFactory.createBuiltInFunction(function () {
-				let stringValue = convert.toString(env, this.node);
-				let args = slice.call(arguments).map(arg => convert.toPrimitive(env, arg));
+			proto.define(name, objectFactory.createBuiltInFunction(function* () {
+				let stringValue = yield convert.toString(env, this.node);
+				let args = yield asyncMap(arguments, function* (arg) { return yield convert.toPrimitive(env, arg); });
+
 				return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
 			}, String.prototype[name].length, "String.prototype." + name));
 		}
 	});
 
-	stringClass.define("fromCharCode", objectFactory.createBuiltInFunction(function (...charCodes) {
-		let args = charCodes.map(arg => convert.toPrimitive(env, arg));
+	stringClass.define("fromCharCode", objectFactory.createBuiltInFunction(function* (...charCodes) {
+		let args = yield asyncMap(charCodes, function* (arg) { return yield convert.toPrimitive(env, arg); });
 		return objectFactory.createPrimitive(String.fromCharCode.apply(null, args));
 	}, 1, "String.fromCharCode"));
 
-	proto.define("slice", objectFactory.createBuiltInFunction(function (start, end) {
-		let stringValue = convert.toString(env, this.node);
-		let startValue = convert.toInteger(env, start);
+	proto.define("slice", objectFactory.createBuiltInFunction(function* (start, end) {
+		let stringValue = yield convert.toString(env, this.node);
+		let startValue = yield convert.toInteger(env, start);
 		let endValue;
 
 		if (!contracts.isNullOrUndefined(end)) {
-			endValue = convert.toInteger(env, end);
+			endValue = yield convert.toInteger(env, end);
 		}
 
 		return objectFactory.createPrimitive(stringValue.slice(startValue, endValue));
 	}, 2, "String.prototype.slice"));
 
-	proto.define("split", objectFactory.createBuiltInFunction(function (separator, limit) {
-		let stringValue = convert.toString(env, this.node);
+	proto.define("split", objectFactory.createBuiltInFunction(function* (separator, limit) {
+		let stringValue = yield convert.toString(env, this.node);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();
-		let limitValue = contracts.isUndefined(limit) ? undefined : convert.toUInt32(env, limit);
+		let limitValue = contracts.isUndefined(limit) ? undefined : (yield convert.toUInt32(env, limit));
 
 		let arr = objectFactory.create("Array");
 		if (contracts.isUndefined(separator)) {
@@ -97,7 +99,7 @@ export default function stringApi (env) {
 			if (separator.className === "RegExp") {
 				separatorValue = separator.source;
 			} else {
-				separatorValue = convert.toString(env, separator);
+				separatorValue = yield convert.toString(env, separator);
 			}
 
 			let result = stringValue.split(separatorValue, limitValue);
@@ -109,14 +111,14 @@ export default function stringApi (env) {
 		return arr;
 	}, 2, "String.prototype.split"));
 
-	proto.define("replace", objectFactory.createBuiltInFunction(function (regexOrSubstr, substrOrFn) {
-		let stringValue = convert.toString(env, this.node);
+	proto.define("replace", objectFactory.createBuiltInFunction(function* (regexOrSubstr, substrOrFn) {
+		let stringValue = yield convert.toString(env, this.node);
 
 		let matcher;
 		if (regexOrSubstr && regexOrSubstr.className === "RegExp") {
 			matcher = regexOrSubstr.source;
 		} else {
-			matcher = convert.toString(env, regexOrSubstr);
+			matcher = yield convert.toString(env, regexOrSubstr);
 		}
 
 		let replacer;
@@ -127,24 +129,24 @@ export default function stringApi (env) {
 			replacer = function () {
 				let thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
 				let args = slice.call(arguments).map(arg => objectFactory.createPrimitive(arg));
-				let replacedValue = func.executeFunction(env, substrOrFn, params, args, thisArg, callee);
-				return replacedValue ? convert.toString(env, replacedValue) : undefined;
+				let replacedValue = x(func.executeFunction(env, substrOrFn, params, args, thisArg, callee));
+				return replacedValue ? x(convert.toString(env, replacedValue)) : undefined;
 			};
 		} else {
-			replacer = convert.toString(env, substrOrFn);
+			replacer = yield convert.toString(env, substrOrFn);
 		}
 
 		return objectFactory.createPrimitive(stringValue.replace(matcher, replacer));
 	}, 2, "String.prototype.replace"));
 
-	proto.define("match", objectFactory.createBuiltInFunction(function (regex) {
-		let stringValue = convert.toString(env, this.node);
+	proto.define("match", objectFactory.createBuiltInFunction(function* (regex) {
+		let stringValue = yield convert.toString(env, this.node);
 		let actualRegex;
 
 		if (regex && regex.className === "RegExp") {
 			actualRegex = regex.source;
 		} else if (regex) {
-			actualRegex = new RegExp(convert.toPrimitive(env, regex));
+			actualRegex = new RegExp(yield convert.toPrimitive(env, regex));
 		}
 
 		let match = stringValue.match(actualRegex);
@@ -163,10 +165,10 @@ export default function stringApi (env) {
 		return globalObject.getValue("null");
 	}, 1, "String.prototype.match"));
 
-	proto.define("trim", objectFactory.createBuiltInFunction(function () {
+	proto.define("trim", objectFactory.createBuiltInFunction(function* () {
 		contracts.assertIsNotNullOrUndefined(this.node, "String.prototype.trim");
 
-		let stringValue = convert.toPrimitive(env, this.node, "string");
+		let stringValue = yield convert.toPrimitive(env, this.node, "string");
 		return objectFactory.createPrimitive(stringValue.trim());
 	}, 0, "String.prototype.trim"));
 

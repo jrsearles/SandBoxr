@@ -1,8 +1,8 @@
+import ObjectType from "./object-type";
 import PrimitiveType from "./primitive-type";
 import FunctionType from "./function-type";
 import NativeFunctionType from "./native-function-type";
 import RegexType from "./regex-type";
-import ObjectType from "./object-type";
 import ArrayType from "./array-type";
 import StringType from "./string-type";
 import DateType from "./date-type";
@@ -18,10 +18,8 @@ const parentless = {
 let orphans = Object.create(null);
 
 function setOrphans (scope) {
-	let parent;
-
 	for (let typeName in orphans) {
-		parent = scope.getValue(typeName);
+		let parent = scope.getValue(typeName);
 		if (parent) {
 			orphans[typeName].forEach(function (child) {
 				child.setPrototype(parent.getValue("prototype"));
@@ -40,16 +38,18 @@ function setProto (typeName, instance, env) {
 	}
 
 	let parent = env.getReference(typeName);
-	if (!parent.isUnresolved()) {
-		instance.setPrototype(parent.getValue().getProperty("prototype").getValue());
+	if (parent.isUnresolved()) {
+		// during initialization it is possible for objects to be created
+		// before the types have been registered - add a registry of items
+		// and these can be filled in when the type is registered
+		orphans[typeName] = orphans[typeName] || [];
+		orphans[typeName].push(instance);
+
 		return;
 	}
 
-	// during initialization it is possible for objects to be created
-	// before the types have been registered - add a registry of items
-	// and these can be filled in when the type is registered
-	orphans[typeName] = orphans[typeName] || [];
-	orphans[typeName].push(instance);
+	let proto = parent.getValue().getValue("prototype");
+	instance.setPrototype(proto);
 }
 
 export default function ObjectFactory (env) {
@@ -68,6 +68,12 @@ ObjectFactory.prototype = {
 	},
 
 	create (typeName, value) {
+		// the value is already wrapped in an object
+		// this can happen if an exception is rethrown
+		if (value && value instanceof ObjectType) {
+			return value;
+		}
+
 		let instance;
 
 		switch (typeName) {
@@ -145,14 +151,14 @@ ObjectFactory.prototype = {
 			instance.defineOwnProperty("callee", thrower);
 			instance.defineOwnProperty("caller", thrower);
 		} else {
-			instance.defineOwnProperty("callee", { 
-				configurable: true, 
+			instance.defineOwnProperty("callee", {
+				configurable: true,
 				enumerable: false,
 				value: callee,
 				writable: true
 			});
 		}
-		
+
 		return instance;
 	},
 
@@ -190,17 +196,17 @@ ObjectFactory.prototype = {
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
 	},
-	
+
 	createThrower (message, thrower) {
 		this.throwers = this.throwers || Object.create(null);
 		if (message in this.throwers) {
 			return this.throwers[message];
 		}
-		
+
 		thrower = thrower || function () {
 			throw new TypeError(message);
 		};
-		
+
 		// we want to keep the same instance of the throwers because there
 		// are silly tests that check for this
 		let throwerInstance = this.createBuiltInFunction(thrower);

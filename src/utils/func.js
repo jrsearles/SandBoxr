@@ -1,6 +1,4 @@
-import {degenerate} from "./async";
-
-export let executeFunction = degenerate(function* (env, fn, params, args, thisArg, callee, isNew) {
+export function* executeFunction (env, fn, params, args, thisArg, callee, isNew) {
 	let scope = fn.createScope(env, thisArg, false);
 	let returnResult;
 
@@ -11,12 +9,12 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 	scope.loadArgs(params, args, fn);
 	scope.init(fn.node && fn.node.body);
 
-	returnResult = yield scope.use(() => {
+	returnResult = yield scope.use(function* () {
 		if (fn.native) {
-			return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
+			return yield fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee, isNew), args) || returnResult;
 		}
-		
-		let executionResult = env.createExecutionContext(fn.node.body, callee, isNew).execute();
+
+		let executionResult = yield env.createExecutionContext(fn.node.body, callee, isNew).execute();
 		if (executionResult && executionResult.exit && executionResult.result) {
 			if (!isNew || !executionResult.result.isPrimitive) {
 				return executionResult.result;
@@ -27,23 +25,23 @@ export let executeFunction = degenerate(function* (env, fn, params, args, thisAr
 	});
 
 	return returnResult || env.global.getValue("undefined");
-});
+}
 
-export function	getFunctionResult (env, fn, params, args, thisArg, callee) {
+export function* getFunctionResult (env, fn, params, args, thisArg, callee) {
 	let scope = fn.createScope(env, thisArg, false);
 	scope.loadArgs(params, args, fn);
 	scope.init(fn.node && fn.node.body);
 
-	return scope.use(() => {
+	return yield scope.use(function* () {
 		if (fn.native) {
-			return fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
+			return yield fn.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
 		}
 
-		return env.createExecutionContext(fn.node.body, callee).execute();
+		return yield env.createExecutionContext(fn.node.body, callee).execute();
 	});
 }
 
-export function	tryCallMethod (env, obj, name) {
+export function* tryCallMethod (env, obj, name) {
 	let fn = obj.getProperty(name);
 	if (!fn) {
 		return false;
@@ -56,14 +54,14 @@ export function	tryCallMethod (env, obj, name) {
 		let scope = fn.createScope(env, obj);
 		scope.init(fn.node && fn.node.body);
 
-		let executionResult = scope.use(() => {
+		let executionResult = yield scope.use(function* () {
 			if (fn.native) {
-				return fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
+				return yield fn.nativeFunction.apply(env.createExecutionContext(obj, obj), []);
 			}
 
 			scope.loadArgs(fn.node.params, [], fn);
 
-			let result = env.createExecutionContext(fn.node.body, fn.node).execute();
+			let result = yield env.createExecutionContext(fn.node.body, fn.node).execute();
 			return result && result.result;
 		});
 

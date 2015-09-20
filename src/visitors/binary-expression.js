@@ -1,7 +1,7 @@
 import * as operators from "../utils/operators";
-import {degenerate} from "../utils/async";
+import * as comparers from "../utils/comparers";
 
-export default degenerate(function* BinaryExpression (context) {
+export default function* BinaryExpression (context) {
 	let undef = context.env.global.getValue("undefined");
 	let left = (yield context.create(context.node.left).execute()).result;
 	let leftValue = left.getValue() || undef;
@@ -11,10 +11,10 @@ export default degenerate(function* BinaryExpression (context) {
 
 	let newValue;
 	if (context.node.operator in operators) {
-		newValue = operators[context.node.operator](context.env, leftValue, rightValue);
+		newValue = yield operators[context.node.operator](context.env, leftValue, rightValue);
 	} else {
-		newValue = context.env.evaluate(leftValue, rightValue, context.node.operator);
+		newValue = yield comparers[context.node.operator](context.env, leftValue, rightValue);
 	}
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));
-});
+}

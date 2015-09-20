@@ -31,15 +31,15 @@ export default function errorApi (env) {
 	proto.define("name", objectFactory.createPrimitive("Error"));
 	proto.define("message", objectFactory.createPrimitive(""));
 
-	proto.define("toString", objectFactory.createBuiltInFunction(function () {
+	proto.define("toString", objectFactory.createBuiltInFunction(function* () {
 		let name = this.node.getValue("name");
 		let msg;
 
 		if (this.node.hasProperty("message")) {
-			msg = convert.toString(env, this.node.getValue("message"));
+			msg = yield convert.toString(env, this.node.getValue("message"));
 		}
 
-		name = name && convert.toString(env, name);
+		name = name && (yield convert.toString(env, name));
 		if (name && msg) {
 			return objectFactory.create("String", name + ": " + msg);
 		}

@@ -2,6 +2,7 @@ import NativeFunctionType from "../types/native-function-type";
 import * as contracts from "../utils/contracts";
 import * as func from "../utils/func";
 import * as convert from "../utils/convert";
+import {map as asyncMap} from "../utils/async";
 
 function defineThis (env, fn, thisArg) {
 	if (fn.builtIn || fn.isStrict()) {
@@ -22,28 +23,29 @@ export default function functionApi (env) {
 	const globalObject = env.global;
 	const undef = env.global.getValue("undefined");
 	const objectFactory = env.objectFactory;
-	
+
 	let funcClass;
 
-	let funcCtor = function (...args) {
+	let funcCtor = function* (...args) {
 		let funcInstance;
 
 		if (options.parser && args.length > 0) {
 			let body = args.pop();
 
 			if (args.length > 0) {
-				args = args.map(function (arg, index) {
+				args = yield asyncMap(args, function* (arg, index) {
 					if (contracts.isNull(arg)) {
-						throw new SyntaxError("Unexpected token null");
+						return this.raise(new SyntaxError("Unexpected token null"));
 					}
 
-					return contracts.isUndefined(arg) ? "" : convert.toString(env, arg);
-				})
+					return contracts.isUndefined(arg) ? "" : (yield convert.toString(env, arg));
+				});
+
 				// the spec allows parameters to be comma-delimited, so we will join and split again comma
-				.join(",").split(/\s*,\s*/g);
+				args = args.join(",").split(/\s*,\s*/g);
 			}
 
-			let ast = options.parser("(function(){" + convert.toString(env, body) + "}).apply(this,arguments);");
+			let ast = options.parser("(function(){" + (yield convert.toString(env, body)) + "}).apply(this,arguments);");
 			let userNode = ast.body[0].expression.callee.object.body.body;
 			let strict = contracts.isStrictNode(userNode);
 
@@ -62,7 +64,7 @@ export default function functionApi (env) {
 			};
 
 			let fn = objectFactory.createFunction(callee);
-			let wrappedFunc = function () {
+			let wrappedFunc = function* () {
 				let thisArg;
 				if (this.isNew) {
 					thisArg = objectFactory.createObject(funcInstance);
@@ -74,7 +76,7 @@ export default function functionApi (env) {
 					}
 				}
 
-				let executionResult = func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
+				let executionResult = yield func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
 
 				if (this.isNew) {
 					return thisArg;
@@ -129,7 +131,7 @@ export default function functionApi (env) {
 	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
 		if (argsArray) {
 			if (argsArray.className !== "Arguments" && argsArray.className !== "Array" && argsArray.className !== "Function") {
-				throw new TypeError("Arguments list was wrong type");
+				return this.raise(new TypeError("Arguments list was wrong type"));
 			}
 		}
 

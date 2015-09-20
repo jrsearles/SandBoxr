@@ -5,21 +5,21 @@ const sign = Math.sign;
 const floor = Math.floor;
 const abs = Math.abs;
 
-function getString (env, value) {
+function* getString (env, value) {
 	if (!value) {
 		return "undefined";
 	}
 
 	if (value.isPrimitive) {
-		return String(value.value);
+		return String(value.unwrap());
 	}
 
-	let primitiveValue = func.tryCallMethod(env, value, "toString");
+	let primitiveValue = yield func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
 
-	primitiveValue = func.tryCallMethod(env, value, "valueOf");
+	primitiveValue = yield func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
@@ -27,33 +27,33 @@ function getString (env, value) {
 	throw new TypeError("Cannot convert object to primitive value.");
 }
 
-function getPrimitive (env, value) {
+function* getPrimitive (env, value) {
 	if (!value) {
 		return 0;
 	}
 
 	if (value.isPrimitive) {
-		return value.value;
+		return value.unwrap();
 	}
 
-	let primitiveValue = func.tryCallMethod(env, value, "valueOf");
+	let primitiveValue = yield func.tryCallMethod(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.value;
+		return primitiveValue.unwrap();
 	}
 
-	primitiveValue = func.tryCallMethod(env, value, "toString");
+	primitiveValue = yield func.tryCallMethod(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.value;
+		return primitiveValue.unwrap();
 	}
 
 	throw new TypeError("Cannot convert object to primitive value.");
 }
 
-function getValues (env, args) {
+function* getValues (env, args) {
 	let values = [];
 
 	for (let i = 0, ln = args.length; i < ln; i++) {
-		values.push(getPrimitive(env, args[i]));
+		values.push(yield getPrimitive(env, args[i]));
 	}
 
 	return values;
@@ -93,34 +93,34 @@ export function	toArray (obj, length) {
 	return arr;
 }
 
-export function	toPrimitive (env, obj, preferredType) {
+export function*	toPrimitive (env, obj, preferredType) {
 	preferredType = preferredType && preferredType.toLowerCase();
 	if (!preferredType && obj) {
 		preferredType = obj.primitiveHint;
 	}
 
 	if (preferredType === "string") {
-		return getString(env, obj);
+		return yield getString(env, obj);
 	}
 
 	// default case/number
-	return getPrimitive(env, obj);
+	return yield getPrimitive(env, obj);
 }
 
-export function	toString (env, obj) {
-	return String(toPrimitive(env, obj, "string"));
+export function* toString (env, obj) {
+	return String(yield toPrimitive(env, obj, "string"));
 }
 
-export function	toNumber (env, obj) {
+export function* toNumber (env, obj) {
 	if (!obj || obj.type === "undefined") {
 		return NaN;
 	}
 
-	return Number(toPrimitive(env, obj, "number"));
+	return Number(yield toPrimitive(env, obj, "number"));
 }
 
-export function	toInteger (env, obj) {
-	let value = toNumber(env, obj);
+export function* toInteger (env, obj) {
+	let value = yield toNumber(env, obj);
 	if (isNaN(value)) {
 		return 0;
 	}
@@ -132,13 +132,13 @@ export function	toInteger (env, obj) {
 	return sign(value) * floor(abs(value));
 }
 
-export function	toInt32 (env, obj) {
-	let value = toInteger(env, obj);
+export function* toInt32 (env, obj) {
+	let value = yield toInteger(env, obj);
 	return isFinite(value) ? value : 0;
 }
 
-export function	toUInt32 (env, obj) {
-	let value = toInt32(env, obj);
+export function* toUInt32 (env, obj) {
+	let value = yield toInt32(env, obj);
 	return value >>> 0;
 }
 
@@ -155,9 +155,9 @@ export function	toBoolean (obj) {
 }
 
 export function	toNativeFunction (env, fn, name) {
-	return env.objectFactory.createBuiltInFunction(function () {
+	return env.objectFactory.createBuiltInFunction(function* () {
 		let scope = this && this.node && this.node.unwrap();
-		let args = getValues(env, arguments);
+		let args = yield getValues(env, arguments);
 
 		let value = fn.apply(scope, args);
 		return env.objectFactory.createPrimitive(value);

@@ -1,9 +1,8 @@
 import Reference from "../env/reference";
 import PropertyReference from "../env/property-reference";
 import * as convert from "../utils/convert";
-import {degenerate} from "../utils/async";
 
-export default degenerate(function* UnaryExpression (context) {
+export default function* UnaryExpression (context) {
 	const objectFactory = context.env.objectFactory;
 	let result = (yield context.create(context.node.argument).execute()).result;
 	let value, newValue;
@@ -23,12 +22,12 @@ export default degenerate(function* UnaryExpression (context) {
 
 		case "-":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(-(convert.toNumber(context.env, value)));
+			newValue = objectFactory.createPrimitive(-(yield convert.toNumber(context.env, value)));
 			break;
 
 		case "+":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(+(convert.toNumber(context.env, value)));
+			newValue = objectFactory.createPrimitive(+(yield convert.toNumber(context.env, value)));
 			break;
 
 		case "!":
@@ -38,25 +37,25 @@ export default degenerate(function* UnaryExpression (context) {
 
 		case "~":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(~(convert.toInt32(context.env, value)));
+			newValue = objectFactory.createPrimitive(~(yield convert.toInt32(context.env, value)));
 			break;
 
 		case "delete":
 			let deleted = true;
 			if (result && result instanceof Reference) {
 				let resolved = !result.isUnresolved();
-				
+
 				if (context.env.isStrict()) {
 					if (!resolved || !(result instanceof PropertyReference) || result.unqualified) {
-						throw new SyntaxError("Delete of an unqualified identifier in strict mode.");	
+						return context.raise(new SyntaxError("Delete of an unqualified identifier in strict mode."));
 					}
 				}
-				
+
 				if (resolved) {
 					deleted = result.deleteBinding(result.name);
 				}
 			} else if (context.node.argument.object) {
-				throw new ReferenceError(context.node.argument.object.name + " is not defined");
+				return context.raise(new ReferenceError(`${context.node.argument.object.name} is not defined`));
 			}
 
 			newValue = objectFactory.createPrimitive(deleted);
@@ -67,8 +66,8 @@ export default degenerate(function* UnaryExpression (context) {
 			break;
 
 		default:
-			throw new SyntaxError("Unknown unary operator: " + context.node.operator);
+			return context.raise(new SyntaxError(`Unknown unary operator: ${context.node.operator}`));
 	}
 
 	return context.result(newValue);
-});
+}

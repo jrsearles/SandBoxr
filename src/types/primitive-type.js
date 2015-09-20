@@ -15,7 +15,7 @@ export default class PrimitiveType extends ObjectType {
 		if (this.value == null) {
 			throw new TypeError(`Cannot read property '${name}' of ${this.type}`);
 		}
-	
+
 		return super.getProperty.apply(this, arguments);
 	}
 

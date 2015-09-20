@@ -23,6 +23,7 @@ export default class Environment {
 
 		// todo: improve this
 		this.ops = Object.assign(comparers, options.comparers);
+		this.trying = 0;
 	}
 
 	evaluate (left, right, operator) {

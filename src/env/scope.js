@@ -97,9 +97,9 @@ export default class Scope {
 		});
 	}
 
-	use (inner) {
+	*use (inner) {
 		try {
-			let result = inner();
+			let result = yield inner();
 			this.exit();
 			return result;
 		} catch (err) {

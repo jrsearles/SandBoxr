@@ -1,20 +1,18 @@
-import {degenerate} from "../utils/async";
-
-export default degenerate(function* BlockStatement (context) {
+export default function* BlockStatement (context) {
 	let result, priorResult;
-	
+
 	if (context.node.type === "Program") {
 		context.env.current.init(context.node);
 	}
-	
+
 	for (let current of context.node.body) {
 		result = yield context.create(current).execute();
-		if (result && result.shouldBreak(context, false, priorResult)) {
+		if (result.shouldBreak(context, false, priorResult)) {
 			return result;
 		}
-		
+
 		priorResult = result;
 	}
-	
+
 	return result;
-});
+}

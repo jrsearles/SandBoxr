@@ -1,6 +1,4 @@
-import {degenerate} from "../utils/async";
-
-export default degenerate(function* VariableDeclarator (context) {
+export default function* VariableDeclarator (context) {
 	let name = context.node.id.name;
 	let value;
 
@@ -14,4 +12,4 @@ export default degenerate(function* VariableDeclarator (context) {
 	}
 
 	return context.result(context.env.getReference(name));
-});
+}

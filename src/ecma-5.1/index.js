@@ -51,8 +51,8 @@ export default function ecma51 (env) {
 	consoleAPI(env, options);
 
 	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(name => {
-		globalObject.define(name, objectFactory.createBuiltInFunction(function (value) {
-			let stringValue = convert.toString(env, value);
+		globalObject.define(name, objectFactory.createBuiltInFunction(function* (value) {
+			let stringValue = yield convert.toString(env, value);
 			return objectFactory.createPrimitive(global[name](stringValue));
 		}, 1, name));
 	});
@@ -61,15 +61,15 @@ export default function ecma51 (env) {
 		globalObject.define(name, convert.toNativeFunction(env, global[name], name));
 	});
 
-	globalObject.define("parseInt", objectFactory.createBuiltInFunction(function (value, radix) {
-		let stringValue = convert.toString(env, value);
-		radix = convert.toPrimitive(env, radix, "number");
+	globalObject.define("parseInt", objectFactory.createBuiltInFunction(function* (value, radix) {
+		let stringValue = yield convert.toString(env, value);
+		radix = yield convert.toPrimitive(env, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"));
 
 	if (options.parser) {
-		let evalFunc = objectFactory.createBuiltInFunction(function (code) {
+		let evalFunc = objectFactory.createBuiltInFunction(function* (code) {
 			if (!code) {
 				return undefinedClass;
 			}
@@ -119,8 +119,8 @@ export default function ecma51 (env) {
 				}
 			}
 
-			let executionResult = scope.use(() => {
-				return this.create(ast).execute();
+			let executionResult = yield scope.use(function* () {
+				return yield env.createExecutionContext(ast).execute();
 			});
 
 			return executionResult && executionResult.result ? executionResult.result.getValue() : undefinedClass;

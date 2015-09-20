@@ -1,6 +1,6 @@
 import "./polyfills";
 import Environment from "./env";
-import {promisify} from "./utils/async";
+import {exhaust as x} from "./utils/async";
 
 export class SandBoxr {
 	/**
@@ -28,9 +28,10 @@ export class SandBoxr {
 		}
 
 		try {
-			return promisify(this.env.createExecutionContext(this.ast).execute()).then(res => res && res.result);
+			let result = x(this.env.createExecutionContext(this.ast).execute());
+			return Promise.resolve(result).then(res => res.result);
 		} catch (err) {
-			return Promise.reject(err);
+			return Promise.reject(err.unwrap());
 		}
 	}
 

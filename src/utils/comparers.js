@@ -1,11 +1,15 @@
 import * as convert from "./convert";
 
-function negate (value) {
+function neg (value) {
 	if (value === undefined) {
 		return false;
 	}
 
 	return !value;
+}
+
+function pos (value) {
+	return !!value;
 }
 
 const comparers = {
@@ -36,7 +40,7 @@ const comparers = {
 		return a === b;
 	},
 
-	implicitEquals (env, a, b) {
+	*implicitEquals (env, a, b) {
 		/* eslint-disable eqeqeq */
 		if (a.isPrimitive && b.isPrimitive) {
 			return a.value == b.value;
@@ -46,19 +50,19 @@ const comparers = {
 			return a === b;
 		}
 
-		let primitiveA = convert.toPrimitive(env, a);
-		let primitiveB = convert.toPrimitive(env, b);
+		let primitiveA = yield convert.toPrimitive(env, a);
+		let primitiveB = yield convert.toPrimitive(env, b);
 
 		if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
 			return Number(primitiveA) === Number(primitiveB);
 		}
 
 		if (typeof primitiveA === "string") {
-			return primitiveA === convert.toPrimitive(env, b, "string");
+			return primitiveA === (yield convert.toPrimitive(env, b, "string"));
 		}
 
 		if (typeof primitiveB === "string") {
-			return convert.toPrimitive(env, a, "string") === primitiveB;
+			return (yield convert.toPrimitive(env, a, "string")) === primitiveB;
 		}
 
 		// use native implicit comarison
@@ -78,14 +82,14 @@ const comparers = {
 		return a === b;
 	},
 
-	relationalCompare (env, a, b, leftFirst) {
+	*relationalCompare (env, a, b, leftFirst) {
 		let primitiveA, primitiveB;
 		if (leftFirst) {
-			primitiveA = convert.toPrimitive(env, a, "number");
-			primitiveB = convert.toPrimitive(env, b, "number");
+			primitiveA = yield convert.toPrimitive(env, a, "number");
+			primitiveB = yield convert.toPrimitive(env, b, "number");
 		} else {
-			primitiveB = convert.toPrimitive(env, b, "number");
-			primitiveA = convert.toPrimitive(env, a, "number");
+			primitiveB = yield convert.toPrimitive(env, b, "number");
+			primitiveA = yield convert.toPrimitive(env, a, "number");
 		}
 
 		if (typeof primitiveA === "string" && typeof primitiveB === "string") {
@@ -102,16 +106,16 @@ const comparers = {
 		return primitiveA < primitiveB;
 	},
 
-	["=="] () { return this.implicitEquals(...arguments); },
-	["!="] () { return !this.implicitEquals(...arguments); },
+	*["=="] () { return yield this.implicitEquals(...arguments); },
+	*["!="] () { return !(yield this.implicitEquals(...arguments)); },
 
 	["==="] () { return this.strictEquals(...arguments); },
 	["!=="] () { return !this.strictEquals(...arguments); },
 
-	["<"] (env, a, b) { return !!this.relationalCompare(env, a, b, true); },
-	["<="] (env, a, b) { return negate(this.relationalCompare(env, b, a, false)); },
-	[">"] (env, a, b) { return !!this.relationalCompare(env, b, a, false); },
-	[">="] (env, a, b) { return negate(this.relationalCompare(env, a, b, true)); }
+	*["<"] (env, a, b) { return pos(yield this.relationalCompare(env, a, b, true)); },
+	*["<="] (env, a, b) { return neg(yield this.relationalCompare(env, b, a, false)); },
+	*[">"] (env, a, b) { return pos(yield this.relationalCompare(env, b, a, false)); },
+	*[">="] (env, a, b) { return neg(yield this.relationalCompare(env, a, b, true)); }
 };
 
 export default comparers;

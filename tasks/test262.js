@@ -1,4 +1,3 @@
-var SandBoxr = require("../dist/sandboxr");
 var path = require("path");
 var test262 = require("test262-streamer");
 var gulp = require("gulp");
@@ -15,6 +14,8 @@ var negativeMatcher = /\*.*@negative\b/i;
 var verbose = args.verbose;
 
 gulp.task("test262", function () {
+	var SandBoxr = require("../dist/sandboxr");
+
 	var results = {
 		passed: 0,
 		skipped: 0,

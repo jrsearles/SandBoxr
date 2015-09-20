@@ -47,17 +47,6 @@ export default class FunctionType extends ObjectType {
 		}
 	}
 
-	// getProperty (name) {
-	// 	let prop = super.getProperty(name);
-	// 	if (!prop && name !== "prototype") {
-	// 		// since a function instance is itself a function look at our own prototype
-	// 		let proto = this.getProperty("prototype");
-	// 		return proto && proto.getValue().getProperty(name);
-	// 	}
-
-	// 	return prop;
-	// }
-
 	bindThis (thisArg) {
 		this.boundThis = thisArg;
 	}
@@ -81,35 +70,14 @@ export default class FunctionType extends ObjectType {
 	createScope (env, thisArg) {
 		// if a parent scope is defined we need to limit the scope to that scope
 		let priorScope = env.current.scope;
-		// let fn = this;
 
 		if (this.boundScope) {
 			env.setScope(this.boundScope.scope);
-			// env.current = this.boundScope;
 		}
-
-		// let args = Array.prototype.slice.call(arguments, 1);
-		// thisArg = this.boundThis || thisArg;
-		// if (this.boundThis) {
-		// 	args[0] = this.boundThis;
-		// }
 
 		let scope = env.createScope(this.boundThis || thisArg, priorScope);
 		scope.priorScope = priorScope;
 		return scope;
-		// let scope = env.createScope.apply(env, args);
-		// return {
-		// 	init () {
-		// 		if (!fn.native) {
-		// 			scope.init(fn.node.body);
-		// 		}
-		// 	},
-
-		// 	exitScope () {
-		// 		scope.exitScope();
-		// 		env.current = priorScope;
-		// 	}
-		// };
 	}
 
 	hasInstance (obj) {

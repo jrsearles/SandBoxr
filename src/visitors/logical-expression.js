@@ -1,7 +1,6 @@
 import * as convert from "../utils/convert";
-import {degenerate} from "../utils/async";
 
-export default degenerate(function* LogicalExpression (context) {
+export default function* LogicalExpression (context) {
 	let left = yield context.create(context.node.left).execute();
 	let passed = convert.toBoolean(left.result.getValue());
 
@@ -14,4 +13,4 @@ export default degenerate(function* LogicalExpression (context) {
 	}
 
 	return yield context.create(context.node.right).execute();
-});
+}

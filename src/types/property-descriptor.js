@@ -1,4 +1,5 @@
 import * as comparers from "../utils/comparers";
+import {exhaust as x} from "../utils/async";
 
 const defaultDescriptor = {
 	configurable: false,
@@ -11,7 +12,7 @@ export default class PropertyDescriptor {
 		this.base = base;
 		this.configurable = config.configurable || false;
 		this.enumerable = config.enumerable || false;
-	
+
 		if ("get" in config || "set" in config) {
 			this.dataProperty = false;
 			this.get = config.get;
@@ -24,12 +25,12 @@ export default class PropertyDescriptor {
 			this.value = value || config.value;
 		}
 	}
-	
+
 	bind (obj) {
 		this.base = obj;
 		return this;
 	}
-	
+
 	update (descriptor) {
 		for (let prop in descriptor) {
 			if (descriptor.hasOwnProperty(prop)) {
@@ -47,7 +48,7 @@ export default class PropertyDescriptor {
 			this.get = this.getter = this.set = this.setter = undefined;
 		}
 	}
-	
+
 	canUpdate (descriptor) {
 		if (this.configurable) {
 			return true;
@@ -98,7 +99,7 @@ export default class PropertyDescriptor {
 		}
 
 		if (this.getter) {
-			return this.getter.call(this.base);
+			return x(this.getter.call(this.base));
 		}
 
 		return undefined;
@@ -116,7 +117,7 @@ export default class PropertyDescriptor {
 		if (this.dataProperty) {
 			this.value = value;
 		} else if (this.setter) {
-			this.setter.call(this.base, value);
+			x(this.setter.call(this.base, value));
 		}
 	}
 }

@@ -5,17 +5,17 @@ export default function regexApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
 
-	let regexClass = objectFactory.createFunction(function (pattern, flags) {
+	let regexClass = objectFactory.createFunction(function* (pattern, flags) {
 		if (pattern && pattern.className === "RegExp") {
-			if (!contracts.isUndefined(flags)) {
-				throw new TypeError("Cannot supply flags when constructing one RegExp from another");
+			if (contracts.isUndefined(flags)) {
+				return pattern;
 			}
 
-			return pattern;
+			return this.raise(new TypeError("Cannot supply flags when constructing one RegExp from another"));
 		}
 
-		let patternString = contracts.isUndefined(pattern) ? "" : convert.toString(env, pattern);
-		flags = contracts.isUndefined(flags) ? "" : convert.toString(env, flags);
+		let patternString = contracts.isUndefined(pattern) ? "" : (yield convert.toString(env, pattern));
+		flags = contracts.isUndefined(flags) ? "" : (yield convert.toString(env, flags));
 
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, { configurable: false, enumerable: false, writable: false });
@@ -23,21 +23,21 @@ export default function regexApi (env) {
 	let proto = regexClass.getValue("prototype");
 	proto.className = "RegExp";
 
-	proto.define("test", objectFactory.createBuiltInFunction(function (str) {
-		let stringValue = convert.toString(env, str);
+	proto.define("test", objectFactory.createBuiltInFunction(function* (str) {
+		let stringValue = yield convert.toString(env, str);
 
-		this.node.source.lastIndex = convert.toInt32(env, this.node.getValue("lastIndex"));
+		this.node.source.lastIndex = yield convert.toInt32(env, this.node.getValue("lastIndex"));
 		let testValue = this.node.source.test(stringValue);
 		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex), true, env);
 
 		return objectFactory.createPrimitive(testValue);
 	}, 1, "RegExp.prototype.test"));
 
-	proto.define("exec", objectFactory.createBuiltInFunction(function (str) {
-		let stringValue = convert.toString(env, str);
+	proto.define("exec", objectFactory.createBuiltInFunction(function* (str) {
+		let stringValue = yield convert.toString(env, str);
 
 		// update underlying regex in case the index was manually updated
-		this.node.source.lastIndex = convert.toInt32(env, this.node.getValue("lastIndex"));
+		this.node.source.lastIndex = yield convert.toInt32(env, this.node.getValue("lastIndex"));
 
 		// get match from underlying regex
 		let match = this.node.source.exec(stringValue);

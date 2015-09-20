@@ -1,6 +1,4 @@
-import {degenerate} from "../utils/async";
-
-export default degenerate(function* ArrayExpression (context) {
+export default function* ArrayExpression (context) {
 	const objectFactory = context.env.objectFactory;
 	let arr = objectFactory.create("Array");
 
@@ -21,4 +19,4 @@ export default degenerate(function* ArrayExpression (context) {
 	}
 
 	return context.result(arr);
-});
+}

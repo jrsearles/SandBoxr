@@ -2,6 +2,7 @@ import ObjectType from "./object-type";
 import * as convert from "../utils/convert";
 import * as contracts from "../utils/contracts";
 import iterate from "../iterators";
+import {exhaust as x} from "../utils/async";
 
 function setIndex (env, arr, name, descriptor, throwOnError) {
 	let index = Number(name);
@@ -26,9 +27,9 @@ function setIndex (env, arr, name, descriptor, throwOnError) {
 	return true;
 }
 
-function setLength (env, arr, name, descriptor, throwOnError) {
-	let newLengthValue = convert.toUInt32(env, descriptor.value);
-	if (newLengthValue !== convert.toNumber(env, descriptor.value)) {
+function* setLength (env, arr, name, descriptor, throwOnError) {
+	let newLengthValue = yield convert.toUInt32(env, descriptor.value);
+	if (newLengthValue !== (yield convert.toNumber(env, descriptor.value))) {
 		throw new RangeError("Array length out of range");
 	}
 
@@ -96,7 +97,7 @@ export default class ArrayType extends ObjectType {
 
 	putValue (name, value, throwOnError, env) {
 		if (name === "length") {
-			setLength(env, this, name, { value }, throwOnError);
+			x(setLength(env, this, name, { value }, throwOnError));
 			return;
 		}
 
@@ -109,7 +110,7 @@ export default class ArrayType extends ObjectType {
 		}
 
 		if (name === "length" && "length" in this.properties && descriptor && "value" in descriptor) {
-			return setLength(env, this, name, descriptor, throwOnError);
+			return x(setLength(env, this, name, descriptor, throwOnError));
 		}
 
 		return super.defineOwnProperty.apply(this, arguments);
