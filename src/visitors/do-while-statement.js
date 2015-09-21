@@ -1,11 +1,11 @@
-import * as convert from "../utils/convert";
+import {toBoolean} from "../utils/native";
 
 export default function* DoWhileStatement (context) {
 	let result, priorResult;
 	let passed = true;
 
 	if (context.node.type === "WhileStatement") {
-		passed = convert.toBoolean((yield context.create(context.node.test).execute()).result.getValue());
+		passed = toBoolean((yield context.create(context.node.test).execute()).result.getValue());
 	}
 
 	while (passed) {
@@ -14,7 +14,7 @@ export default function* DoWhileStatement (context) {
 			return result;
 		}
 
-		passed = convert.toBoolean((yield context.create(context.node.test).execute()).result.getValue());
+		passed = toBoolean((yield context.create(context.node.test).execute()).result.getValue());
 		priorResult = result;
 	}
 

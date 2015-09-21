@@ -1,7 +1,7 @@
-import ExecutionResult from "./execution-result";
+import {ExecutionResult} from "./execution-result";
 import { default as expressionVisitor } from "./visitors";
 
-export default class ExecutionContext {
+export class ExecutionContext {
 	constructor (env, node, callee, isNew) {
 		this.node = node;
 		this.callee = callee;

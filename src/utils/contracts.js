@@ -1,4 +1,4 @@
-import keywords from "../keywords";
+import {isReserved,isStrictReserved} from "../keywords";
 
 const objectPattern = /\[object (\w+)\]/;
 const integerPattern = /^-?\d+$/;
@@ -73,11 +73,11 @@ export function	assertIsNotGeneric (obj, expectedClass, methodName) {
 }
 
 export function assertIsValidIdentifier (name, strict) {
-	if (keywords.isReserved(name)) {
+	if (isReserved(name)) {
 		throw new SyntaxError(`Illegal use of reserved keyword: ${name}`);
 	}
 
-	if (strict && keywords.isStrictReserved(name)) {
+	if (strict && isStrictReserved(name)) {
 		throw new SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
 	}
 }

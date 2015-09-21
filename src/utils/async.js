@@ -13,39 +13,27 @@ function isNextable (obj) {
 	return isObjectOrFunction(obj) && typeof obj.next === "function";
 }
 
-export function* map (arrayLike, func) {
-	let arr = [];
-	for (let i = 0, ln = arrayLike.length; i < ln; i++) {
-		arr.push(yield func(arrayLike[i], i, arrayLike));
+export function* map (arr, func) {
+	let mapped = [];
+
+	for (let i = 0, ln = arr.length; i < ln; i++) {
+		mapped.push(yield* func(arr[i], i, arr));
 	}
 
-	return arr;
+	return mapped;
 }
 
 export function* each (arr, func) {
+	let abort = false;
+	let aborter = function () { abort = true; };
+
 	for (let i = 0, ln = arr.length; i < ln; i++) {
-		yield func(arr[i], i, arr);
-	}
-}
+		yield* func(arr[i], i, arr, aborter);
 
-export function degenerate (inner) {
-	return function () {
-		let generator = inner.apply(this, arguments);
-
-		function handle (result) {
-			if (result.done) {
-				return result.value;
-			}
-
-			if (isThenable(result.value)) {
-				return result.value.then(res => handle(generator.next(res)), err => handle(generator.throw(err)));
-			}
-
-			return handle(generator.next(result.value));
+		if (abort) {
+			break;
 		}
-
-		return handle(generator.next());
-	};
+	}
 }
 
 export function* step (it) {
@@ -107,10 +95,22 @@ export function exhaust (it, prev) {
 	return exhaust(it, value);
 }
 
-export function promisify (obj) {
-	if (isNextable(obj)) {
-		return Promise.resolve(exhaust(obj));
-	}
+/**
+ * Normalizes a result into a promise, whether it is a generator, promise,
+ * or normal value.
+ *
+ * @param {Iterator} [it] - The iterator.
+ * @returns {Promise} A promise which resolves or rejects based on the result.
+ */
+export function promisify (it) {
+	try {
+		let result = exhaust(it);
+		if (isNextable(result)) {
+			return result;
+		}
 
-	return Promise.resolve(obj);
+		return Promise.resolve(result);
+	} catch (err) {
+		return Promise.reject(err.toNative());
+	}
 }

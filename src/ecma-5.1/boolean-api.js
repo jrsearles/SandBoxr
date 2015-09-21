@@ -1,16 +1,16 @@
 import * as contracts from "../utils/contracts";
-import * as convert from "../utils/convert";
+import {toBoolean,primitiveToObject} from "../utils/native";
 
 export default function booleanApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
 
 	let booleanClass = objectFactory.createFunction(function (obj) {
-		let booleanValue = convert.toBoolean(obj);
+		let booleanValue = toBoolean(obj);
 
 		// called as new
 		if (this.isNew) {
-			return convert.primitiveToObject(env, booleanValue);
+			return primitiveToObject(env, booleanValue);
 		}
 
 		return objectFactory.create("Boolean", booleanValue);

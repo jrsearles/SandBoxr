@@ -1,4 +1,4 @@
-export default class ExecutionResult {
+export class ExecutionResult {
 	constructor (value, name, obj) {
 		this.result = value;
 		this.name = name;

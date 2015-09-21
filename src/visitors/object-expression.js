@@ -1,5 +1,6 @@
-import * as func from "../utils/func";
+import {execute as exec} from "../utils/func";
 import * as contracts from "../utils/contracts";
+import {each} from "../utils/async";
 
 function setDescriptor (env, obj, name, descriptor) {
 	let strict = env.isStrict();
@@ -7,14 +8,14 @@ function setDescriptor (env, obj, name, descriptor) {
 	if (descriptor.get) {
 		contracts.assertAreValidArguments(descriptor.get.node.params, strict);
 		descriptor.getter = function* () {
-			return yield func.executeFunction(env, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
+			return yield exec(env, descriptor.get, descriptor.get.node.params, [], this, descriptor.get.node);
 		};
 	}
 
 	if (descriptor.set) {
 		contracts.assertAreValidArguments(descriptor.set.node.params, strict);
 		descriptor.setter = function* () {
-			yield func.executeFunction(env, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
+			yield exec(env, descriptor.set, descriptor.set.node.params, arguments, this, descriptor.set.node);
 		};
 	}
 
@@ -29,7 +30,7 @@ export default function* ObjectExpression (context) {
 	let obj = context.env.objectFactory.createObject();
 	let descriptors = Object.create(null);
 
-	for (let property of context.node.properties) {
+	yield* each(context.node.properties, function* (property) {
 		let value = (yield context.create(property.value).execute()).result.getValue();
 		let name = property.key.name || property.key.value;
 
@@ -44,7 +45,7 @@ export default function* ObjectExpression (context) {
 				obj.defineOwnProperty(name, createDescriptor(value));
 				break;
 		}
-	}
+	});
 
 	for (let prop in descriptors) {
 		setDescriptor(context.env, obj, prop, descriptors[prop]);

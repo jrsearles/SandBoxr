@@ -1,5 +1,5 @@
-import PrimitiveType from "./primitive-type";
-import PropertyDescriptor from "./property-descriptor";
+import {PrimitiveType} from "./primitive-type";
+import {PropertyDescriptor} from "./property-descriptor";
 import * as contracts from "../utils/contracts";
 
 function getCharacter (source, position) {
@@ -13,7 +13,7 @@ function getCharacter (source, position) {
 	return new PrimitiveType(undefined);
 }
 
-export default class StringType extends PrimitiveType {
+export class StringType extends PrimitiveType {
 	constructor (value) {
 		super(value);
 	}
@@ -35,7 +35,7 @@ export default class StringType extends PrimitiveType {
 			}
 		}
 
-		return super.getProperty.apply(this, arguments);
+		return super.getProperty(...arguments);
 	}
 
 	getOwnPropertyNames () {
@@ -52,6 +52,6 @@ export default class StringType extends PrimitiveType {
 			return name < this.value.length;
 		}
 
-		return super.hasOwnProperty.apply(this, arguments);
+		return super.hasOwnProperty(...arguments);
 	}
 }

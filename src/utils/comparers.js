@@ -1,4 +1,4 @@
-import * as convert from "./convert";
+import {toPrimitive} from "./native";
 
 function neg (value) {
 	if (value === undefined) {
@@ -50,19 +50,19 @@ const comparers = {
 			return a === b;
 		}
 
-		let primitiveA = yield convert.toPrimitive(env, a);
-		let primitiveB = yield convert.toPrimitive(env, b);
+		let primitiveA = yield toPrimitive(env, a);
+		let primitiveB = yield toPrimitive(env, b);
 
 		if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
 			return Number(primitiveA) === Number(primitiveB);
 		}
 
 		if (typeof primitiveA === "string") {
-			return primitiveA === (yield convert.toPrimitive(env, b, "string"));
+			return primitiveA === (yield toPrimitive(env, b, "string"));
 		}
 
 		if (typeof primitiveB === "string") {
-			return (yield convert.toPrimitive(env, a, "string")) === primitiveB;
+			return (yield toPrimitive(env, a, "string")) === primitiveB;
 		}
 
 		// use native implicit comarison
@@ -85,11 +85,11 @@ const comparers = {
 	*relationalCompare (env, a, b, leftFirst) {
 		let primitiveA, primitiveB;
 		if (leftFirst) {
-			primitiveA = yield convert.toPrimitive(env, a, "number");
-			primitiveB = yield convert.toPrimitive(env, b, "number");
+			primitiveA = yield toPrimitive(env, a, "number");
+			primitiveB = yield toPrimitive(env, b, "number");
 		} else {
-			primitiveB = yield convert.toPrimitive(env, b, "number");
-			primitiveA = yield convert.toPrimitive(env, a, "number");
+			primitiveB = yield toPrimitive(env, b, "number");
+			primitiveA = yield toPrimitive(env, a, "number");
 		}
 
 		if (typeof primitiveA === "string" && typeof primitiveB === "string") {

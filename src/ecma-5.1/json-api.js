@@ -1,7 +1,7 @@
 import * as contracts from "../utils/contracts";
-import * as func from "../utils/func";
-import * as convert from "../utils/convert";
-import {map as asyncMap} from "../utils/async";
+import {execute as exec, tryExecute as tryExec} from "../utils/func";
+import {toString,toNumber,toArray} from "../utils/native";
+import {map} from "../utils/async";
 
 const primitives = {
 	"String": true,
@@ -48,7 +48,7 @@ function* serializeObject (env, stack, obj, replacer, gap, depth) {
 }
 
 function* serializeArray (env, stack, arr, replacer, gap, depth) {
-	let length = arr.getValue("length").unwrap();
+	let length = arr.getValue("length").toNative();
 	let values = [];
 
 	for (let i = 0; i < length; i++) {
@@ -81,7 +81,7 @@ function* serialize (env, stack, obj, replacer, gap, depth) {
 		return undefined;
 	}
 
-	let jsonString = yield func.tryCallMethod(env, obj, "toJSON");
+	let jsonString = yield tryExec(env, obj, "toJSON");
 	if (jsonString) {
 		return serializePrimitive(jsonString.value);
 	}
@@ -113,18 +113,18 @@ function* createReplacer (env, replacer) {
 				let params = replacer.native ? [] : replacer.node.params;
 				let callee = replacer.native ? replacer : replacer.node;
 
-				return yield func.executeFunction(env, replacer, params, args, holder, callee);
+				return yield exec(env, replacer, params, args, holder, callee);
 			};
 		}
 
 		if (replacer.className === "Array") {
-			let keys = yield asyncMap(convert.toArray(replacer), function* (arg) {
+			let keys = yield* map(toArray(replacer), function* (arg) {
 				if (arg.className === "String") {
-					return yield convert.toString(env, arg);
+					return yield toString(env, arg);
 				}
 
 				if (arg.className === "Number") {
-					return String(yield convert.toNumber(env, arg));
+					return String(yield toNumber(env, arg));
 				}
 
 				return undefined;
@@ -147,7 +147,7 @@ function* createReplacer (env, replacer) {
 function* getSpacer (env, spacer) {
 	if (spacer) {
 		if (spacer.className === "Number") {
-			let count = Math.floor(yield convert.toNumber(env, spacer));
+			let count = Math.floor(yield toNumber(env, spacer));
 			count = Math.max(Math.min(10, count), 0);
 
 			if (count > 0) {
@@ -158,7 +158,7 @@ function* getSpacer (env, spacer) {
 		}
 
 		if (spacer.className === "String") {
-			let gap = yield convert.toString(env, spacer);
+			let gap = yield toString(env, spacer);
 			return gap.substr(0, 10);
 		}
 	}
@@ -216,7 +216,7 @@ function createReviver (env, reviver) {
 			let params = reviver.native ? [] : reviver.node.params;
 			let callee = reviver.native ? reviver : reviver.node;
 
-			return yield func.executeFunction(env, reviver, params, args, holder, callee);
+			return yield* exec(env, reviver, params, args, holder, callee);
 		};
 	}
 
@@ -248,7 +248,7 @@ export default function jsonApi (env) {
 	jsonClass.define("parse", objectFactory.createBuiltInFunction(function* (str, reviver) {
 		reviver = createReviver(env, reviver);
 
-		let stringValue = yield convert.toString(env, str);
+		let stringValue = yield toString(env, str);
 		let parsedObject = JSON.parse(stringValue);
 		let deserializedObject = yield deserialize(env, parsedObject, reviver);
 

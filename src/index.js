@@ -1,6 +1,6 @@
 import "./polyfills";
-import Environment from "./env";
-import {exhaust as x} from "./utils/async";
+import {Environment} from "./env";
+import {promisify} from "./utils/async";
 
 export class SandBoxr {
 	/**
@@ -15,7 +15,9 @@ export class SandBoxr {
 	}
 
 	/**
-	 * Executes the abstract syntax tree (AST) against the provided environment (or the default environment if not provided)
+	 * Executes the abstract syntax tree (AST) against the provided environment (or the default
+	 * environment if not provided)
+	 *
 	 * @param {Object} [env] - The environment to execute the AST against.
 	 * @returns {Promise} A promise that resolves with the result of the execution
 	 */
@@ -27,16 +29,13 @@ export class SandBoxr {
 			this.env.init(this.options);
 		}
 
-		try {
-			let result = x(this.env.createExecutionContext(this.ast).execute());
-			return Promise.resolve(result).then(res => res.result);
-		} catch (err) {
-			return Promise.reject(err.unwrap());
-		}
+		return promisify(this.env.createExecutionContext(this.ast).execute())
+			.then(res => res.result);
 	}
 
 	/**
 	 * Creates an environment instance.
+	 *
 	 * @returns {Object} The environment instance.
 	 */
 	static createEnvironment () {
@@ -45,6 +44,7 @@ export class SandBoxr {
 
 	/**
 	 * Creates a new SandBoxr instance.
+	 *
 	 * @param {Object} ast - The abstract syntax tree to execute.
 	 * @param {Object} [options] The options to use with the sandbox.
 	 * @returns {Object} A new sandbox.

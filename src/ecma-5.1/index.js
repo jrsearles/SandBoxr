@@ -1,6 +1,6 @@
-import PrimitiveType from "../types/primitive-type";
-import ObjectFactory from "../types/object-factory";
-import Reference from "../env/reference";
+import {PrimitiveType} from "../types/primitive-type";
+import {ObjectFactory} from "../types/object-factory";
+import {Reference} from "../env/reference";
 import numberAPI from "./number-api";
 import stringAPI from "./string-api";
 import functionAPI from "./function-api";
@@ -13,7 +13,7 @@ import regexAPI from "./regex-api";
 import errorAPI from "./error-api";
 import jsonAPI from "./json-api";
 import consoleAPI from "./console-api";
-import * as convert from "../utils/convert";
+import {toString,toPrimitive,toNativeFunction} from "../utils/native";
 import * as contracts from "../utils/contracts";
 
 const frozen = { configurable: false, enumerable: false, writable: false };
@@ -52,18 +52,18 @@ export default function ecma51 (env) {
 
 	["parseFloat", "decodeURI", "encodeURI", "decodeURIComponent", "encodeURIComponent", "escape", "unescape"].forEach(name => {
 		globalObject.define(name, objectFactory.createBuiltInFunction(function* (value) {
-			let stringValue = yield convert.toString(env, value);
+			let stringValue = yield toString(env, value);
 			return objectFactory.createPrimitive(global[name](stringValue));
 		}, 1, name));
 	});
 
 	["isNaN", "isFinite"].forEach(function (name) {
-		globalObject.define(name, convert.toNativeFunction(env, global[name], name));
+		globalObject.define(name, toNativeFunction(env, global[name], name));
 	});
 
 	globalObject.define("parseInt", objectFactory.createBuiltInFunction(function* (value, radix) {
-		let stringValue = yield convert.toString(env, value);
-		radix = yield convert.toPrimitive(env, radix, "number");
+		let stringValue = yield toString(env, value);
+		radix = yield toPrimitive(env, radix, "number");
 
 		return objectFactory.createPrimitive(parseInt(stringValue, radix));
 	}, 2, "parseInt"));

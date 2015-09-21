@@ -1,4 +1,4 @@
-import * as convert from "../utils/convert";
+import {toNativeFunction} from "../utils/native";
 
 const constants = ["E", "LN10", "LN2", "LOG10E", "LOG2E", "PI", "SQRT1_2", "SQRT2"];
 const methods = ["abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "random", "round", "sin", "sqrt", "tan"];
@@ -6,7 +6,7 @@ const methods = ["abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "
 export default function mathApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	
+
 	let mathClass = objectFactory.createObject();
 	mathClass.className = "Math";
 
@@ -15,7 +15,7 @@ export default function mathApi (env) {
 	});
 
 	methods.forEach(name => {
-		mathClass.define(name, convert.toNativeFunction(env, Math[name], "Math." + name));
+		mathClass.define(name, toNativeFunction(env, Math[name], "Math." + name));
 	});
 
 	globalObject.define("Math", mathClass);

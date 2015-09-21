@@ -1,6 +1,6 @@
-import PropertyDescriptor from "./property-descriptor";
+import {PropertyDescriptor} from "./property-descriptor";
 
-export default class ObjectType {
+export class ObjectType {
 	constructor () {
 		this.isPrimitive = false;
 		this.type = "object";
@@ -78,7 +78,7 @@ export default class ObjectType {
 					enumerable: descriptor.enumerable,
 					writable: descriptor.writable
 				});
-				
+
 				this.version++;
 			} else {
 				descriptor.setValue(value);
@@ -132,7 +132,7 @@ export default class ObjectType {
 				if (throwOnError) {
 					throw new TypeError(`Cannot delete property: ${name}`);
 				}
-				
+
 				return false;
 			}
 		}
@@ -199,14 +199,14 @@ export default class ObjectType {
 		return this === obj;
 	}
 
-	unwrap () {
+	toNative () {
 		let unwrapped = {};
 		let current = this;
 
 		while (current) {
 			for (let name in current.properties) {
 				if (current.properties[name].enumerable && !(name in unwrapped)) {
-					unwrapped[name] = current.getValue(name).unwrap();
+					unwrapped[name] = current.getValue(name).toNative();
 				}
 			}
 

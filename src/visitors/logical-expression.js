@@ -1,8 +1,8 @@
-import * as convert from "../utils/convert";
+import {toBoolean} from "../utils/native";
 
 export default function* LogicalExpression (context) {
 	let left = yield context.create(context.node.left).execute();
-	let passed = convert.toBoolean(left.result.getValue());
+	let passed = toBoolean(left.result.getValue());
 
 	if (passed && context.node.operator === "||") {
 		return left;

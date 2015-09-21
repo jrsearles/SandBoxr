@@ -1,11 +1,11 @@
-import * as convert from "../utils/convert";
+import {toBoolean} from "../utils/native";
 
 function* shouldContinue (context) {
 	if (!context.node.test) {
 		return true;
 	}
 
-	return convert.toBoolean((yield context.create(context.node.test).execute()).result.getValue());
+	return toBoolean((yield context.create(context.node.test).execute()).result.getValue());
 }
 
 export default function* ForStatement (context) {

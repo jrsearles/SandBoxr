@@ -1,12 +1,12 @@
-import PropertyReference from "../env/property-reference";
-import * as convert from "../utils/convert";
+import {PropertyReference} from "../env/property-reference";
+import {toString} from "../utils/native";
 
 export default function* MemberExpression (context) {
 	let obj = (yield context.create(context.node.object).execute()).result.getValue();
 	let name, value;
 
 	if (context.node.computed) {
-		name = yield convert.toString(context.env, (yield context.create(context.node.property).execute()).result.getValue());
+		name = yield toString(context.env, (yield context.create(context.node.property).execute()).result.getValue());
 	} else {
 		name = context.node.property.name;
 	}

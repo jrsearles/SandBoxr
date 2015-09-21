@@ -1,4 +1,4 @@
-import * as convert from "../utils/convert";
+import {toString} from "../utils/native";
 import * as contracts from "../utils/contracts";
 
 const errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
@@ -36,10 +36,10 @@ export default function errorApi (env) {
 		let msg;
 
 		if (this.node.hasProperty("message")) {
-			msg = yield convert.toString(env, this.node.getValue("message"));
+			msg = yield toString(env, this.node.getValue("message"));
 		}
 
-		name = name && (yield convert.toString(env, name));
+		name = name && (yield toString(env, name));
 		if (name && msg) {
 			return objectFactory.create("String", name + ": " + msg);
 		}

@@ -1,11 +1,14 @@
+import {each} from "../utils/async";
+
 function* executeStatements (context, statements) {
 	let result;
-	for (let statement of statements) {
+
+	yield each(statements, function* (statement, i, all, abort) {
 		result = yield context.create(statement).execute();
 		if (result && result.isCancelled()) {
-			return result;
+			abort();
 		}
-	}
+	});
 
 	return result;
 }

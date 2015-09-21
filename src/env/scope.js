@@ -11,7 +11,7 @@ function validateSyntax (root) {
 	}
 }
 
-export default class Scope {
+export class Scope {
 	constructor (env, scope) {
 		env.globalScope = env.globalScope || this;
 

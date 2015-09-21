@@ -26,11 +26,11 @@ result;
 	document.getElementById("acornExec").onclick = function () {
 		executeAst(acorn.parse);
 	};
-	
+
 	document.getElementById("esprimaExec").onclick = function () {
 		executeAst(esprima.parse);
 	};
-	
+
 	document.getElementById("stepExec").onclick = function step () {
 		var code = document.getElementById("codeArea").value;
 		var ast = acorn.parse(code);
@@ -41,12 +41,12 @@ result;
 		var runner = new SandBoxr(ast, { parser: acorn.parse });
 		var exec = runner.step();
 		var result;
-		
+
 		while (result = exec.next()) {
-			
+
 		}
 	}
-		
+
 	function executeAst (parser) {
 		var code = document.getElementById("codeArea").value;
 		var ast = parser(code);
@@ -56,7 +56,7 @@ result;
 		debugger;
 		var runner = new SandBoxr(ast, { parser: parser });
 		runner.execute().then(function (value) {
-			writeValue(value && value.unwrap());
+			writeValue(value && value.toNative());
 		}, function (err) {
 			writeValue(err.toString());
 		});

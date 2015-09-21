@@ -1,8 +1,8 @@
-import ObjectType from "./object-type";
-import PropertyDescriptor from "./property-descriptor";
+import {ObjectType} from "./object-type";
+import {PropertyDescriptor} from "./property-descriptor";
 import * as contracts from "../utils/contracts";
 
-export default class FunctionType extends ObjectType {
+export class FunctionType extends ObjectType {
 	constructor (node) {
 		super();
 		this.type = "function";
@@ -111,7 +111,7 @@ export default class FunctionType extends ObjectType {
 		return false;
 	}
 
-	unwrap () {
+	toNative () {
 		return undefined;
 	}
 }

@@ -1,4 +1,4 @@
-import * as convert from "../utils/convert";
+import {toString} from "../utils/native";
 
 const methods = ["log", "info", "error"];
 
@@ -9,7 +9,7 @@ export default function consoleApi (env) {
 
 	methods.forEach(name => {
 		consoleClass.define(name, objectFactory.createBuiltInFunction(function (message) {
-			let stringValue = convert.toString(env, message);
+			let stringValue = toString(env, message);
 			console[name](stringValue);
 		}, 1, "console." + name));
 	});

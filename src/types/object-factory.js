@@ -1,13 +1,13 @@
-import ObjectType from "./object-type";
-import PrimitiveType from "./primitive-type";
-import FunctionType from "./function-type";
-import NativeFunctionType from "./native-function-type";
-import RegexType from "./regex-type";
-import ArrayType from "./array-type";
-import StringType from "./string-type";
-import DateType from "./date-type";
-import ErrorType from "./error-type";
-import ArgumentType from "./argument-type";
+import {ObjectType} from "./object-type";
+import {PrimitiveType} from "./primitive-type";
+import {FunctionType} from "./function-type";
+import {NativeFunctionType} from "./native-function-type";
+import {RegexType} from "./regex-type";
+import {ArrayType} from "./array-type";
+import {StringType} from "./string-type";
+import {DateType} from "./date-type";
+import {ErrorType} from "./error-type";
+import {ArgumentType} from "./argument-type";
 import * as contracts from "../utils/contracts";
 
 const parentless = {
@@ -52,20 +52,18 @@ function setProto (typeName, instance, env) {
 	instance.setPrototype(proto);
 }
 
-export default function ObjectFactory (env) {
-	this.env = env;
-}
-
-ObjectFactory.prototype = {
-	constructor: ObjectFactory,
+export class ObjectFactory {
+	constructor (env) {
+		this.env = env;
+	}
 
 	init () {
 		setOrphans(this.env);
-	},
+	}
 
 	createPrimitive (value) {
 		return this.create(contracts.getType(value), value);
-	},
+	}
 
 	create (typeName, value) {
 		// the value is already wrapped in an object
@@ -122,7 +120,7 @@ ObjectFactory.prototype = {
 		instance.init(this);
 		setProto(typeName, instance, this.env);
 		return instance;
-	},
+	}
 
 	createObject (parent) {
 		let instance = new ObjectType();
@@ -137,7 +135,7 @@ ObjectFactory.prototype = {
 
 		instance.init(this);
 		return instance;
-	},
+	}
 
 	createArguments (args, callee, strict) {
 		let instance = new ArgumentType();
@@ -160,7 +158,7 @@ ObjectFactory.prototype = {
 		}
 
 		return instance;
-	},
+	}
 
 	createFunction (fnOrNode, proto, descriptor, strict) {
 		let instance;
@@ -180,7 +178,7 @@ ObjectFactory.prototype = {
 		}
 
 		return instance;
-	},
+	}
 
 	createBuiltInFunction (fn, length, methodName) {
 		let instance = new NativeFunctionType(function () {
@@ -195,7 +193,7 @@ ObjectFactory.prototype = {
 		instance.builtIn = true;
 		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
 		return instance;
-	},
+	}
 
 	createThrower (message, thrower) {
 		this.throwers = this.throwers || Object.create(null);
@@ -219,6 +217,4 @@ ObjectFactory.prototype = {
 			configurable: false
 		};
 	}
-};
-
-module.exports = ObjectFactory;
+}

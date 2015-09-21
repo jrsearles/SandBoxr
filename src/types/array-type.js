@@ -1,5 +1,5 @@
-import ObjectType from "./object-type";
-import * as convert from "../utils/convert";
+import {ObjectType} from "./object-type";
+import {toNumber,toUInt32} from "../utils/native";
 import * as contracts from "../utils/contracts";
 import iterate from "../iterators";
 import {exhaust as x} from "../utils/async";
@@ -7,7 +7,7 @@ import {exhaust as x} from "../utils/async";
 function setIndex (env, arr, name, descriptor, throwOnError) {
 	let index = Number(name);
 	let lengthProperty = arr.getProperty("length");
-	let lengthValue = lengthProperty.getValue().unwrap();
+	let lengthValue = lengthProperty.getValue().toNative();
 
 	if ((!lengthProperty.canSetValue() && index >= lengthValue)
 		|| !ObjectType.prototype.defineOwnProperty.call(arr, name, descriptor, false, env)) {
@@ -28,8 +28,8 @@ function setIndex (env, arr, name, descriptor, throwOnError) {
 }
 
 function* setLength (env, arr, name, descriptor, throwOnError) {
-	let newLengthValue = yield convert.toUInt32(env, descriptor.value);
-	if (newLengthValue !== (yield convert.toNumber(env, descriptor.value))) {
+	let newLengthValue = yield toUInt32(env, descriptor.value);
+	if (newLengthValue !== (yield toNumber(env, descriptor.value))) {
 		throw new RangeError("Array length out of range");
 	}
 
@@ -85,7 +85,7 @@ function* setLength (env, arr, name, descriptor, throwOnError) {
 	return succeeded;
 }
 
-export default class ArrayType extends ObjectType {
+export class ArrayType extends ObjectType {
 	constructor () {
 		super();
 		this.className = "Array";
@@ -101,7 +101,7 @@ export default class ArrayType extends ObjectType {
 			return;
 		}
 
-		super.putValue.apply(this, arguments);
+		super.putValue(...arguments);
 	}
 
 	defineOwnProperty (name, descriptor, throwOnError, env) {
@@ -113,17 +113,17 @@ export default class ArrayType extends ObjectType {
 			return x(setLength(env, this, name, descriptor, throwOnError));
 		}
 
-		return super.defineOwnProperty.apply(this, arguments);
+		return super.defineOwnProperty(...arguments);
 	}
 
-	unwrap () {
+	toNative () {
 		let arr = [];
 
 		// this won't grab properties from the prototype - do we care?
 		// it's an edge case but we may want to address it
 		for (let index in this.properties) {
 			if (this.properties[index].enumerable) {
-				arr[Number(index)] = this.getValue(index).unwrap();
+				arr[Number(index)] = this.getValue(index).toNative();
 			}
 		}
 

@@ -7,7 +7,7 @@ const defaultDescriptor = {
 	writable: false
 };
 
-export default class PropertyDescriptor {
+export class PropertyDescriptor {
 	constructor (base, config = defaultDescriptor, value) {
 		this.base = base;
 		this.configurable = config.configurable || false;

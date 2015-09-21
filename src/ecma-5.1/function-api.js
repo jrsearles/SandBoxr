@@ -1,8 +1,8 @@
-import NativeFunctionType from "../types/native-function-type";
+import {NativeFunctionType} from "../types/native-function-type";
 import * as contracts from "../utils/contracts";
-import * as func from "../utils/func";
-import * as convert from "../utils/convert";
-import {map as asyncMap} from "../utils/async";
+import {execute as exec, call} from "../utils/func";
+import {toString,toObject,toArray} from "../utils/native";
+import {map} from "../utils/async";
 
 function defineThis (env, fn, thisArg) {
 	if (fn.builtIn || fn.isStrict()) {
@@ -13,7 +13,7 @@ function defineThis (env, fn, thisArg) {
 		return env.global;
 	}
 
-	return convert.toObject(env, thisArg);
+	return toObject(env, thisArg);
 }
 
 const frozen = { configurable: false, enumerable: false, writable: false };
@@ -33,19 +33,19 @@ export default function functionApi (env) {
 			let body = args.pop();
 
 			if (args.length > 0) {
-				args = yield asyncMap(args, function* (arg, index) {
+				args = yield* map(args, function* (arg, index) {
 					if (contracts.isNull(arg)) {
 						return this.raise(new SyntaxError("Unexpected token null"));
 					}
 
-					return contracts.isUndefined(arg) ? "" : (yield convert.toString(env, arg));
+					return contracts.isUndefined(arg) ? "" : (yield toString(env, arg));
 				});
 
 				// the spec allows parameters to be comma-delimited, so we will join and split again comma
 				args = args.join(",").split(/\s*,\s*/g);
 			}
 
-			let ast = options.parser("(function(){" + (yield convert.toString(env, body)) + "}).apply(this,arguments);");
+			let ast = options.parser("(function(){" + (yield toString(env, body)) + "}).apply(this,arguments);");
 			let userNode = ast.body[0].expression.callee.object.body.body;
 			let strict = contracts.isStrictNode(userNode);
 
@@ -76,7 +76,7 @@ export default function functionApi (env) {
 					}
 				}
 
-				let executionResult = yield func.getFunctionResult(env, fn, params, arguments, thisArg, callee);
+				let executionResult = yield call(env, fn, params, arguments, thisArg, callee);
 
 				if (this.isNew) {
 					return thisArg;
@@ -119,40 +119,40 @@ export default function functionApi (env) {
 		return objectFactory.createPrimitive("function () { [user code] }");
 	}, 0, "Function.prototype.toString"));
 
-	proto.define("call", objectFactory.createBuiltInFunction(function (thisArg, ...args) {
+	proto.define("call", objectFactory.createBuiltInFunction(function* (thisArg, ...args) {
 		let params = this.node.native ? [] : this.node.node.params;
 		let callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
-		return func.executeFunction(env, this.node, params, args, thisArg, callee);
+		return yield* exec(env, this.node, params, args, thisArg, callee);
 	}, 1, "Function.prototype.call"));
 
-	proto.define("apply", objectFactory.createBuiltInFunction(function (thisArg, argsArray) {
+	proto.define("apply", objectFactory.createBuiltInFunction(function* (thisArg, argsArray) {
 		if (argsArray) {
 			if (argsArray.className !== "Arguments" && argsArray.className !== "Array" && argsArray.className !== "Function") {
 				return this.raise(new TypeError("Arguments list was wrong type"));
 			}
 		}
 
-		let args = convert.toArray(argsArray);
+		let args = toArray(argsArray);
 		let params = this.node.native ? [] : this.node.node.params;
 		let callee = this.node.native ? this.node : this.node.node;
 		thisArg = defineThis(env, this.node, thisArg);
 		this.node.bindThis(thisArg);
 
-		return func.executeFunction(env, this.node, params, args, thisArg, callee);
+		return yield* exec(env, this.node, params, args, thisArg, callee);
 	}, 2, "Function.prototype.apply"));
 
-	proto.define("bind", objectFactory.createBuiltInFunction(function (thisArg, ...args) {
+	proto.define("bind", objectFactory.createBuiltInFunction(function* (thisArg, ...args) {
 		let fn = this.node;
 		let params = fn.native ? [] : fn.node.params;
 		let callee = fn.native ? fn : fn.node;
 		thisArg = defineThis(env, this.node, thisArg);
 
-		let nativeFunc = function (...additionalArgs) {
+		let nativeFunc = function* (...additionalArgs) {
 			let mergedArgs = args.concat(additionalArgs);
-			return func.executeFunction(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
+			return yield* exec(env, fn, params, mergedArgs, thisArg, callee, this.isNew);
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);

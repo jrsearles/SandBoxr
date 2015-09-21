@@ -1,3 +1,5 @@
+import {each} from "../utils/async";
+
 export default function* BlockStatement (context) {
 	let result, priorResult;
 
@@ -5,14 +7,14 @@ export default function* BlockStatement (context) {
 		context.env.current.init(context.node);
 	}
 
-	for (let current of context.node.body) {
-		result = yield context.create(current).execute();
+	yield* each(context.node.body, function* (node, i, body, abort) {
+		result = yield context.create(node).execute();
 		if (result.shouldBreak(context, false, priorResult)) {
-			return result;
+			abort();
 		}
 
 		priorResult = result;
-	}
+	});
 
 	return result;
 }

@@ -1,6 +1,6 @@
-import PropertyReference from "./property-reference";
+import {PropertyReference} from "./property-reference";
 
-export default class ObjectEnvironment {
+export class ObjectEnvironment {
 	constructor (parent, obj, thisArg, env) {
 		this.parent = parent && parent.scope;
 		this.strict = parent && parent.strict;

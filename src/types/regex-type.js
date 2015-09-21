@@ -1,6 +1,6 @@
-import ObjectType from "./object-type";
+import {ObjectType} from "./object-type";
 
-export default class RegexType extends ObjectType {
+export class RegexType extends ObjectType {
 	constructor (value) {
 		super();
 		this.source = value;
@@ -16,7 +16,7 @@ export default class RegexType extends ObjectType {
 		this.defineOwnProperty("multiline", { value: objectFactory.createPrimitive(this.source.multiline) });
 	}
 
-	unwrap () {
+	toNative () {
 		return this.source;
 	}
 }

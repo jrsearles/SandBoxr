@@ -1,18 +1,18 @@
-import ExecutionContext from "../execution-context";
-import DeclarativeEnvironment from "./declarative-environment";
-import ObjectEnvironment from "./object-environment";
-import Reference from "./reference";
+import {ExecutionContext} from "../execution-context";
+import {DeclarativeEnvironment} from "./declarative-environment";
+import {ObjectEnvironment} from "./object-environment";
+import {Reference} from "./reference";
 import api from "../ecma-5.1";
 import comparers from "../utils/comparers";
 import * as contracts from "../utils/contracts";
-import Scope from "./scope";
+import {Scope} from "./scope";
 
 let defaultOptions = {
 	allowDebugger: false,
 	useStrict: false
 };
 
-export default class Environment {
+export class Environment {
 	init (options = defaultOptions) {
 		// clear state in case of re-init
 		this.current = null;

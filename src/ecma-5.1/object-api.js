@@ -1,7 +1,7 @@
-import ObjectType from "../types/object-type";
-import * as convert from "../utils/convert";
+import {ObjectType} from "../types/object-type";
+import {toString,toBoolean,toObject} from "../utils/native";
 import * as contracts from "../utils/contracts";
-import * as func from "../utils/func";
+import {execute as exec, call} from "../utils/func";
 
 function isObject (obj) {
 	if (!obj) {
@@ -15,9 +15,10 @@ function isObject (obj) {
 	return true;
 }
 
-function defineProperty (env, obj, name, descriptor) {
+function* defineProperty (env, obj, name, descriptor) {
 	if (!isObject(descriptor)) {
-		throw new TypeError("Property description must be an object: " + convert.toString(env, descriptor));
+		let stringValue = yield toString(env, descriptor);
+		throw new TypeError(`Property description must be an object: ${stringValue}`);
 	}
 
 	let undef = env.global.getValue("undefined");
@@ -35,7 +36,7 @@ function defineProperty (env, obj, name, descriptor) {
 		["writable", "enumerable", "configurable"].forEach(function (prop) {
 			if (descriptor.hasProperty(prop)) {
 				let attrValue = descriptor.getValue(prop);
-				options[prop] = convert.toBoolean(attrValue);
+				options[prop] = toBoolean(attrValue);
 			}
 		});
 
@@ -48,16 +49,17 @@ function defineProperty (env, obj, name, descriptor) {
 				options.get = options.getter = undefined;
 			} else {
 				if (getter.className !== "Function") {
-					throw new TypeError("Getter must be a function: " + convert.toString(env, getter));
+					let stringValue = yield toString(env, getter);
+					throw new TypeError(`Getter must be a function: ${stringValue}`);
 				}
 
 				options.get = getter;
 				options.getter = function* () {
 					let scope = env.setScope(currentScope);
-					let thisArg = getter.isStrict() ? this : convert.toObject(env, this);
+					let thisArg = getter.isStrict() ? this : toObject(env, this);
 
 					return yield scope.use(function* () {
-						let getResult = yield func.getFunctionResult(env, getter, getter.node.params, [], thisArg, getter.node);
+						let getResult = yield call(env, getter, getter.node.params, [], thisArg, getter.node);
 						return getResult && getResult.exit ? getResult.result.getValue() : undef;
 					});
 				};
@@ -70,16 +72,17 @@ function defineProperty (env, obj, name, descriptor) {
 				options.set = options.setter = undefined;
 			} else {
 				if (setter.className !== "Function") {
-					throw new TypeError("Setter must be a function: " + convert.toString(env, setter));
+					let stringValue = yield toString(env, setter);
+					throw new TypeError(`Setter must be a function: ${stringValue}`);
 				}
 
 				options.set = setter;
 				options.setter = function* (value) {
 					let scope = env.setScope(currentScope);
-					let thisArg = setter.isStrict() ? this : convert.toObject(env, this);
+					let thisArg = setter.isStrict() ? this : toObject(env, this);
 
 					return yield scope.use(function* () {
-						yield func.executeFunction(env, setter, setter.node.params, [value], thisArg, setter.node);
+						yield exec(env, setter, setter.node.params, [value], thisArg, setter.node);
 						return undef;
 					});
 				};
@@ -121,12 +124,12 @@ export default function objectApi (env) {
 	}, proto, { configurable: false, enumerable: false, writable: false });
 
 	proto.define("hasOwnProperty", objectFactory.createBuiltInFunction(function* (name) {
-		name = yield convert.toString(env, name);
+		name = yield toString(env, name);
 		return objectFactory.createPrimitive(name in this.node.properties);
 	}, 1, "Object.prototype.hasOwnProperty"));
 
 	proto.define("valueOf", objectFactory.createBuiltInFunction(function () {
-		return convert.toObject(env, this.node);
+		return toObject(env, this.node);
 	}, 0, "Object.prototype.valueOf"));
 
 	let toStringFunc = objectFactory.createBuiltInFunction(function () {
@@ -152,19 +155,19 @@ export default function objectApi (env) {
 	}, 1, "Object.isPrototypeOf"));
 
 	proto.define("propertyIsEnumerable", objectFactory.createBuiltInFunction(function* (name) {
-		name = yield convert.toString(env, name);
+		name = yield toString(env, name);
 		let descriptor = this.node.getOwnProperty(name);
 		return objectFactory.createPrimitive(!!(descriptor && descriptor.enumerable));
 	}, 1, "Object.propertyIsEnumerable"));
 
 	objectClass.define("create", objectFactory.createBuiltInFunction(function* (parent, descriptors) {
 		if (parent && parent.isPrimitive && parent.value !== null) {
-			let stringValue = yield convert.toString(env, parent);
+			let stringValue = yield toString(env, parent);
 			return this.throw(new TypeError(`Object prototype may only be an Object or null: ${stringValue}`));
 		}
 
 		if (descriptors && descriptors.isPrimitive && descriptors.value === null) {
-			return this.throw(new TypeError("Cannot convert null or undefined to object"));
+			return this.throw(new TypeError("Cannot null or undefined to object"));
 		}
 
 		let obj = objectFactory.createObject();
@@ -176,7 +179,7 @@ export default function objectApi (env) {
 		if (descriptors) {
 			for (let prop in descriptors.properties) {
 				if (descriptors.properties[prop].enumerable) {
-					defineProperty(env, obj, prop, descriptors.getValue(prop));
+					yield defineProperty(env, obj, prop, descriptors.getValue(prop));
 				}
 			}
 		}
@@ -187,17 +190,17 @@ export default function objectApi (env) {
 	objectClass.define("defineProperty", objectFactory.createBuiltInFunction(function* (obj, prop, descriptor) {
 		contracts.assertIsObject(obj, "Object.defineProperty");
 
-		defineProperty(env, obj, yield convert.toString(env, prop), descriptor);
+		yield defineProperty(env, obj, yield toString(env, prop), descriptor);
 		return obj;
 	}, 3, "Object.defineProperty"));
 
-	objectClass.define("defineProperties", objectFactory.createBuiltInFunction(function (obj, descriptors) {
+	objectClass.define("defineProperties", objectFactory.createBuiltInFunction(function* (obj, descriptors) {
 		contracts.assertIsObject(obj, "Object.defineProperties");
 		contracts.assertArgIsNotNullOrUndefined(descriptors);
 
 		for (let prop in descriptors.properties) {
 			if (descriptors.properties[prop].enumerable) {
-				defineProperty(env, obj, prop, descriptors.getValue(prop));
+				yield defineProperty(env, obj, prop, descriptors.getValue(prop));
 			}
 		}
 
@@ -207,7 +210,7 @@ export default function objectApi (env) {
 	objectClass.define("getOwnPropertyDescriptor", objectFactory.createBuiltInFunction(function* (obj, prop) {
 		contracts.assertIsObject(obj, "Object.getOwnPropertyDescriptor");
 
-		prop = yield convert.toString(env, prop);
+		prop = yield toString(env, prop);
 
 		if (obj.hasOwnProperty(prop)) {
 			let descriptor = obj.getProperty(prop);

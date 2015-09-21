@@ -1,12 +1,14 @@
-import ObjectType from "./object-type";
+import {ObjectType} from "./object-type";
 import * as contracts from "../utils/contracts";
 
-export default class PrimitiveType extends ObjectType {
+export class PrimitiveType extends ObjectType {
 	constructor (value) {
 		super();
+
 		this.isPrimitive = true;
 		this.value = value;
 		this.type = typeof value;
+
 		this.className = contracts.getType(value);
 	}
 
@@ -16,10 +18,13 @@ export default class PrimitiveType extends ObjectType {
 			throw new TypeError(`Cannot read property '${name}' of ${this.type}`);
 		}
 
-		return super.getProperty.apply(this, arguments);
+		return super.getProperty(...arguments);
 	}
 
-	unwrap () {
+	toNative () {
 		return this.value;
 	}
 }
+
+export const UNDEFINED = new PrimitiveType(undefined);
+export const NULL = new PrimitiveType(null);

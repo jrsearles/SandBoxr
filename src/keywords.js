@@ -49,12 +49,10 @@ const keywords = 	{
 		"yield"],
 };
 
-export default {
-	isReserved (name) {
-		return keywords.es5.indexOf(name) >= 0;
-	},
-	
-	isStrictReserved (name) {
-		return keywords.es5strict.indexOf(name) >= 0;	
-	}
-};
+export function isReserved (name) {
+	return keywords.es5.indexOf(name) >= 0;
+}
+
+export function	isStrictReserved (name) {
+	return keywords.es5strict.indexOf(name) >= 0;
+}

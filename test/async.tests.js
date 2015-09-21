@@ -16,28 +16,28 @@ describe("Async", function () {
 					resolve(result);
 				}, 4);
 			});
-			
+
 			return promise;
 		});
-		
+
 		env.global.define("foo", foo);
-		
+
 		var ast = parser.parse("foo()===50;");
 		var sandbox = SandBoxr.create(ast);
 		var result = sandbox.execute(env);
-		
+
 		result.then(function (value) {
-			expect(value.unwrap()).to.be.true;
+			expect(value.toNative()).to.be.true;
 			done();
 		});
 	});
-	
+
 	it("should return a promise as a result", function (done) {
 		var ast = parser.parse("true===true;");
 		var sandbox = SandBoxr.create(ast);
-		
+
 		sandbox.execute().then(function (value) {
-			expect(value.unwrap()).to.be.true;
+			expect(value.toNative()).to.be.true;
 			done();
 		});
 	});

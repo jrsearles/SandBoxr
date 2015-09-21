@@ -1,31 +1,31 @@
-import * as convert from "./convert";
+import {toPrimitive,toNumber,toInt32,toString} from "./native";
 
 function* addOrConcat (env, a, b) {
 	if (a.isPrimitive && b.isPrimitive) {
 		return a.value + b.value;
 	}
 
-	a = yield convert.toPrimitive(env, a);
-	b = yield convert.toPrimitive(env, b);
+	a = yield toPrimitive(env, a);
+	b = yield toPrimitive(env, b);
 	return a + b;
 }
 
 export default {
 	["+"]: addOrConcat,
-	*["-"] (env, a, b) { return (yield convert.toNumber(env, a)) - (yield convert.toNumber(env, b)); },
-	*["/"] (env, a, b) { return (yield convert.toNumber(env, a)) / (yield convert.toNumber(env, b)); },
-	*["*"] (env, a, b) { return (yield convert.toNumber(env, a)) * (yield convert.toNumber(env, b)); },
-	*["<<"] (env, a, b) { return (yield convert.toPrimitive(env, a)) << (yield convert.toPrimitive(env, b)); },
-	*[">>"] (env, a, b) { return (yield convert.toPrimitive(env, a)) >> (yield convert.toPrimitive(env, b)); },
-	*[">>>"] (env, a, b) { return (yield convert.toPrimitive(env, a)) >>> (yield convert.toPrimitive(env, b)); },
-	*["%"] (env, a, b) { return (yield convert.toPrimitive(env, a)) % (yield convert.toPrimitive(env, b)); },
-	*["|"] (env, a, b) { return (yield convert.toInt32(env, a)) | (yield convert.toInt32(env, b)); },
-	*["^"] (env, a, b) { return (yield convert.toInt32(env, a)) ^ (yield convert.toInt32(env, b)); },
-	*["&"] (env, a, b) { return (yield convert.toInt32(env, a)) & (yield convert.toInt32(env, b)); },
+	*["-"] (env, a, b) { return (yield toNumber(env, a)) - (yield toNumber(env, b)); },
+	*["/"] (env, a, b) { return (yield toNumber(env, a)) / (yield toNumber(env, b)); },
+	*["*"] (env, a, b) { return (yield toNumber(env, a)) * (yield toNumber(env, b)); },
+	*["<<"] (env, a, b) { return (yield toPrimitive(env, a)) << (yield toPrimitive(env, b)); },
+	*[">>"] (env, a, b) { return (yield toPrimitive(env, a)) >> (yield toPrimitive(env, b)); },
+	*[">>>"] (env, a, b) { return (yield toPrimitive(env, a)) >>> (yield toPrimitive(env, b)); },
+	*["%"] (env, a, b) { return (yield toPrimitive(env, a)) % (yield toPrimitive(env, b)); },
+	*["|"] (env, a, b) { return (yield toInt32(env, a)) | (yield toInt32(env, b)); },
+	*["^"] (env, a, b) { return (yield toInt32(env, a)) ^ (yield toInt32(env, b)); },
+	*["&"] (env, a, b) { return (yield toInt32(env, a)) & (yield toInt32(env, b)); },
 	*["in"] (env, a, b) {
-		a = yield convert.toString(env, a);
+		a = yield toString(env, a);
 		if (b.isPrimitive) {
-			let bString = yield convert.toString(env, b);
+			let bString = yield toString(env, b);
 			throw new TypeError(`Cannot use 'in' operator to search for '${a}' in ${bString}`);
 		}
 

@@ -1,6 +1,7 @@
-import PropertyReference from "../env/property-reference";
-import * as convert from "../utils/convert";
-import * as func from "../utils/func";
+import {PropertyReference} from "../env/property-reference";
+import {toString,toObject} from "../utils/native";
+import {execute as exec} from "../utils/func";
+import {map} from "../utils/async";
 
 function assignThis (env, fnMember, fn, isNew, native) {
 	if (isNew) {
@@ -10,7 +11,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 	}
 
 	if (fnMember instanceof PropertyReference && (!fnMember.unqualified || fnMember.base !== env.global)) {
-		return convert.toObject(env, fnMember.base);
+		return toObject(env, fnMember.base);
 	}
 
 	return null;
@@ -22,13 +23,13 @@ export default function* CallExpression (context) {
 
 	let fnMember = (yield context.create(node.callee).execute()).result;
 	let fn = fnMember.getValue();
-	let args = [];
-	for (let arg of node.arguments) {
-		args.push((yield context.create(arg).execute()).result.getValue());
-	}
+
+	let args = yield* map(node.arguments, function* (arg) {
+		return (yield context.create(arg).execute()).result.getValue();
+	});
 
 	if (!fn || fn.className !== "Function") {
-		let stringValue = yield convert.toString(context.env, fn);
+		let stringValue = yield toString(context.env, fn);
 		return context.raise(new TypeError(`${stringValue} not a function`));
 	}
 
@@ -38,5 +39,5 @@ export default function* CallExpression (context) {
 	let callee = fnMember;
 
 	callee.identifier = fn.name;
-	return context.result(yield func.executeFunction(context.env, fn, params, args, thisArg, callee, isNew));
+	return context.result(yield exec(context.env, fn, params, args, thisArg, callee, isNew));
 }

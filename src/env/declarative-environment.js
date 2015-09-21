@@ -1,7 +1,7 @@
-import Reference from "./reference";
-import PropertyDescriptor from "../types/property-descriptor";
+import {Reference} from "./reference";
+import {PropertyDescriptor} from "../types/property-descriptor";
 
-export default class DeclarativeEnvironment {
+export class DeclarativeEnvironment {
 	constructor (parent, thisArg, env) {
 		this.properties = Object.create(null);
 		this.parent = parent && parent.scope;

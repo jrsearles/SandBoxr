@@ -120,29 +120,29 @@ describe("API", function () {
 			});
 	});
 
-	it("should allow an object to be converted to a unwrapped object", function (done) {
+	it("should allow an object to be converted to a native object", function (done) {
 		var ast = parser.parse("({foo:true});");
 		var sandbox = SandBoxr.create(ast);
 		sandbox.execute().then(function (result) {
-			expect(result.unwrap().foo).to.be.true;
+			expect(result.toNative().foo).to.be.true;
 			done();
 		});
 	});
 
-	it("should allow a primitive to be unwrapped", function (done) {
+	it("should allow a primitive to be toNativeped", function (done) {
 		var ast = parser.parse("(1);");
 		var sandbox = SandBoxr.create(ast);
 		sandbox.execute().then(function (result) {
-			expect(result.unwrap()).to.equal(1);
+			expect(result.toNative()).to.equal(1);
 			done();
 		});
 	});
 
-	it("should allow an array to be unwrapped", function (done) {
+	it("should allow an array to be toNativeped", function (done) {
 		var ast = parser.parse("([1,2,3]);");
 		var sandbox = SandBoxr.create(ast);
 		sandbox.execute().then(function (result) {
-			expect(result.unwrap()[2]).to.equal(3);
+			expect(result.toNative()[2]).to.equal(3);
 			done();
 		});
 	});

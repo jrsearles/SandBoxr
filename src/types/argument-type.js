@@ -1,6 +1,6 @@
-import ObjectType from "./object-type";
+import {ObjectType} from "./object-type";
 
-export default class ArgumentType extends ObjectType {
+export class ArgumentType extends ObjectType {
 	constructor (callee) {
 		super();
 		this.className = "Arguments";
@@ -41,7 +41,7 @@ export default class ArgumentType extends ObjectType {
 	defineOwnProperty (name, descriptor, throwOnError) {
 		name = String(name);
 
-		let allowed = super.defineOwnProperty.apply(this, arguments);
+		let allowed = super.defineOwnProperty(...arguments);
 		if (allowed && name in this.parameterMap) {
 			if ("set" in descriptor || "get" in descriptor) {
 				delete this.parameterMap[name];
@@ -63,6 +63,6 @@ export default class ArgumentType extends ObjectType {
 			delete this.parameterMap[name];
 		}
 
-		return super.deleteProperty.apply(this, arguments);
+		return super.deleteProperty(...arguments);
 	}
 }

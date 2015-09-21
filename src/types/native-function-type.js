@@ -1,7 +1,7 @@
-import FunctionType from "./function-type";
-import PropertyDescriptor from "./property-descriptor";
+import {FunctionType} from "./function-type";
+import {PropertyDescriptor} from "./property-descriptor";
 
-export default class NativeFunctionType extends FunctionType {
+export class NativeFunctionType extends FunctionType {
 	constructor (fn) {
 		super();
 		this.type = "function";
@@ -14,11 +14,11 @@ export default class NativeFunctionType extends FunctionType {
 		if ("nativeLength" in this.nativeFunction) {
 			length = this.nativeFunction.nativeLength;
 		}
-		
+
 		if ("strict" in this.nativeFunction) {
 			this.strict = this.nativeFunction.strict;
 		}
-		
+
 		this.initStrict(objectFactory);
 		this.defineOwnProperty("length", {
 			value: objectFactory.createPrimitive(length),
@@ -26,10 +26,10 @@ export default class NativeFunctionType extends FunctionType {
 			enumerable: false,
 			writable: false
 		});
-	
+
 		proto = proto || objectFactory.createObject();
 		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
-	
+
 		descriptor = descriptor || { configurable: false, enumerable: false, writable: true };
 		let protoDescriptor = {
 			value: proto,
@@ -37,7 +37,7 @@ export default class NativeFunctionType extends FunctionType {
 			enumerable: descriptor.enumerable,
 			writable: descriptor.writable
 		};
-	
+
 		this.defineOwnProperty("prototype", protoDescriptor);
 	}
 }

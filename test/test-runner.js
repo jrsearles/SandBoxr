@@ -10,7 +10,7 @@ module.exports = {
 	confirmBlock: function (code, done) {
 		this.runBlock(code)
 			.then(function (result) {
-				expect(result.unwrap()).to.be.true;
+				expect(result.toNative()).to.be.true;
 				done();
 			}, done);
 	},

@@ -1,8 +1,8 @@
-import * as convert from "../utils/convert";
+import {toBoolean} from "../utils/native";
 
 export default function* IfStatement (context) {
 	let testValue = (yield context.create(context.node.test).execute()).result.getValue();
-	if (convert.toBoolean(testValue)) {
+	if (toBoolean(testValue)) {
 		return yield context.create(context.node.consequent).execute();
 	}
 

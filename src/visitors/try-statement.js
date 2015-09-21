@@ -1,9 +1,10 @@
 import * as contracts from "../utils/contracts";
+import {each} from "../utils/async";
 
 function* executeBlock (context, body, swallow) {
 	let result;
 
-	for (let node of body) {
+	yield* each(body, function* (node, i, all, abort) {
 		if (swallow) {
 			try {
 				result = yield context.create(node).execute();
@@ -15,9 +16,9 @@ function* executeBlock (context, body, swallow) {
 		}
 
 		if (result.canBreak()) {
-			break;
+			abort();
 		}
-	}
+	});
 
 	return result;
 }
@@ -34,7 +35,7 @@ export default function* TryStatement (context) {
 			context.env.createVariable(errVar);
 			context.env.putValue(errVar, result.result);
 
-			result = yield scope.use(function* () {
+			result = yield* scope.use(function* () {
 				return yield executeBlock(context, context.node.handler.body.body, true);
 			});
 		}
@@ -52,5 +53,8 @@ export default function* TryStatement (context) {
 		}
 	}
 
-	return result;
+	if (result && !result.raised) {
+		// if an exception was raised it was already thrown
+		return result;
+	}
 }

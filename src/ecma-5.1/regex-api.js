@@ -1,4 +1,4 @@
-import * as convert from "../utils/convert";
+import {toString,toInt32,toNativeFunction} from "../utils/native";
 import * as contracts from "../utils/contracts";
 
 export default function regexApi (env) {
@@ -14,8 +14,8 @@ export default function regexApi (env) {
 			return this.raise(new TypeError("Cannot supply flags when constructing one RegExp from another"));
 		}
 
-		let patternString = contracts.isUndefined(pattern) ? "" : (yield convert.toString(env, pattern));
-		flags = contracts.isUndefined(flags) ? "" : (yield convert.toString(env, flags));
+		let patternString = contracts.isUndefined(pattern) ? "" : (yield toString(env, pattern));
+		flags = contracts.isUndefined(flags) ? "" : (yield toString(env, flags));
 
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
 	}, null, { configurable: false, enumerable: false, writable: false });
@@ -24,9 +24,9 @@ export default function regexApi (env) {
 	proto.className = "RegExp";
 
 	proto.define("test", objectFactory.createBuiltInFunction(function* (str) {
-		let stringValue = yield convert.toString(env, str);
+		let stringValue = yield toString(env, str);
 
-		this.node.source.lastIndex = yield convert.toInt32(env, this.node.getValue("lastIndex"));
+		this.node.source.lastIndex = yield toInt32(env, this.node.getValue("lastIndex"));
 		let testValue = this.node.source.test(stringValue);
 		this.node.putValue("lastIndex", objectFactory.createPrimitive(this.node.source.lastIndex), true, env);
 
@@ -34,10 +34,10 @@ export default function regexApi (env) {
 	}, 1, "RegExp.prototype.test"));
 
 	proto.define("exec", objectFactory.createBuiltInFunction(function* (str) {
-		let stringValue = yield convert.toString(env, str);
+		let stringValue = yield toString(env, str);
 
 		// update underlying regex in case the index was manually updated
-		this.node.source.lastIndex = yield convert.toInt32(env, this.node.getValue("lastIndex"));
+		this.node.source.lastIndex = yield toInt32(env, this.node.getValue("lastIndex"));
 
 		// get match from underlying regex
 		let match = this.node.source.exec(stringValue);
@@ -64,7 +64,7 @@ export default function regexApi (env) {
 		return objectFactory.createPrimitive(String(this.node.source));
 	}, 0, "RegExp.prototype.toString"));
 
-	proto.define("compile", convert.toNativeFunction(env, RegExp.prototype.compile, "RegExp.prototype.compile"));
+	proto.define("compile", toNativeFunction(env, RegExp.prototype.compile, "RegExp.prototype.compile"));
 	proto.defineOwnProperty("lastIndex", { value: objectFactory.createPrimitive(0), writable: true });
 
 	["global", "ignoreCase", "multiline", "source"].forEach(name => {

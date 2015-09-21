@@ -1,6 +1,6 @@
-import Reference from "../env/reference";
-import PropertyReference from "../env/property-reference";
-import * as convert from "../utils/convert";
+import {Reference} from "../env/reference";
+import {PropertyReference} from "../env/property-reference";
+import {toNumber,toBoolean,toInt32} from "../utils/native";
 
 export default function* UnaryExpression (context) {
 	const objectFactory = context.env.objectFactory;
@@ -22,22 +22,22 @@ export default function* UnaryExpression (context) {
 
 		case "-":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(-(yield convert.toNumber(context.env, value)));
+			newValue = objectFactory.createPrimitive(-(yield toNumber(context.env, value)));
 			break;
 
 		case "+":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(+(yield convert.toNumber(context.env, value)));
+			newValue = objectFactory.createPrimitive(+(yield toNumber(context.env, value)));
 			break;
 
 		case "!":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(!(convert.toBoolean(value)));
+			newValue = objectFactory.createPrimitive(!(toBoolean(value)));
 			break;
 
 		case "~":
 			value = result.getValue();
-			newValue = objectFactory.createPrimitive(~(yield convert.toInt32(context.env, value)));
+			newValue = objectFactory.createPrimitive(~(yield toInt32(context.env, value)));
 			break;
 
 		case "delete":

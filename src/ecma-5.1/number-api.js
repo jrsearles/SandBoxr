@@ -1,4 +1,4 @@
-import * as convert from "../utils/convert";
+import {toPrimitive,toNumber,primitiveToObject} from "../utils/native";
 import * as contracts from "../utils/contracts";
 
 const constants = ["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"];
@@ -9,10 +9,10 @@ export default function numberApi (env) {
 	const objectFactory = env.objectFactory;
 
 	let numberClass = objectFactory.createFunction(function* (obj) {
-		let numberValue = Number(yield convert.toPrimitive(env, obj, "number"));
+		let numberValue = Number(yield toPrimitive(env, obj, "number"));
 
 		if (this.isNew) {
-			return convert.primitiveToObject(env, numberValue);
+			return primitiveToObject(env, numberValue);
 		}
 
 		return objectFactory.create("Number", numberValue);
@@ -27,7 +27,7 @@ export default function numberApi (env) {
 
 		let radixValue = 10;
 		if (radix) {
-			radixValue = yield convert.toPrimitive(env, radix, "number");
+			radixValue = yield toPrimitive(env, radix, "number");
 			if (radixValue < 2 || radixValue > 36) {
 				return this.raise(new RangeError("toString() radix argument must be between 2 and 36"));
 			}
@@ -41,7 +41,7 @@ export default function numberApi (env) {
 
 		let digits = 0;
 		if (fractionDigits) {
-			digits = yield convert.toNumber(env, fractionDigits);
+			digits = yield toNumber(env, fractionDigits);
 		}
 
 		return objectFactory.createPrimitive(Number.prototype.toFixed.call(this.node.value, digits));

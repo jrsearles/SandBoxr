@@ -1,6 +1,6 @@
-import ObjectType from "./object-type";
+import {ObjectType} from "./object-type";
 
-export default class DateType extends ObjectType {
+export class DateType extends ObjectType {
 	constructor (value) {
 		super();
 		this.value = value;
@@ -13,7 +13,7 @@ export default class DateType extends ObjectType {
 		this.primitiveHint = "string";
 	}
 
-	unwrap () {
+	toNative () {
 		return this.value;
 	}
 }

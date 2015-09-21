@@ -1,5 +1,5 @@
-import * as convert from "../utils/convert";
-import {map as asyncMap} from "../utils/async";
+import {toPrimitive,toNumber,toNativeFunction} from "../utils/native";
+import {map} from "../utils/async";
 
 const staticMethods = ["now"];
 const protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMilliseconds", "getMinutes", "getMonth", "getMilliseconds", "getMinutes", "getMonth", "getSeconds", "getTime", "getTimezoneOffset", "getUTCDay", "getUTCDate", "getUTCFullYear", "getUTCHours", "getUTCMilliseconds", "getUTCMinutes", "getUTCMonth", "getUTCSeconds", "getYear", "toDateString", "toGMTString", "toISOString", "toJSON", "toLocaleString", "toLocaleDateString", "toLocaleTimeString", "toString", "toTimeString", "toUTCString"];
@@ -18,15 +18,15 @@ export default function dateApi (env) {
 			if (p1.isPrimitive) {
 				args = [p1.value];
 			} else {
-				let primitiveValue = yield convert.toPrimitive(env, p1);
+				let primitiveValue = yield toPrimitive(env, p1);
 				if (typeof primitiveValue !== "string") {
-					primitiveValue = yield convert.toNumber(env, p1);
+					primitiveValue = yield toNumber(env, p1);
 				}
 
 				args = [primitiveValue];
 			}
 		} else {
-			args = yield asyncMap(arguments, function* (arg) { return yield convert.toPrimitive(env, arg, "number"); });
+			args = yield* map(arguments, function* (arg) { return yield toPrimitive(env, arg, "number"); });
 		}
 
 		if (this.isNew) {
@@ -58,13 +58,13 @@ export default function dateApi (env) {
 	}, null, { configurable: false, enumerable: false, writable: false });
 
 	dateClass.define("parse", objectFactory.createBuiltInFunction(function* (value) {
-		let stringValue = yield convert.toPrimitive(env, value, "string");
+		let stringValue = yield toPrimitive(env, value, "string");
 		let dateValue = Date.parse(stringValue);
 		return objectFactory.createPrimitive(dateValue);
 	}, 1, "Date.prototype.parse"));
 
 	dateClass.define("UTC", objectFactory.createBuiltInFunction(function* () {
-		let args = yield asyncMap(arguments, function* (arg) { return yield convert.toPrimitive(env, arg, "number"); });
+		let args = yield* map(arguments, function* (arg) { return yield toPrimitive(env, arg, "number"); });
 		return objectFactory.createPrimitive(Date.UTC.apply(null, args));
 	}, 7, "Date.prototype.UTC"));
 
@@ -73,16 +73,16 @@ export default function dateApi (env) {
 	proto.value = new Date(Date.prototype);
 
 	staticMethods.forEach(name => {
-		dateClass.define(name, convert.toNativeFunction(env, Date[name], "Date." + name));
+		dateClass.define(name, toNativeFunction(env, Date[name], "Date." + name));
 	});
 
 	protoMethods.forEach(name => {
-		proto.define(name, convert.toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
+		proto.define(name, toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
 	});
 
 	setters.forEach(name => {
 		function* setter () {
-			let args = yield asyncMap(arguments, function* (arg) { return yield convert.toPrimitive(env, arg); });
+			let args = yield* map(arguments, function* (arg) { return yield toPrimitive(env, arg); });
 			Date.prototype[name].apply(this.node.value, args);
 		}
 

@@ -1,4 +1,4 @@
-export function* executeFunction (env, fn, params, args, thisArg, callee, isNew) {
+export function* execute (env, fn, params, args, thisArg, callee, isNew) {
 	let scope = fn.createScope(env, thisArg, false);
 	let returnResult;
 
@@ -27,7 +27,7 @@ export function* executeFunction (env, fn, params, args, thisArg, callee, isNew)
 	return returnResult || env.global.getValue("undefined");
 }
 
-export function* getFunctionResult (env, fn, params, args, thisArg, callee) {
+export function* call (env, fn, params, args, thisArg, callee) {
 	let scope = fn.createScope(env, thisArg, false);
 	scope.loadArgs(params, args, fn);
 	scope.init(fn.node && fn.node.body);
@@ -41,7 +41,7 @@ export function* getFunctionResult (env, fn, params, args, thisArg, callee) {
 	});
 }
 
-export function* tryCallMethod (env, obj, name) {
+export function* tryExecute (env, obj, name) {
 	let fn = obj.getProperty(name);
 	if (!fn) {
 		return false;

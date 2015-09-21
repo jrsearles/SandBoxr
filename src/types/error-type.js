@@ -1,13 +1,13 @@
-import ObjectType from "./object-type";
+import {ObjectType} from "./object-type";
 
-export default class ErrorType extends ObjectType {
+export class ErrorType extends ObjectType {
 	constructor (source) {
 		super();
 		this.source = source;
 		this.className = "Error";
 	}
 
-	unwrap () {
+	toNative () {
 		return this.source;
 	}
 }

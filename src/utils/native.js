@@ -1,5 +1,5 @@
 import "../polyfills";
-import * as func from "../utils/func";
+import {tryExecute as tryExec} from "../utils/func";
 
 const sign = Math.sign;
 const floor = Math.floor;
@@ -11,15 +11,15 @@ function* getString (env, value) {
 	}
 
 	if (value.isPrimitive) {
-		return String(value.unwrap());
+		return String(value.toNative());
 	}
 
-	let primitiveValue = yield func.tryCallMethod(env, value, "toString");
+	let primitiveValue = yield tryExec(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
 
-	primitiveValue = yield func.tryCallMethod(env, value, "valueOf");
+	primitiveValue = yield tryExec(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
 		return String(primitiveValue.value);
 	}
@@ -33,17 +33,17 @@ function* getPrimitive (env, value) {
 	}
 
 	if (value.isPrimitive) {
-		return value.unwrap();
+		return value.toNative();
 	}
 
-	let primitiveValue = yield func.tryCallMethod(env, value, "valueOf");
+	let primitiveValue = yield tryExec(env, value, "valueOf");
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.unwrap();
+		return primitiveValue.toNative();
 	}
 
-	primitiveValue = yield func.tryCallMethod(env, value, "toString");
+	primitiveValue = yield tryExec(env, value, "toString");
 	if (primitiveValue && primitiveValue.isPrimitive) {
-		return primitiveValue.unwrap();
+		return primitiveValue.toNative();
 	}
 
 	throw new TypeError("Cannot convert object to primitive value.");
@@ -78,7 +78,7 @@ export function	toArray (obj, length) {
 	let arr = [];
 
 	if (obj) {
-		let ln = length >= 0 ? length : obj.getValue("length").unwrap();
+		let ln = length >= 0 ? length : obj.getValue("length").toNative();
 		let i = 0;
 
 		while (i < ln) {
@@ -93,7 +93,7 @@ export function	toArray (obj, length) {
 	return arr;
 }
 
-export function*	toPrimitive (env, obj, preferredType) {
+export function* toPrimitive (env, obj, preferredType) {
 	preferredType = preferredType && preferredType.toLowerCase();
 	if (!preferredType && obj) {
 		preferredType = obj.primitiveHint;
@@ -156,7 +156,7 @@ export function	toBoolean (obj) {
 
 export function	toNativeFunction (env, fn, name) {
 	return env.objectFactory.createBuiltInFunction(function* () {
-		let scope = this && this.node && this.node.unwrap();
+		let scope = this && this.node && this.node.toNative();
 		let args = yield getValues(env, arguments);
 
 		let value = fn.apply(scope, args);
