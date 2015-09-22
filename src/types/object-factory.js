@@ -117,6 +117,20 @@ export class ObjectFactory {
 		return instance;
 	}
 
+	createArray (elements) {
+		let instance = this.create("Array");
+
+		if (elements) {
+			for (let i = 0, ln = elements.length; i < ln; i++) {
+				instance.putValue(i, elements[i], true, this.env);
+			}
+
+			instance.putValue("length", this.create("Number", elements.length), true, this.env);
+		}
+
+		return instance;
+	}
+
 	createObject (parent) {
 		let instance = new ObjectType();
 
