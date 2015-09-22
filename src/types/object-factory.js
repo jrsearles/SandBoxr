@@ -1,5 +1,5 @@
 import {ObjectType} from "./object-type";
-import {PrimitiveType} from "./primitive-type";
+import {PrimitiveType,UNDEFINED,NULL} from "./primitive-type";
 import {FunctionType} from "./function-type";
 import {NativeFunctionType} from "./native-function-type";
 import {RegexType} from "./regex-type";
@@ -9,11 +9,6 @@ import {DateType} from "./date-type";
 import {ErrorType} from "./error-type";
 import {ArgumentType} from "./argument-type";
 import * as contracts from "../utils/contracts";
-
-const parentless = {
-	"Undefined": true,
-	"Null": true
-};
 
 let orphans = Object.create(null);
 
@@ -33,10 +28,6 @@ function setOrphans (scope) {
 }
 
 function setProto (typeName, instance, env) {
-	if (typeName in parentless) {
-		return;
-	}
-
 	let parent = env.getReference(typeName);
 	if (parent.isUnresolved()) {
 		// during initialization it is possible for objects to be created
@@ -75,14 +66,18 @@ export class ObjectFactory {
 		let instance;
 
 		switch (typeName) {
+			case "Null":
+				return NULL;
+
+			case "Undefined":
+				return UNDEFINED;
+
 			case "String":
 				instance = new StringType(value);
 				break;
 
 			case "Number":
 			case "Boolean":
-			case "Null":
-			case "Undefined":
 				instance = new PrimitiveType(value);
 				break;
 
@@ -127,7 +122,7 @@ export class ObjectFactory {
 
 		if (parent !== null) {
 			if (parent) {
-				instance.setPrototype(parent && parent.getValue("prototype"));
+				instance.setPrototype(parent.getValue("prototype"));
 			} else {
 				setProto("Object", instance, this.env);
 			}
@@ -171,11 +166,11 @@ export class ObjectFactory {
 
 		instance.init(this, proto, descriptor, strict);
 
-		// setProto("Function", instance, this.env);
-		let functionClass = this.env.getReference("Function");
-		if (functionClass && !functionClass.isUnresolved()) {
-			instance.setPrototype(functionClass.getValue().getValue("prototype"));
-		}
+		setProto("Function", instance, this.env);
+		// let functionClass = this.env.getReference("Function");
+		// if (functionClass && !functionClass.isUnresolved()) {
+		// 	instance.setPrototype(functionClass.getValue().getValue("prototype"));
+		// }
 
 		return instance;
 	}

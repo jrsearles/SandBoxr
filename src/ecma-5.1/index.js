@@ -1,4 +1,4 @@
-import {PrimitiveType} from "../types/primitive-type";
+import {UNDEFINED,NULL} from "../types/primitive-type";
 import {ObjectFactory} from "../types/object-factory";
 import {Reference} from "../env/reference";
 import numberAPI from "./number-api";
@@ -25,11 +25,8 @@ export default function ecma51 (env) {
 
 	env.createObjectScope(globalObject);
 
-	let undefinedClass = new PrimitiveType();
-	globalObject.define("undefined", undefinedClass, frozen);
-
-	let nullClass = new PrimitiveType(null);
-	globalObject.define("null", nullClass, frozen);
+	globalObject.define("undefined", UNDEFINED, frozen);
+	globalObject.define("null", NULL, frozen);
 
 	globalObject.define("Infinity", objectFactory.createPrimitive(Infinity), frozen);
 	globalObject.define("NaN", objectFactory.createPrimitive(NaN), frozen);
@@ -71,7 +68,7 @@ export default function ecma51 (env) {
 	if (options.parser) {
 		let evalFunc = objectFactory.createBuiltInFunction(function* (code) {
 			if (!code) {
-				return undefinedClass;
+				return UNDEFINED;
 			}
 
 			if (code.type !== "string") {
@@ -103,7 +100,7 @@ export default function ecma51 (env) {
 				if (strictCode) {
 					let thisArg;
 					if (strictScope) {
-						thisArg = currentGlobal ? globalObject : undefinedClass;
+						thisArg = currentGlobal ? globalObject : UNDEFINED;
 					} else {
 						thisArg = env.getThisBinding() || globalObject;
 					}
@@ -123,7 +120,7 @@ export default function ecma51 (env) {
 				return yield env.createExecutionContext(ast).execute();
 			});
 
-			return executionResult && executionResult.result ? executionResult.result.getValue() : undefinedClass;
+			return executionResult && executionResult.result ? executionResult.result.getValue() : UNDEFINED;
 		}, 1, "eval");
 
 		globalObject.define("eval", evalFunc);

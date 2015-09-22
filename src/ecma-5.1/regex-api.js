@@ -1,3 +1,4 @@
+import {NULL} from "../types/primitive-type";
 import {toString,toInt32,toNativeFunction} from "../utils/native";
 import * as contracts from "../utils/contracts";
 
@@ -57,7 +58,7 @@ export default function regexApi (env) {
 			return arr;
 		}
 
-		return this.env.global.getValue("null");
+		return NULL;
 	}, 1, "RegExp.prototype.exec"));
 
 	proto.define("toString", objectFactory.createBuiltInFunction(function () {

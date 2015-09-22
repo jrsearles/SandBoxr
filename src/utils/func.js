@@ -1,3 +1,5 @@
+import {UNDEFINED} from "../types/primitive-type";
+
 export function* execute (env, fn, params, args, thisArg, callee, isNew) {
 	let scope = fn.createScope(env, thisArg, false);
 	let returnResult;
@@ -24,7 +26,7 @@ export function* execute (env, fn, params, args, thisArg, callee, isNew) {
 		return returnResult;
 	});
 
-	return returnResult || env.global.getValue("undefined");
+	return returnResult || UNDEFINED;
 }
 
 export function* call (env, fn, params, args, thisArg, callee) {
@@ -50,7 +52,6 @@ export function* tryExecute (env, obj, name) {
 	fn = fn.getValue();
 
 	if (fn && fn.className === "Function") {
-		let undef = env.global.getValue("undefined");
 		let scope = fn.createScope(env, obj);
 		scope.init(fn.node && fn.node.body);
 
@@ -65,7 +66,7 @@ export function* tryExecute (env, obj, name) {
 			return result && result.result;
 		});
 
-		return executionResult ? executionResult.getValue() : undef;
+		return executionResult ? executionResult.getValue() : UNDEFINED;
 	}
 
 	return false;

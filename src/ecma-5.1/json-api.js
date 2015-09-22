@@ -1,3 +1,4 @@
+import {UNDEFINED} from "../types/primitive-type";
 import * as contracts from "../utils/contracts";
 import {execute as exec, tryExecute as tryExec} from "../utils/func";
 import {toString,toNumber,toArray} from "../utils/native";
@@ -226,7 +227,6 @@ function createReviver (env, reviver) {
 export default function jsonApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	const undef = env.global.getValue("undefined");
 
 	let jsonClass = objectFactory.createObject();
 	jsonClass.className = "JSON";
@@ -238,7 +238,7 @@ export default function jsonApi (env) {
 		// run at the top value
 		obj = yield replacer(obj, "", obj);
 		if (contracts.isUndefined(obj)) {
-			return undef;
+			return UNDEFINED;
 		}
 
 		let stack = [];
@@ -252,7 +252,7 @@ export default function jsonApi (env) {
 		let parsedObject = JSON.parse(stringValue);
 		let deserializedObject = yield deserialize(env, parsedObject, reviver);
 
-		return yield reviver(deserializedObject, "", deserializedObject) || undef;
+		return yield reviver(deserializedObject, "", deserializedObject) || UNDEFINED;
 	}, 2, "JSON.parse"));
 
 	globalObject.define("JSON", jsonClass);

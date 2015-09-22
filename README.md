@@ -19,7 +19,7 @@ The current release can be considered a release candidate. Barring some low-leve
 - Begin implementing [ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html). This may be done as a plugin - not sure yet. This will become more clear as implementation begins.
 - Performance measurements/optimizations
 - Add detection of infinite loops
-- Refactor execution results, try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward and we'd be better off returning a response and let exceptions bubble up without actually throwing where possible.)
+- ~~Refactor execution results, try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward and we'd be better off returning a response and let exceptions bubble up without actually throwing where possible.)~~
 - Split out some of the code into separate packages
 - Possible: allow stepping/pausing of code execution
 - Possible: directly integrate external parser (with ability to override)
@@ -44,8 +44,8 @@ var sandbox = SandBoxr.create(ast);
 
 // execute the code, which returns a promise
 sandbox.execute().then(function (result) {
-	// get the raw value
-	var rawValue = result.unwrap();
+	// get the value
+	var nativeValue = result.toNative();
 });
 ```
 

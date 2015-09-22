@@ -1,4 +1,5 @@
 import {ObjectType} from "../types/object-type";
+import {UNDEFINED,NULL} from "../types/primitive-type";
 import {toString,toBoolean,toObject} from "../utils/native";
 import * as contracts from "../utils/contracts";
 import {execute as exec, call} from "../utils/func";
@@ -21,7 +22,6 @@ function* defineProperty (env, obj, name, descriptor) {
 		throw new TypeError(`Property description must be an object: ${stringValue}`);
 	}
 
-	let undef = env.global.getValue("undefined");
 	let options = {};
 
 	if (descriptor) {
@@ -44,7 +44,7 @@ function* defineProperty (env, obj, name, descriptor) {
 
 		// we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
 		if (hasGetter) {
-			let getter = descriptor.getValue("get") || undef;
+			let getter = descriptor.getValue("get") || UNDEFINED;
 			if (getter.isPrimitive && getter.value === undefined) {
 				options.get = options.getter = undefined;
 			} else {
@@ -67,7 +67,7 @@ function* defineProperty (env, obj, name, descriptor) {
 		}
 
 		if (hasSetter) {
-			let setter = descriptor.getValue("set") || undef;
+			let setter = descriptor.getValue("set") || UNDEFINED;
 			if (setter.isPrimitive && setter.value === undefined) {
 				options.set = options.setter = undefined;
 			} else {
@@ -83,14 +83,14 @@ function* defineProperty (env, obj, name, descriptor) {
 
 					return yield scope.use(function* () {
 						yield exec(env, setter, setter.node.params, [value], thisArg, setter.node);
-						return undef;
+						return UNDEFINED;
 					});
 				};
 			}
 		}
 
 		if (hasValue) {
-			options.value = descriptor.getValue("value") || undef;
+			options.value = descriptor.getValue("value") || UNDEFINED;
 		}
 	}
 
@@ -100,7 +100,6 @@ function* defineProperty (env, obj, name, descriptor) {
 export default function objectApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	const undef = globalObject.getValue("undefined");
 
 	let proto = new ObjectType();
 	let objectClass = objectFactory.createFunction(function (value) {
@@ -223,14 +222,14 @@ export default function objectApi (env) {
 				result.putValue("value", descriptor.value, false, env);
 				result.putValue("writable", objectFactory.createPrimitive(descriptor.writable), false, env);
 			} else {
-				result.putValue("get", descriptor.get || undef, false, env);
-				result.putValue("set", descriptor.set || undef, false, env);
+				result.putValue("get", descriptor.get || UNDEFINED, false, env);
+				result.putValue("set", descriptor.set || UNDEFINED, false, env);
 			}
 
 			return result;
 		}
 
-		return undef;
+		return UNDEFINED;
 	}, 2, "Object.getOwnPropertyDescriptor"));
 
 	objectClass.define("keys", objectFactory.createBuiltInFunction(function (obj) {
@@ -264,7 +263,7 @@ export default function objectApi (env) {
 		contracts.assertIsObject(obj, "Object.getPrototypeOf");
 
 		let objProto = obj.getPrototype();
-		return objProto || env.global.getValue("null");
+		return objProto || NULL;
 	}, 1, "Object.getPrototypeOf"));
 
 	objectClass.define("freeze", objectFactory.createBuiltInFunction(function (obj) {

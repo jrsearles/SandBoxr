@@ -1,5 +1,6 @@
+import {UNDEFINED} from "./types/primitive-type";
 import {ExecutionResult} from "./execution-result";
-import { default as expressionVisitor } from "./visitors";
+import {default as expressionVisitor} from "./visitors";
 
 export class ExecutionContext {
 	constructor (env, node, callee, isNew) {
@@ -73,6 +74,6 @@ export class ExecutionContext {
 	}
 
 	empty () {
-		return this.result();
+		return this.result(UNDEFINED);
 	}
 };

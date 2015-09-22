@@ -1,3 +1,4 @@
+import {UNDEFINED} from "../types/primitive-type";
 import {ExecutionContext} from "../execution-context";
 import {DeclarativeEnvironment} from "./declarative-environment";
 import {ObjectEnvironment} from "./object-environment";
@@ -89,7 +90,7 @@ export class Environment {
 		}
 
 		if (this.isStrict()) {
-			return this.global.getValue("undefined");
+			return UNDEFINED;
 		}
 
 		return this.global;

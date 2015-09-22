@@ -1,3 +1,4 @@
+import {UNDEFINED} from "../types/primitive-type";
 import EstreeWalker from "../estree-walker";
 import {visit as hoister} from "./hoister";
 import * as contracts from "../utils/contracts";
@@ -26,7 +27,6 @@ export class Scope {
 		}
 
 		let env = this.env;
-		let undef = env.global.getValue("undefined");
 		this.scope.strict = contracts.isStrictNode(node.body);
 
 		let strict = this.scope.strict || env.isStrict();
@@ -38,7 +38,7 @@ export class Scope {
 			let name = decl.name || decl.id.name;
 			contracts.assertIsValidParameterName(name, strict);
 
-			let value = undef;
+			let value = UNDEFINED;
 			if (decl.type === "FunctionDeclaration") {
 				// functions can be used before they are defined
 				value = env.objectFactory.createFunction(decl, null, null, strict || contracts.isStrictNode(decl.body.body));
@@ -56,7 +56,6 @@ export class Scope {
 		let env = this.env;
 		let scope = this.scope;
 
-		let undef = env.global.getValue("undefined");
 		let strict = env.isStrict() || callee.isStrict();
 
 		let argumentList = env.objectFactory.createArguments(args, callee, strict);
@@ -73,7 +72,7 @@ export class Scope {
 				}
 			}
 
-			scope.putValue(param.name, args[index] || undef);
+			scope.putValue(param.name, args[index] || UNDEFINED);
 		});
 
 		// just set value if additional, unnamed arguments are passed in

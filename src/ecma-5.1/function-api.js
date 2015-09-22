@@ -1,4 +1,5 @@
 import {NativeFunctionType} from "../types/native-function-type";
+import {UNDEFINED} from "../types/primitive-type";
 import * as contracts from "../utils/contracts";
 import {execute as exec, call} from "../utils/func";
 import {toString,toObject,toArray} from "../utils/native";
@@ -6,7 +7,7 @@ import {map} from "../utils/async";
 
 function defineThis (env, fn, thisArg) {
 	if (fn.builtIn || fn.isStrict()) {
-		return thisArg || env.global.getValue("undefined");
+		return thisArg || UNDEFINED;
 	}
 
 	if (contracts.isNullOrUndefined(thisArg)) {
@@ -21,7 +22,6 @@ const frozen = { configurable: false, enumerable: false, writable: false };
 export default function functionApi (env) {
 	const options = env.options;
 	const globalObject = env.global;
-	const undef = env.global.getValue("undefined");
 	const objectFactory = env.objectFactory;
 
 	let funcClass;
@@ -72,7 +72,7 @@ export default function functionApi (env) {
 					thisArg = this.node;
 
 					if (!thisArg) {
-						thisArg = strict ? undef : globalObject;
+						thisArg = strict ? UNDEFINED : globalObject;
 					}
 				}
 
@@ -82,7 +82,7 @@ export default function functionApi (env) {
 					return thisArg;
 				}
 
-				return executionResult && executionResult.result || undef;
+				return executionResult && executionResult.result || UNDEFINED;
 			};
 
 			wrappedFunc.nativeLength = callee.params.length;

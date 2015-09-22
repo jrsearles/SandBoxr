@@ -1,3 +1,4 @@
+import {UNDEFINED} from "../types/primitive-type";
 import * as contracts from "../utils/contracts";
 import {tryExecute as tryExec} from "../utils/func";
 import {toString,toPrimitive,toInteger,toUInt32,toBoolean,toObject,toArray} from "../utils/native";
@@ -31,11 +32,10 @@ function* getLength (env, source) {
 export default function arrayApi (env) {
 	const globalObject = env.global;
 	const objectFactory = env.objectFactory;
-	const undef = globalObject.getValue("undefined");
 
 	function* executeCallback (callback, entry, thisArg, arr) {
 		if (!thisArg) {
-			thisArg = callback.isStrict() ? undef : env.global;
+			thisArg = callback.isStrict() ? UNDEFINED : env.global;
 		}
 
 		let scope = env.createScope(thisArg);
@@ -124,7 +124,7 @@ export default function arrayApi (env) {
 		}
 
 		this.node.putValue("length", objectFactory.createPrimitive(i), true, env);
-		return obj || undef;
+		return obj || UNDEFINED;
 	}, 0, "Array.prototype.pop"));
 
 	proto.define("shift", objectFactory.createBuiltInFunction(function* () {
@@ -150,7 +150,7 @@ export default function arrayApi (env) {
 		}
 
 		this.node.putValue("length", objectFactory.createPrimitive(length === 0 ? 0 : --length), true, env);
-		return obj || undef;
+		return obj || UNDEFINED;
 	}, 0, "Array.prototype.shift"));
 
 	proto.define("unshift", objectFactory.createBuiltInFunction(function* (...items) {
@@ -303,7 +303,7 @@ export default function arrayApi (env) {
 
 	function* join (separator) {
 		let length = yield getLength(env, this.node);
-		separator = arguments.length === 0 || separator === undef ? "," : (yield toPrimitive(env, separator, "string"));
+		separator = arguments.length === 0 || separator === UNDEFINED ? "," : (yield toPrimitive(env, separator, "string"));
 		let stringValues = [];
 		let stringValue;
 
@@ -327,7 +327,7 @@ export default function arrayApi (env) {
 	proto.define("join", objectFactory.createBuiltInFunction(join, 1, "Array.prototype.join"));
 
 	proto.define("indexOf", objectFactory.createBuiltInFunction(function* (searchElement, fromIndex) {
-		searchElement = searchElement || undef;
+		searchElement = searchElement || UNDEFINED;
 		let length = yield getLength(env, this.node);
 		let index = arguments.length === 1 ? 0 : (yield toInteger(env, fromIndex));
 		const notFound = objectFactory.createPrimitive(-1);
@@ -339,7 +339,7 @@ export default function arrayApi (env) {
 		index = getStartIndex(index, length);
 
 		for (let entry of iterate.forward(env, this.node, index, length)) {
-			if (searchElement.equals(entry.value || undef)) {
+			if (searchElement.equals(entry.value || UNDEFINED)) {
 				return objectFactory.createPrimitive(entry.index);
 			}
 		}
@@ -348,7 +348,7 @@ export default function arrayApi (env) {
 	}, 1, "Array.prototype.indexOf"));
 
 	proto.define("lastIndexOf", objectFactory.createBuiltInFunction(function* (searchElement, fromIndex) {
-		searchElement = searchElement || undef;
+		searchElement = searchElement || UNDEFINED;
 		let length = yield getLength(env, this.node);
 		let index = arguments.length === 1 ? length - 1 : (yield toInteger(env, fromIndex));
 
@@ -357,7 +357,7 @@ export default function arrayApi (env) {
 		}
 
 		for (let entry of iterate.reverse(env, this.node, index)) {
-			if (searchElement.equals(entry.value || undef)) {
+			if (searchElement.equals(entry.value || UNDEFINED)) {
 				return objectFactory.createPrimitive(entry.index);
 			}
 		}
@@ -572,7 +572,7 @@ export default function arrayApi (env) {
 			};
 		} else {
 			comparer = function (a, b) {
-				let scope = env.createScope(undef);
+				let scope = env.createScope(UNDEFINED);
 				scope.init(compareFunction.node.body);
 
 				scope.loadArgs(compareFunction.node.params, [a, b], compareFunction);

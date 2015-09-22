@@ -1,13 +1,13 @@
 import * as operators from "../utils/operators";
 import * as comparers from "../utils/comparers";
+import {UNDEFINED} from "../types/primitive-type";
 
 export default function* BinaryExpression (context) {
-	let undef = context.env.global.getValue("undefined");
 	let left = (yield context.create(context.node.left).execute()).result;
-	let leftValue = left.getValue() || undef;
+	let leftValue = left.getValue() || UNDEFINED;
 
 	let right = (yield context.create(context.node.right).execute()).result;
-	let rightValue = right.getValue() || undef;
+	let rightValue = right.getValue() || UNDEFINED;
 
 	let newValue;
 	if (context.node.operator in operators) {

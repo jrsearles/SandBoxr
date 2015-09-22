@@ -1,3 +1,4 @@
+import {UNDEFINED,NULL} from "../types/primitive-type";
 import {toString,toInteger,toUInt32,toPrimitive,primitiveToObject} from "../utils/native";
 import * as contracts from "../utils/contracts";
 import {execute as exec} from "../utils/func";
@@ -8,7 +9,6 @@ const slice = Array.prototype.slice;
 
 export default function stringApi (env) {
 	const globalObject = env.global;
-	const undef = globalObject.getValue("undefined");
 	const objectFactory = env.objectFactory;
 
 	let stringClass = objectFactory.createFunction(function* (value) {
@@ -127,7 +127,7 @@ export default function stringApi (env) {
 			let params = callee.params || [];
 
 			replacer = function () {
-				let thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? undef : globalObject;
+				let thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? UNDEFINED : globalObject;
 				let args = slice.call(arguments).map(arg => objectFactory.createPrimitive(arg));
 				let replacedValue = x(exec(env, substrOrFn, params, args, thisArg, callee));
 				return replacedValue ? x(toString(env, replacedValue)) : undefined;
@@ -162,7 +162,7 @@ export default function stringApi (env) {
 			return matches;
 		}
 
-		return globalObject.getValue("null");
+		return NULL;
 	}, 1, "String.prototype.match"));
 
 	proto.define("trim", objectFactory.createBuiltInFunction(function* () {
