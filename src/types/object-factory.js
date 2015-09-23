@@ -43,6 +43,10 @@ function setProto (typeName, instance, env) {
 	instance.setPrototype(proto);
 }
 
+function createDataPropertyDescriptor (value, { configurable = true, enumerable = true, writable = true }) {
+	return { value, configurable, enumerable, writable };
+}
+
 export class ObjectFactory {
 	constructor (env) {
 		this.env = env;
@@ -52,10 +56,22 @@ export class ObjectFactory {
 		setOrphans(this.env);
 	}
 
+	/**
+	 * Creates a primitive object based on the provided native value.
+	 * @param {any} value - The primitive value.
+	 * @returns {ObjectType} The primitive instance.
+	 */
 	createPrimitive (value) {
 		return this.create(contracts.getType(value), value);
 	}
 
+	/**
+	 * Creates an object based on the type specified. For a primitive type the second
+	 * parameter is used as the objects underlying value.
+	 * @param {String} typeName - The name of the object to create.
+	 * @param {any} [value] - The primitive value.
+	 * @returns {ObjectType} The new instance.
+	 */
 	create (typeName, value) {
 		// the value is already wrapped in an object
 		// this can happen if an exception is rethrown
@@ -117,26 +133,36 @@ export class ObjectFactory {
 		return instance;
 	}
 
+	/**
+	 * Creates an array object.
+	 * @param {ObjectType[]} [elements] - If provided, the elements will be added to the new array.
+	 * @returns {ArrayType} The array instance.
+	 */
 	createArray (elements) {
 		let instance = this.create("Array");
 
 		if (elements) {
 			for (let i = 0, ln = elements.length; i < ln; i++) {
-				instance.putValue(i, elements[i], true, this.env);
+				instance.defineOwnProperty(i, createDataPropertyDescriptor(elements[i]), true, this.env);
 			}
-
-			instance.putValue("length", this.create("Number", elements.length), true, this.env);
 		}
 
 		return instance;
 	}
 
-	createObject (parent) {
+	/**
+	 * Creates an object.
+	 * @param {ObjectType} [proto] - The prototype to use with the new object. If no value is provided
+	 * the Object prototype will be used. If `null` is passed in, no prototype will be assigned to the
+	 * new object.
+	 * @returns {ObjectType} The object instance.
+	 */
+	createObject (proto) {
 		let instance = new ObjectType();
 
-		if (parent !== null) {
-			if (parent) {
-				instance.setPrototype(parent.getValue("prototype"));
+		if (proto !== null) {
+			if (proto) {
+				instance.setPrototype(proto.getValue("prototype"));
 			} else {
 				setProto("Object", instance, this.env);
 			}
@@ -169,6 +195,15 @@ export class ObjectFactory {
 		return instance;
 	}
 
+	/**
+	 * Creates a function instance.
+	 * @param {AST|Function} fnOrNode - The AST or function to be used when the function is called.
+	 * @param {ObjectType} [proto] - The prototype to use for the function. If no object is provided
+	 * an empty object is used.
+	 * @param {Object} [descriptor] - Property values to be used for the prototype.
+	 * @param {Boolean} [strict] - Indicates whether the function is in stict mode.
+	 * @returns {FunctionType} The function instance.
+	 */
 	createFunction (fnOrNode, proto, descriptor, strict) {
 		let instance;
 
@@ -179,23 +214,24 @@ export class ObjectFactory {
 		}
 
 		instance.init(this, proto, descriptor, strict);
-
 		setProto("Function", instance, this.env);
-		// let functionClass = this.env.getReference("Function");
-		// if (functionClass && !functionClass.isUnresolved()) {
-		// 	instance.setPrototype(functionClass.getValue().getValue("prototype"));
-		// }
-
 		return instance;
 	}
 
-	createBuiltInFunction (fn, length, methodName) {
+	/**
+	 * Creates a function with no prototype that cannot be instantiated.
+	 * @param {Function} func - The underlying function.
+	 * @param {Number} length - The length property of the function.
+	 * @param {String} funcName - The name of the function.
+	 * @returns {NativeFunctionType} The function instance.
+	 */
+	createBuiltInFunction (func, length, funcName) {
 		let instance = new NativeFunctionType(function () {
 			if (this.isNew) {
-				throw new TypeError(methodName + " is not a constructor");
+				throw new TypeError(`${funcName} is not a constructor`);
 			}
 
-			return fn.apply(this, arguments);
+			return func.apply(this, arguments);
 		});
 
 		setProto("Function", instance, this.env);

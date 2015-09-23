@@ -32,6 +32,11 @@ export class Environment {
 		return this.ops[operator](this, left, right);
 	}
 
+	/**
+	 * Gets a reference from the environment
+	 * @param {String} name - The name of the property
+	 * @returns {Reference} The reference.
+	 */
 	getReference (name) {
 		let scope = this.current && this.current.scope;
 		while (scope) {
@@ -61,11 +66,21 @@ export class Environment {
 		this.current.scope.deleteVariable(name);
 	}
 
+	/**
+	 * Declares a variable within the current scope.
+	 * @param {String} name - the name of the variable.
+	 * @param {Boolean} [immutable] - whether the variable is immutable or not.
+	 * @returns {PropertyDescriptor} The property descriptor for the new variabble.
+	 */
 	createVariable (name, immutable) {
 		contracts.assertIsValidIdentifier(name, this.isStrict());
 		return this.current.scope.createVariable(name, !immutable);
 	}
 
+	/**
+	 * Indicates whether the current lexical scope is in strict mode.
+	 * @returns {Boolean} true if in strict mode; false otherwise.
+	 */
 	isStrict () {
 		if (this.options.useStrict) {
 			return true;
@@ -83,6 +98,10 @@ export class Environment {
 		return false;
 	}
 
+	/**
+	 * Gets the current `this` object for the environment.
+	 * @returns {ObjectType} The `this` object for the current scope.
+	 */
 	getThisBinding () {
 		let thisArg = this.current.scope.getThisBinding();
 		if (thisArg) {
@@ -100,14 +119,31 @@ export class Environment {
 		return new ExecutionContext(this, node, callee, isNew);
 	}
 
+	/**
+	 * Creates a new declarative scope.
+	 * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
+	 * @returns {Scope} The new scope.
+	 */
 	createScope (thisArg) {
 		return this.setScope(new DeclarativeEnvironment(this.current, thisArg, this));
 	}
 
+	/**
+	 * Creates a new scope based on the provided object. This is used for the `with`
+	 * statement, as well as the global scope.
+	 * @param {ObjectType} obj - The object to bind the scope to.
+	 * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
+	 * @returns {Scope} The new scope.
+	 */
 	createObjectScope (obj, thisArg) {
 		return this.setScope(new ObjectEnvironment(this.current, obj, thisArg, this));
 	}
 
+	/**
+	 * Sets the current scope.
+	 * @param {Environment} scope - Sets the current environment.
+	 * @returns {Scope} The created scope.
+	 */
 	setScope (scope) {
 		return this.current = new Scope(this, scope);
 	}

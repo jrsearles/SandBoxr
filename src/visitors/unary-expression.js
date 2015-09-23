@@ -52,7 +52,7 @@ export default function* UnaryExpression (context) {
 				}
 
 				if (resolved) {
-					deleted = result.deleteBinding(result.name);
+					deleted = result.delete();
 				}
 			} else if (context.node.argument.object) {
 				return context.raise(new ReferenceError(`${context.node.argument.object.name} is not defined`));

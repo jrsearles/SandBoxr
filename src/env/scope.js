@@ -21,6 +21,11 @@ export class Scope {
 		this.priorScope = (env.current || env.globalScope).scope;
 	}
 
+	/**
+	 * Initializes the scope by validating the function body and hoisting variables.
+	 * @param {AST} node - The node to be executed.
+	 * @returns {void}
+	 */
 	init (node) {
 		if (!node) {
 			return;
@@ -52,6 +57,13 @@ export class Scope {
 		});
 	}
 
+	/**
+	 * Loads the arguments into the scope and creates the special `arguments` object.
+	 * @param {AST[]} params - The parameter identifiers
+	 * @param {ObjectType[]} args - The argument values
+	 * @param {FunctionType} callee - The function
+	 * @returns {void}
+	 */
 	loadArgs (params, args, callee) {
 		let env = this.env;
 		let scope = this.scope;
@@ -96,6 +108,12 @@ export class Scope {
 		});
 	}
 
+	/**
+	 * Runs the passed in function and exits the scope when the function completes,
+	 * returning the environment back to the previos state.
+	 * @param {Function} inner - The function to execute.
+	 * @returns {Iterator} The function results
+	 */
 	*use (inner) {
 		try {
 			let result = yield inner();
@@ -107,6 +125,11 @@ export class Scope {
 		}
 	}
 
+	/**
+	 * Exits the scope, returning the environment to it's previous state.
+	 * (Typically you would call `use` which handles exiting the scope itself.)
+	 * @returns {void}
+	 */
 	exit () {
 		this.env.setScope(this.priorScope);
 	}
