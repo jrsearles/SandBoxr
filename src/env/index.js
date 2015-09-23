@@ -4,7 +4,7 @@ import {DeclarativeEnvironment} from "./declarative-environment";
 import {ObjectEnvironment} from "./object-environment";
 import {Reference} from "./reference";
 import api from "../ecma-5.1";
-import comparers from "../utils/comparers";
+import operators from "../utils/operators";
 import * as contracts from "../utils/contracts";
 import {Scope} from "./scope";
 
@@ -19,17 +19,12 @@ export class Environment {
 		this.current = null;
 		this.globalScope = null;
 
-		this.options = Object.assign(this.options || {}, defaultOptions, options);
+		this.options = Object.assign({}, defaultOptions, options);
 		api(this);
 
 		// todo: improve this
-		this.ops = Object.assign(comparers, options.comparers);
-		this.trying = 0;
-	}
-
-	evaluate (left, right, operator) {
-		// todo: improve this - why do we need this here?
-		return this.ops[operator](this, left, right);
+		this.ops = Object.assign(operators, options.operators);
+		this.ops.env = this;
 	}
 
 	/**

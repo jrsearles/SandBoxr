@@ -176,8 +176,8 @@ describe("API", function () {
 		it("should be able to replace an operators", function (done) {
 			var env = SandBoxr.createEnvironment();
 			env.init({
-				comparers: {
-					"implicitEquals": function (env, a, b) {
+				operators: {
+					"coerciveEquals": function (a, b) {
 						if (a.isPrimitive && b.isPrimitive) {
 							return a.value === b.value;
 						}

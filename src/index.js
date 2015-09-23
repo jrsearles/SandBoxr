@@ -6,7 +6,7 @@ export class SandBoxr {
 	/**
 	 * Creates a new Sandbox
 	 * @class
-	 * @param {Object} ast - The abstract syntax tree to execute.
+	 * @param {AST} ast - The abstract syntax tree to execute.
 	 * @param {Object} [options] The options to use with the sandbox.
 	 */
 	constructor (ast, options = {}) {
@@ -17,8 +17,7 @@ export class SandBoxr {
 	/**
 	 * Executes the abstract syntax tree (AST) against the provided environment (or the default
 	 * environment if not provided)
-	 *
-	 * @param {Object} [env] - The environment to execute the AST against.
+	 * @param {Environment} [env] - The environment to execute the AST against.
 	 * @returns {Promise} A promise that resolves with the result of the execution
 	 */
 	execute (env) {
@@ -35,7 +34,6 @@ export class SandBoxr {
 
 	/**
 	 * Creates an environment instance.
-	 *
 	 * @returns {Object} The environment instance.
 	 */
 	static createEnvironment () {
@@ -44,10 +42,9 @@ export class SandBoxr {
 
 	/**
 	 * Creates a new SandBoxr instance.
-	 *
-	 * @param {Object} ast - The abstract syntax tree to execute.
+	 * @param {AST} ast - The abstract syntax tree to execute.
 	 * @param {Object} [options] The options to use with the sandbox.
-	 * @returns {Object} A new sandbox.
+	 * @returns {SandBoxr} A new sandbox.
 	 */
 	static create (ast, options) {
 		return new SandBoxr(ast, options);

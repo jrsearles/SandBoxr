@@ -1,5 +1,4 @@
 import * as contracts from "../utils/contracts";
-import operators from "../utils/operators";
 
 export default function* AssignmentExpression (context) {
 	let assignment = context.node.operator === "=";
@@ -15,7 +14,7 @@ export default function* AssignmentExpression (context) {
 		// remove equals
 		let op = context.node.operator.slice(0, -1);
 
-		let nativeValue = yield operators[op](context.env, left.getValue(), right.getValue());
+		let nativeValue = yield context.env.ops[op](left.getValue(), right.getValue());
 		newValue = context.env.objectFactory.createPrimitive(nativeValue);
 	}
 

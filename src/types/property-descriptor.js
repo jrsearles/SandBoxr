@@ -1,4 +1,4 @@
-import * as comparers from "../utils/comparers";
+import {areSame} from "../utils/operators";
 import {exhaust as x} from "../utils/async";
 
 const defaultDescriptor = {
@@ -76,7 +76,7 @@ export class PropertyDescriptor {
 					return false;
 				}
 
-				return !("value" in descriptor) || comparers.areSame(this.value, descriptor.value);
+				return !("value" in descriptor) || areSame(this.value, descriptor.value);
 			}
 
 			return true;

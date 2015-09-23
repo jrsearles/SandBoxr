@@ -1,5 +1,3 @@
-import * as operators from "../utils/operators";
-import * as comparers from "../utils/comparers";
 import {UNDEFINED} from "../types/primitive-type";
 
 export default function* BinaryExpression (context) {
@@ -9,12 +7,8 @@ export default function* BinaryExpression (context) {
 	let right = (yield context.create(context.node.right).execute()).result;
 	let rightValue = right.getValue() || UNDEFINED;
 
-	let newValue;
-	if (context.node.operator in operators) {
-		newValue = yield operators[context.node.operator](context.env, leftValue, rightValue);
-	} else {
-		newValue = yield comparers[context.node.operator](context.env, leftValue, rightValue);
-	}
+	let op = context.node.operator;
+	let newValue = yield context.env.ops[op](leftValue, rightValue);
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));
 }
