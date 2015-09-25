@@ -162,11 +162,11 @@ export default function objectApi (env) {
 	objectClass.define("create", objectFactory.createBuiltInFunction(function* (parent, descriptors) {
 		if (parent && parent.isPrimitive && parent.value !== null) {
 			let stringValue = yield toString(env, parent);
-			return this.throw(new TypeError(`Object prototype may only be an Object or null: ${stringValue}`));
+			return this.raise(new TypeError(`Object prototype may only be an Object or null: ${stringValue}`));
 		}
 
 		if (descriptors && descriptors.isPrimitive && descriptors.value === null) {
-			return this.throw(new TypeError("Cannot null or undefined to object"));
+			return this.raise(new TypeError("Cannot convert null or undefined to object"));
 		}
 
 		let obj = objectFactory.createObject();
