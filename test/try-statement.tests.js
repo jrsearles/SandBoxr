@@ -37,4 +37,8 @@ describe("Try-Catch-Finally", function () {
 	it("should be able to determine instanceof thrown error", function (done) {
 		runner.confirmBlock("var result = false;try { throw new TypeError() } catch (err) { result = err instanceof TypeError; }\nresult==true;", done);
 	});
+
+	it("should bubble up exception from uncaught from a function", function (done) {
+		runner.confirmError("function a() {\ntry { throw new TypeError(); } finally { }\n}\na();", TypeError, done);
+	});
 });

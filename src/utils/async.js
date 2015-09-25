@@ -85,7 +85,7 @@ export function exhaust (it, prev) {
 	}
 
 	if (result.done) {
-		return result.value || value;
+		return value;
 	}
 
 	if (isThenable(value)) {

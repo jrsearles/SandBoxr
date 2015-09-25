@@ -110,6 +110,12 @@ export class ObjectFactory {
 				break;
 
 			case "Error":
+			case "TypeError":
+			case "ReferenceError":
+			case "SyntaxError":
+			case "RangeError":
+			case "URIError":
+			case "EvalError":
 				instance = new ErrorType(value);
 
 				if (value) {

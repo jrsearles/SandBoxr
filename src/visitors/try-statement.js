@@ -4,7 +4,7 @@ import {each} from "../utils/async";
 function* executeBlock (context, body, swallow) {
 	let result;
 
-	yield* each(body, function* (node, i, all, abort) {
+	yield each(body, function* (node, i, all, abort) {
 		if (swallow) {
 			try {
 				result = yield context.create(node).execute();
@@ -25,6 +25,9 @@ function* executeBlock (context, body, swallow) {
 
 export default function* TryStatement (context) {
 	let result = yield executeBlock(context, context.node.block.body, true);
+	let finalizerResult;
+	// let shouldRaise = false;
+	// let shouldReturn = false;
 
 	if (result && result.raised) {
 		if (context.node.handler) {
@@ -35,26 +38,43 @@ export default function* TryStatement (context) {
 			context.env.createVariable(errVar);
 			context.env.putValue(errVar, result.result);
 
-			result = yield* scope.use(function* () {
+			result = yield scope.use(function* () {
 				return yield executeBlock(context, context.node.handler.body.body, true);
 			});
 		}
 	}
 
-	// if there is no catch OR if an error is raised within the catch we need to pass that on
-	if (result && result.raised) {
-		yield result;
+	if (!context.node.finalizer) {
+		return result;
 	}
 
+	// let shouldThrow = result && result.raised;
+
+	// if there is no catch OR if an error is raised within the catch we need to pass that on
+	// if (result && result.raised) {
+	// 	shouldRaise = true;
+	// 	// yield result;
+	// }
+
 	if (context.node.finalizer) {
-		let finalizerResult = yield executeBlock(context, context.node.finalizer.body);
+		finalizerResult = yield executeBlock(context, context.node.finalizer.body);
 		if (finalizerResult && finalizerResult.canBreak()) {
 			return finalizerResult;
+			// shouldReturn = true;
 		}
 	}
 
-	if (result && !result.raised) {
-		// if an exception was raised it was already thrown
-		return result;
-	}
+	// if (shouldRaise) {
+	// 	try {
+	// 		throw result.result;
+	// 	} catch (err) {
+	// 		throw err;
+	// 	} finally {
+	// 		if (shouldReturn) {
+	// 			return finalizerResult;
+	// 		}
+	// 	}
+	// }
+
+	return result;
 }

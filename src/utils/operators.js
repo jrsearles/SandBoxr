@@ -14,7 +14,7 @@ function pos (value) {
 
 const ops = {
 	// algorithms
-	*areSame (a, b) {
+	areSame (a, b) {
 		if (a.type !== b.type) {
 			return false;
 		}
@@ -71,7 +71,7 @@ const ops = {
 		/* eslint-enable eqeqeq */
 	},
 
-	*strictEquals (a, b) {
+	strictEquals (a, b) {
 		if (a.isPrimitive && b.isPrimitive) {
 			return a.value === b.value;
 		}
@@ -156,7 +156,7 @@ const ops = {
 		return b.hasProperty(a);
 	},
 
-	*["instanceof"] (a, b) {
+	["instanceof"] (a, b) {
 		if (b.type !== "function") {
 			throw new TypeError(`Expecting a function in instanceof check, but got ${b.type}`);
 		}

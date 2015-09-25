@@ -14,7 +14,7 @@ function* descIterator (factory, stringValue, start) {
 
 const StringIterator = {
 	create (objectFactory, value, start, desc) {
-		let stringValue = value.unwrap();
+		let stringValue = value.toNative();
 		return (desc ? descIterator : ascIterator)(objectFactory, stringValue, start);
 	}
 };

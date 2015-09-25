@@ -60,7 +60,7 @@ function* defineProperty (env, obj, name, descriptor) {
 
 					return yield scope.use(function* () {
 						let getResult = yield call(env, getter, getter.node.params, [], thisArg, getter.node);
-						return getResult && getResult.exit ? getResult.result.getValue() : undef;
+						return getResult && getResult.exit ? getResult.result.getValue() : UNDEFINED;
 					});
 				};
 			}

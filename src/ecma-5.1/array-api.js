@@ -46,7 +46,7 @@ export default function arrayApi (env) {
 
 		return yield scope.use(function* () {
 			let executionResult = yield env.createExecutionContext(callback.node.body, callback.node).execute();
-			return executionResult ? executionResult.result : undef;
+			return executionResult ? executionResult.result : UNDEFINED;
 		});
 	}
 
@@ -54,12 +54,12 @@ export default function arrayApi (env) {
 		let scope = env.createScope();
 		scope.init(callback.node.body);
 
-		let args = [priorValue || undef, entry.value || undef, objectFactory.createPrimitive(entry.index), arr];
+		let args = [priorValue || UNDEFINED, entry.value || UNDEFINED, objectFactory.createPrimitive(entry.index), arr];
 		scope.loadArgs(callback.node.params, args, callback);
 
 		return yield scope.use(function* () {
 			let executionResult = yield env.createExecutionContext(callback.node.body, callback.node).execute();
-			return executionResult ? executionResult.result : undef;
+			return executionResult ? executionResult.result : UNDEFINED;
 		});
 	}
 
