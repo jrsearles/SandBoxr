@@ -1,6 +1,6 @@
 import "./polyfills";
 import {Environment} from "./env";
-import {promisify} from "./utils/async";
+import {promisify,step} from "./utils/async";
 
 export class SandBoxr {
 	/**
@@ -21,15 +21,26 @@ export class SandBoxr {
 	 * @returns {Promise} A promise that resolves with the result of the execution
 	 */
 	execute (env) {
-		this.env = env;
-
-		if (!this.env) {
-			this.env = SandBoxr.createEnvironment();
-			this.env.init(this.options);
+		if (!env) {
+			env = SandBoxr.createEnvironment();
+			env.init(this.options);
 		}
 
-		return promisify(this.env.createExecutionContext(this.ast).execute())
+		return promisify(env.createExecutionContext(this.ast).execute())
 			.then(res => res.result);
+	}
+
+	[Symbol.iterator] () {
+		return this.step();
+	}
+
+	step (env) {
+		if (!env) {
+			env = SandBoxr.createEnvironment();
+			env.init(this.options);
+		}
+
+		return step(env.createExecutionContext(this.ast).execute());
 	}
 
 	/**

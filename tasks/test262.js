@@ -26,7 +26,7 @@ gulp.task("test262", function () {
 	var passed = util.colors.green("passed:");
 	var skipped = util.colors.blue("skipped:");
 
-	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"] })
+	return test262({ files: ["ch15/15.11/**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"] })
 		.pipe(through.obj(function (file, enc, cb) {
 			var filename = path.basename(file.path);
 			var src = file.contents.toString();

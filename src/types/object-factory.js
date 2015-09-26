@@ -120,12 +120,10 @@ export class ObjectFactory {
 
 				if (value) {
 					typeName = value.name || typeName;
-					instance.defineOwnProperty("message", {
-						value: this.createPrimitive(value.message),
-						configurable: true,
-						enumerable: false,
-						writable: true
-					});
+					if (value.message) {
+						let message = this.createPrimitive(value.message);
+						instance.defineOwnProperty("message", createDataPropertyDescriptor(message, { enumerable: false }));
+					}
 				}
 
 				break;

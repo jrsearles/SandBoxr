@@ -3,9 +3,12 @@ var expect = require("chai").expect;
 
 describe("Scope", function () {
 	describe("strict mode", function () {
-		it("should detect 'use strict' literal and set scope to strict mode", function () {
-			var scope = runner.getScope("'use strict';");
-			expect(scope.isStrict()).to.be.true;
+		it("should detect 'use strict' literal and set scope to strict mode", function (done) {
+			runner.getScope("'use strict';")
+				.then(function (scope) {
+					expect(scope.isStrict()).to.be.true;
+					done();
+				});
 		});
 	});
 

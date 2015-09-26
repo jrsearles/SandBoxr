@@ -1,4 +1,5 @@
 import {toString} from "../utils/native";
+import * as contracts from "../utils/contracts";
 
 const errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
@@ -7,7 +8,11 @@ export default function errorApi (env) {
 	const objectFactory = env.objectFactory;
 
 	let errorClass = objectFactory.createFunction(function* (message) {
-		let messageString = yield toString(env, message);
+		let messageString;
+		if (!contracts.isNullOrUndefined(message)) {
+			messageString = yield toString(env, message);
+		}
+
 		return objectFactory.create("Error", new Error(messageString));
 	}, null, { configurable: false, enumerable: false, writable: false });
 

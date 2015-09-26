@@ -36,22 +36,20 @@ export function* each (arr, func) {
 	}
 }
 
-export function* step (it) {
-	let result = it.next();
+export function* step (it, prev) {
+	let result = it.next(prev);
 	let value = result.value;
 
 	if (isNextable(value)) {
 		yield* step(value);
 	} else if (isThenable(value)) {
 		yield value.then(res => it);
-	} else {
-		yield value;
 	}
 
-	if (!result.done) {
-		yield* step(it);
-	} else if (result.done && result.value) {
-		return result.value;
+	if (result.done) {
+		return value;
+	} else {
+		yield step(it, value);
 	}
 }
 

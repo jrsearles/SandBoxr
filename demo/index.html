@@ -23,6 +23,8 @@ result;
 <fieldset><legend>Tree</legend><pre id="tree"></pre></fieldset>
 
 <script type="text/javascript">
+	var execution;
+
 	document.getElementById("acornExec").onclick = function () {
 		executeAst(acorn.parse);
 	};
@@ -32,19 +34,28 @@ result;
 	};
 
 	document.getElementById("stepExec").onclick = function step () {
+		execution = execution || getExecution();
+		var current = execution.next();
+		var value = current.value;
+
+		if (value && typeof value === "object") {
+			value = value.result.getValue();
+			writeValue(value.toNative());
+		} else {
+			writeValue(value);
+		}
+
+		if (current.done) {
+			execution = null;
+		}
+	};
+
+	function getExecution () {
 		var code = document.getElementById("codeArea").value;
 		var ast = acorn.parse(code);
 
-		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
-
-		debugger;
-		var runner = new SandBoxr(ast, { parser: acorn.parse });
-		var exec = runner.step();
-		var result;
-
-		while (result = exec.next()) {
-
-		}
+		var runner = SandBoxr.create(ast, { parser: acorn.parse });
+		return runner.step();
 	}
 
 	function executeAst (parser) {

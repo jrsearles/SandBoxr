@@ -28,9 +28,13 @@ module.exports = {
 	},
 
 	getScope: function (code) {
+		var env = SandBoxr.createEnvironment();
+		env.init();
+
 		var runner = this.getRunner(code);
-		runner.execute();
-		return runner.env;
+		return runner.execute(env).then(function () {
+			return env;
+		});
 	},
 
 	getRunner: function (code) {
