@@ -1,11 +1,12 @@
-var runner = require("./test-runner");
+import {describe,it} from "mocha";
+import * as runner from "./test-runner";
 
-describe("Prototype tests", function () {
-	it("should create a new object", function (done) {
+describe("Prototype tests", () => {
+	it("should create a new object", done => {
 		runner.confirmBlock("function FooObj() {};var o=new FooObj();typeof o=='object';", done);
 	});
 
-	it("should inherit from object", function (done) {
+	it("should inherit from object", done => {
 		runner.confirmBlock("function foo() {};foo.prototype.bar = 'empty';\nvar o = new foo();\no.bar=='empty';", done);
 	});
 });

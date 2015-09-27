@@ -1,8 +1,9 @@
-var runner = require("./test-runner");
+import {describe,it} from "mocha";
+import * as runner from "./test-runner";
 
-describe("Expressions", function () {
-	describe("Sequence", function () {
-		it("should assign to last value in sequence", function (done) {
+describe("Expressions", () => {
+	describe("Sequence", () => {
+		it("should assign to last value in sequence", done => {
 			runner.confirmBlock("var a = (7, 5);a===5;", done);
 		});
 	});

@@ -1,18 +1,19 @@
-var browserify = require("browserify");
-var babelify = require("babelify");
-var gulp = require("gulp");
-var source = require("vinyl-source-stream");
-var buffer = require("vinyl-buffer");
-var eslint = require("gulp-eslint");
-var mocha = require("gulp-mocha");
-var uglify = require("gulp-uglify");
-var rename = require("gulp-rename");
-var streamify = require("gulp-streamify");
-var sourcemaps = require("gulp-sourcemaps");
+import browserify from "browserify";
+import babelify from "babelify";
+import gulp from "gulp";
+import source from "vinyl-source-stream";
+import buffer from "vinyl-buffer";
+import eslint from "gulp-eslint";
+import mocha from "gulp-mocha";
+import uglify from "gulp-uglify";
+import rename from "gulp-rename";
+import streamify from "gulp-streamify";
+import sourcemaps from "gulp-sourcemaps";
+// import babel from "babel-core/register";
 
-require("./tasks/test262");
+import "./tasks/test262";
 
-var header = [
+const header = [
 	"/*!",
 	" * SandBoxr JavaScript library v<#= pkg.version #>",
 	" * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr",
@@ -21,7 +22,7 @@ var header = [
 	""
 ].join("\n");
 
-gulp.task("build", ["lint"], function () {
+gulp.task("build", ["lint"], () => {
 	return browserify({ standalone: "SandBoxr", debug: true })
 		.transform(babelify.configure({ optional: ["runtime"], sourceMaps: true }))
 		.require("./", { entry: true })
@@ -38,18 +39,18 @@ gulp.task("build", ["lint"], function () {
 		.pipe(gulp.dest("./dist/"));
 });
 
-gulp.task("release", ["build", "test262"]);
+gulp.task("release", ["test262", "build"]);
 
-gulp.task("watch", function () {
+gulp.task("watch", () => {
 	gulp.watch("./src/**/*", ["build"]);
 });
 
-gulp.task("test", function () {
+gulp.task("test", () => {
 	return gulp.src("./test/**/*.js")
 		.pipe(mocha());
 });
 
-gulp.task("lint", function () {
+gulp.task("lint", () => {
 	return gulp.src(["./src/**/*.js"])
 		.pipe(eslint())
 		.pipe(eslint.format())

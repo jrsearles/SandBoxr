@@ -1,23 +1,24 @@
-var runner = require("./test-runner");
+import {describe,it} from "mocha";
+import * as runner from "./test-runner";
 
-describe("Update Expressions", function () {
-	describe("++ operator", function () {
-		it("should increment a value", function (done) {
+describe("Update Expressions", () => {
+	describe("++ operator", () => {
+		it("should increment a value", done => {
 			runner.confirmBlock("var a = 0;a++;a==1;", done);
 		});
-	
-		it("should be NaN for undefined", function (done) {
+
+		it("should be NaN for undefined", done => {
 			runner.confirmBlock("var a;isNaN(++a);", done);
 		});
-				
-		it("should add the property to an object if it doesn't exist", function (done) {
+
+		it("should add the property to an object if it doesn't exist", done => {
 			runner.confirmBlock("var a = {};a.foo++;'foo' in a;", done);
 		});
 	});
 
-	describe("-- operator", function () {
-		it("should decrement a value", function (done) {
+	describe("-- operator", () => {
+		it("should decrement a value", done => {
 			runner.confirmBlock("var a = 0;a--;a==-1;", done);
-		});			
+		});
 	});
 });

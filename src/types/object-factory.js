@@ -43,7 +43,8 @@ function setProto (typeName, instance, env) {
 	instance.setPrototype(proto);
 }
 
-function createDataPropertyDescriptor (value, { configurable = true, enumerable = true, writable = true }) {
+const defaultDescriptor = { configurable: true, enumerable: true, writable: true };
+function createDataPropertyDescriptor (value, { configurable = true, enumerable = true, writable = true } = defaultDescriptor) {
 	return { value, configurable, enumerable, writable };
 }
 

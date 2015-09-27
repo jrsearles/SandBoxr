@@ -1,7 +1,7 @@
 import {NativeFunctionType} from "../types/native-function-type";
 import {UNDEFINED} from "../types/primitive-type";
 import * as contracts from "../utils/contracts";
-import {execute as exec, call} from "../utils/func";
+import {execute as exec} from "../utils/func";
 import {toString,toObject,toArray} from "../utils/native";
 import {map} from "../utils/async";
 
@@ -31,39 +31,26 @@ export default function functionApi (env) {
 
 		if (options.parser && args.length > 0) {
 			let body = args.pop();
+			let params = "";
 
 			if (args.length > 0) {
-				args = yield* map(args, function* (arg, index) {
+				params = (yield map(args, function* (arg, index) {
 					if (contracts.isNull(arg)) {
-						return this.raise(new SyntaxError("Unexpected token null"));
+						throw new SyntaxError("Unexpected token null");
 					}
 
 					return contracts.isUndefined(arg) ? "" : (yield toString(env, arg));
-				});
-
+				}))
 				// the spec allows parameters to be comma-delimited, so we will join and split again comma
-				args = args.join(",").split(/\s*,\s*/g);
+				.join(",");
 			}
 
-			let ast = options.parser("(function(){" + (yield toString(env, body)) + "}).apply(this,arguments);");
-			let userNode = ast.body[0].expression.callee.object.body.body;
+			let bodyString = yield toString(env, body);
+			let ast = options.parser(`(function(${params}){${bodyString}}).apply($this,$args);`);
+			let callee = ast.body[0].expression.callee.object;
+			let userNode = callee.body.body;
 			let strict = contracts.isStrictNode(userNode);
 
-			let params = args.map(arg => {
-				return {
-					type: "Identifier",
-					name: arg.trim()
-				};
-			});
-
-			contracts.assertAreValidArguments(params, strict);
-			let callee = {
-				type: "FunctionDeclaration",
-				params: params,
-				body: ast
-			};
-
-			let fn = objectFactory.createFunction(callee);
 			let wrappedFunc = function* () {
 				let thisArg;
 				if (this.isNew) {
@@ -76,7 +63,12 @@ export default function functionApi (env) {
 					}
 				}
 
-				let executionResult = yield call(env, fn, params, arguments, thisArg, callee);
+				this.env.createVariable("$this").setValue(thisArg);
+
+				let $args = this.env.objectFactory.createArray(arguments);
+				this.env.createVariable("$args").setValue($args);
+
+				let executionResult = yield env.createExecutionContext(ast).execute();
 
 				if (this.isNew) {
 					return thisArg;

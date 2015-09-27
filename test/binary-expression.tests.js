@@ -1,11 +1,12 @@
-var runner = require("./test-runner");
+import {describe,it} from "mocha";
+import * as runner from "./test-runner";
 
-describe("Expressions", function () {
-	describe("Binary Expressions", function () {
-		var left = 1;
-		var right = 2;
+describe("Expressions", () => {
+	describe("Binary Expressions", () => {
+		const left = 1;
+		const right = 2;
 
-		var operators = [
+		let operators = [
 			{ op:	"==", name: "Equals operator", expected: left == right },
 			{ op:	"!=", name: "Not equals operator", expected: left != right },
 			{ op:	"===", name: "Strict equals operator", expected: left === right },
@@ -27,49 +28,49 @@ describe("Expressions", function () {
 			{ op:	"&", name: "Bitwise OR operator", expected: left & right }
 		];
 
-		operators.forEach(function (current) {
-			it("should apply " + current.op, function(done) {
-				var code = "(" + left + " " + current.op + " " + right + ") === (" + current.expected + ");";
-	 			runner.confirmBlock(code, done);
+		operators.forEach(current => {
+			it("should apply " + current.op, done => {
+				let code = "(" + left + " " + current.op + " " + right + ") === (" + current.expected + ");";
+				runner.confirmBlock(code, done);
 			});
 		});
 
-		it("should show that a property is in the object if it is", function (done) {
+		it("should show that a property is in the object if it is", done => {
 			runner.confirmBlock("var a = { foo: 1 };\n'foo' in a;", done);
 		});
 
-		it("should show that a property is not in the object if it is not", function (done) {
+		it("should show that a property is not in the object if it is not", done => {
 			runner.confirmBlock("var a = { foo: 1 };\n!('bar' in a);", done);
 		});
 
-		describe("Quirks", function () {
-			it("should convert to string if left is string", function (done) {
+		describe("Quirks", () => {
+			it("should convert to string if left is string", done => {
 				runner.confirmBlock("'1' + 2 === '12';", done);
 			});
 
-			it("should convert to string if right is string", function (done) {
+			it("should convert to string if right is string", done => {
 				runner.confirmBlock("1 + '2' === '12'", done);
 			});
 
-			it("should convert to number for subtraction operator", function (done) {
+			it("should convert to number for subtraction operator", done => {
 				runner.confirmBlock("'1' - 2 === -1;", done);
 			});
 		});
 
-		describe("instanceof", function () {
-			it("should return true for an object", function (done) {
+		describe("instanceof", () => {
+			it("should return true for an object", done => {
 				runner.confirmBlock("({} instanceof Object);", done);
 			});
 
-			it("should return false for not an object", function (done) {
+			it("should return false for not an object", done => {
 				runner.confirmBlock("!({} instanceof String);", done);
 			});
 
-			it("should respect inheritance", function (done) {
+			it("should respect inheritance", done => {
 				runner.confirmBlock("function C(){}\nfunction D(){}\nD.prototype = new C();\nvar o = new D();(o instanceof C) && (o instanceof D);", done);
 			});
 
-			it("should return false for primitive", function (done) {
+			it("should return false for primitive", done => {
 				runner.confirmBlock("!('foo' instanceof String);", done);
 			});
 		});

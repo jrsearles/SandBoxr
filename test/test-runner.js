@@ -1,50 +1,50 @@
-var parser = require("./ast-parser");
-var expect = require("chai").expect;
-var SandBoxr = require("../dist/sandboxr");
+import * as parser from "./ast-parser";
+import {expect} from "chai";
+import SandBoxr from "../";
 
-module.exports = {
-	runBlock: function (code, done) {
+export default {
+	runBlock (code, done) {
 		return this.getRunner(code).execute();
 	},
 
-	confirmBlock: function (code, done) {
+	confirmBlock (code, done) {
 		this.runBlock(code)
-			.then(function (result) {
+			.then(result => {
 				expect(result.toNative()).to.be.true;
 				done();
 			}, done);
 	},
 
-	confirmError: function (code, errType, done) {
+	confirmError (code, errType, done) {
 		this.runBlock(code)
-			.then(function () {
+			.then(() => {
 				expect(false).to.be.true;
 				done();
 			},
-			function (err) {
+			err => {
 				expect(err).to.be.instanceof(errType);
 				done();
 			});
 	},
 
-	getScope: function (code) {
-		var env = SandBoxr.createEnvironment();
+	getScope (code) {
+		let env = SandBoxr.createEnvironment();
 		env.init();
 
-		var runner = this.getRunner(code);
+		let runner = this.getRunner(code);
 		return runner.execute(env).then(function () {
 			return env;
 		});
 	},
 
-	getRunner: function (code) {
-		var ast = parser.parse(code);
+	getRunner (code) {
+		let ast = parser.parse(code);
 		return SandBoxr.create(ast);
 	},
 
-	wrapArgs: function (args) {
-		return args.map(function (arg) {
-			return typeof arg === "string" ? "'" + arg + "'" : String(arg);
+	wrapArgs (args) {
+		return args.map(arg => {
+			return typeof arg === "string" ? `'${arg}'` : String(arg);
 		}).join(",");
 	}
 };
