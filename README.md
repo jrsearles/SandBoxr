@@ -3,29 +3,6 @@
 
 -----
 
-The current release can be considered a release candidate. Barring some low-level API changes and further documentation the release is now feature complete.
-
-## TODO for 1.0
-- ~~Finish implementation!~~
-- ~~Finalize API, including extension points~~
-- ~~Strict mode~~
-- ~~Verify against Esprima (this library strives to be parser agnostic complying with ESTree format, though all testing has been with Acorn's parser)~~
-- ~~Battle testing in production~~
-- ~~Port the library to ES6 - this will likely take the pain away from some of the async implementation~~
-- ~~Async support~~ (excluding timers)
-- Docs & Examples / Stabilize API
-
-## TODO vNext
-- Begin implementing [ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html). This may be done as a plugin - not sure yet. This will become more clear as implementation begins.
-- Performance measurements/optimizations
-- Add detection of infinite loops
-- ~~Refactor execution results, try/catch flow. (Currently we directly use try/catch to manage the actual try/catch/throw statements. This *works* but has ended up making the scope management awkward and we'd be better off returning a response and let exceptions bubble up without actually throwing where possible.)~~
-- Split out some of the code into separate packages
-- Possible: allow stepping/pausing of code execution
-- Possible: directly integrate external parser (with ability to override)
-
------
-
 ## Purpose
 
 The purpose of this library is to safely allow user generated code to be run in isolation. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary intended usage is targetted towards the browser, though it works in non-browser environments as well.
@@ -33,6 +10,20 @@ The purpose of this library is to safely allow user generated code to be run in 
 This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). To simplify development, the stepping mechanisms in `JS Interpreter` are not present here, though using ES6 generators should allow these to be incorporated at some point.
 
 Upon discovering the [Test 262 conformance suite](https://github.com/tc39/test262) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
+
+-----
+
+The current release can be considered a release candidate. Barring some low-level API changes and further documentation the release is now feature complete.
+
+## TODO
+- Docs & Examples - would like to put together an interactive playground that can be used for demoing.
+- Performance measurements/optimizations
+- Add detection of infinite loops
+- Possible: allow stepping/pausing of code execution
+- Possible: directly integrate external parser (with ability to override)
+
+## ES6
+Work has begun to integrate [ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html) support. For now work is being done on the branch _ecma6-master_. As work stabilizes i will begin merging these features over into the main branch. Support will be controlled by the option `ecmaVersion`, setting the value to 6 to get ES6 features.
 
 ## Usage
 
