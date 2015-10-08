@@ -129,6 +129,15 @@ export function isOctalLiteral (rawValue, actualValue) {
 }
 
 export function	getType (obj) {
+	// manually check for null/undefined or IE9 will coerce them to the global
+	if (obj === undefined) {
+		return "Undefined";
+	}
+	
+	if (obj === null) {
+		return "Null";
+	}
+	
 	return objectPattern.exec(Object.prototype.toString.call(obj))[1];
 }
 
