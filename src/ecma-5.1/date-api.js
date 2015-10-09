@@ -70,7 +70,7 @@ export default function dateApi (env) {
 
 	let proto = dateClass.getValue("prototype");
 	proto.className = "Date";
-	proto.value = new Date(Date.prototype);
+	proto.value = new Date(0);
 
 	staticMethods.forEach(name => {
 		dateClass.define(name, toNativeFunction(env, Date[name], "Date." + name));
