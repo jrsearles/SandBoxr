@@ -5,7 +5,7 @@ function isObjectOrFunction (obj) {
 	return obj && typeof obj in objectOrFunctionTypes;
 }
 
-function isThenable (obj) {
+export function isThenable (obj) {
 	return isObjectOrFunction(obj) && typeof obj.then === "function";
 }
 
