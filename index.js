@@ -1,2 +1,2 @@
-import {SandBoxr} from "./src";
-export default SandBoxr;
+export {SandBoxr} from "./src";
+export const version = "0.13.0";

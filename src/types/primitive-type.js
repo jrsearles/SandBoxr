@@ -1,5 +1,5 @@
 import {ObjectType} from "./object-type";
-import * as contracts from "../utils/contracts";
+import {getType} from "../utils/contracts";
 
 export class PrimitiveType extends ObjectType {
 	constructor (value) {
@@ -9,13 +9,13 @@ export class PrimitiveType extends ObjectType {
 		this.value = value;
 		this.type = typeof value;
 
-		this.className = contracts.getType(value);
+		this.className = getType(value);
 	}
 
 	getProperty (name) {
 		// can't read properties of null/undefined
 		if (this.value == null) {
-			throw new TypeError(`Cannot read property '${name}' of ${this.type}`);
+			throw TypeError(`Cannot read property '${name}' of ${this.type}`);
 		}
 
 		return super.getProperty(...arguments);

@@ -1,15 +1,11 @@
-import * as contracts from "../utils/contracts";
+import {isStrictNode} from "../utils/contracts";
 
 export default function FunctionExpression (context) {
 	let objectFactory = context.env.objectFactory;
-	let strict = context.env.isStrict() || contracts.isStrictNode(context.node.body.body);
-	let func = objectFactory.createFunction(context.node, null, null, strict);
-	
+	let strict = context.env.isStrict() || isStrictNode(context.node.body.body);
+	let name = context.node.id ? context.node.id.name : "anonymous";
+
+	let func = objectFactory.createFunction(context.node, undefined, {strict, name});
 	func.bindScope(context.env.current);
-
-	if (context.node.id) {
-		func.name = context.node.id.name;
-	}
-
 	return context.result(func);
 }

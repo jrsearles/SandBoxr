@@ -1,4 +1,4 @@
-import * as contracts from "../utils/contracts";
+import {assertIsValidIdentifier} from "../utils/contracts";
 import {each} from "../utils/async";
 
 function* executeBlock (context, body, swallow) {
@@ -32,11 +32,11 @@ export default function* TryStatement (context) {
 	if (result && result.raised) {
 		if (context.node.handler) {
 			let errVar = context.node.handler.param.name;
-			contracts.assertIsValidIdentifier(errVar, context.env.isStrict());
+			assertIsValidIdentifier(errVar, context.env.isStrict());
 
 			let scope = context.env.createScope();
 			context.env.createVariable(errVar);
-			context.env.putValue(errVar, result.result);
+			context.env.setValue(errVar, result.result);
 
 			result = yield scope.use(function* () {
 				return yield executeBlock(context, context.node.handler.body.body, true);

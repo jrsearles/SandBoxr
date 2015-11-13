@@ -1,4 +1,6 @@
-import {isReserved,isStrictReserved} from "../keywords";
+import {isReserved, isStrictReserved} from "../keywords";
+import {SymbolType} from "../types/symbol-type";
+import {toBoolean} from "./native";
 
 const objectPattern = /\[object (\w+)\]/;
 const integerPattern = /^-?\d+$/;
@@ -8,43 +10,49 @@ const useStrictPattern = /^\s*(?:'use strict'|"use strict")\s*;?\s*$/;
 
 export function assertIsObject (obj, methodName) {
 	if (!isObject(obj)) {
-		throw new TypeError(`${methodName} called on non-object`);
+		throw TypeError(`${methodName} called on non-object`);
 	}
 }
 
 export function assertIsNotNullOrUndefined (value, methodName) {
 	if (isNullOrUndefined(value)) {
-		throw new TypeError(`${methodName} called on null or undefined`);
+		throw TypeError(`${methodName} called on null or undefined`);
 	}
 }
 
 export function assertArgIsNotNullOrUndefined (obj) {
 	if (isNullOrUndefined(obj)) {
-		throw new TypeError("Cannot convert null or undefined to object");
+		throw TypeError("Cannot convert null or undefined to object");
 	}
 }
 
-export function	assertIsFunction (obj, toString) {
-	if (!obj || obj.className !== "Function") {
-		throw new TypeError("%s is not a function");
+export function	assertIsFunction (obj, argName) {
+	if (!isFunction(obj)) {
+		throw TypeError(`${argName} is not a function`);
 	}
 }
 
 export function	assertIsNotConstructor (context, methodName) {
 	if (context.isNew) {
-		throw new TypeError(`${methodName} is not a constructor`);
+		throw TypeError(`${methodName} is not a constructor`);
+	}
+}
+
+export function assertIsConstructor (context, methodName) {
+	if (!context.isNew) {
+		throw TypeError(`${methodName} must be called with 'new'`);
 	}
 }
 
 export function	assertIsValidArrayLength (length) {
 	if (!isValidArrayLength(length)) {
-		throw new RangeError("Invalid array length");
+		throw RangeError("Invalid array length");
 	}
 }
 
 export function assertIsValidAssignment (left, strict) {
 	if (left && !left.isReference) {
-		throw new ReferenceError("Invalid left-hand side in assignment");
+		throw ReferenceError("Invalid left-hand side in assignment");
 	}
 
 	if (left && left.base === left.env.global) {
@@ -54,7 +62,7 @@ export function assertIsValidAssignment (left, strict) {
 
 export function	assertIsValidParameterName (name, strict) {
 	if (/^\d|[;\(\)"']/.test(name)) {
-		throw new SyntaxError(`Unexpected token in ${name}`);
+		throw SyntaxError(`Unexpected token in ${name}`);
 	}
 
 	assertIsValidName(name, strict);
@@ -62,23 +70,23 @@ export function	assertIsValidParameterName (name, strict) {
 
 export function assertIsValidName (name, strict) {
 	if (strict && (name === "arguments" || name === "eval")) {
-		throw new SyntaxError("Unexpected eval or arguments in strict mode");
+		throw SyntaxError("Unexpected eval or arguments in strict mode");
 	}
 }
 
 export function	assertIsNotGeneric (obj, expectedClass, methodName) {
 	if (!obj || obj.className !== expectedClass) {
-		throw new TypeError(`${methodName} is not generic`);
+		throw TypeError(`${methodName} is not generic`);
 	}
 }
 
 export function assertIsValidIdentifier (name, strict) {
 	if (isReserved(name)) {
-		throw new SyntaxError(`Illegal use of reserved keyword: ${name}`);
+		throw SyntaxError(`Illegal use of reserved keyword: ${name}`);
 	}
 
 	if (strict && isStrictReserved(name)) {
-		throw new SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
+		throw SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
 	}
 }
 
@@ -88,10 +96,22 @@ export function assertAreValidArguments (params, strict) {
 
 		if (strict) {
 			if (params.some((p, i) => index !== i && param.name === p.name)) {
-				throw new SyntaxError("Strict mode function may not have duplicate parameter names");
+				throw SyntaxError("Strict mode function may not have duplicate parameter names");
 			}
 		}
 	});
+}
+
+export function assertIsMap (obj, methodName) {
+	if (!obj || obj.className !== "Map") {
+		throw TypeError(`The object must be a map when calling ${methodName}`);
+	}
+}
+
+export function assertIsSet (obj, methodName) {
+	if (!obj || obj.className !== "Set") {
+		throw TypeError(`The object must be a set when calling ${methodName}`);
+	}
 }
 
 export function	isValidArrayLength (length) {
@@ -103,11 +123,36 @@ export function	isObject (obj) {
 		return false;
 	}
 
+	if (obj.isSymbol) {
+		return false;
+	}
+
 	if (obj.isPrimitive) {
 		return obj.value && obj.type === "object";
 	}
 
 	return true;
+}
+
+export function isRegExp (obj) {
+	if (!isObject(obj)) {
+		return false;
+	}
+
+	let matchKey = SymbolType.getByKey("match");
+	let matchProp = obj.getProperty(matchKey);
+	if (matchProp) {
+		let matchValue = matchProp.getValue();
+		if (!isUndefined(matchValue)) {
+			return toBoolean(matchValue);
+		}
+	}
+
+	return obj.className === "RegExp";
+}
+
+export function isNumber (obj) {
+	return obj && obj.type === "number";
 }
 
 export function isOctalLiteral (rawValue, actualValue) {
@@ -133,11 +178,11 @@ export function	getType (obj) {
 	if (obj === undefined) {
 		return "Undefined";
 	}
-	
+
 	if (obj === null) {
 		return "Null";
 	}
-	
+
 	return objectPattern.exec(Object.prototype.toString.call(obj))[1];
 }
 
@@ -151,6 +196,18 @@ export function	isUndefined (obj) {
 
 export function	isNull (obj) {
 	return obj && obj.isPrimitive && obj.value === null;
+}
+
+export function isFunction (obj) {
+	return !!obj && obj.className === "Function";
+}
+
+export function isConstructor (obj) {
+	if (!isFunction(obj)) {
+		return false;
+	}
+
+	return obj.canConstruct;
 }
 
 export function	isInteger (value) {
@@ -172,6 +229,10 @@ function isDirective (node) {
 }
 
 export function isStrictNode (nodes) {
+	if (!nodes) {
+		return false;
+	}
+
 	if (Array.isArray(nodes)) {
 		for (let node of nodes) {
 			if (!isDirective(node)) {
@@ -182,6 +243,12 @@ export function isStrictNode (nodes) {
 				return true;
 			}
 		}
+
+		return false;
+	}
+
+	if (nodes.body) {
+		return isStrictNode(nodes.body);
 	}
 
 	return false;

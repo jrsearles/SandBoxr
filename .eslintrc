@@ -6,6 +6,7 @@ env:
 rules:
     indent: [2, "tab", { "SwitchCase": 1 }]
     brace-style: [2, "1tbs", { "allowSingleLine": true }]
+    comma-spacing: [2, {"before": false, "after": true}]
     comma-style: [2, "last"]
     curly: 2
     default-case: 1
@@ -19,9 +20,10 @@ rules:
     no-nested-ternary: 2
     no-return-assign: 0
     no-this-before-super: 2
-    no-unused-vars: [2, { "args": "none" }]
+    no-unused-vars: [1, { "args": "none" }]
     no-useless-call: 2
     no-var: 2
+    object-curly-spacing: [1, "never"]
     object-shorthand: [1, "methods"]
     #prefer-arrow-callback: 1
     prefer-spread: 1

@@ -1,6 +1,4 @@
-import "../polyfills";
-
-const objectOrFunctionTypes = { "object": true, "function": true };
+const objectOrFunctionTypes = {"object": true, "function": true};
 function isObjectOrFunction (obj) {
 	return obj && typeof obj in objectOrFunctionTypes;
 }
@@ -16,23 +14,19 @@ function isNextable (obj) {
 export function* map (arr, func) {
 	let mapped = [];
 
-	for (let i = 0, ln = arr.length; i < ln; i++) {
-		mapped.push(yield* func(arr[i], i, arr));
-	}
+	yield* each(arr, function* () {
+		mapped.push(yield* func(...arguments));
+	});
 
 	return mapped;
 }
 
 export function* each (arr, func) {
-	let abort = false;
-	let aborter = function () { abort = true; };
+	let aborted = false;
+	let aborter = function () { aborted = true; };
 
-	for (let i = 0, ln = arr.length; i < ln; i++) {
+	for (let i = 0, ln = arr.length; !aborted && i < ln; i++) {
 		yield* func(arr[i], i, arr, aborter);
-
-		if (abort) {
-			break;
-		}
 	}
 }
 
@@ -53,44 +47,68 @@ export function* step (it, prev) {
 	}
 }
 
+function tryCatch (it, priorValue, method) {
+	try {
+		let {done, value} = it[method](priorValue);
+		return {state: "next", done, value};
+	} catch (err) {
+		return {state: "throw", done: false, value: err};
+	}
+}
+
 /**
  * Fully exhausts an iterator, including delegated generators.
  * Special handling is taken if a Promise is returned, pausing
  * the generator until the promise is resolved.
  *
  * @param {Iterator} [it] - The iterator
- * @param {Object} [prev] - The previous iteration value (internal)
+ * @param {Object} [value] - The previous iteration value (internal)
+ * @param {Array<Iterator>} [stack] - The stack of iterators (internal)
  * @returns {Object|Promise} Returns the final value, or a Promise if
  * at any point in the iteration a Promise is returned.
  */
-export function exhaust (it, prev) {
-	// sanity check
-	if (!isNextable(it)) {
-		return it;
-	}
+export function exhaust (it, value, stack = []) {
+	let state = "next";
 
-	let result = it.next(prev);
-	let value = result.value;
+	while (it) {
+		if (!isNextable(it)) {
+			value = it;
 
-	if (isNextable(value)) {
-		try {
-			value = exhaust(value);
-		} catch (err) {
-			// cascade the error upstream
-			let e = it.throw(err);
-			return exhaust(e.value);
+			if (!(it = stack.pop())) {
+				break;
+			}
+		}
+
+		let done;
+		({state, done, value} = tryCatch(it, value, state));
+
+		if (state === "throw") {
+			if (it = stack.pop()) {
+				continue;
+			}
+
+			throw value;
+		}
+
+		if (isNextable(value)) {
+			stack.push(it);
+
+			it = value;
+			value = undefined;
+
+			continue;
+		}
+
+		if (isThenable(value)) {
+			return value.then(res => exhaust(it, res, stack), err => it.throw(err));
+		}
+
+		if (done) {
+			it = stack.pop();
 		}
 	}
 
-	if (result.done) {
-		return value;
-	}
-
-	if (isThenable(value)) {
-		return value.then(res => exhaust(it, res), err => it.throw(err));
-	}
-
-	return exhaust(it, value);
+	return value;
 }
 
 /**
@@ -109,6 +127,10 @@ export function promisify (it) {
 
 		return Promise.resolve(result);
 	} catch (err) {
-		return Promise.reject(err.toNative());
+		if (typeof err === "object" && typeof err.toNative === "function") {
+			err = err.toNative();
+		}
+
+		return Promise.reject(err);
 	}
 }

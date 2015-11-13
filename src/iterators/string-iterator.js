@@ -1,21 +1,21 @@
-function* ascIterator (factory, stringValue, start) {
-	for (let index = start, length = stringValue.length; index < length; index++) {
-		let value = factory.createPrimitive(stringValue[index]);
-		yield { value, index };
+function* ascIterator (stringValue, start, length) {
+	for (let key = start; key < length; key++) {
+		let value = stringValue.getValue(key);
+		yield {value, key};
 	}
 }
 
-function* descIterator (factory, stringValue, start) {
-	for (let index = start; index >= 0; index--) {
-		let value = factory.createPrimitive(stringValue[index]);
-		yield { value, index };
+function* descIterator (stringValue, start) {
+	for (let key = start; key >= 0; key--) {
+		let value = stringValue.getValue(key);
+		yield {value, key};
 	}
 }
 
 const StringIterator = {
-	create (objectFactory, value, start, desc) {
-		let stringValue = value.toNative();
-		return (desc ? descIterator : ascIterator)(objectFactory, stringValue, start);
+	create (value, start, desc) {
+		let length = value.toNative().length;
+		return (desc ? descIterator : ascIterator)(value, start, length);
 	}
 };
 

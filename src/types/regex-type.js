@@ -7,13 +7,26 @@ export class RegexType extends ObjectType {
 		this.className = "RegExp";
 	}
 
-	init (objectFactory) {
+	init (env) {
+		super.init(...arguments);
+
 		// lastIndex is settable, all others are read-only attributes
-		this.defineOwnProperty("lastIndex", { value: objectFactory.createPrimitive(this.source.lastIndex), writable: true });
-		this.defineOwnProperty("source", { value: objectFactory.createPrimitive(this.source.source) });
-		this.defineOwnProperty("global", { value: objectFactory.createPrimitive(this.source.global) });
-		this.defineOwnProperty("ignoreCase", { value: objectFactory.createPrimitive(this.source.ignoreCase) });
-		this.defineOwnProperty("multiline", { value: objectFactory.createPrimitive(this.source.multiline) });
+		this.defineOwnProperty("lastIndex", {value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true});
+
+		["source", "global", "ignoreCase", "multiline"].forEach(key => {
+			if (env.options.ecmaVersion > 5) {
+				let getter = function () { return objectFactory.createPrimitive(this.source[key]); };
+				let getterFunc = objectFactory.createGetter(getter, key);
+
+				this.defineOwnProperty(key, {
+					getter: getter,
+					get: getterFunc,
+					configurable: true
+				});
+			} else {
+				this.defineOwnProperty(key, {value: env.objectFactory.createPrimitive(this.source[key])});
+			}
+		});
 	}
 
 	toNative () {

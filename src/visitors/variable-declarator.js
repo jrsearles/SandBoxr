@@ -8,7 +8,7 @@ export default function* VariableDeclarator (context) {
 
 	// variables have already been hoisted so we just need to initialize them if defined
 	if (value) {
-		context.env.putValue(name, value.getValue(), context.env.isStrict(), context);
+		context.env.setValue(name, value.getValue());
 	}
 
 	return context.result(context.env.getReference(name));

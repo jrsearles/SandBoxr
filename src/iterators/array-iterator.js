@@ -11,11 +11,11 @@ function* descIterator (source, lo, hi) {
 	}
 }
 
-function* yieldIndex (source, index) {
-	let prop = source.getProperty(index);
+function* yieldIndex (source, key) {
+	let prop = source.getProperty(key);
 	if (prop) {
 		let value = prop.getValue();
-		yield { value, index };
+		yield {value, key};
 	}
 }
 

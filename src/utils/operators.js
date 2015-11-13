@@ -1,4 +1,4 @@
-import {toPrimitive,toNumber,toInt32,toString} from "./native";
+import {toPrimitive, toNumber, toInt32, toString, toPropertyKey} from "./native";
 
 function neg (value) {
 	if (value === undefined) {
@@ -41,29 +41,51 @@ const ops = {
 		return a === b;
 	},
 
+	areSameOrZero (a, b) {
+		if (a.type !== b.type) {
+			return false;
+		}
+
+		if (a.isPrimitive && b.isPrimitive) {
+			if (a.value == null) {
+				return true;
+			}
+
+			if (a.type === "number") {
+				if (isNaN(a.value) && isNaN(b.value)) {
+					return true;
+				}
+			}
+
+			return a.value === b.value;
+		}
+
+		return a === b;
+	},
+
 	*coerciveEquals (a, b) {
 		/* eslint-disable eqeqeq */
 		if (a.isPrimitive && b.isPrimitive) {
 			return a.value == b.value;
 		}
 
-		if ((a.type === "object" && b.type === "object") || (a.type === "function" && b.type === "function")) {
-			return a === b;
+		if (a.type === b.type) {
+			return this.strictEquals(a, b);
 		}
 
-		let primitiveA = yield toPrimitive(this.env, a);
-		let primitiveB = yield toPrimitive(this.env, b);
+		let primitiveA = yield toPrimitive(a);
+		let primitiveB = yield toPrimitive(b);
 
 		if ((typeof primitiveA === "number" || typeof primitiveB === "number") || (typeof primitiveA === "boolean" || typeof primitiveB === "boolean")) {
 			return Number(primitiveA) === Number(primitiveB);
 		}
 
 		if (typeof primitiveA === "string") {
-			return primitiveA === (yield toPrimitive(this.env, b, "string"));
+			return primitiveA === (yield toPrimitive(b, "string"));
 		}
 
 		if (typeof primitiveB === "string") {
-			return (yield toPrimitive(this.env, a, "string")) === primitiveB;
+			return (yield toPrimitive(a, "string")) === primitiveB;
 		}
 
 		// use native implicit comarison
@@ -86,11 +108,11 @@ const ops = {
 	*relationalCompare (a, b, leftFirst) {
 		let primitiveA, primitiveB;
 		if (leftFirst) {
-			primitiveA = yield toPrimitive(this.env, a, "number");
-			primitiveB = yield toPrimitive(this.env, b, "number");
+			primitiveA = yield toPrimitive(a, "number");
+			primitiveB = yield toPrimitive(b, "number");
 		} else {
-			primitiveB = yield toPrimitive(this.env, b, "number");
-			primitiveA = yield toPrimitive(this.env, a, "number");
+			primitiveB = yield toPrimitive(b, "number");
+			primitiveA = yield toPrimitive(a, "number");
 		}
 
 		if (typeof primitiveA === "string" && typeof primitiveB === "string") {
@@ -120,25 +142,25 @@ const ops = {
 			return a.value + b.value;
 		}
 
-		a = yield toPrimitive(this.env, a);
-		b = yield toPrimitive(this.env, b);
+		a = yield toPrimitive(a);
+		b = yield toPrimitive(b);
 		return a + b;
 	},
-	*["-"] (a, b) { return (yield toNumber(this.env, a)) - (yield toNumber(this.env, b)); },
+	*["-"] (a, b) { return (yield toNumber(a)) - (yield toNumber(b)); },
 
 	// multiplicative operators
-	*["/"] (a, b) { return (yield toNumber(this.env, a)) / (yield toNumber(this.env, b)); },
-	*["*"] (a, b) { return (yield toNumber(this.env, a)) * (yield toNumber(this.env, b)); },
-	*["%"] (a, b) { return (yield toPrimitive(this.env, a)) % (yield toPrimitive(this.env, b)); },
+	*["/"] (a, b) { return (yield toNumber(a)) / (yield toNumber(b)); },
+	*["*"] (a, b) { return (yield toNumber(a)) * (yield toNumber(b)); },
+	*["%"] (a, b) { return (yield toPrimitive(a)) % (yield toPrimitive(b)); },
 
 	// bitwise shift operators
-	*["<<"] (a, b) { return (yield toPrimitive(this.env, a)) << (yield toPrimitive(this.env, b)); },
-	*[">>"] (a, b) { return (yield toPrimitive(this.env, a)) >> (yield toPrimitive(this.env, b)); },
-	*[">>>"] (a, b) { return (yield toPrimitive(this.env, a)) >>> (yield toPrimitive(this.env, b)); },
+	*["<<"] (a, b) { return (yield toPrimitive(a)) << (yield toPrimitive(b)); },
+	*[">>"] (a, b) { return (yield toPrimitive(a)) >> (yield toPrimitive(b)); },
+	*[">>>"] (a, b) { return (yield toPrimitive(a)) >>> (yield toPrimitive(b)); },
 
-	*["|"] (a, b) { return (yield toInt32(this.env, a)) | (yield toInt32(this.env, b)); },
-	*["^"] (a, b) { return (yield toInt32(this.env, a)) ^ (yield toInt32(this.env, b)); },
-	*["&"] (a, b) { return (yield toInt32(this.env, a)) & (yield toInt32(this.env, b)); },
+	*["|"] (a, b) { return (yield toInt32(a)) | (yield toInt32(b)); },
+	*["^"] (a, b) { return (yield toInt32(a)) ^ (yield toInt32(b)); },
+	*["&"] (a, b) { return (yield toInt32(a)) & (yield toInt32(b)); },
 
 	// relational operators
 	*["<"] (a, b) { return pos(yield this.relationalCompare(a, b, true)); },
@@ -147,18 +169,18 @@ const ops = {
 	*[">="] (a, b) { return neg(yield this.relationalCompare(a, b, true)); },
 
 	*["in"] (a, b) {
-		a = yield toString(this.env, a);
+		a = yield toPropertyKey(a);
 		if (b.isPrimitive) {
-			let bString = yield toString(this.env, b);
-			throw new TypeError(`Cannot use 'in' operator to search for '${a}' in ${bString}`);
+			let bString = yield toString(b);
+			throw TypeError(`Cannot use 'in' operator to search for '${a}' in ${bString}`);
 		}
 
-		return b.hasProperty(a);
+		return b.has(a);
 	},
 
 	["instanceof"] (a, b) {
 		if (b.type !== "function") {
-			throw new TypeError(`Expecting a function in instanceof check, but got ${b.type}`);
+			throw TypeError(`Expecting a function in instanceof check, but got ${b.type}`);
 		}
 
 		if (a.isPrimitive) {

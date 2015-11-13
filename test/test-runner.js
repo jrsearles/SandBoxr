@@ -1,6 +1,6 @@
 import * as parser from "./ast-parser";
 import {expect} from "chai";
-import SandBoxr from "../";
+import {SandBoxr} from "../";
 
 export default {
 	runBlock (code, done) {

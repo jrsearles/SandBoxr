@@ -1,6 +1,18 @@
 import {ObjectType} from "./object-type";
 import {PropertyDescriptor} from "./property-descriptor";
-import * as contracts from "../utils/contracts";
+import {UNDEFINED} from "./primitive-type";
+import {isStrictNode, isNullOrUndefined, isObject} from "../utils/contracts";
+
+function getParameterLength (params) {
+	for (let i = 0, ln = params.length; i < ln; i++) {
+		// parameter length should only include the first "Formal" parameters
+		if (params[i].type !== "Identifier") {
+			return i;
+		}
+	}
+
+	return params.length;
+}
 
 export class FunctionType extends ObjectType {
 	constructor (node) {
@@ -10,45 +22,68 @@ export class FunctionType extends ObjectType {
 		this.native = false;
 		this.node = node;
 
+		this.arrow = node && node.type === "ArrowFunctionExpression";
+		this.canConstruct = !this.arrow;
+
 		this.boundScope = null;
 		this.boundThis = null;
 	}
 
-	init (objectFactory, proto, descriptor, strict) {
+	init (env, proto, descriptor, strict) {
+		super.init(...arguments);
+
 		if (strict !== undefined) {
 			this.strict = strict;
 		}
 
 		// set length property from the number of parameters
-		this.defineOwnProperty("length", {
-			value: objectFactory.createPrimitive(this.node.params.length),
-			configurable: false,
-			enumerable: false,
-			writable: false
-		});
+		this.defineOwnProperty("length", {value: env.objectFactory.createPrimitive(getParameterLength(this.node.params))});
 
-		this.initStrict(objectFactory);
+		if (!this.arrow) {
+			// functions have a prototype
+			proto = proto || env.objectFactory.createObject();
+			this.defineOwnProperty("prototype", {value: proto, writable: true});
 
-		// functions have a prototype
-		proto = proto || objectFactory.createObject();
-		this.defineOwnProperty("prototype", { value: proto, configurable: false, enumerable: false, writable: true });
-
-		// set the contructor property as an instance of itself
-		proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
-	}
-
-	initStrict (objectFactory) {
-		if (this.isStrict()) {
-			let throwerProps = objectFactory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-			this.defineOwnProperty("caller", throwerProps);
-			this.defineOwnProperty("arguments", throwerProps);
-		} else {
-			this.defineOwnProperty("caller", { value: objectFactory.createPrimitive(undefined) });
+			// set the contructor property as an instance of itself
+			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this});
 		}
 	}
 
+	*call (thisArg, args = [], callee) {
+		let self = this;
+		let env = this[Symbol.for("env")];
+		let scope = env.createExecutionScope(this, thisArg);
+
+		yield scope.loadArgs(this.node.params, args, this);
+		scope.init(this.node && this.node.body);
+
+		return yield scope.use(function* () {
+			let executionResult = yield env.createExecutionContext(self.node.body, callee).execute();
+			let shouldReturn = self.arrow || (executionResult && executionResult.exit);
+
+			if (shouldReturn && executionResult.result) {
+				return executionResult.result;
+			}
+
+			return UNDEFINED;
+		});
+	}
+
+	*construct (thisArg, args = [], callee) {
+		if (!thisArg || thisArg === this) {
+			thisArg = this[Symbol.for("env")].objectFactory.createObject(this);
+		}
+
+		let result = yield this.call(thisArg, args, callee);
+		if (result && !result.isPrimitive) {
+			return result;
+		}
+
+		return thisArg;
+	}
+
 	bindThis (thisArg) {
-		this.boundThis = thisArg;
+		this.boundThis = this.boundThis || thisArg;
 	}
 
 	bindScope (scope) {
@@ -64,20 +99,7 @@ export class FunctionType extends ObjectType {
 			return false;
 		}
 
-		return (this.strict = contracts.isStrictNode(this.node.body.body));
-	}
-
-	createScope (env, thisArg) {
-		// if a parent scope is defined we need to limit the scope to that scope
-		let priorScope = env.current.scope;
-
-		if (this.boundScope) {
-			env.setScope(this.boundScope.scope);
-		}
-
-		let scope = env.createScope(this.boundThis || thisArg, priorScope);
-		scope.priorScope = priorScope;
-		return scope;
+		return (this.strict = isStrictNode(this.node.body.body));
 	}
 
 	hasInstance (obj) {
@@ -90,8 +112,8 @@ export class FunctionType extends ObjectType {
 		let current = obj;
 
 		let proto = this.getValue("prototype");
-		if (contracts.isNullOrUndefined(proto) || !contracts.isObject(proto)) {
-			throw new TypeError("Function has non-object prototype in instanceof check");
+		if (isNullOrUndefined(proto) || !isObject(proto)) {
+			throw TypeError("Function has non-object prototype in instanceof check");
 		}
 
 		while (current) {

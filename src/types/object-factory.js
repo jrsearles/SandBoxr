@@ -1,5 +1,5 @@
 import {ObjectType} from "./object-type";
-import {PrimitiveType,UNDEFINED,NULL} from "./primitive-type";
+import {PrimitiveType, UNDEFINED, NULL} from "./primitive-type";
 import {FunctionType} from "./function-type";
 import {NativeFunctionType} from "./native-function-type";
 import {RegexType} from "./regex-type";
@@ -8,9 +8,14 @@ import {StringType} from "./string-type";
 import {DateType} from "./date-type";
 import {ErrorType} from "./error-type";
 import {ArgumentType} from "./argument-type";
-import * as contracts from "../utils/contracts";
+import {IteratorType} from "./iterator-type";
+import {SymbolType} from "./symbol-type";
+import {CollectionType} from "./collection-type";
+import {ProxyType} from "./proxy-type";
+import {getType, assertIsObject} from "../utils/contracts";
 
 let orphans = Object.create(null);
+const functionNameMatcher = /([^.]+(?:\[Symbol\.\w+\])?)$/;
 
 function setOrphans (scope) {
 	for (let typeName in orphans) {
@@ -28,8 +33,7 @@ function setOrphans (scope) {
 }
 
 function setProto (typeName, instance, env) {
-	let parent = env.getReference(typeName);
-	if (parent.isUnresolved()) {
+	if (!env.global || !env.global.owns(typeName)) {
 		// during initialization it is possible for objects to be created
 		// before the types have been registered - add a registry of items
 		// and these can be filled in when the type is registered
@@ -39,18 +43,20 @@ function setProto (typeName, instance, env) {
 		return;
 	}
 
-	let proto = parent.getValue().getValue("prototype");
+	let proto = env.global.getValue(typeName).getValue("prototype");
 	instance.setPrototype(proto);
 }
 
-const defaultDescriptor = { configurable: true, enumerable: true, writable: true };
-function createDataPropertyDescriptor (value, { configurable = true, enumerable = true, writable = true } = defaultDescriptor) {
-	return { value, configurable, enumerable, writable };
+const defaultDescriptor = {configurable: true, enumerable: true, writable: true};
+function createDataPropertyDescriptor (value, {configurable = true, enumerable = true, writable = true} = defaultDescriptor) {
+	return {value, configurable, enumerable, writable};
 }
 
 export class ObjectFactory {
 	constructor (env) {
 		this.env = env;
+		this.options = env.options;
+		this.ecmaVersion = env.options.ecmaVersion || 5;
 	}
 
 	init () {
@@ -63,7 +69,7 @@ export class ObjectFactory {
 	 * @returns {ObjectType} The primitive instance.
 	 */
 	createPrimitive (value) {
-		return this.create(contracts.getType(value), value);
+		return this.create(getType(value), value);
 	}
 
 	/**
@@ -89,6 +95,10 @@ export class ObjectFactory {
 			case "Undefined":
 				return UNDEFINED;
 
+			case "Symbol":
+				instance = new SymbolType(value);
+				break;
+
 			case "String":
 				instance = new StringType(value);
 				break;
@@ -110,6 +120,14 @@ export class ObjectFactory {
 				instance = new ArrayType();
 				break;
 
+			case "Set":
+				instance = new CollectionType("Set");
+				break;
+
+			case "Map":
+				instance = new CollectionType("Map");
+				break;
+
 			case "Error":
 			case "TypeError":
 			case "ReferenceError":
@@ -123,17 +141,17 @@ export class ObjectFactory {
 					typeName = value.name || typeName;
 					if (value.message) {
 						let message = this.createPrimitive(value.message);
-						instance.defineOwnProperty("message", createDataPropertyDescriptor(message, { enumerable: false }));
+						instance.defineOwnProperty("message", createDataPropertyDescriptor(message, {enumerable: false}));
 					}
 				}
 
 				break;
 
 			default:
-				throw new Error("Not a primitive: " + value);
+				throw Error("Not a primitive: " + value);
 		}
 
-		instance.init(this);
+		instance.init(this.env);
 		setProto(typeName, instance, this.env);
 		return instance;
 	}
@@ -148,7 +166,7 @@ export class ObjectFactory {
 
 		if (elements) {
 			for (let i = 0, ln = elements.length; i < ln; i++) {
-				instance.defineOwnProperty(i, createDataPropertyDescriptor(elements[i]), true, this.env);
+				instance.setIndex(i, elements[i]);
 			}
 		}
 
@@ -173,7 +191,24 @@ export class ObjectFactory {
 			}
 		}
 
-		instance.init(this);
+		instance.init(this.env);
+		return instance;
+	}
+
+	createProxy (target, handler) {
+		assertIsObject(target, "Proxy");
+		assertIsObject(handler, "Proxy");
+
+		if (target.isProxy && target.revoked) {
+			throw TypeError();
+		}
+
+		if (handler.isProxy && handler.revoked) {
+			throw TypeError();
+		}
+
+		let instance = new ProxyType(target, handler);
+		instance.init(this.env);
 		return instance;
 	}
 
@@ -181,7 +216,7 @@ export class ObjectFactory {
 		let instance = new ArgumentType();
 		let objectClass = this.env.global.getValue("Object");
 
-		instance.init(this, objectClass, objectClass.getPrototype());
+		instance.init(this.env, objectClass, objectClass.getPrototype());
 		instance.setPrototype(objectClass.getValue("prototype"));
 
 		if (strict) {
@@ -197,7 +232,43 @@ export class ObjectFactory {
 			});
 		}
 
+		let stringTagKey = SymbolType.getByKey("toStringTag");
+		if (stringTagKey) {
+			instance.define(stringTagKey, this.createPrimitive("Arguments"));
+		}
+
 		return instance;
+	}
+
+	createIterator (iterable, proto) {
+		let self = this;
+		let instance = new IteratorType(iterable);
+
+		if (!proto) {
+			proto = this.createObject();
+			proto.className = "[Symbol.iterator]";
+		}
+
+		if (!proto.has("next")) {
+			proto.define("next", this.createBuiltInFunction(function () {
+				let result = this.node.advance();
+				if (result.value) {
+					return result.value;
+				}
+
+				return self.createIteratorResult({done: true});
+			}));
+		}
+
+		instance.setPrototype(proto);
+		return instance;
+	}
+
+	createIteratorResult ({value, done = false}) {
+		let result = this.createObject();
+		result.defineOwnProperty("done", {value: this.createPrimitive(done)});
+		result.defineOwnProperty("value", {value: value || UNDEFINED});
+		return result;
 	}
 
 	/**
@@ -205,11 +276,10 @@ export class ObjectFactory {
 	 * @param {AST|Function} fnOrNode - The AST or function to be used when the function is called.
 	 * @param {ObjectType} [proto] - The prototype to use for the function. If no object is provided
 	 * an empty object is used.
-	 * @param {Object} [descriptor] - Property values to be used for the prototype.
-	 * @param {Boolean} [strict] - Indicates whether the function is in stict mode.
+	 * @param {Object} [options] - Property values to be used for the prototype.
 	 * @returns {FunctionType} The function instance.
 	 */
-	createFunction (fnOrNode, proto, descriptor, strict) {
+	createFunction (fnOrNode, proto, {configurable = false, enumerable = false, writable = true, strict = false, name = "anonymous"} = {}) {
 		let instance;
 
 		if (typeof fnOrNode === "function") {
@@ -218,9 +288,23 @@ export class ObjectFactory {
 			instance = new FunctionType(fnOrNode);
 		}
 
-		instance.init(this, proto, descriptor, strict);
+		instance.init(this.env, proto, {configurable, enumerable, writable}, strict);
+		instance.name = name;
+
+		if (this.options.ecmaVersion > 5) {
+			instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
+		}
+
 		setProto("Function", instance, this.env);
 		return instance;
+	}
+
+	createGetter (func, key) {
+		return this.createBuiltInFunction(func, 0, `get ${key}`);
+	}
+
+	createSetter (func, key) {
+		return this.createBuiltInFunction(func, 1, `set ${key}`);
 	}
 
 	/**
@@ -233,15 +317,23 @@ export class ObjectFactory {
 	createBuiltInFunction (func, length, funcName) {
 		let instance = new NativeFunctionType(function () {
 			if (this.isNew) {
-				throw new TypeError(`${funcName} is not a constructor`);
+				throw TypeError(`${funcName} is not a constructor`);
 			}
 
 			return func.apply(this, arguments);
 		});
 
 		setProto("Function", instance, this.env);
+		instance[Symbol.for("env")] = this.env;
 		instance.builtIn = true;
-		instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: false, enumerable: false, writable: false });
+		instance.canConstruct = false;
+		instance.defineOwnProperty("length", {value: this.createPrimitive(length), configurable: this.ecmaVersion > 5});
+
+		let match = functionNameMatcher.exec(funcName);
+		let name = match && match[1] || funcName;
+
+		instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
+
 		return instance;
 	}
 
@@ -252,7 +344,7 @@ export class ObjectFactory {
 		}
 
 		thrower = thrower || function () {
-			throw new TypeError(message);
+			throw TypeError(message);
 		};
 
 		// we want to keep the same instance of the throwers because there

@@ -1,57 +1,31 @@
 import {PrimitiveType} from "./primitive-type";
 import {PropertyDescriptor} from "./property-descriptor";
-import * as contracts from "../utils/contracts";
-
-function getCharacter (source, position) {
-	if (position < source.value.length) {
-		// todo: need to set length
-		let character = new StringType(source.value[position]);
-		character.setPrototype(source.getPrototype());
-		return character;
-	}
-
-	return new PrimitiveType(undefined);
-}
 
 export class StringType extends PrimitiveType {
 	constructor (value) {
 		super(value);
 	}
 
-	init (objectFactory) {
+	init (env) {
+		super.init(...arguments);
+		let length = this.value.length;
+
 		this.properties.length = new PropertyDescriptor(this, {
 			configurable: false,
 			enumerable: false,
 			writable: false,
-			value: objectFactory.createPrimitive(this.value.length)
+			value: env.objectFactory.createPrimitive(length)
 		});
-	}
 
-	getProperty (name) {
-		if (contracts.isInteger(name)) {
-			let position = Number(name);
-			if (position < this.value.length) {
-				return new PropertyDescriptor(this, { configurable: false, enumerable: true, writable: false, value: getCharacter(this, position) });
-			}
+		// todo: do this lazily
+		let charAttrs = {writable: false, enumerable: true, configurable: false};
+		for (let i = 0; i < length; i++) {
+			// we are not using the object factory to avoid circular loop
+			let c = new StringType(this.value.charAt(i));
+			c.setPrototype(this.getProperty());
+			c.define("0", c, charAttrs);
+
+			this.define(i, c, charAttrs);
 		}
-
-		return super.getProperty(...arguments);
-	}
-
-	getOwnPropertyNames () {
-		let props = [];
-		for (let i = 0, ln = this.value.length; i < ln; i++) {
-			props.push(String(i));
-		}
-
-		return props.concat(super.getOwnPropertyNames());
-	}
-
-	hasOwnProperty (name) {
-		if (contracts.isInteger(name)) {
-			return name < this.value.length;
-		}
-
-		return super.hasOwnProperty(...arguments);
 	}
 }

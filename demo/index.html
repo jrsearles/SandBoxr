@@ -6,27 +6,79 @@
 	<script type="text/javascript" src="../node_modules/acorn/dist/acorn.js"></script>
 	<script type="text/javascript" src="../node_modules/esprima/esprima.js"></script>
 	<script type="text/javascript" src="../dist/sandboxr.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.js"></script>
+
+	<style type="text/css">
+		#codeArea {
+			left: 0;
+			top: 0;
+			right: 0;
+			height: 550px;
+			position: absolute;
+		}
+
+		body {
+			margin-top: 575px;
+		}
+	</style>
 </head>
 <body>
-<textarea id="codeArea" cols="40" rows="8">
+<div id="codeArea">
 var result = "";
 function $ERROR (msg) {
 	result += msg;
 }
 
+var assert = {
+  sameValue: function (a, b, msg) {
+	  if (a !== b) {
+		  $ERROR(msg);
+		}
+	},
+
+	throws: function (errorType, fn) {
+	  var caughtError;
+		try {
+		  fn();
+		} catch (err) {
+		  caughtError = err;
+		} finally {
+		  if (!caughtError) {
+			  $ERROR("Expected an error but none thrown");
+			} else if (!(caughtError instanceof errorType)) {
+			  $ERROR("Error of unexpected type");
+			}
+		}
+	}
+}
+
+
 result;
-</textarea>
+</div>
+<div id="details">
 <button id="acornExec">Exec (Acorn)</button>
 <button id="esprimaExec">Exec (Esprima)</button>
 <button id="stepExec">Step</button>
+<label>ECMA 2015
+<input type="checkbox" id="ecma6" checked="checked"></input>
+</label>
 <fieldset><legend>Result</legend><pre id="result"></pre></fieldset>
 <fieldset><legend>Tree</legend><pre id="tree"></pre></fieldset>
-
+</div>
 <script type="text/javascript">
+	var editor = ace.edit("codeArea");
+	editor.setTheme("ace/theme/monokai");
+	editor.getSession().setMode("ace/mode/javascript");
+
 	var execution;
 
+	function isEcma6 () {
+		return document.getElementById("ecma6").checked;
+	}
+
 	document.getElementById("acornExec").onclick = function () {
-		executeAst(acorn.parse);
+		var ecmaVersion = isEcma6() ? 6 : 5;
+		executeAst(function (text) { return acorn.parse(text, { ecmaVersion: ecmaVersion }); });
 	};
 
 	document.getElementById("esprimaExec").onclick = function () {
@@ -59,13 +111,16 @@ result;
 	}
 
 	function executeAst (parser) {
-		var code = document.getElementById("codeArea").value;
+		var ecmaVersion = isEcma6() ? 6 : 5;
+
+		var code = editor.getSession().getValue();
+		// var code = document.getElementById("codeArea").value;
 		var ast = parser(code);
 
 		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
 
 		debugger;
-		var runner = new SandBoxr(ast, { parser: parser });
+		var runner = new SandBoxr(ast, { parser: parser, ecmaVersion: ecmaVersion });
 		runner.execute().then(function (value) {
 			writeValue(value && value.toNative());
 		}, function (err) {
@@ -76,6 +131,31 @@ result;
 	function writeValue (obj) {
 		document.getElementById("result").innerHTML = JSON.stringify(obj);
 	}
+
+		var env = SandBoxr.createEnvironment();
+		env.init();
+
+		var foo = env.objectFactory.createFunction(function () {
+			var promise = new Promise(function (resolve) {
+				setTimeout(function () {
+					var result = env.objectFactory.createPrimitive(50);
+					resolve(result);
+				}, 4);
+			});
+
+			return promise;
+		});
+
+		env.global.define("foo", foo);
+
+		var ast = acorn.parse("foo()===50;");
+		var sandbox = SandBoxr.create(ast);
+		var result = sandbox.execute(env);
+
+		result.then(function (value) {
+			writeValue(value.toNative());
+		});
+
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 import {describe,it} from "mocha";
 import {expect} from "chai";
-import SandBoxr from "../";
+import {SandBoxr} from "../";
 import * as parser from "./ast-parser";
 
 describe("Async", () => {

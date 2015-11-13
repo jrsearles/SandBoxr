@@ -1,69 +1,69 @@
 import {PropertyReference} from "./property-reference";
 
 export class ObjectEnvironment {
-	constructor (parent, obj, thisArg, env) {
+	constructor (parent, obj, thisArg, env, strict) {
 		this.parent = parent && parent.scope;
-		this.strict = parent && parent.strict;
 		this.object = obj;
 		this.thisBinding = thisArg || obj;
 		this.env = env;
+		this.strict = strict;
 	}
 
-	getReference (name, unqualified) {
-		let ref = new PropertyReference(name, this.object, this.env);
+	getReference (key, unqualified) {
+		let ref = new PropertyReference(key, this.object, this.env);
 		ref.unqualified = unqualified;
 		return ref;
 	}
 
-	hasProperty (name) {
-		return this.parent ? this.parent.hasProperty(name) : this.hasOwnProperty(name);
+	has (key) {
+		return this.parent ? this.parent.has(key) : this.owns(key);
 	}
 
-	hasOwnProperty (name) {
-		return this.object.hasProperty(name);
+	owns (key) {
+		return this.object.has(key);
 	}
 
-	getVariable (name) {
-		return this.object.getProperty(name);
+	getVariable (key) {
+		return this.object.getProperty(key);
 	}
 
-	deleteVariable (name) {
-		return this.object.deleteProperty(name, false);
+	deleteVariable (key) {
+		return this.object.deleteProperty(key, false);
 	}
 
-	createVariable (name, immutable) {
+	createVariable (key, immutable) {
 		if (this.parent) {
 			return this.parent.createVariable(...arguments);
-		} else {
-			this.object.defineOwnProperty(name, {
-				value: undefined,
-				configurable: immutable,
-				enumerable: true,
-				writable: true
-			}, this.env.isStrict());
+		}
 
-			return this.object.getProperty(name);
+		this.object.defineOwnProperty(key, {
+			value: undefined,
+			configurable: immutable,
+			enumerable: true,
+			writable: true
+		}, this.env.isStrict());
+
+		return this.object.getProperty(key);
+	}
+
+	setValue (key, value, throwOnError) {
+		if (this.parent && !this.object.has(key)) {
+			this.parent.setValue(...arguments);
+		} else {
+			this.object.setValue(key, value, throwOnError);
 		}
 	}
 
-	putValue (name, value, throwOnError) {
-		if (this.parent && !this.object.hasProperty(name)) {
-			this.parent.putValue(...arguments);
-		} else {
-			this.object.putValue(name, value, throwOnError);
-		}
-	}
-
-	getValue (name, throwOnError) {
-		if (!this.hasOwnProperty(name)) {
+	getValue (key, throwOnError) {
+		if (!this.owns(key)) {
 			if (throwOnError) {
-				throw new ReferenceError(`${name} is not defined.`);
+				throw ReferenceError(`${key} is not defined.`);
 			}
 
 			return undefined;
 		}
 
-		return this.object.getValue(name);
+		return this.object.getValue(key);
 	}
 
 	getThisBinding () {

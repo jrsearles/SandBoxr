@@ -18,10 +18,13 @@ import LabeledStatement from "./labeled-statement";
 import Literal from "./literal";
 import LogicalExpression from "./logical-expression";
 import MemberExpression from "./member-expression";
+import MetaProperty from "./meta-property";
 import ObjectExpression from "./object-expression";
 import ReturnStatement from "./return-statement";
 import SequenceExpression from "./sequence-expression";
 import SwitchStatement from "./switch-statement";
+import TaggedTemplateExpression from "./tagged-template-expression";
+import TemplateLiteral from "./template-literal";
 import ThisExpression from "./this-expression";
 import ThrowStatement from "./throw-statement";
 import TryStatement from "./try-statement";
@@ -52,10 +55,13 @@ const visitors = {
 	Literal,
 	LogicalExpression,
 	MemberExpression,
+	MetaProperty,
 	ObjectExpression,
 	ReturnStatement,
 	SequenceExpression,
 	SwitchStatement,
+	TaggedTemplateExpression,
+	TemplateLiteral,
 	ThisExpression,
 	ThrowStatement,
 	TryStatement,
@@ -65,6 +71,7 @@ const visitors = {
 	VariableDeclarator,
 	WithStatement,
 
+	ArrowFunctionExpression: FunctionExpression,
 	ContinueStatement: BreakStatement,
 	IfStatement: ConditionalExpression,
 	NewExpression: CallExpression,
@@ -75,7 +82,7 @@ const visitors = {
 export default {
 	*visit (context) {
 		if (!(context.node.type in visitors)) {
-			throw new TypeError("No handler defined for: " + context.node.type);
+			throw TypeError(`No handler defined for: ${context.node.type}`);
 		}
 
 		return yield visitors[context.node.type](context);

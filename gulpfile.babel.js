@@ -9,7 +9,6 @@ import uglify from "gulp-uglify";
 import rename from "gulp-rename";
 import streamify from "gulp-streamify";
 import sourcemaps from "gulp-sourcemaps";
-// import babel from "babel-core/register";
 
 import "./tasks/test262";
 

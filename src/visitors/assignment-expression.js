@@ -1,23 +1,21 @@
-import * as contracts from "../utils/contracts";
+import {assign} from "../utils/assign";
 
 export default function* AssignmentExpression (context) {
-	let assignment = context.node.operator === "=";
 	let right = (yield context.create(context.node.right).execute()).result;
-	let left = (yield context.create(context.node.left).execute()).result;
+	let rightValue = right.getValue();
 
-	contracts.assertIsValidAssignment(left, context.env.isStrict());
-
-	let newValue;
-	if (assignment) {
-		newValue = right.getValue();
+	if (context.node.operator === "=") {
+		yield assign(context.env, context.node.left, rightValue);
 	} else {
+		let left = (yield context.create(context.node.left).execute()).result;
+
 		// remove equals
 		let op = context.node.operator.slice(0, -1);
 
-		let nativeValue = yield context.env.ops[op](left.getValue(), right.getValue());
-		newValue = context.env.objectFactory.createPrimitive(nativeValue);
+		let nativeValue = yield context.env.ops[op](left.getValue(), rightValue);
+		rightValue = context.env.objectFactory.createPrimitive(nativeValue);
+		left.setValue(rightValue, context.env.isStrict());
 	}
 
-	left.setValue(newValue);
-	return context.result(newValue);
+	return context.result(rightValue);
 }

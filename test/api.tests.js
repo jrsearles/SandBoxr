@@ -1,7 +1,7 @@
 import {describe,it} from "mocha";
 import {expect} from "chai";
 import * as parser from "./ast-parser";
-import SandBoxr from "../";
+import {SandBoxr} from "../";
 
 describe("API", () => {
 	it("should allow a variable to be defined", done => {
@@ -65,7 +65,7 @@ describe("API", () => {
 			}
 
 			return env.objectFactory.createPrimitive(stringValue);
-		}));
+		}, null));
 
 		let ast = parser.parse("String.concat('foo','bar')==='foobar';");
 		let sandbox = SandBoxr.create(ast);

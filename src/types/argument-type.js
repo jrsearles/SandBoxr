@@ -10,7 +10,7 @@ export class ArgumentType extends ObjectType {
 
 	mapProperty (index, binding) {
 		index = String(index);
-		super.defineOwnProperty(index, { configurable: true, enumerable: true, writable: true, value: undefined }, true);
+		super.defineOwnProperty(index, {configurable: true, enumerable: true, writable: true, value: undefined}, true);
 		this.parameterMap[index] = binding;
 	}
 

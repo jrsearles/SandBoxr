@@ -1,6 +1,5 @@
-import "./polyfills";
 import {Environment} from "./env";
-import {exhaust as x,isThenable} from "./utils/async";
+import {exhaust as x, isThenable} from "./utils/async";
 
 export class SandBoxr {
 	/**
@@ -22,7 +21,7 @@ export class SandBoxr {
 	 */
 	execute (env) {
 		// todo: obsolete
-		
+
 		try {
 			return this.execAsync(env);
 		} catch (err) {
@@ -46,10 +45,10 @@ export class SandBoxr {
 		if (isThenable(executionResult)) {
 			return executionResult.then(res => res.result);
 		}
-		
+
 		return executionResult.result;
 	}
-	
+
 	/**
 	 * Executes the abstract syntax tree (AST) against the provided environment (or the default
 	 * environment if not provided)
@@ -60,7 +59,7 @@ export class SandBoxr {
 		// always return a promise
 		return Promise.resolve(this.exec(env));
 	}
-	
+
 	/**
 	 * Creates an environment instance.
 	 * @returns {Object} The environment instance.

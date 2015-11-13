@@ -1,17 +1,20 @@
 import {PropertyReference} from "../env/property-reference";
-import {toString,toObject} from "../utils/native";
-import {execute as exec} from "../utils/func";
+import {toString, toObject} from "../utils/native";
 import {map} from "../utils/async";
+import {UNDEFINED} from "../types/primitive-type";
 
 function assignThis (env, fnMember, fn, isNew, native) {
 	if (isNew) {
-		// if this is a native contructor we don't care about this
-		// otherwise create a new object
-		return native ? null : env.objectFactory.createObject(fn);
+		return null;
 	}
 
 	if (fnMember instanceof PropertyReference && (!fnMember.unqualified || fnMember.base !== env.global)) {
-		return toObject(env, fnMember.base);
+		let thisArg = fnMember.base;
+		if (env.options.ecmaVersion === 5) {
+			return toObject(env, thisArg);
+		}
+
+		return thisArg;
 	}
 
 	return null;
@@ -29,15 +32,15 @@ export default function* CallExpression (context) {
 	});
 
 	if (!fn || fn.className !== "Function") {
-		let stringValue = yield toString(context.env, fn);
-		return context.raise(new TypeError(`${stringValue} not a function`));
+		let stringValue = yield toString(fn);
+		return context.raise(TypeError(`${stringValue} not a function`));
 	}
 
 	let native = fn.native;
 	let thisArg = assignThis(context.env, fnMember, fn, isNew, native);
-	let params = native ? [] : fn.node.params;
 	let callee = fnMember;
 
 	callee.identifier = fn.name;
-	return context.result(yield exec(context.env, fn, params, args, thisArg, callee, isNew));
+	let result = yield fn[isNew ? "construct" : "call"](thisArg, args, callee);
+	return context.result(result || UNDEFINED);
 }

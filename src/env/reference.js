@@ -1,11 +1,11 @@
-import * as contracts from "../utils/contracts";
+import {assertIsValidIdentifier} from "../utils/contracts";
 
 export class Reference {
-	constructor (name, base, env) {
+	constructor (key, base, env) {
 		this.isReference = true;
 		this.unqualified = false;
 
-		this.name = name;
+		this.key = key;
 		this.base = base;
 		this.env = env;
 		this.strict = env.isStrict();
@@ -18,10 +18,10 @@ export class Reference {
 	 */
 	getValue () {
 		if (!this.base) {
-			throw new ReferenceError(`${this.name} is not defined`);
+			throw ReferenceError(`${this.key} is not defined`);
 		}
 
-		return this.base.getValue(this.name, this.strict);
+		return this.base.getValue(this.key, this.strict);
 	}
 
 	/**
@@ -31,15 +31,21 @@ export class Reference {
 	 */
 	setValue (value) {
 		if (this.base) {
-			return this.base.putValue(this.name, value, this.strict);
+			if (!this.base.setValue(this.key, value) && this.strict) {
+				throw TypeError();
+			}
+
+			return true;
 		}
 
-		contracts.assertIsValidIdentifier(this.name, this.strict);
+		// check identifier before strict
+		assertIsValidIdentifier(this.key, this.strict);
+
 		if (this.strict) {
-			throw new ReferenceError(`${this.name} is not defined`);
+			throw ReferenceError(`${this.key} is not defined`);
 		}
 
-		return this.env.global.defineOwnProperty(this.name, {
+		return this.env.global.defineOwnProperty(this.key, {
 			value: value,
 			configurable: true,
 			enumerable: true,
@@ -49,13 +55,17 @@ export class Reference {
 		this.env);
 	}
 
+	isStrict () {
+		return this.strict || this.env.isStrict();
+	}
+
 	/**
 	 * Deletes the underlying reference.
 	 * @returns {Boolean} The result of the delete operation.
 	 */
 	["delete"] () {
 		if (this.base) {
-			return this.base.deleteVariable(this.name);
+			return this.base.deleteVariable(this.key);
 		}
 
 		return true;

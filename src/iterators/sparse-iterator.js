@@ -1,5 +1,4 @@
-import * as contracts from "../utils/contracts";
-import "../polyfills";
+import {isInteger} from "../utils/contracts";
 
 const ASCENDING = (a, b) => a - b;
 const DESCENDING = (a, b) => b - a;
@@ -30,7 +29,7 @@ export default class SparseIterator {
 			this.version += current.version;
 
 			for (let name in current.properties) {
-				if (!(name in this.props) && contracts.isInteger(name)) {
+				if (!(name in this.props) && isInteger(name)) {
 					let index = Number(name);
 
 					if (index >= this.start && index <= this.end) {
@@ -52,11 +51,11 @@ export default class SparseIterator {
 		}
 
 		if (this.keys.length > 0) {
-			let index = this.position = this.keys.shift();
-			let value = this.props[index].getValue();
+			let key = this.position = this.keys.shift();
+			let value = this.props[key].getValue();
 
 			return {
-				value: { value, index },
+				value: {value, key},
 				done: false
 			};
 		}

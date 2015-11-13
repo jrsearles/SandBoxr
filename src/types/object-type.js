@@ -1,103 +1,263 @@
+import {areSame} from "../utils/operators";
 import {PropertyDescriptor} from "./property-descriptor";
+const integerMatcher = /^\n+$/;
+
+function isSymbol (key) {
+	return key && typeof key === "object" && key.isSymbol;
+}
+
+function getPropertySource (key) {
+	return isSymbol(key) ? "symbols" : "properties";
+}
+
+function* propertyIterator (env, obj) {
+	let visited = Object.create(null);
+	let objectFactory = env.objectFactory;
+
+	let current = obj;
+	while (current) {
+		let keys = current.getOwnPropertyKeys("String");
+
+		for (let key of keys) {
+			let desc = current.getProperty(key);
+			if (desc) {
+				if (desc.enumerable && !(key in visited)) {
+					let value = objectFactory.createPrimitive(key);
+					yield objectFactory.createIteratorResult({value});
+				}
+
+				visited[key] = true;
+			}
+		}
+
+		current = current.getPrototype();
+	}
+
+	return objectFactory.createIteratorResult({done: true});
+}
+
+function propertyKeyComparer (a, b) {
+	if (integerMatcher.test(a)) {
+		if (integerMatcher.test(b)) {
+			return a - b;
+		}
+
+		return 1;
+	}
+
+	if (integerMatcher.test(b)) {
+		return -1;
+	}
+
+	return 0;
+}
 
 export class ObjectType {
 	constructor () {
 		this.isPrimitive = false;
 		this.type = "object";
 		this.className = "Object";
-		this.properties = Object.create(null);
 		this.extensible = true;
+		this.properties = Object.create(null);
+		this.symbols = Object.create(null);
 
 		this.version = 0;
 		this.primitiveHint = "number";
 	}
 
-	init (objectFactory, proto, descriptor) { }
+	init (env, proto, descriptor, strict) {
+		this[Symbol.for("env")] = env;
+	}
 
 	getPrototype () {
 		return this.proto;
 	}
 
 	setPrototype (proto) {
-		this.proto = proto;
-		this.version++;
-	}
+		if (this.proto === proto) {
+			return true;
+		}
 
-	getProperty (name) {
-		name = String(name);
+		if (!this.isExtensible()) {
+			return false;
+		}
 
-		let current = this;
+		// check whether prototype chain already includes object
+		let current = proto;
 		while (current) {
-			if (name in current.properties) {
-				return current.properties[name].bind(this);
+			if (current === this) {
+				return false;
 			}
 
 			current = current.getPrototype();
 		}
 
+		this.proto = proto;
+		this.version++;
+
+		return true;
+	}
+
+	getProperty (key, receiver) {
+		receiver = receiver || this;
+
+		let localKey = String(key);
+		let source = getPropertySource(key);
+
+		if (localKey in this[source]) {
+			return this[source][localKey].bind(receiver);
+		}
+
+		let current = this.getPrototype();
+		if (current) {
+			return current.getProperty(key, receiver);
+		}
+
 		return undefined;
 	}
 
-	getOwnProperty (name) {
-		return this.properties[String(name)];
+	getOwnProperty (key) {
+		return this[getPropertySource(key)][String(key)];
 	}
 
-	getOwnPropertyNames () {
-		return Object.keys(this.properties);
-	}
+	getOwnPropertyKeys (keyType) {
+		let keys = [];
 
-	hasProperty (name) {
-		return !!this.getProperty(name);
-	}
-
-	hasOwnProperty (name) {
-		return String(name) in this.properties;
-	}
-
-	putValue (name, value, throwOnError, env) {
-		if (this.isPrimitive) {
-			return;
+		if (keyType !== "Symbol") {
+			// note: this uses native sort which may not be stable
+			keys = Object.keys(this.properties).sort(propertyKeyComparer);
 		}
 
-		name = String(name);
+		if (keyType !== "String") {
+			for (let key in this.symbols) {
+				keys.push(this.symbols[key].key);
+			}
+		}
 
-		let descriptor = this.getProperty(name);
+		return keys;
+	}
+
+	isExtensible () {
+		return this.extensible;
+	}
+
+	getIterator () {
+		let env = this[Symbol.for("env")];
+		return env.objectFactory.createIterator(propertyIterator(env, this));
+	}
+
+	has (key) {
+		if (String(key) in this[getPropertySource(key)]) {
+			return true;
+		}
+
+		let current = this.getPrototype();
+		if (current) {
+			return current.has(key);
+		}
+
+		return false;
+	}
+
+	owns (key) {
+		return String(key) in this[getPropertySource(key)];
+	}
+
+	setValue (key, value, receiver) {
+		receiver = receiver || this;
+
+		let descriptor = this.getProperty(key);
 		if (descriptor) {
-			if (!descriptor.canSetValue()) {
-				if (throwOnError) {
-					throw new TypeError(`Cannot assign to read only property '${name}' of %s`);
+			if (this !== receiver && receiver.owns(key)) {
+				let receiverDescriptor = receiver.getProperty(key);
+				if (!receiverDescriptor.dataProperty) {
+					return false;
 				}
 
-				return;
+				descriptor = receiverDescriptor;
 			}
 
-			if (descriptor.dataProperty && !this.hasOwnProperty(name)) {
-				this.properties[name] = new PropertyDescriptor(this, {
-					value: value,
-					configurable: descriptor.configurable,
-					enumerable: descriptor.enumerable,
-					writable: descriptor.writable
-				});
+			if (descriptor.hasValue() && receiver.owns(key) && areSame(descriptor.getValue(), value)) {
+				return true;
+			}
 
-				this.version++;
-			} else {
+			if (!descriptor.canSetValue()) {
+				return false;
+			}
+
+			if (!descriptor.dataProperty) {
+				descriptor.bind(receiver);
 				descriptor.setValue(value);
+				return true;
 			}
-		} else {
-			this.defineOwnProperty(name, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError, env);
+
+			if (!descriptor.canUpdate({value})) {
+				return false;
+			}
+
+			if (!receiver.owns(key)) {
+				return receiver.defineOwnProperty(key, {
+					value: value,
+					configurable: true,
+					enumerable: true,
+					writable: true
+				}, false);
+			}
+
+			descriptor.setValue(value);
+			return true;
 		}
+
+		return receiver.defineOwnProperty(key, {
+			value: value,
+			configurable: true,
+			enumerable: true,
+			writable: true
+		}, false);
 	}
 
-	defineOwnProperty (name, descriptor, throwOnError, env) {
+	// putValue (key, value, throwOnError) {
+	// 	if (this.isPrimitive) {
+	// 		return;
+	// 	}
+
+	// 	let descriptor = this.getProperty(key);
+	// 	if (descriptor) {
+	// 		if (!descriptor.canSetValue()) {
+	// 			if (throwOnError) {
+	// 				throw TypeError(`Cannot assign to read only property '${key}'`);
+	// 			}
+
+	// 			return;
+	// 		}
+
+	// 		if (descriptor.dataProperty && !this.owns(key)) {
+	// 			this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, {
+	// 				value: value,
+	// 				configurable: descriptor.configurable,
+	// 				enumerable: descriptor.enumerable,
+	// 				writable: descriptor.writable
+	// 			}, key);
+
+	// 			this.version++;
+	// 		} else {
+	// 			descriptor.setValue(value);
+	// 		}
+	// 	} else {
+	// 		this.defineOwnProperty(key, {value: value, configurable: true, enumerable: true, writable: true}, throwOnError);
+	// 	}
+	// }
+
+	defineOwnProperty (key, descriptor, throwOnError) {
 		if (this.isPrimitive) {
 			if (throwOnError) {
-				throw new TypeError(`Cannot define property: ${name}, object is not extensible`);
+				throw TypeError(`Cannot define property: ${key}, object is not extensible`);
 			}
 
 			return false;
 		}
 
-		let current = this.getOwnProperty(name);
+		let current = this.getOwnProperty(key);
 		if (current) {
 			if (current.canUpdate(descriptor)) {
 				current.update(descriptor);
@@ -105,32 +265,35 @@ export class ObjectType {
 			}
 
 			if (throwOnError) {
-				throw new TypeError(`Cannot redefine property: ${name}`);
+				throw TypeError(`Cannot redefine property: ${key}`);
 			}
 
 			return false;
 		} else if (!this.extensible) {
 			if (throwOnError) {
-				throw new TypeError(`Cannot define property: ${name}, object is not extensible`);
+				throw TypeError(`Cannot define property: ${key}, object is not extensible`);
 			}
 
 			return false;
 		}
 
-		this.properties[name] = new PropertyDescriptor(this, descriptor);
+		this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, descriptor, key);
 		this.version++;
 		return true;
 	}
 
-	deleteProperty (name, throwOnError) {
+	deleteProperty (key, throwOnError) {
 		if (this.isPrimitive) {
 			return false;
 		}
 
-		if (name in this.properties) {
-			if (!this.properties[name].configurable) {
+		let source = getPropertySource(key);
+		key = String(key);
+
+		if (key in this[source]) {
+			if (!this[source][key].configurable) {
 				if (throwOnError) {
-					throw new TypeError(`Cannot delete property: ${name}`);
+					throw TypeError(`Cannot delete property: ${key}`);
 				}
 
 				return false;
@@ -138,65 +301,72 @@ export class ObjectType {
 		}
 
 		this.version++;
-		return delete this.properties[name];
+		return delete this[source][key];
 	}
 
-	define (name, value, descriptor) {
+	define (key, value, {configurable = true, enumerable = false, writable = true, getter, get, setter, set} = {}) {
 		// this method is intended for external usage only - it provides a way to define
 		// methods and properties and overwrite any existing properties even if they are
 		// not configurable
-		descriptor = descriptor || { configurable: true, enumerable: false, writable: true };
-		descriptor.value = value;
 
-		this.properties[name] = new PropertyDescriptor(this, descriptor);
+		let descriptor;
+		if (getter || setter) {
+			descriptor = {getter, get, setter, set, configurable, enumerable};
+		}	else {
+			descriptor = {value, configurable, enumerable, writable};
+		}
+
+		this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, descriptor, key);
 		this.version++;
 	}
 
-	remove (name) {
+	remove (key) {
 		// this method is intended for external usage only - it provides a way to remove
 		// properties even if they are not normally able to be deleted
-		delete this.properties[name];
+		delete this[getPropertySource(key)][String(key)];
 		this.version++;
 	}
 
-	getValue (name) {
+	getValue (key) {
 		if (arguments.length > 0) {
-			return this.getProperty(name).getValue();
+			let property = this.getProperty(key);
+			return property && property.getValue();
 		}
 
 		return this;
 	}
 
-	freeze () {
-		for (let prop in this.properties) {
-			if (this.properties[prop].dataProperty) {
-				this.defineOwnProperty(prop, { writable: false, configurable: false }, true);
-			} else {
-				this.defineOwnProperty(prop, { configurable: false }, true);
+	each (func) {
+		["properties", "symbols"].forEach(source => {
+			for (let key in this[source]) {
+				func(this[source][key]);
 			}
-		}
+		});
+	}
+
+	freeze () {
+		this.each(desc => {
+			if (desc.dataProperty) {
+				this.defineOwnProperty(desc.key, {writable: false, configurable: false});
+			} else {
+				this.defineOwnProperty(desc.key, {configurable: false});
+			}
+		});
 
 		this.preventExtensions();
 	}
 
 	preventExtensions () {
 		this.extensible = false;
+		return true;
 	}
 
 	seal () {
-		for (let prop in this.properties) {
-			this.defineOwnProperty(prop, { configurable: false }, true);
-		}
+		this.each(desc => {
+			this.defineOwnProperty(desc.key, {configurable: false}, true);
+		});
 
 		this.preventExtensions();
-	}
-
-	equals (obj) {
-		if (this.isPrimitive && obj.isPrimitive) {
-			return this.value === obj.value;
-		}
-
-		return this === obj;
 	}
 
 	toNative () {
