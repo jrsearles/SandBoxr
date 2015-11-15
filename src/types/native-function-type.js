@@ -43,6 +43,8 @@ export class NativeFunctionType extends FunctionType {
 
 			this.defineOwnProperty("prototype", protoDescriptor);
 		}
+
+		this.addPoison();
 	}
 
 	*call (thisArg, args = [], callee) {

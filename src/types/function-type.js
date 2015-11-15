@@ -47,6 +47,35 @@ export class FunctionType extends ObjectType {
 			// set the contructor property as an instance of itself
 			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this});
 		}
+
+		this.addPoison();
+	}
+
+	addPoison () {
+		let env = this[Symbol.for("env")];
+		if (env.options.ecmaVersion > 5) {
+			return;
+		}
+
+		if (this.isStrict()) {
+			let thrower = function () {
+				throw TypeError();
+			};
+
+			let throwerFunc = env.objectFactory.createBuiltInFunction(thrower);
+
+			let throwerProp = {
+				get: throwerFunc,
+				getter: thrower,
+				set: throwerFunc,
+				setter: thrower,
+				enumerable: false,
+				configurable: false
+			};
+
+			this.define("caller", null, throwerProp);
+			this.define("arguments", null, throwerProp);
+		}
 	}
 
 	*call (thisArg, args = [], callee) {
