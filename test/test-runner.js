@@ -1,10 +1,10 @@
 import * as parser from "./ast-parser";
 import {expect} from "chai";
-import {SandBoxr} from "../";
+import * as SandBoxr from "../";
 
 export default {
 	runBlock (code, done) {
-		return this.getRunner(code).execute();
+		return this.getRunner(code).resolve();
 	},
 
 	confirmBlock (code, done) {
@@ -32,7 +32,7 @@ export default {
 		env.init();
 
 		let runner = this.getRunner(code);
-		return runner.execute(env).then(function () {
+		return runner.resolve(env).then(function () {
 			return env;
 		});
 	},

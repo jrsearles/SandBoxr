@@ -120,41 +120,14 @@ result;
 		document.getElementById("tree").innerHTML = JSON.stringify(ast, null, 2);
 
 		debugger;
-		var runner = new SandBoxr(ast, { parser: parser, ecmaVersion: ecmaVersion });
-		runner.execute().then(function (value) {
-			writeValue(value && value.toNative());
-		}, function (err) {
-			writeValue(err.toString());
-		});
+		var runner = SandBoxr.create(ast, { parser: parser, ecmaVersion: ecmaVersion });
+		var value = runner.execute();
+		writeValue(value && value.toNative());
 	}
 
 	function writeValue (obj) {
 		document.getElementById("result").innerHTML = JSON.stringify(obj);
 	}
-
-		var env = SandBoxr.createEnvironment();
-		env.init();
-
-		var foo = env.objectFactory.createFunction(function () {
-			var promise = new Promise(function (resolve) {
-				setTimeout(function () {
-					var result = env.objectFactory.createPrimitive(50);
-					resolve(result);
-				}, 4);
-			});
-
-			return promise;
-		});
-
-		env.global.define("foo", foo);
-
-		var ast = acorn.parse("foo()===50;");
-		var sandbox = SandBoxr.create(ast);
-		var result = sandbox.execute(env);
-
-		result.then(function (value) {
-			writeValue(value.toNative());
-		});
 
 </script>
 </body>

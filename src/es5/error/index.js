@@ -1,6 +1,8 @@
 import {toString} from "../../utils/native";
 import {isNullOrUndefined} from "../../utils/contracts";
 
+import $toString from "./error.to-string";
+
 const errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
 export default function errorApi (env) {
@@ -20,22 +22,7 @@ export default function errorApi (env) {
 		return objectFactory.create("Error", new Error(messageString));
 	}, proto, {configurable: false, enumerable: false, writable: false});
 
-	proto.define("toString", objectFactory.createBuiltInFunction(function* () {
-		let name = this.node.getValue("name");
-		let msg;
-
-		if (this.node.has("message")) {
-			msg = yield toString(this.node.getValue("message"));
-		}
-
-		name = name && (yield toString(name));
-		if (name && msg) {
-			return objectFactory.create("String", name + ": " + msg);
-		}
-
-		return objectFactory.create("String", name || msg);
-	}, 0, "Error.prototype.toString"));
-
+	$toString(proto, env, objectFactory);
 	globalObject.define("Error", errorClass);
 
 	errorTypes.forEach(errorType => {

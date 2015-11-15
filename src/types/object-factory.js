@@ -32,13 +32,16 @@ function setOrphans (scope) {
 	orphans = Object.create(null);
 }
 
-function setProto (typeName, instance, env) {
+function setProto (typeName, instance, factory) {
+	let env = factory.env;
 	if (!env.global || !env.global.owns(typeName)) {
-		// during initialization it is possible for objects to be created
-		// before the types have been registered - add a registry of items
-		// and these can be filled in when the type is registered
-		orphans[typeName] = orphans[typeName] || [];
-		orphans[typeName].push(instance);
+		if (!factory.initialized) {
+			// during initialization it is possible for objects to be created
+			// before the types have been registered - add a registry of items
+			// and these can be filled in when the type is registered
+			orphans[typeName] = orphans[typeName] || [];
+			orphans[typeName].push(instance);
+		}
 
 		return;
 	}
@@ -57,10 +60,12 @@ export class ObjectFactory {
 		this.env = env;
 		this.options = env.options;
 		this.ecmaVersion = env.options.ecmaVersion || 5;
+		this.initialized = false;
 	}
 
 	init () {
 		setOrphans(this.env);
+		this.initialized = true;
 	}
 
 	/**
@@ -121,11 +126,8 @@ export class ObjectFactory {
 				break;
 
 			case "Set":
-				instance = new CollectionType("Set");
-				break;
-
 			case "Map":
-				instance = new CollectionType("Map");
+				instance = new CollectionType(typeName);
 				break;
 
 			case "Error":
@@ -152,7 +154,7 @@ export class ObjectFactory {
 		}
 
 		instance.init(this.env);
-		setProto(typeName, instance, this.env);
+		setProto(typeName, instance, this);
 		return instance;
 	}
 
@@ -187,7 +189,7 @@ export class ObjectFactory {
 			if (proto) {
 				instance.setPrototype(proto.getValue("prototype"));
 			} else {
-				setProto("Object", instance, this.env);
+				setProto("Object", instance, this);
 			}
 		}
 
@@ -295,7 +297,7 @@ export class ObjectFactory {
 			instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
 		}
 
-		setProto("Function", instance, this.env);
+		setProto("Function", instance, this);
 		return instance;
 	}
 
@@ -323,7 +325,7 @@ export class ObjectFactory {
 			return func.apply(this, arguments);
 		});
 
-		setProto("Function", instance, this.env);
+		setProto("Function", instance, this);
 		instance[Symbol.for("env")] = this.env;
 		instance.builtIn = true;
 		instance.canConstruct = false;

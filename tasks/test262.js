@@ -1,4 +1,4 @@
-import {SandBoxr} from "../";
+import * as SandBoxr from "../";
 import path from  "path";
 import test262 from "test262-streamer";
 import streamer6 from "../../test262-6-streamer";
@@ -123,7 +123,7 @@ gulp.task("test262-6", function () {
 
 gulp.task("test262", () => {
 	// "!ch15/15.1/**/*.js",
-	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"] })
+	return test262({ files: ["**/*.js", "!intl402/**/*.js"] })
 		.pipe(through.obj((file, enc, cb) => {
 			let filename = path.basename(file.path);
 			let src = file.contents.toString();

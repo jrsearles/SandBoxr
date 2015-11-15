@@ -1,14 +1,17 @@
-const objectOrFunctionTypes = {"object": true, "function": true};
-function isObjectOrFunction (obj) {
-	return obj && typeof obj in objectOrFunctionTypes;
+function isObject (obj) {
+	return obj && typeof obj === "object";
+}
+
+function isFunction (obj) {
+	return typeof obj === "function";
 }
 
 export function isThenable (obj) {
-	return isObjectOrFunction(obj) && typeof obj.then === "function";
+	return (isObject(obj) || isFunction(obj)) && typeof obj.then === "function";
 }
 
 function isNextable (obj) {
-	return isObjectOrFunction(obj) && typeof obj.next === "function";
+	return isObject(obj) && typeof obj.next === "function";
 }
 
 export function* map (arr, func) {
@@ -67,9 +70,7 @@ function tryCatch (it, priorValue, method) {
  * @returns {Object|Promise} Returns the final value, or a Promise if
  * at any point in the iteration a Promise is returned.
  */
-export function exhaust (it, value, stack = []) {
-	let state = "next";
-
+export function exhaust (it, value, stack = [], state = "next") {
 	while (it) {
 		if (!isNextable(it)) {
 			value = it;
@@ -90,17 +91,19 @@ export function exhaust (it, value, stack = []) {
 			throw value;
 		}
 
-		if (isNextable(value)) {
-			stack.push(it);
+		if (value) {
+			if (isNextable(value)) {
+				stack.push(it);
 
-			it = value;
-			value = undefined;
+				it = value;
+				value = undefined;
 
-			continue;
-		}
+				continue;
+			}
 
-		if (isThenable(value)) {
-			return value.then(res => exhaust(it, res, stack), err => it.throw(err));
+			if (isThenable(value)) {
+				return value.then(res => exhaust(it, res, stack), err => exhaust(it, err, stack, "throw"));
+			}
 		}
 
 		if (done) {

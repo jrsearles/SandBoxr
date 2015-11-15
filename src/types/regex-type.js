@@ -15,8 +15,8 @@ export class RegexType extends ObjectType {
 
 		["source", "global", "ignoreCase", "multiline"].forEach(key => {
 			if (env.options.ecmaVersion > 5) {
-				let getter = function () { return objectFactory.createPrimitive(this.source[key]); };
-				let getterFunc = objectFactory.createGetter(getter, key);
+				let getter = function () { return env.objectFactory.createPrimitive(this.source[key]); };
+				let getterFunc = env.objectFactory.createGetter(getter, key);
 
 				this.defineOwnProperty(key, {
 					getter: getter,
