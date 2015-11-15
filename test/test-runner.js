@@ -3,28 +3,26 @@ import {expect} from "chai";
 import * as SandBoxr from "../";
 
 export default {
-	runBlock (code, done) {
-		return this.getRunner(code).resolve();
+	runBlock (code) {
+		return this.getRunner(code).execute();
 	},
 
 	confirmBlock (code, done) {
-		this.runBlock(code)
-			.then(result => {
-				expect(result.toNative()).to.be.true;
-				done();
-			}, done);
+		let value = this.runBlock(code);
+		expect(value.toNative()).to.be.true;
+		done && done();
 	},
 
 	confirmError (code, errType, done) {
-		this.runBlock(code)
-			.then(() => {
-				expect(false).to.be.true;
-				done();
-			},
-			err => {
-				expect(err).to.be.instanceof(errType);
-				done();
-			});
+		try {
+			this.runBlock(code);
+
+			expect(false).to.be.true;
+			done && done();
+		} catch (err) {
+			expect(err.toNative()).to.be.instanceOf(errType);
+			done && done();
+		}
 	},
 
 	getScope (code) {

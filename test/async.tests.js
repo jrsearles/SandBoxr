@@ -1,6 +1,6 @@
 import {describe,it} from "mocha";
 import {expect} from "chai";
-import {SandBoxr} from "../";
+import * as SandBoxr from "../";
 import * as parser from "./ast-parser";
 
 describe("Async", () => {
@@ -23,7 +23,7 @@ describe("Async", () => {
 
 		let ast = parser.parse("foo()===50;");
 		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
+		let result = sandbox.resolve(env);
 
 		result.then(value => {
 			expect(value.toNative()).to.be.true;
@@ -35,7 +35,7 @@ describe("Async", () => {
 		let ast = parser.parse("true===true;");
 		let sandbox = SandBoxr.create(ast);
 
-		sandbox.execute().then(value => {
+		sandbox.resolve().then(value => {
 			expect(value.toNative()).to.be.true;
 			done();
 		});

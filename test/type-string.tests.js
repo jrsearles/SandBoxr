@@ -68,78 +68,75 @@ describe("Type: String", () => {
 
 		{ fn: "valueOf", args: [] }
 	].forEach(testCase => {
-		it("String.prototype." + testCase.fn + ": should return expected results with args: " + runner.wrapArgs(testCase.args), done => {
+		it("String.prototype." + testCase.fn + ": should return expected results with args: " + runner.wrapArgs(testCase.args), () => {
 			let source = testCase.source || "Foo";
 			let expected = source[testCase.fn](...testCase.args);
 			let code = "'" + source + "'." + testCase.fn + "(" + runner.wrapArgs(testCase.args) + ");";
 
-			runner.runBlock(code).then(result => {
+			let result = runner.runBlock(code);
 
-				if (Array.isArray(expected)) {
-					expect(result.getProperty("length").getValue().value).to.equal(expected.length);
-					expected.forEach((value, index) => {
-						expect(result.getProperty(index).getValue().value).to.equal(value);
-					});
-				} else {
-					expect(result.getValue().value).to.equal(expected);
-				}
-
-				done();
-			});
+			if (Array.isArray(expected)) {
+				expect(result.getProperty("length").getValue().value).to.equal(expected.length);
+				expected.forEach((value, index) => {
+					expect(result.getProperty(index).getValue().value).to.equal(value);
+				});
+			} else {
+				expect(result.getValue().value).to.equal(expected);
+			}
 		});
 	});
 
 	describe("String.fromCharCode", () => {
-		it("should return expected value", done => {
-			runner.confirmBlock("String.fromCharCode(65, 66, 67)=='ABC';", done);
+		it("should return expected value", () => {
+			runner.confirmBlock("String.fromCharCode(65, 66, 67)=='ABC';");
 		});
 	});
 
 	describe("String.prototype.length", () => {
-		it("should return the length of the string.", done => {
-			runner.confirmBlock("'foo'.length==3;", done);
+		it("should return the length of the string.", () => {
+			runner.confirmBlock("'foo'.length==3;");
 		});
 
-		it("should ignore when length is set", done => {
-			runner.confirmBlock("var a = 'foo';a.length = 2;a.length==3;", done);
+		it("should ignore when length is set", () => {
+			runner.confirmBlock("var a = 'foo';a.length = 2;a.length==3;");
 		});
 	});
 
 	describe("When using bracket notation", () => {
-		it("should return character at that position", done => {
-			runner.confirmBlock("'foo'[1] == 'o';", done);
+		it("should return character at that position", () => {
+			runner.confirmBlock("'foo'[1] == 'o';");
 		});
 
-		it("should return undefined if position is not in array", done => {
-			runner.confirmBlock("'foo'[99] === undefined;", done);
+		it("should return undefined if position is not in array", () => {
+			runner.confirmBlock("'foo'[99] === undefined;");
 		});
 
-		it("should not allow character to be replaced by position", done => {
-			runner.confirmBlock("var a = 'foo'; a[1] = 'f';a === 'foo';", done);
+		it("should not allow character to be replaced by position", () => {
+			runner.confirmBlock("var a = 'foo'; a[1] = 'f';a === 'foo';");
 		});
 	});
 
 	describe("When converting", () => {
-		it("should use overridden `toString` if set.", done => {
-			runner.confirmBlock("var a = {toString:function() { return 'foo'; } };String(a) == 'foo';", done);
+		it("should use overridden `toString` if set.", () => {
+			runner.confirmBlock("var a = {toString:function() { return 'foo'; } };String(a) == 'foo';");
 		});
 
-		it("should throw a type error if overridden `toString` returns an object", done => {
-			runner.confirmError("var a = {toString:function() { return {}; } };String(a);", TypeError, done);
+		it("should throw a type error if overridden `toString` returns an object", () => {
+			runner.confirmError("var a = {toString:function() { return {}; } };String(a);", TypeError);
 		});
 	});
 
 	describe("as object", () => {
-		it("should show typeof `object` when creating use `new`", done => {
-			runner.confirmBlock("typeof new String('foo') == 'object';", done);
+		it("should show typeof `object` when creating use `new`", () => {
+			runner.confirmBlock("typeof new String('foo') == 'object';");
 		});
 
-		it("should not strictly equal a primitive string", done => {
-			runner.confirmBlock("new String('foo') !== 'foo';", done);
+		it("should not strictly equal a primitive string", () => {
+			runner.confirmBlock("new String('foo') !== 'foo';");
 		});
 
-		it("should implicitly equal a primitive string", done => {
-			runner.confirmBlock("new String('foo') == 'foo';", done);
+		it("should implicitly equal a primitive string", () => {
+			runner.confirmBlock("new String('foo') == 'foo';");
 		});
 	});
 });

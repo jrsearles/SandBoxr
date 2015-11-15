@@ -1,7 +1,7 @@
 import {describe,it} from "mocha";
 import {expect} from "chai";
 import * as parser from "./ast-parser";
-import {SandBoxr} from "../";
+import * as SandBoxr from "../";
 
 describe("API", () => {
 	it("should allow a variable to be defined", done => {
@@ -13,7 +13,7 @@ describe("API", () => {
 
 		let ast = parser.parse("a === 99;");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute(env)
+		sandbox.resolve(env)
 			.then(result => {
 				expect(result.value).to.be.true;
 				done();
@@ -32,7 +32,7 @@ describe("API", () => {
 
 		let ast = parser.parse("a.foo === 99;");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute(env)
+		sandbox.resolve(env)
 			.then(result => {
 				expect(result.value).to.be.true;
 				done();
@@ -47,7 +47,7 @@ describe("API", () => {
 
 		let ast = parser.parse("typeof String.prototype.trim === 'undefined';");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute(env)
+		sandbox.resolve(env)
 			.then(result => {
 				expect(result.value).to.be.true;
 				done();
@@ -69,7 +69,7 @@ describe("API", () => {
 
 		let ast = parser.parse("String.concat('foo','bar')==='foobar';");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute(env)
+		sandbox.resolve(env)
 			.then(result => {
 				expect(result.value).to.be.true;
 				done();
@@ -86,11 +86,11 @@ describe("API", () => {
 		let ast = parser.parse("a++;");
 		let sandbox = SandBoxr.create(ast);
 
-		sandbox.execute(env)
+		sandbox.resolve(env)
 			.then(() => {
 				ast = parser.parse("a===100;");
 				sandbox = SandBoxr.create(ast);
-				return sandbox.execute(env);
+				return sandbox.resolve(env);
 			})
 			.then(result => {
 				expect(result.value).to.be.true;
@@ -107,12 +107,12 @@ describe("API", () => {
 
 		let ast = parser.parse("a++;");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute(env)
+		sandbox.resolve(env)
 			.then(() => {
 				env.init();
 				ast = parser.parse("typeof a === 'undefined';");
 				sandbox = SandBoxr.create(ast);
-				return sandbox.execute(env);
+				return sandbox.resolve(env);
 			})
 			.then(result => {
 				expect(result.value).to.be.true;
@@ -123,7 +123,7 @@ describe("API", () => {
 	it("should allow an object to be converted to a native object", done => {
 		let ast = parser.parse("({foo:true});");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute().then(result => {
+		sandbox.resolve().then(result => {
 			expect(result.toNative().foo).to.be.true;
 			done();
 		});
@@ -132,7 +132,7 @@ describe("API", () => {
 	it("should allow a primitive to be toNativeped", done => {
 		let ast = parser.parse("(1);");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute().then(result => {
+		sandbox.resolve().then(result => {
 			expect(result.toNative()).to.equal(1);
 			done();
 		});
@@ -141,7 +141,7 @@ describe("API", () => {
 	it("should allow an array to be toNativeped", done => {
 		let ast = parser.parse("([1,2,3]);");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.execute().then(result => {
+		sandbox.resolve().then(result => {
 			expect(result.toNative()[2]).to.equal(3);
 			done();
 		});
@@ -151,7 +151,7 @@ describe("API", () => {
 		it("should be able to exclude api's", done => {
 			let ast = parser.parse("typeof JSON === 'undefined'");
 			let sandbox = SandBoxr.create(ast, { exclude: ["JSON"] });
-			sandbox.execute().then(result => {
+			sandbox.resolve().then(result => {
 				expect(result.value).to.be.true;
 				done();
 			});
@@ -160,7 +160,7 @@ describe("API", () => {
 		it("should be able to exclude methods from prototype", done => {
 			let ast = parser.parse("typeof String.prototype.trim === 'undefined'");
 			let sandbox = SandBoxr.create(ast, { exclude: ["String.prototype.trim"] });
-			sandbox.execute().then(result => {
+			sandbox.resolve().then(result => {
 				expect(result.value).to.be.true;
 				done();
 			});
@@ -194,13 +194,13 @@ describe("API", () => {
 			let ast = parser.parse("0 == '0'");
 			let sandbox = SandBoxr.create(ast);
 
-			sandbox.execute(env).then(result => {
+			sandbox.resolve(env).then(result => {
 				expect(result.value).to.be.false;
 
 				ast = parser.parse("0 != '0'");
 				sandbox = SandBoxr.create(ast);
 
-				return sandbox.execute();
+				return sandbox.resolve();
 			}).then(result => {
 				expect(result.value).to.be.true;
 				done();

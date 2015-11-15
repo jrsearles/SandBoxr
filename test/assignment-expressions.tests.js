@@ -20,30 +20,30 @@ describe("Expressions", () => {
 			{ op:	"^=", name: "Bitwise XOR assignment", expected: left ^ right },
 			{ op:	"&=", name: "Bitwise OR assignment", expected: left & right }
 		].forEach(current => {
-			it("should apply " + current.op, done => {
+			it("should apply " + current.op, () => {
 				let code = "var a = " + left + "; a " + current.op + " " + right + ";a == " + current.expected + ";";
-				runner.confirmBlock(code, done);
+				runner.confirmBlock(code);
 			});
 		});
 	});
 
 
-	it("should error if the left side is null", done => {
-		runner.confirmError("var x = (y *= 1);", ReferenceError, done);
+	it("should error if the left side is null", () => {
+		runner.confirmError("var x = (y *= 1);", ReferenceError);
 	});
 
-	it("should increment value", done => {
+	it("should increment value", () => {
 		let code = "var a = 0; a++;a==1;";
-		runner.confirmBlock(code, done);
+		runner.confirmBlock(code);
 	});
 
-	it("should decrement value", done => {
+	it("should decrement value", () => {
 		let code = "var a = 0; a--;a==-1;";
-		runner.confirmBlock(code, done);
+		runner.confirmBlock(code);
 	});
 
-	it("should decrement value after returning", done => {
+	it("should decrement value after returning", () => {
 		let code = "var a = 0; var b = a--;b==0;";
-		runner.confirmBlock(code, done);
+		runner.confirmBlock(code);
 	});
 });
