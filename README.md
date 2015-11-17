@@ -1,7 +1,6 @@
 # SandBoxr
 
 [![NPM Version](https://img.shields.io/npm/v/sandboxr.svg)](https://www.npmjs.org/package/sandboxr)
-![Bower version](https://img.shields.io/bower/v/bootstrap.svg)
 
 > A fully compliant [5.1 ECMAScript](http://www.ecma-international.org/ecma-262/5.1/index.html) runner. _SandBoxr_ runs JavaScript in a sandboxed environment.
 -----
