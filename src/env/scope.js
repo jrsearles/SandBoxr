@@ -1,18 +1,9 @@
 import {UNDEFINED} from "../types/primitive-type";
 import EstreeWalker from "../estree-walker";
-import {visit as hoister} from "./hoister";
 import {isStrictNode, assertIsValidParameterName} from "../utils/contracts";
 import rules from "../syntax-rules";
 import {each} from "../utils/async";
 import {declare} from "../utils/assign";
-
-function validateSyntax (root) {
-	for (let node of EstreeWalker.create(root)) {
-		if (node.type in rules) {
-			rules[node.type](node, true);
-		}
-	}
-}
 
 export class Scope {
 	constructor (env, scope) {
@@ -33,30 +24,51 @@ export class Scope {
 			return;
 		}
 
+		let self = this;
 		let env = this.env;
 		this.scope.strict = isStrictNode(node.body);
 
 		let strict = this.scope.strict || env.isStrict();
 		if (strict && node.type === "Program") {
-			validateSyntax(node);
+			// todo: see if we can combine below for a single iteration
+			EstreeWalker.walk(node, rules, {strict: true});
 		}
-
-		hoister(node, decl => {
-			let name = decl.name || decl.id.name;
-			assertIsValidParameterName(name, strict);
-
-			let value = UNDEFINED;
-			if (decl.type === "FunctionDeclaration") {
-				// functions can be used before they are defined
-				let strictFunc = strict || isStrictNode(decl.body.body);
-				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc});
-				value.bindScope(this);
-			} else if (this.scope.has(name)) {
-				return;
+		
+		// hoist variables
+		EstreeWalker.walk(node, {
+			// skip functions
+			FunctionExpression: false,
+			
+			// do not hoist variables declared within tests
+			IfStatement: ["consequent", "alternate"],
+			
+			FunctionDeclaration (node) {
+				let name = node.id.name;
+				
+				assertIsValidParameterName(name, strict);
+				let strictFunc = strict || isStrictNode(node.body.body);
+				let value = env.objectFactory.createFunction(node, undefined, {strict: strictFunc});
+				value.bindScope(self);
+				
+				let newVar = env.createVariable(name, true);
+				newVar.setValue(value);
+				
+				// do not scan body
+				return false;
+			},
+			
+			VariableDeclarator (node) {
+				let name = node.id.name;
+				assertIsValidParameterName(name, strict);
+				if (self.scope.has(name)) {
+					return;
+				}
+				
+				let newVar = env.createVariable(name, true);
+				newVar.setValue(UNDEFINED);
+				
+				return false;
 			}
-
-			let newVar = env.createVariable(name, true);
-			newVar.setValue(value);
 		});
 	}
 
@@ -113,8 +125,8 @@ export class Scope {
 
 	/**
 	 * Loads the arguments into the scope and creates the special `arguments` object.
-	 * @param {AST[]} params - The parameter identifiers
-	 * @param {ObjectType[]} args - The argument values
+	 * @param {Array<Identifier>} params - The parameter identifiers
+	 * @param {Array<ObjectType>} args - The argument values
 	 * @param {FunctionType} callee - The function
 	 * @returns {void}
 	 */
@@ -125,8 +137,7 @@ export class Scope {
 		}
 
 		// todo: this method is getting far too complex
-		let env = this.env;
-		let scope = this.scope;
+		let {env, scope} = this;
 		let strictCallee = isStrictNode(callee.node);
 		let strict = env.isStrict() || strictCallee;
 
@@ -183,10 +194,10 @@ export class Scope {
 	}
 
 	createParameterScope () {
-		let scope = this.env.createScope();
-		scope.scope.setParent(this.scope.parent);
-		this.scope.setParent(scope);
-		return scope.scope;
+		let temp = this.env.createScope();
+		temp.scope.setParent(this.scope.parent);
+		this.scope.setParent(temp);
+		return temp.scope;
 	}
 
 	/**

@@ -5,7 +5,7 @@ function* executeStatements (context, statements) {
 
 	yield each(statements, function* (statement, i, all, abort) {
 		result = yield context.create(statement).execute();
-		if (result && result.isCancelled()) {
+		if (result && result.isAbrupt()) {
 			abort();
 		}
 	});
@@ -34,7 +34,7 @@ export default function* SwitchStatement (context) {
 
 		passed = true;
 		value = yield executeStatements(context, current.consequent);
-		if (value && value.isCancelled()) {
+		if (value && value.isAbrupt()) {
 			value.cancel = false;
 			return value;
 		}

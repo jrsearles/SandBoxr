@@ -4,7 +4,8 @@
   "description": "SandBoxr runs JavaScript in a sandboxed environment.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel/register"
+    "test": "mocha --compilers js:babel/register",
+    "build": "gulp"
   },
   "repository": {
     "type": "git",

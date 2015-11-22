@@ -7,49 +7,49 @@ function validateAssignment (left, strict) {
 }
 
 const rules = {
-	AssignmentExpression (node, strict) {
-		validateAssignment(node.left, strict);
+	AssignmentExpression (node, parent, state) {
+		validateAssignment(node.left, state.strict);
 	},
 
-	CatchClause (node, strict) {
-		assertIsValidName(node.param.name, strict);
+	CatchClause (node, parent, state) {
+		assertIsValidName(node.param.name, state.strict);
 	},
 
-	Identifier (node, strict) {
-		assertIsValidIdentifier(node.name, strict);
+	Identifier (node, parent, state) {
+		assertIsValidIdentifier(node.name, state.strict);
 	},
 
-	FunctionDeclaration (node, strict) {
-		assertIsValidName(node.id.name, strict);
-		assertAreValidArguments(node.params, strict);
+	FunctionDeclaration (node, parent, state) {
+		assertIsValidName(node.id.name, state.strict);
+		assertAreValidArguments(node.params, state.strict);
 	},
 
-	FunctionExpression (node, strict) {
+	FunctionExpression (node, parent, state) {
 		if (node.id) {
-			assertIsValidName(node.id.name, strict);
+			assertIsValidName(node.id.name, state.strict);
 		}
 
-		assertAreValidArguments(node.params, strict);
+		assertAreValidArguments(node.params, state.strict);
 	},
 
-	Literal (node, strict) {
-		if (strict && node.raw) {
+	Literal (node, parent, state) {
+		if (state.strict && node.raw) {
 			if (isOctalLiteral(node.raw, node.value)) {
 				throw SyntaxError("Octal literals are not allowed in strict mode.");
 			}
 		}
 	},
 
-	UpdateExpression (node, strict) {
-		validateAssignment(node.argument, strict);
+	UpdateExpression (node, parent, state) {
+		validateAssignment(node.argument, state.strict);
 	},
 
-	VariableDeclarator (node, strict) {
-		assertIsValidName(node.id.name, strict);
+	VariableDeclarator (node, parent, state) {
+		assertIsValidName(node.id.name, state.strict);
 	},
 
-	WithStatement (node, strict) {
-		if (strict) {
+	WithStatement (node, parent, state) {
+		if (state.strict) {
 			throw SyntaxError("Strict mode code may not include a with statement");
 		}
 	}

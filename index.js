@@ -5,10 +5,11 @@ export const version = "0.13.0";
 
 /**
 	* Creates an environment instance.
+	* @param {Object} [options] The options to use with the environment.
 	* @returns {Object} The environment instance.
 	*/
-export function createEnvironment () {
-	return new Environment();
+export function createEnvironment (options) {
+	return new Environment(options);
 }
 
 /**

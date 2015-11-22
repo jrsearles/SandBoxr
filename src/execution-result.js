@@ -11,12 +11,12 @@ export class ExecutionResult {
 		this.raised = false;
 	}
 
-	isCancelled () {
+	isAbrupt () {
 		return this.cancel || this.exit || this.raised;
 	}
 
 	canBreak () {
-		return this.isCancelled() || this.skip;
+		return this.isAbrupt() || this.skip;
 	}
 
 	shouldBreak (context, loop, priorResult) {

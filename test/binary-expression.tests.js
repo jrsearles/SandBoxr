@@ -1,4 +1,4 @@
-import {describe,it} from "mocha";
+import {describe, it} from "mocha";
 import * as runner from "./test-runner";
 
 describe("Expressions", () => {
@@ -7,25 +7,25 @@ describe("Expressions", () => {
 		const right = 2;
 
 		let operators = [
-			{ op:	"==", name: "Equals operator", expected: left == right },
-			{ op:	"!=", name: "Not equals operator", expected: left != right },
-			{ op:	"===", name: "Strict equals operator", expected: left === right },
-			{ op:	"!==", name: "Strict not equals operator", expected: left !== right },
-			{ op:	"<", name: "Less than operator", expected: left < right },
-			{ op:	"<=", name: "Less than or equals operator", expected: left <= right },
-			{ op:	">", name: "Greater than operator", expected: left > right },
-			{ op:	">=", name: "Greater than or equals operator", expected: left >= right },
-			{ op:	"<<", name: "Left shift operator", expected: left << right },
-			{ op:	">>", name: "Right shift operator", expected: left >> right },
-			{ op:	">>>", name: "Unsigned right shift operator", expected: left >>> right },
-			{ op:	"+", name: "Addition operator", expected: left + right },
-			{ op:	"-", name: "Subtraction operator", expected: left - right },
-			{ op:	"*", name: "Multiply operator", expected: left * right },
-			{ op:	"/", name: "Divide operator", expected: left / right },
-			{ op:	"%", name: "Remainder operator", expected: left % right },
-			{ op:	"|", name: "Bitwise AND operator", expected: left | right },
-			{ op:	"^", name: "Bitwise XOR operator", expected: left ^ right },
-			{ op:	"&", name: "Bitwise OR operator", expected: left & right }
+			{op:	"==", name: "Equals operator", expected: left == right},
+			{op:	"!=", name: "Not equals operator", expected: left != right},
+			{op:	"===", name: "Strict equals operator", expected: left === right},
+			{op:	"!==", name: "Strict not equals operator", expected: left !== right},
+			{op:	"<", name: "Less than operator", expected: left < right},
+			{op:	"<=", name: "Less than or equals operator", expected: left <= right},
+			{op:	">", name: "Greater than operator", expected: left > right},
+			{op:	">=", name: "Greater than or equals operator", expected: left >= right},
+			{op:	"<<", name: "Left shift operator", expected: left << right},
+			{op:	">>", name: "Right shift operator", expected: left >> right},
+			{op:	">>>", name: "Unsigned right shift operator", expected: left >>> right},
+			{op:	"+", name: "Addition operator", expected: left + right},
+			{op:	"-", name: "Subtraction operator", expected: left - right},
+			{op:	"*", name: "Multiply operator", expected: left * right},
+			{op:	"/", name: "Divide operator", expected: left / right},
+			{op:	"%", name: "Remainder operator", expected: left % right},
+			{op:	"|", name: "Bitwise AND operator", expected: left | right},
+			{op:	"^", name: "Bitwise XOR operator", expected: left ^ right},
+			{op:	"&", name: "Bitwise OR operator", expected: left & right}
 		];
 
 		operators.forEach(current => {

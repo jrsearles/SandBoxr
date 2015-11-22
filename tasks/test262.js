@@ -3,7 +3,7 @@ import path from  "path";
 import test262 from "test262-streamer";
 import streamer6 from "../../test262-6-streamer";
 import gulp from "gulp";
-import util from "gulp-util";
+import gutil from "gulp-util";
 import through from "through2";
 import * as parser from "../test/ast-parser";
 import yargs from "yargs";
@@ -22,19 +22,19 @@ let results = {
 	failed: 0
 };
 
-let failed = util.colors.bold.red("failed:");
-let passed = util.colors.green("passed:");
-let skipped = util.colors.blue("skipped:");
+let failed = gutil.colors.bold.red("failed:");
+let passed = gutil.colors.green("passed:");
+let skipped = gutil.colors.blue("skipped:");
 let stopOnFail = false;
 
 function testsCompleted () {
-	util.log("TOTALS ==============================");
-	util.log(passed, results.passed);
-	util.log(skipped, results.skipped);
-	util.log(failed, results.failed);
+	gutil.log("TOTALS ==============================");
+	gutil.log(passed, results.passed);
+	gutil.log(skipped, results.skipped);
+	gutil.log(failed, results.failed);
 
 	if (results.failed) {
-		throw new util.PluginError({
+		throw new gutil.PluginError({
 			plugin: "test262",
 			message: results.failed + " test(s) failed."
 		});
@@ -77,7 +77,7 @@ gulp.task("test262-6", function () {
 
 				if (negMatcher.test(src)) {
 					if (verbose) {
-						util.log(skipped, filename);
+						gutil.log(skipped, filename);
 					}
 
 					results.skipped++;
@@ -89,8 +89,8 @@ gulp.task("test262-6", function () {
 				let useStrict = useStrictMatcher.test(src);
 
 				if (verbose) {
-					util.log("starting:", filename, "-", desc);
-					util.log("strict:", String(useStrict));
+					gutil.log("starting:", filename, "-", desc);
+					gutil.log("strict:", String(useStrict));
 				}
 
 				let parseFn = function (text) { return parser.parse(text, { ecmaVersion: 6 }); };
@@ -101,20 +101,20 @@ gulp.task("test262-6", function () {
 
 				box.execute().then(function (res) {
 					if (verbose) {
-						util.log(passed, filename);
+						gutil.log(passed, filename);
 					}
 
 					results.passed++;
 					cb(null, results);
 				}, function (err) {
-					util.log(failed, filename, err.toString());
+					gutil.log(failed, filename, err.toString());
 					results.failed++;
 
 					cb(stopOnFail ? err : null, results);
 				});
 
 			} catch (err) {
-				util.log(failed, filename, err.toString());
+				gutil.log(failed, filename, err.toString());
 				cb(stopOnFail ? err : null, results);
 			}
 		}))
@@ -123,7 +123,7 @@ gulp.task("test262-6", function () {
 
 gulp.task("test262", () => {
 	// "!ch15/15.1/**/*.js",
-	return test262({ files: ["**/*.js", "!intl402/**/*.js"] })
+	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"] })
 		.pipe(through.obj((file, enc, cb) => {
 			let filename = path.basename(file.path);
 			let src = file.contents.toString();
@@ -137,7 +137,7 @@ gulp.task("test262", () => {
 			}
 
 			if (verbose) {
-				util.log("starting:", filename, "-", desc);
+				gutil.log("starting:", filename, "-", desc);
 			}
 
 			let ast;
@@ -149,19 +149,25 @@ gulp.task("test262", () => {
 				return;
 			}
 
-			let box = SandBoxr.create(ast, { parser: parser.parse });
-			box.execute().then(res => {
+			let box = SandBoxr.create(ast, {parser: parser.parse});
+
+			try {
+				box.execute();
 				if (verbose) {
-					util.log(passed, filename);
+					gutil.log(passed, filename);
 				}
 
 				results.passed++;
 				cb(null, results);
-			}, err => {
-				util.log(failed, filename, "(" + desc + ")", err);
+			} catch (err) {
+				if ("toNative" in err) {
+					err = err.toNative();
+				}
+				
+				gutil.log(failed, filename, "(" + desc + ")", err);
 				results.failed++;
 				cb(null, results);
-			});
+			}
 		}))
 		.on("finish", testsCompleted);
 });

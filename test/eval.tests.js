@@ -1,4 +1,4 @@
-import {describe,it} from "mocha";
+import {describe, it} from "mocha";
 import {expect} from "chai";
 import * as SandBoxr from "../";
 import * as parser from "./ast-parser";
@@ -8,63 +8,49 @@ function createRunner (text) {
 }
 
 describe("Eval", () => {
-	it("should eval expression if parser is defined", done => {
+	it("should eval expression if parser is defined", () => {
 		let ast = parser.parse("eval('1 + 1')===2;");
 		let runner = SandBoxr.create(ast, { parser: parser.parse });
-		runner.resolve().then(result => {
-			expect(result.value).to.be.true;
-			done();
-		});
+		let result = runner.execute();
+		expect(result.value).to.be.true;
 	});
 
-	it("should be able to add variables to current scope", done => {
+	it("should be able to add variables to current scope", () => {
 		let ast = parser.parse("eval('var i = 2;');i==2;");
 		let runner = SandBoxr.create(ast, { parser: parser.parse });
-		runner.resolve().then(result => {
-			expect(result.value).to.be.true;
-			done();
-		});
+		let result = runner.execute();
+		expect(result.value).to.be.true;
 	});
 
 	describe("with Function constructor", () => {
-		it("should return a function instance", done => {
+		it("should return a function instance", () => {
 			let runner = createRunner("typeof (new Function('return 1+2')) === 'function'");
-			runner.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = runner.execute();
+			expect(result.value).to.be.true;
 		});
 
-		it("should resolve parsed code when called", done => {
+		it("should resolve parsed code when called", () => {
 			let runner = createRunner("(new Function('return 1+2'))() === 3;");
-			runner.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = runner.execute();
+			expect(result.value).to.be.true;
 		});
 
-		it("should allow arguments to be defined", done => {
+		it("should allow arguments to be defined", () => {
 			let runner = createRunner("(new Function('a', 'b', 'return a + b'))(1,2) === 3;");
-			runner.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = runner.execute();
+			expect(result.value).to.be.true;
 		});
 
-		it("should run in the global scope", done => {
+		it("should run in the global scope", () => {
 			let runner = createRunner("function a() { return new Function('return this;'); }\na()() === this;");
-			runner.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = runner.execute();
+			expect(result.value).to.be.true;
 		});
 
-		it("should be able to call constructor with `call`", done => {
+		it("should be able to call constructor with `call`", () => {
 			let runner = createRunner("(Function.call(this, 'return 1+2;'))()==3;");
-			runner.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = runner.execute();
+			expect(result.value).to.be.true;
 		});
 	});
 });
