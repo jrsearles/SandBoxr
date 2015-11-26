@@ -113,7 +113,7 @@ export function* toArray (obj, length) {
 	let arr = [];
 
 	if (obj) {
-		if (arguments.length < 3) {
+		if (arguments.length < 2) {
 			length = yield toLength(obj);
 		}
 

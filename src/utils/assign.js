@@ -1,6 +1,6 @@
 import {UNDEFINED} from "../types/primitive-type";
 import {each} from "./async";
-import {toString} from "./native";
+import {toPropertyKey} from "./native";
 
 export function* declare (env, leftNode, rightValue) {
 	if (leftNode.type === "Identifier") {
@@ -68,11 +68,7 @@ function* destructureArray (env, pattern, arr, cb) {
 function* getObjectKey (env, keyNode) {
 	if (keyNode.computed) {
 		let key = (yield env.createExecutionContext(keyNode).execute()).result.getValue();
-		if (key.isSymbol) {
-			return key;
-		}
-
-		return yield toString(key);
+		return yield toPropertyKey(key);
 	}
 
 	return keyNode.name;

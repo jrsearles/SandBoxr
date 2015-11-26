@@ -3,5 +3,4 @@ typings
 jsconfig.json
 .settings
 .vscode
-gulpfile.js
 npm-debug.log

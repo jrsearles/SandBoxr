@@ -1,5 +1,5 @@
 import {UNDEFINED} from "../types/primitive-type";
-import EstreeWalker from "../estree-walker";
+import EstreeWalker from "../estree/estree-walker";
 import {isStrictNode, assertIsValidParameterName} from "../utils/contracts";
 import rules from "../syntax-rules";
 import {each} from "../utils/async";

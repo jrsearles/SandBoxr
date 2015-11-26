@@ -122,8 +122,10 @@ gulp.task("test262-6", function () {
 });
 
 gulp.task("test262", () => {
+	let base = path.join(__dirname, "../node_modules/test262/test/suite/");
+	
 	// "!ch15/15.1/**/*.js",
-	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"] })
+	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
 		.pipe(through.obj((file, enc, cb) => {
 			let filename = path.basename(file.path);
 			let src = file.contents.toString();
@@ -149,7 +151,7 @@ gulp.task("test262", () => {
 				return;
 			}
 
-			let box = SandBoxr.create(ast, {parser: parser.parse});
+			let box = SandBoxr.create(ast, { parser: parser.parse, useStrict: file.useStrict });
 
 			try {
 				box.execute();

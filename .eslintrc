@@ -1,53 +1,53 @@
 env:
-    node: true
-    mocha: true
-    browser: true
+  node: true
+  mocha: true
+  browser: true
 
 rules:
-    indent: [2, "tab", { "SwitchCase": 1 }]
-    brace-style: [2, "1tbs", { "allowSingleLine": true }]
-    comma-spacing: [2, {"before": false, "after": true}]
-    comma-style: [2, "last"]
-    curly: 2
-    default-case: 1
-    eqeqeq: [2, "allow-null"]
-    guard-for-in: 0
-    no-const-assign: 2
-    no-debugger: 2
-    no-floating-decimal: 2
-    no-lone-blocks: 2
-    no-loop-func: 0
-    no-nested-ternary: 2
-    no-return-assign: 0
-    no-this-before-super: 2
-    no-unused-vars: [1, { "args": "none" }]
-    no-useless-call: 2
-    no-var: 2
-    object-curly-spacing: [1, "never"]
-    object-shorthand: [1, "methods"]
-    #prefer-arrow-callback: 1
-    prefer-spread: 1
-    #prefer-template: 2
-    radix: 2
-    semi: 2
-    space-after-keywords: [2, "always"]
-    space-before-blocks: 2
-    space-before-function-paren: [2, "always"]
-    spaced-comment: [2, "always", { exceptions: ["-"]}]
-    strict: 0
-    valid-jsdoc: [2, { prefer: { "return": "returns"}}]
+  indent: [2, "tab", { "SwitchCase": 1 }]
+  brace-style: [2, "1tbs", { "allowSingleLine": true }]
+  comma-spacing: [2, {"before": false, "after": true}]
+  comma-style: [2, "last"]
+  curly: 2
+  default-case: 1
+  eqeqeq: [2, "allow-null"]
+  guard-for-in: 0
+  no-const-assign: 2
+  no-debugger: 2
+  no-floating-decimal: 2
+  no-lone-blocks: 2
+  no-loop-func: 0
+  no-nested-ternary: 2
+  no-return-assign: 0
+  no-this-before-super: 2
+  no-unused-vars: [1, { "args": "none" }]
+  no-useless-call: 2
+  no-var: 2
+  object-curly-spacing: [1, "never"]
+  object-shorthand: [1, "methods"]
+  #prefer-arrow-callback: 1
+  prefer-spread: 1
+  #prefer-template: 2
+  radix: 2
+  semi: 2
+  space-after-keywords: [2, "always"]
+  space-before-blocks: 2
+  space-before-function-paren: [2, "always"]
+  spaced-comment: [2, "always", { exceptions: ["-"]}]
+  strict: 0
+  valid-jsdoc: [2, { prefer: { "return": "returns"}}]
 
 ecmaFeatures:
-    arrowFunctions: true
-    blockBindings: true
-    classes: true
-    defaultParams: true
-    destructuring: true
-    forOf: true
-    generators: true
-    modules: true
-    objectLiteralComputedProperties: true
-    objectLiteralShorthandMethods: true
-    objectLiteralShorthandProperties: true
-    restParams: true
-    templateStrings: true
+  arrowFunctions: true
+  blockBindings: true
+  classes: true
+  defaultParams: true
+  destructuring: true
+  forOf: true
+  generators: true
+  modules: true
+  objectLiteralComputedProperties: true
+  objectLiteralShorthandMethods: true
+  objectLiteralShorthandProperties: true
+  restParams: true
+  templateStrings: true

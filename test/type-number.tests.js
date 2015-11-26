@@ -1,4 +1,4 @@
-import {describe,it} from "mocha";
+import {describe, it} from "mocha";
 import * as runner from "./test-runner";
 
 describe("Type: Number", () => {

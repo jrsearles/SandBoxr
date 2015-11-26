@@ -68,7 +68,7 @@ export default function (target, env, factory) {
 				result = true;
 				break;
 			}
-		} while (end <= length)
+		} while (end <= length);
 
 		return factory.createPrimitive(result);
 	}, 1, "String.prototype.includes"));
