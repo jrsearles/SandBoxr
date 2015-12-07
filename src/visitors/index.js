@@ -34,7 +34,7 @@ import VariableDeclaration from "./variable-declaration";
 import VariableDeclarator from "./variable-declarator";
 import WithStatement from "./with-statement";
 
-const visitors = {
+export const visitors = {
 	ArrayExpression,
 	AssignmentExpression,
 	BinaryExpression,
@@ -79,12 +79,12 @@ const visitors = {
 	WhileStatement: DoWhileStatement
 };
 
-export default {
-	*visit (context) {
-		if (!(context.node.type in visitors)) {
-			throw TypeError(`No handler defined for: ${context.node.type}`);
-		}
+// export default {
+// 	*visit (context) {
+// 		if (!(context.node.type in visitors)) {
+// 			throw TypeError(`No handler defined for: ${context.node.type}`);
+// 		}
 
-		return yield visitors[context.node.type](context);
-	}
-};
+// 		return yield visitors[context.node.type](context);
+// 	}
+// };

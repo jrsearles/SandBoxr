@@ -86,12 +86,12 @@ export class Environment {
 	/**
 	 * Declares a variable within the current scope.
 	 * @param {String} key - the key of the variable.
-	 * @param {Boolean} [immutable] - whether the variable is immutable or not.
+	 * @param {Object} [descriptor] - whether the variable is immutable or not.
 	 * @returns {PropertyDescriptor} The property descriptor for the new variabble.
 	 */
-	createVariable (key, immutable) {
+	createVariable (key, {configurable = true, writable = true, intitialized = true} = {}) {
 		assertIsValidIdentifier(key, this.isStrict());
-		return this.current.scope.createVariable(key, !immutable);
+		return this.current.scope.createVariable(...arguments);
 	}
 
 	/**

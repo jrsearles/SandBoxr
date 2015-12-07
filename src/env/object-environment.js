@@ -31,18 +31,12 @@ export class ObjectEnvironment {
 		return this.object.deleteProperty(key, false);
 	}
 
-	createVariable (key, immutable) {
+	createVariable (key, {configurable = true, writable = true, initialized = true} = {}) {
 		if (this.parent) {
 			return this.parent.createVariable(...arguments);
 		}
 
-		this.object.defineOwnProperty(key, {
-			value: undefined,
-			configurable: immutable,
-			enumerable: true,
-			writable: true
-		}, this.env.isStrict());
-
+		this.object.defineOwnProperty(key, {value: undefined, enumerable: true, configurable, writable, initialized}, this.env.isStrict());
 		return this.object.getProperty(key);
 	}
 

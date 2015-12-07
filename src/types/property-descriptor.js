@@ -13,6 +13,7 @@ export class PropertyDescriptor {
 		this.base = base;
 		this.configurable = config.configurable || false;
 		this.enumerable = config.enumerable || false;
+		this.initialized = config.initialized !== false;
 		this.key = key;
 
 		if ("get" in config || "set" in config) {
@@ -73,6 +74,10 @@ export class PropertyDescriptor {
 		}
 
 		if (this.dataProperty) {
+			if (!this.initialized) {
+				return true;
+			}
+			
 			if (!this.writable) {
 				if (descriptor.writable) {
 					return false;
@@ -96,6 +101,10 @@ export class PropertyDescriptor {
 	}
 
 	getValue () {
+		if (!this.initialized) {
+			throw TypeError();
+		}
+		
 		if (this.dataProperty) {
 			return this.value;
 		}
@@ -108,7 +117,7 @@ export class PropertyDescriptor {
 	}
 
 	canSetValue (value) {
-		return this.writable || !!this.setter;
+		return this.writable || !!this.setter || !this.initialized;
 	}
 
 	setValue (value) {
@@ -116,6 +125,8 @@ export class PropertyDescriptor {
 			return;
 		}
 
+		this.initialized = true;
+		
 		if (this.dataProperty) {
 			this.value = value;
 		} else if (this.setter) {

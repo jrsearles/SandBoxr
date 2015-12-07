@@ -1,5 +1,5 @@
 import {UNDEFINED} from "../types/primitive-type";
-import EstreeWalker from "../estree/estree-walker";
+import {EstreeIterator} from "estree-iterator";
 import {isStrictNode, assertIsValidParameterName} from "../utils/contracts";
 import rules from "../syntax-rules";
 import {each} from "../utils/async";
@@ -31,18 +31,19 @@ export class Scope {
 		let strict = this.scope.strict || env.isStrict();
 		if (strict && node.type === "Program") {
 			// todo: see if we can combine below for a single iteration
-			EstreeWalker.walk(node, rules, {strict: true});
+			EstreeIterator.walk(node, rules, {strict: true});
 		}
 		
 		// hoist variables
-		EstreeWalker.walk(node, {
+		EstreeIterator.walk(node, {
 			// skip functions
 			FunctionExpression: false,
 			
 			// do not hoist variables declared within tests
 			IfStatement: ["consequent", "alternate"],
 			
-			FunctionDeclaration (node) {
+			FunctionDeclaration (context) {
+				let {node} = context;
 				let name = node.id.name;
 				
 				assertIsValidParameterName(name, strict);
@@ -50,22 +51,32 @@ export class Scope {
 				let value = env.objectFactory.createFunction(node, undefined, {strict: strictFunc});
 				value.bindScope(self);
 				
-				let newVar = env.createVariable(name, true);
+				let newVar = env.createVariable(name, {configurable: false});
 				newVar.setValue(value);
 				
 				// do not scan body
 				return false;
 			},
 			
-			VariableDeclarator (node) {
+			VariableDeclarator (context) {
+				let {node} = context;
+				let parent = context.parent.node;
+				
 				let name = node.id.name;
+				let writable = parent.kind !== "const";
+				let initialized = parent.kind === "var";
+				
 				assertIsValidParameterName(name, strict);
+				
 				if (self.scope.has(name)) {
 					return;
 				}
 				
-				let newVar = env.createVariable(name, true);
-				newVar.setValue(UNDEFINED);
+				let newVar = env.createVariable(name, {configurable: false, writable, initialized});
+				
+				if (initialized) {
+					newVar.setValue(UNDEFINED);
+				}
 				
 				return false;
 			}

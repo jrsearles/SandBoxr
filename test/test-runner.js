@@ -1,10 +1,41 @@
 import * as parser from "./ast-parser";
 import {expect} from "chai";
-import * as SandBoxr from "../";
+import * as SandBoxr from "../index";
 
-export default {
+function getRunner (code, options) {
+	let ast = parser.parse(code, options);
+	return SandBoxr.create(ast, options);
+};
+
+export function wrapArgs (args) {
+	return args.map(arg => {
+		return typeof arg === "string" ? `'${arg}'` : String(arg);
+	}).join(",");
+}
+
+export const es6 = {
+	confirmBlock	(code) {
+		return getRunner(code, {ecmaVersion: 6}).execute();
+	},
+	
+	confirmError (code, errType) {
+		try {
+			getRunner(code, {ecmaVersion: 6}).execute();
+
+			expect(false).to.be.true;
+		} catch (err) {
+			if (typeof err === "object" && err.toNative) {
+				err = err.toNative();
+			}
+			
+			expect(err).to.be.instanceOf(errType);
+		}
+	}
+};
+
+export const es5 = {
 	runBlock (code) {
-		return this.getRunner(code).execute();
+		return getRunner(code).execute();
 	},
 
 	confirmBlock (code, done) {
@@ -29,20 +60,9 @@ export default {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
-		let runner = this.getRunner(code);
+		let runner = getRunner(code);
 		return runner.resolve(env).then(function () {
 			return env;
 		});
-	},
-
-	getRunner (code) {
-		let ast = parser.parse(code);
-		return SandBoxr.create(ast);
-	},
-
-	wrapArgs (args) {
-		return args.map(arg => {
-			return typeof arg === "string" ? `'${arg}'` : String(arg);
-		}).join(",");
 	}
 };

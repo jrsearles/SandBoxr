@@ -41,17 +41,12 @@ export class DeclarativeEnvironment {
 		return true;
 	}
 
-	createVariable (key) {
+	createVariable (key, {configurable = false, writable = true, initialized = true} = {}) {
 		if (this.has(key)) {
 			return this.properties[key];
 		}
 
-		return this.properties[key] = new PropertyDescriptor(this, {
-			value: undefined,
-			configurable: false,
-			enumerable: true,
-			writable: true
-		});
+		return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized});
 	}
 
 	setValue (key, value, throwOnError) {
@@ -72,17 +67,16 @@ export class DeclarativeEnvironment {
 	}
 
 	getValue (key, throwOnError) {
-		if (this.has(key)) {
-			if (!this.properties[key].value) {
-				if (throwOnError) {
-					throw ReferenceError(`${key} is not defined`);
-				}
-
-				return undefined;
-			}
-
-			return this.properties[key].getValue();
+		let propInfo = this.properties[key];
+		if (propInfo && propInfo.value) {
+			return propInfo.value;
 		}
+		
+		if (throwOnError || (propInfo && !propInfo.initialized)) {
+			throw ReferenceError(`${key} is not defined`);
+		}
+		
+		return undefined;
 	}
 
 	getThisBinding () {

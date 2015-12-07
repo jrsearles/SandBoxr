@@ -23,7 +23,9 @@ import "./tasks/test262";
 
 gulp.task("test", () => {
 	return gulp.src("./test/**/*.js")
-		.pipe(mocha());
+		.pipe(mocha({       
+			compilers: ["js:babel-core/register"]
+		}));
 });
 
 gulp.task("lint", () => {
@@ -44,19 +46,19 @@ gulp.task("build", () => {
 		.pipe(source("sandboxr.js"))
 		.pipe(buffer())
 		// .pipe(header(banner, {pkg: pkg}))
-		.pipe(gulp.dest("./dist"))
+		.pipe(gulp.dest("./dist"));
 	
-		.pipe(rename("sandboxr.min.js"))
-		// .pipe(sourcemaps.init({loadMaps: true}))
-		.pipe(uglify({preserveComments: "license"}))
-		// .pipe(sourcemaps.write("."))
-		.pipe(gulp.dest("./dist/"));
+		// .pipe(rename("sandboxr.min.js"))
+		// // .pipe(sourcemaps.init({loadMaps: true}))
+		// .pipe(uglify({preserveComments: "license"}))
+		// // .pipe(sourcemaps.write("."))
+		// .pipe(gulp.dest("./dist/"));
 });
 
 gulp.task("release", ["test262", "build"]);
 
 gulp.task("watch", () => {
-	gulp.watch("./src/**/*", ["build"]);
+	gulp.watch(["./src/**/*", "./test/**/*.js"], ["lint", "test"]);
 });
 
 gulp.task("default", ["build"]);

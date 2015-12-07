@@ -181,7 +181,7 @@ export class ObjectType {
 				return true;
 			}
 
-			if (!descriptor.canSetValue()) {
+			if (descriptor.initialized && !descriptor.canSetValue()) {
 				return false;
 			}
 

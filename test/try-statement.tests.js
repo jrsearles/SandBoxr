@@ -1,5 +1,5 @@
-import {describe,it} from "mocha";
-import * as runner from "./test-runner";
+// import {describe, it} from "mocha";
+import {es5 as runner} from "./test-runner";
 
 describe("Try-Catch-Finally", () => {
 	it("should not throw an exception if an error occurs in a try-block", done => {

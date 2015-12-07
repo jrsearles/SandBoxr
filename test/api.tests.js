@@ -1,7 +1,7 @@
-import {describe,it} from "mocha";
+// import {describe, it} from "mocha";
 import {expect} from "chai";
 import * as parser from "./ast-parser";
-import * as SandBoxr from "../";
+import * as SandBoxr from "../index";
 
 describe("API", () => {
 	it("should allow a variable to be defined", done => {
@@ -25,7 +25,7 @@ describe("API", () => {
 		env.init();
 
 		let obj = env.objectFactory.createObject();
-		obj.defineOwnProperty("foo", { value: env.objectFactory.createPrimitive(99) });
+		obj.defineOwnProperty("foo", {value: env.objectFactory.createPrimitive(99)});
 
 		let a = env.createVariable("a");
 		a.setValue(obj);
@@ -150,7 +150,7 @@ describe("API", () => {
 	describe("Exclusions", () => {
 		it("should be able to exclude api's", done => {
 			let ast = parser.parse("typeof JSON === 'undefined'");
-			let sandbox = SandBoxr.create(ast, { exclude: ["JSON"] });
+			let sandbox = SandBoxr.create(ast, {exclude: ["JSON"]});
 			sandbox.resolve().then(result => {
 				expect(result.value).to.be.true;
 				done();
@@ -159,7 +159,7 @@ describe("API", () => {
 
 		it("should be able to exclude methods from prototype", done => {
 			let ast = parser.parse("typeof String.prototype.trim === 'undefined'");
-			let sandbox = SandBoxr.create(ast, { exclude: ["String.prototype.trim"] });
+			let sandbox = SandBoxr.create(ast, {exclude: ["String.prototype.trim"]});
 			sandbox.resolve().then(result => {
 				expect(result.value).to.be.true;
 				done();
@@ -168,7 +168,7 @@ describe("API", () => {
 
 		it("should not throw if api does not exist", () => {
 			let ast = parser.parse("(1)");
-			SandBoxr.create(ast, { exclude: "String.foo.bar" });
+			SandBoxr.create(ast, {exclude: "String.foo.bar"});
 		});
 	});
 

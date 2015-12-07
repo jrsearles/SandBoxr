@@ -1,6 +1,6 @@
 import {each} from "../utils/async";
 
-export default function* ArrayExpression (context) {
+export default function* ArrayExpression (node, context) {
 	const objectFactory = context.env.objectFactory;
 	let arr = objectFactory.createArray();
 

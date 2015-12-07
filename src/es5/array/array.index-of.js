@@ -8,7 +8,7 @@ export default function ($target, env, factory) {
 		searchElement = searchElement || UNDEFINED;
 		let length = yield toLength(this.node);
 		let index = arguments.length === 1 ? 0 : (yield toInteger(fromIndex));
-		const notFound = factory.createPrimitive(-1);
+		let notFound = factory.createPrimitive(-1);
 
 		if (length === 0 || index >= length) {
 			return notFound;

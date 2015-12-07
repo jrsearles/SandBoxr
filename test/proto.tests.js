@@ -1,5 +1,5 @@
-import {describe,it} from "mocha";
-import * as runner from "./test-runner";
+// import {describe, it} from "mocha";
+import {es5 as runner} from "./test-runner";
 
 describe("Prototype tests", () => {
 	it("should create a new object", done => {

@@ -27,9 +27,10 @@ export class Reference {
 	/**
 	 * Sets the value of the underlying property or value.
 	 * @param {ObjectType} value - The value to assign.
+	 * @param {Boolean} throwOnError - Causes errors to be thrown.
 	 * @returns {Boolean} The result of the value assignment.
 	 */
-	setValue (value) {
+	setValue (value, throwOnError) {
 		if (this.base) {
 			if (!this.base.setValue(this.key, value) && this.strict) {
 				throw TypeError();

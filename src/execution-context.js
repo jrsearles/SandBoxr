@@ -1,6 +1,7 @@
 import {UNDEFINED} from "./types/primitive-type";
 import {ExecutionResult} from "./execution-result";
-import {default as expressionVisitor} from "./visitors";
+import {visitors} from "./visitors";
+import {step} from "./estree";
 
 export class ExecutionContext {
 	constructor (env, node, callee, isNew) {
@@ -16,9 +17,10 @@ export class ExecutionContext {
 
 	*execute () {
 		let executionResult;
-
+		
 		try {
-			executionResult = yield expressionVisitor.visit(this);
+			// executionResult = yield expressionVisitor.visit(this);
+			executionResult = yield step(this.node, visitors, this);
 		} catch (nativeError) {
 			executionResult = this.raise(nativeError);
 		}

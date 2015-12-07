@@ -1,5 +1,4 @@
-import {describe,it} from "mocha";
-import * as runner from "./test-runner";
+import {es5 as runner} from "./test-runner";
 
 describe("Update Expressions", () => {
 	describe("++ operator", () => {

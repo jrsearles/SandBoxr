@@ -1,6 +1,6 @@
-import {describe,it} from "mocha";
+// import {describe, it} from "mocha";
 import {expect} from "chai";
-import * as runner from "./test-runner";
+import {es5 as runner} from "./test-runner";
 
 describe("Type: RegExp", () => {
 	it("should evaluate as typeof object", () => {

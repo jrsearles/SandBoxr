@@ -1,6 +1,6 @@
 import * as SandBoxr from "../";
 import path from  "path";
-import test262 from "test262-streamer";
+// import test262 from "test262-streamer";
 import streamer6 from "../../test262-6-streamer";
 import gulp from "gulp";
 import gutil from "gulp-util";
@@ -66,7 +66,7 @@ gulp.task("test262-6", function () {
 	//	- Set -8 (needs WeakSet)
 	//	- SetIterator +
 
-	return streamer6({ files: ["/built-ins/string/**/*.js"] })
+	return streamer6({ files: ["/language/statements/let/**/*.js"] })
 		.pipe(through.obj(function (file, enc, cb) {
 			let filename = path.basename(file.path);
 
@@ -99,21 +99,16 @@ gulp.task("test262-6", function () {
 
 				// console.log(ast);
 
-				box.execute().then(function (res) {
-					if (verbose) {
-						gutil.log(passed, filename);
-					}
+				box.execute();
+				if (verbose) {
+					gutil.log(passed, filename);
+				}
 
-					results.passed++;
-					cb(null, results);
-				}, function (err) {
-					gutil.log(failed, filename, err.toString());
-					results.failed++;
-
-					cb(stopOnFail ? err : null, results);
-				});
-
+				results.passed++;
+				cb(null, results);
 			} catch (err) {
+				results.failed++;
+				
 				gutil.log(failed, filename, err.toString());
 				cb(stopOnFail ? err : null, results);
 			}
