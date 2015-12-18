@@ -4,15 +4,15 @@ import {UNDEFINED} from "../../types/primitive-type";
 
 export default function ($target, env, factory) {
 	$target.define("join", factory.createBuiltInFunction(function* join (separator) {
-		let length = yield toLength(this.node);
+		let length = yield toLength(this.object);
 		separator = arguments.length === 0 || separator === UNDEFINED ? "," : (yield toString(separator));
 		let stringValues = [];
 		let stringValue;
 
 		for (let i = 0; i < length; i++) {
 			stringValue = "";
-			if (this.node.has(i)) {
-				stringValue = this.node.getValue(i);
+			if (this.object.has(i)) {
+				stringValue = this.object.getValue(i);
 				if (isNullOrUndefined(stringValue)) {
 					stringValue = "";
 				} else {

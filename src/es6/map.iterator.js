@@ -38,20 +38,20 @@ export default function ($target, env, factory) {
 	proto.define(SymbolType.getByKey("toStringTag"), factory.createPrimitive("Map Iterator"), {writable: false});
 
 	$target.define("keys", factory.createBuiltInFunction(function () {
-		assertIsMap(this.node, "Map.prototype.keys");
-		let it = getIterator(this.node, "key");
+		assertIsMap(this.object, "Map.prototype.keys");
+		let it = getIterator(this.object, "key");
 		return factory.createIterator(it, proto);
 	}, 0, "Map.prototype.keys"));
 
 	$target.define("values", factory.createBuiltInFunction(function () {
-		assertIsMap(this.node, "Map.prototype.values");
-		let it = getIterator(this.node, "value");
+		assertIsMap(this.object, "Map.prototype.values");
+		let it = getIterator(this.object, "value");
 		return factory.createIterator(it, proto);
 	}, 0, "Map.prototype.values"));
 
 	let iteratorFunc = factory.createBuiltInFunction(function () {
-		assertIsMap(this.node, "Map.prototype.entries");
-		let it = getIterator(this.node);
+		assertIsMap(this.object, "Map.prototype.entries");
+		let it = getIterator(this.object);
 		return factory.createIterator(it, proto);
 	}, 0, "Map.prototype.entries");
 

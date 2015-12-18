@@ -5,9 +5,9 @@ import {executeAccumulator} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("reduceRight", factory.createBuiltInFunction(function* (callback, initialValue) {
-		let length = yield toLength(this.node);
-		assertIsNotNullOrUndefined(this.node, "Array.prototype.reduceRight");
-		let arr = toObject(env, this.node);
+		let length = yield toLength(this.object);
+		assertIsNotNullOrUndefined(this.object, "Array.prototype.reduceRight");
+		let arr = toObject(env, this.object);
 		assertIsFunction(callback, arr);
 
 		let accumulator;

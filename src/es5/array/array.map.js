@@ -5,7 +5,7 @@ import {executeCallback} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("map", factory.createBuiltInFunction(function* (callback, thisArg) {
-		let arr = toObject(env, this.node);
+		let arr = toObject(env, this.object);
 		let length = yield toLength(arr);
 
 		assertIsNotNullOrUndefined(arr, "Array.prototype.map");

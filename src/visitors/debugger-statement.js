@@ -1,4 +1,4 @@
-export default function DebuggerStatement (context) {
+export default function DebuggerStatement (node, context) {
 	if (context.env.options.allowDebugger) {
 		/* eslint-disable no-debugger */
 		debugger;

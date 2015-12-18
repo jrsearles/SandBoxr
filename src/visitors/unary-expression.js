@@ -2,12 +2,12 @@ import {Reference} from "../env/reference";
 import {PropertyReference} from "../env/property-reference";
 import {toNumber, toBoolean, toInt32} from "../utils/native";
 
-export default function* UnaryExpression (context) {
+export default function* UnaryExpression (node, context, next) {
 	const objectFactory = context.env.objectFactory;
-	let result = (yield context.create(context.node.argument).execute()).result;
+	let result = (yield next(node.argument, context)).result;
 	let value, newValue;
 
-	switch (context.node.operator) {
+	switch (node.operator) {
 		case "typeof":
 			let type;
 			if (result instanceof Reference && result.isUnresolved()) {
@@ -47,15 +47,15 @@ export default function* UnaryExpression (context) {
 
 				if (context.env.isStrict()) {
 					if (!resolved || !(result instanceof PropertyReference) || result.unqualified) {
-						return context.raise(SyntaxError("Delete of an unqualified identifier in strict mode."));
+						throw SyntaxError("Delete of an unqualified identifier in strict mode.");
 					}
 				}
 
 				if (resolved) {
 					deleted = result.delete();
 				}
-			} else if (context.node.argument.object) {
-				return context.raise(ReferenceError(`${context.node.argument.object.name} is not defined`));
+			} else if (node.argument.object) {
+				throw ReferenceError(`${node.argument.object.name} is not defined`);
 			}
 
 			newValue = objectFactory.createPrimitive(deleted);
@@ -66,7 +66,7 @@ export default function* UnaryExpression (context) {
 			break;
 
 		default:
-			return context.raise(SyntaxError(`Unknown unary operator: ${context.node.operator}`));
+			throw SyntaxError(`Unknown unary operator: ${node.operator}`);
 	}
 
 	return context.result(newValue);

@@ -15,8 +15,8 @@ export default function (target, env, factory) {
 	}
 
 	target.define("endsWith", factory.createBuiltInFunction(function* (searchString, endPosition) {
-		assertIsNotNullOrUndefined(this.node, "String.prototype.endsWith");
-		let stringValue = yield toString(this.node);
+		assertIsNotNullOrUndefined(this.object, "String.prototype.endsWith");
+		let stringValue = yield toString(this.object);
 
 		if (isRegExp(searchString)) {
 			throw TypeError("First argument to String.prototype.endsWith must not be a regular expression");
@@ -33,8 +33,8 @@ export default function (target, env, factory) {
 	}, 1, "String.prototype.endsWith"));
 
 	target.define("startsWith", factory.createBuiltInFunction(function* (searchString, startPosition) {
-		assertIsNotNullOrUndefined(this.node, "String.prototype.startsWith");
-		let stringValue = yield toString(this.node);
+		assertIsNotNullOrUndefined(this.object, "String.prototype.startsWith");
+		let stringValue = yield toString(this.object);
 
 		if (isRegExp(searchString)) {
 			throw TypeError("First argument to String.prototype.startsWith must not be a regular expression");
@@ -47,8 +47,8 @@ export default function (target, env, factory) {
 	}, 1, "String.prototype.startsWith"));
 
 	target.define("includes", factory.createBuiltInFunction(function* (searchString, position) {
-		assertIsNotNullOrUndefined(this.node, "String.prototype.includes");
-		let stringValue = yield toString(this.node);
+		assertIsNotNullOrUndefined(this.object, "String.prototype.includes");
+		let stringValue = yield toString(this.object);
 
 		if (isRegExp(searchString)) {
 			throw TypeError("First argument to String.prototype.includes must not be a regular expression");

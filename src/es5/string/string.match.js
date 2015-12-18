@@ -3,7 +3,7 @@ import {toString, toPrimitive} from "../../utils/native";
 
 export default function ($target, env, factory) {
 	$target.define("match", factory.createBuiltInFunction(function* (regex) {
-		let stringValue = yield toString(this.node);
+		let stringValue = yield toString(this.object);
 		let actualRegex;
 
 		if (regex && regex.className === "RegExp") {

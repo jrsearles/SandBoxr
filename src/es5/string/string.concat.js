@@ -4,9 +4,9 @@ import {map} from "../../utils/async";
 
 export default function ($target, env, factory) {
 	$target.define("concat", factory.createBuiltInFunction(function* (...args) {
-		assertIsNotNullOrUndefined(this.node, "String.prototype.concat");
+		assertIsNotNullOrUndefined(this.object, "String.prototype.concat");
 
-		let stringValue = yield toString(this.node);
+		let stringValue = yield toString(this.object);
 		let values = [stringValue];
 		values = values.concat(yield map(args, function* (arg) { return yield toString(arg); }));
 		return factory.createPrimitive(values.join(""));

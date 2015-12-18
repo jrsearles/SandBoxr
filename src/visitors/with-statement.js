@@ -1,20 +1,20 @@
 import {isNullOrUndefined} from "../utils/contracts";
 
-export default function* WithStatement (context) {
+export default function* WithStatement (node, context, next) {
 	if (context.env.isStrict()) {
 		return context.raise(SyntaxError("Strict mode code may not include a with statement"));
 	}
 
-	let obj = (yield context.create(context.node.object).execute()).result.getValue();
+	let obj = (yield next(node.object, context)).result.getValue();
 
 	if (isNullOrUndefined(obj)) {
 		return context.raise(TypeError(`${obj.className} has no properties`));
 	}
 
 	let scope = context.env.createObjectScope(obj, context.env.getThisBinding());
-	scope.init(context.node.body);
+	scope.init(node.body);
 
 	return yield scope.use(function* () {
-		return yield context.create(context.node.body).execute();
+		return yield next(node.body, context);
 	});
 }

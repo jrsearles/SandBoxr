@@ -1,16 +1,16 @@
 import {toBoolean} from "../utils/native";
 
-export default function* LogicalExpression (context) {
-	let left = yield context.create(context.node.left).execute();
+export default function* LogicalExpression (node, context, next) {
+	let left = yield next(node.left, context);
 	let passed = toBoolean(left.result.getValue());
 
-	if (passed && context.node.operator === "||") {
+	if (passed && node.operator === "||") {
 		return left;
 	}
 
-	if (!passed && context.node.operator === "&&") {
+	if (!passed && node.operator === "&&") {
 		return left;
 	}
 
-	return yield context.create(context.node.right).execute();
+	return yield next(node.right, context);
 }

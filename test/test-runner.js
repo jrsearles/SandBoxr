@@ -51,7 +51,11 @@ export const es5 = {
 			expect(false).to.be.true;
 			done && done();
 		} catch (err) {
-			expect(err.toNative()).to.be.instanceOf(errType);
+			if (typeof err === "object" && err.toNative) {
+				err = err.toNative();
+			}
+			
+			expect(err).to.be.instanceOf(errType);
 			done && done();
 		}
 	},

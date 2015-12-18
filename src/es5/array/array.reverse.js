@@ -2,34 +2,34 @@ import {toLength} from "../../utils/native";
 
 export default function ($target, env, factory) {
 	$target.define("reverse", factory.createBuiltInFunction(function* () {
-		let length = yield toLength(this.node);
+		let length = yield toLength(this.object);
 		let middle = Math.floor(length / 2);
 		let lower = 0;
 		let upper, upperValue, lowerValue;
 
 		while (lower !== middle) {
 			upper = length - lower - 1;
-			lowerValue = this.node.has(lower) && this.node.getValue(lower);
-			upperValue = this.node.has(upper) && this.node.getValue(upper);
+			lowerValue = this.object.has(lower) && this.object.getValue(lower);
+			upperValue = this.object.has(upper) && this.object.getValue(upper);
 
 			if (upperValue) {
-				this.node.setValue(lower, upperValue);
+				this.object.setValue(lower, upperValue);
 			}
 
 			if (lowerValue) {
-				this.node.setValue(upper, lowerValue);
+				this.object.setValue(upper, lowerValue);
 			}
 
 			if (upperValue && !lowerValue) {
-				this.node.deleteProperty(upper);
+				this.object.deleteProperty(upper);
 			} else if (lowerValue && !upperValue) {
-				this.node.deleteProperty(lower);
+				this.object.deleteProperty(lower);
 			}
 
 			lower++;
 		}
 
-		return this.node;
+		return this.object;
 	}, 0, "Array.prototype.reverse"));
 
 }

@@ -1,6 +1,6 @@
 export default function ($target, env, factory) {
 	$target.define("toString", factory.createBuiltInFunction(function () {
-		if (this.node.native) {
+		if (this.object.native) {
 			return factory.createPrimitive("function () { [native code] }");
 		}
 

@@ -9,9 +9,9 @@ export default function consoleApi (env) {
 	let consoleClass = objectFactory.createObject();
 
 	methods.forEach(name => {
-		consoleClass.define(name, objectFactory.createBuiltInFunction(function* (...args) {
-			let stringValues = yield map(args, function* (arg) { return yield toString(arg); });
-			console[name](...stringValues);
+		consoleClass.define(name, objectFactory.createBuiltInFunction(function* () {
+			let args = yield map(arguments, function* (arg) { return yield toString(arg); });
+			console[name](...args);
 		}, 1, `console.${name}`));
 	});
 

@@ -1,3 +1,3 @@
-export default function FunctionDeclaration (context) {
-	return context.result(context.env.getValue(context.node.id.name));
+export default function FunctionDeclaration (node, context) {
+	return context.result(context.env.getValue(node.id.name));
 }

@@ -1,4 +1,4 @@
-export default function* ThrowStatement (context) {
-	let arg = (yield context.create(context.node.argument).execute()).result.getValue();
+export default function* ThrowStatement (node, context, next) {
+	let arg = (yield next(node.argument, context)).result.getValue();
 	return context.raise(arg);
 }

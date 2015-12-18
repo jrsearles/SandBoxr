@@ -1,10 +1,10 @@
 import {each} from "../utils/async";
 
-export default function* SequenceExpression (context) {
+export default function* SequenceExpression (node, context, next) {
 	let value;
 
-	yield each(context.node.expressions, function* (expr) {
-		value = (yield context.create(expr).execute()).result.getValue();
+	yield each(node.expressions, function* (expr) {
+		value = (yield next(expr, context)).result.getValue();
 	});
 
 	return context.result(value);

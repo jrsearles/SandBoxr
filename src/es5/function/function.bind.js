@@ -3,10 +3,10 @@ import {isStrictNode} from "../../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("bind", factory.createBuiltInFunction(function* (thisArg, ...args) {
-		let fn = this.node;
+		let fn = this.object;
 		let callee = fn.native ? fn : fn.node;
 		let params = callee.params || [];
-		thisArg = defineThis(env, this.node, thisArg);
+		thisArg = defineThis(env, this.object, thisArg);
 
 		let nativeFunc = function* (...additionalArgs) {
 			let mergedArgs = args.concat(additionalArgs);
@@ -17,7 +17,7 @@ export default function ($target, env, factory) {
 		nativeFunc.strict = env.isStrict() || !fn.native && isStrictNode(fn.node.body.body);
 
 		let boundFunc = factory.createFunction(nativeFunc, null);
-		boundFunc.canConstruct = this.node.canConstruct;
+		boundFunc.canConstruct = this.object.canConstruct;
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
 

@@ -1,16 +1,19 @@
 import {each} from "../utils/async";
 
-export default function* BlockStatement (context) {
+export default function* BlockStatement (node, context, next) {
+	context = context.create();
 	let result, priorResult;
 
-	if (context.node.type === "Program") {
-		context.env.current.init(context.node);
+	if (node.isProgram()) {
+		context.env.current.init(node);
 	}
 
-	yield* each(context.node.body, function* (node, i, body, abort) {
-		result = yield context.create(node).execute();
-		if (result.shouldBreak(context, false, priorResult)) {
+	yield* each(node.body, function* (child, i, body, abort) {
+		result = yield next(child, context);
+		
+		if (context.shouldBreak(result)) {
 			abort();
+			result = context.abrupt(result, priorResult);
 		}
 
 		priorResult = result;

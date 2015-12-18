@@ -1,5 +1,5 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {EstreeIterator} from "estree-iterator";
+import * as EstreeIterator from "../estree/";
 import {isStrictNode, assertIsValidParameterName} from "../utils/contracts";
 import rules from "../syntax-rules";
 import {each} from "../utils/async";
@@ -24,63 +24,87 @@ export class Scope {
 			return;
 		}
 
-		let self = this;
+		// let self = this;
 		let env = this.env;
-		this.scope.strict = isStrictNode(node.body);
+		this.scope.strict = node.isStrict(); // isStrictNode(node.body);
 
 		let strict = this.scope.strict || env.isStrict();
-		if (strict && node.type === "Program") {
-			// todo: see if we can combine below for a single iteration
-			EstreeIterator.walk(node, rules, {strict: true});
-		}
+		// if (strict && node.isProgram()) {
+		// 	// todo: see if we can combine below for a single iteration
+		// 	EstreeIterator.walk(node, rules, {strict: true});
+		// }
 		
-		// hoist variables
-		EstreeIterator.walk(node, {
-			// skip functions
-			FunctionExpression: false,
+		node.getBindings().forEach(decl => {
+			let name = decl.id.name;
 			
-			// do not hoist variables declared within tests
-			IfStatement: ["consequent", "alternate"],
+			assertIsValidParameterName(name, strict);
 			
-			FunctionDeclaration (context) {
-				let {node} = context;
-				let name = node.id.name;
-				
-				assertIsValidParameterName(name, strict);
-				let strictFunc = strict || isStrictNode(node.body.body);
-				let value = env.objectFactory.createFunction(node, undefined, {strict: strictFunc});
-				value.bindScope(self);
-				
-				let newVar = env.createVariable(name, {configurable: false});
+			let initialized = decl.isVar();
+			let value = UNDEFINED;
+			let writable = !decl.isConst();
+			
+			if (decl.isFunction()) {
+				initialized = true;
+				let strictFunc = strict || decl.isStrict(); // isStrictNode(decl.body.body);
+				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc});
+				value.bindScope(this);
+			} else if (env.has(name)) {
+				return;
+			}
+		
+			let newVar = env.createVariable(name, {configurable: false, writable, initialized});
+			if (initialized) {
 				newVar.setValue(value);
-				
-				// do not scan body
-				return false;
-			},
-			
-			VariableDeclarator (context) {
-				let {node} = context;
-				let parent = context.parent.node;
-				
-				let name = node.id.name;
-				let writable = parent.kind !== "const";
-				let initialized = parent.kind === "var";
-				
-				assertIsValidParameterName(name, strict);
-				
-				if (self.scope.has(name)) {
-					return;
-				}
-				
-				let newVar = env.createVariable(name, {configurable: false, writable, initialized});
-				
-				if (initialized) {
-					newVar.setValue(UNDEFINED);
-				}
-				
-				return false;
 			}
 		});
+		
+		// hoist variables
+		// EstreeIterator.walk(node, {
+		// 	// skip functions
+		// 	FunctionExpression: false,
+			
+		// 	// do not hoist variables declared within tests
+		// 	IfStatement: ["consequent", "alternate"],
+			
+		// 	FunctionDeclaration (context) {
+		// 		let {node} = context;
+		// 		let name = node.id.name;
+				
+		// 		assertIsValidParameterName(name, strict);
+		// 		let strictFunc = strict || isStrictNode(node.body.body);
+		// 		let value = env.objectFactory.createFunction(node, undefined, {strict: strictFunc});
+		// 		value.bindScope(self);
+				
+		// 		let newVar = env.createVariable(name, {configurable: false});
+		// 		newVar.setValue(value);
+				
+		// 		// do not scan body
+		// 		return false;
+		// 	},
+			
+		// 	VariableDeclarator (context) {
+		// 		let {node} = context;
+		// 		let parent = context.parent.node;
+				
+		// 		let name = node.id.name;
+		// 		let writable = parent.kind !== "const";
+		// 		let initialized = parent.kind === "var";
+				
+		// 		assertIsValidParameterName(name, strict);
+				
+		// 		if (self.scope.has(name)) {
+		// 			return;
+		// 		}
+				
+		// 		let newVar = env.createVariable(name, {configurable: false, writable, initialized});
+				
+		// 		if (initialized) {
+		// 			newVar.setValue(UNDEFINED);
+		// 		}
+				
+		// 		return false;
+		// 	}
+		// });
 	}
 
 	*loadComplexArgs (params, args, callee) {

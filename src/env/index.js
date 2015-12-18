@@ -5,7 +5,7 @@ import {ObjectEnvironment} from "./object-environment";
 import {Reference} from "./reference";
 import es5 from "../es5";
 import es6 from "../es6";
-import operators from "../utils/operators";
+import {default as operators} from "../utils/operators";
 import {assertIsValidIdentifier} from "../utils/contracts";
 import {Scope} from "./scope";
 
@@ -25,9 +25,7 @@ export class Environment {
 		(options.ecmaVersion === 6 ? es6 : es5)(this);
 
 		// todo: improve this
-		this.ops = Object.assign(operators, options.operators);
-		this.ops.env = this;
-
+		this.ops = Object.assign({}, operators, options.operators);
 		this.objectFactory.init();
 
 		if (options.exclude && options.exclude.length > 0) {
@@ -132,8 +130,8 @@ export class Environment {
 		return this.global;
 	}
 
-	createExecutionContext (node, callee, isNew) {
-		return new ExecutionContext(this, node, callee, isNew);
+	createExecutionContext (obj, callee, isNew) {
+		return new ExecutionContext(this, obj, callee, isNew);
 	}
 
 	/**

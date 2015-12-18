@@ -253,7 +253,7 @@ export class ObjectFactory {
 
 		if (!proto.has("next")) {
 			proto.define("next", this.createBuiltInFunction(function () {
-				let result = this.node.advance();
+				let result = this.object.advance();
 				if (result.value) {
 					return result.value;
 				}

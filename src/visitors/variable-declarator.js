@@ -1,9 +1,9 @@
-export default function* VariableDeclarator (context) {
-	let name = context.node.id.name;
+export default function* VariableDeclarator (node, context, next) {
+	let name = node.id.name;
 	let value;
 
-	if (context.node.init) {
-		value = (yield context.create(context.node.init).execute()).result;
+	if (node.init) {
+		value = (yield next(node.init, context)).result;
 	}
 
 	// variables have already been hoisted so we just need to initialize them if defined

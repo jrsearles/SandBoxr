@@ -4,7 +4,7 @@ import {normalizeIndex} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("copyWithin", factory.createBuiltInFunction(function* (target, start, end) {
-		let arr = toObject(env, this.node);
+		let arr = toObject(env, this.object);
 		let length = yield toLength(arr);
 		let to = normalizeIndex(yield toInteger(target), length);
 		let from = normalizeIndex(yield toInteger(start), length);

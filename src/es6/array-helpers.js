@@ -18,15 +18,4 @@ export function* executeCallback (env, callback, entry, thisArg, arr) {
 
 	let args = [entry.value, env.objectFactory.createPrimitive(entry.key), arr];
 	return yield callback.call(thisArg, args) || UNDEFINED;
-
-	// yield scope.loadArgs(callback.node.params, args, callback);
-
-	// return yield scope.use(function* () {
-	// 	let executionResult = yield env.createExecutionContext(callback.node.body, callback.node).execute();
-	// 	if (executionResult && executionResult.exit) {
-	// 		return executionResult.result || UNDEFINED;
-	// 	}
-
-	// 	return UNDEFINED;
-	// });
 }

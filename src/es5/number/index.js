@@ -35,8 +35,8 @@ export default function numberApi (env) {
 		if (fn) {
 			let methodName = `Number.prototype.${name}`;
 			proto.define(name, objectFactory.createBuiltInFunction(function () {
-				assertIsNotGeneric(this.node, "Number", methodName);
-				return objectFactory.createPrimitive(fn.call(this.node.value));
+				assertIsNotGeneric(this.object, "Number", methodName);
+				return objectFactory.createPrimitive(fn.call(this.object.value));
 			}, fn.length, methodName));
 		}
 	});

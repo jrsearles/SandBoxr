@@ -1,4 +1,4 @@
-import {areSame} from "../utils/operators";
+import {default as ops} from "../utils/operators";
 import {exhaust as x} from "../utils/async";
 import {owns} from "../utils/object";
 
@@ -83,7 +83,7 @@ export class PropertyDescriptor {
 					return false;
 				}
 
-				return !("value" in descriptor) || areSame(this.value, descriptor.value);
+				return !("value" in descriptor) || ops.areSame(this.value, descriptor.value);
 			}
 
 			return true;

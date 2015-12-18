@@ -5,17 +5,17 @@ import {assertIsNotNullOrUndefined, assertIsFunction} from "../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("findIndex", factory.createBuiltInFunction(function* (predicate, thisArg) {
-		assertIsNotNullOrUndefined(this.node, "Array.prototype.findIndex");
+		assertIsNotNullOrUndefined(this.object, "Array.prototype.findIndex");
 
-		let length = yield toLength(this.node);
+		let length = yield toLength(this.object);
 
 		assertIsFunction(predicate, "predicate");
 
 		let i = 0;
 		while (i < length) {
-			let propInfo = this.node.getProperty(i);
+			let propInfo = this.object.getProperty(i);
 			let value = propInfo ? propInfo.getValue() : UNDEFINED;
-			let passed = toBoolean(yield executeCallback(env, predicate, {key: i, value}, thisArg, this.node));
+			let passed = toBoolean(yield executeCallback(env, predicate, {key: i, value}, thisArg, this.object));
 			if (passed) {
 				return factory.createPrimitive(i);
 			}

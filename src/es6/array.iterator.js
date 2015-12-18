@@ -8,7 +8,7 @@ export default function ($target, env, factory) {
 	iteratorProto.className = "Array Iterator";
 
 	iteratorProto.define("next", factory.createBuiltInFunction(function () {
-		let result = this.node.advance();
+		let result = this.object.advance();
 		if (result.value) {
 			return result.value;
 		}
@@ -59,13 +59,13 @@ export default function ($target, env, factory) {
 	}
 
 	$target.define("keys", factory.createBuiltInFunction(function () {
-		let arr = toObject(env, this.node, true);
+		let arr = toObject(env, this.object, true);
 		let it = getIterator(arr, "key");
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.keys"));
 
 	$target.define("entries", factory.createBuiltInFunction(function () {
-		let arr = toObject(env, this.node, true);
+		let arr = toObject(env, this.object, true);
 		let it = getIterator(arr);
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.entries"));
@@ -74,7 +74,7 @@ export default function ($target, env, factory) {
 	iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), {writable: false});
 
 	let iteratorFunc = factory.createBuiltInFunction(function () {
-		let arr = toObject(env, this.node, true);
+		let arr = toObject(env, this.object, true);
 		let it = getIterator(arr, "value");
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.values");

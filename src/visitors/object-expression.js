@@ -26,16 +26,16 @@ function createDescriptor (key, value) {
 	return {key: key, value: value, configurable: true, enumerable: true, writable: true};
 }
 
-export default function* ObjectExpression (context) {
+export default function* ObjectExpression (node, context, next) {
 	let obj = context.env.objectFactory.createObject();
 	let descriptors = Object.create(null);
 
-	yield* each(context.node.properties, function* (property) {
-		let value = (yield context.create(property.value).execute()).result.getValue();
+	yield* each(node.properties, function* (property) {
+		let value = (yield next(property.value, context)).result.getValue();
 		let key;
 
 		if (property.computed) {
-			let keyValue = (yield context.create(property.key).execute()).result.getValue();
+			let keyValue = (yield next(property.key, context)).result.getValue();
 			key = yield toPropertyKey(keyValue);
 		} else {
 			key = property.key.name || property.key.value;

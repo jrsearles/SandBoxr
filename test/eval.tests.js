@@ -1,4 +1,3 @@
-// import {describe, it} from "mocha";
 import {expect} from "chai";
 import * as SandBoxr from "../index";
 import * as parser from "./ast-parser";

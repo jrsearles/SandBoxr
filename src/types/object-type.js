@@ -1,4 +1,4 @@
-import {areSame} from "../utils/operators";
+import {default as ops} from "../utils/operators";
 import {PropertyDescriptor} from "./property-descriptor";
 const integerMatcher = /^\n+$/;
 
@@ -177,7 +177,7 @@ export class ObjectType {
 				descriptor = receiverDescriptor;
 			}
 
-			if (descriptor.hasValue() && receiver.owns(key) && areSame(descriptor.getValue(), value)) {
+			if (descriptor.hasValue() && receiver.owns(key) && ops.areSame(descriptor.getValue(), value)) {
 				return true;
 			}
 

@@ -4,18 +4,18 @@ import {UNDEFINED} from "../../types/primitive-type";
 export default function ($target, env, factory) {
 	$target.define("pop", factory.createBuiltInFunction(function* () {
 		let obj;
-		let i = yield toLength(this.node);
+		let i = yield toLength(this.object);
 
 		if (i > 0) {
 			i--;
 
-			if (this.node.has(i)) {
-				obj = this.node.getValue(i);
-				this.node.deleteProperty(i, true);
+			if (this.object.has(i)) {
+				obj = this.object.getValue(i);
+				this.object.deleteProperty(i, true);
 			}
 		}
 
-		this.node.setValue("length", factory.createPrimitive(i));
+		this.object.setValue("length", factory.createPrimitive(i));
 		return obj || UNDEFINED;
 	}, 0, "Array.prototype.pop"));
 }

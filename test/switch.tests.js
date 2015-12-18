@@ -1,4 +1,3 @@
-// import {describe, it} from "mocha";
 import {es5 as runner} from "./test-runner";
 
 describe("Switch Statement", () => {

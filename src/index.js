@@ -8,9 +8,9 @@ export class Sandbox {
 	 * @param {AST} ast - The abstract syntax tree to execute.
 	 * @param {Object} [options] The options to use with the sandbox.
 	 */
-	constructor (ast, options = {}) {
+	constructor (ast, options) {
 		this.ast = ast;
-		this.options = options;
+		this.options = options || {};
 	}
 
 	/**
@@ -26,7 +26,7 @@ export class Sandbox {
 			env.init(this.options);
 		}
 
-		let executionResult = x(env.createExecutionContext(this.ast).execute());
+		let executionResult = x(env.createExecutionContext().execute(this.ast));
 		if (isThenable(executionResult)) {
 			return executionResult.then(res => res.result);
 		}

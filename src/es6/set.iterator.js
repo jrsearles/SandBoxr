@@ -29,14 +29,14 @@ export default function ($target, env, factory) {
 	proto.define(SymbolType.getByKey("toStringTag"), factory.createPrimitive("Set Iterator"), {writable: false});
 
 	$target.define("entries", factory.createBuiltInFunction(function () {
-		assertIsSet(this.node, "Set.prototype.entries");
-		let it = getIterator(this.node, "key+value");
+		assertIsSet(this.object, "Set.prototype.entries");
+		let it = getIterator(this.object, "key+value");
 		return factory.createIterator(it, proto);
 	}, 0, "Set.prototype.entries"));
 
 	let valuesFunc = factory.createBuiltInFunction(function () {
-		assertIsSet(this.node, "Set.prototype.values");
-		let it = getIterator(this.node, "value");
+		assertIsSet(this.object, "Set.prototype.values");
+		let it = getIterator(this.object, "value");
 		return factory.createIterator(it, proto);
 	}, 0, "Set.prototype.values");
 

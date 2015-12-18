@@ -6,13 +6,13 @@ export default function ($target, env, factory) {
 		let stringValue = yield toString(str);
 
 		// update underlying regex in case the index was manually updated
-		this.node.source.lastIndex = yield toInt32(this.node.getValue("lastIndex"));
+		this.object.source.lastIndex = yield toInt32(this.object.getValue("lastIndex"));
 
 		// get match from underlying regex
-		let match = this.node.source.exec(stringValue);
+		let match = this.object.source.exec(stringValue);
 
 		// update the last index from the underlying regex
-		this.node.setValue("lastIndex", factory.createPrimitive(this.node.source.lastIndex));
+		this.object.setValue("lastIndex", factory.createPrimitive(this.object.source.lastIndex));
 
 		if (match) {
 			let arr = factory.createArray();

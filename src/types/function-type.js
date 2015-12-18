@@ -6,7 +6,7 @@ import {isStrictNode, isNullOrUndefined, isObject} from "../utils/contracts";
 function getParameterLength (params) {
 	for (let i = 0, ln = params.length; i < ln; i++) {
 		// parameter length should only include the first "Formal" parameters
-		if (params[i].type !== "Identifier") {
+		if (!params[i].isIdentifier()) {
 			return i;
 		}
 	}
@@ -22,7 +22,7 @@ export class FunctionType extends ObjectType {
 		this.native = false;
 		this.node = node;
 
-		this.arrow = node && node.type === "ArrowFunctionExpression";
+		this.arrow = node && node.isArrowFunctionExpression();
 		this.canConstruct = !this.arrow;
 
 		this.boundScope = null;
@@ -78,16 +78,20 @@ export class FunctionType extends ObjectType {
 		}
 	}
 
-	*call (thisArg, args = [], callee) {
+	*call (thisArg, args, callee) {
 		let self = this;
 		let env = this[Symbol.for("env")];
 		let scope = env.createExecutionScope(this, thisArg);
 
-		yield scope.loadArgs(this.node.params, args, this);
-		scope.init(this.node && this.node.body);
+		yield scope.loadArgs(this.node.params, args || [], this);
+		scope.init(this.node);
+		
+		if (this.name) {
+			env.createVariable(this.name).setValue(this);
+		}
 
 		return yield scope.use(function* () {
-			let executionResult = yield env.createExecutionContext(self.node.body, callee).execute();
+			let executionResult = yield env.createExecutionContext().execute(self.node.body, callee);
 			let shouldReturn = self.arrow || (executionResult && executionResult.exit);
 
 			if (shouldReturn && executionResult.result) {
@@ -98,12 +102,12 @@ export class FunctionType extends ObjectType {
 		});
 	}
 
-	*construct (thisArg, args = [], callee) {
+	*construct (thisArg, args, callee) {
 		if (!thisArg || thisArg === this) {
 			thisArg = this[Symbol.for("env")].objectFactory.createObject(this);
 		}
 
-		let result = yield this.call(thisArg, args, callee);
+		let result = yield this.call(thisArg, args || [], callee);
 		if (result && !result.isPrimitive) {
 			return result;
 		}

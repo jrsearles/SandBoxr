@@ -81,7 +81,7 @@ export default function dateApi (env) {
 	setters.forEach(name => {
 		function* setter () {
 			let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
-			Date.prototype[name].apply(this.node.value, args);
+			Date.prototype[name].apply(this.object.value, args);
 		}
 
 		proto.define(name, objectFactory.createBuiltInFunction(setter, Date.prototype[name].length, "Date.prototype." + name));

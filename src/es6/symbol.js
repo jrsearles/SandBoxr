@@ -32,13 +32,13 @@ export default function (globalObject, env, factory) {
 
 	let proto = symbolClass.getValue("prototype");
 	proto.define("toString", factory.createBuiltInFunction(function () {
-		let stringValue = `Symbol(${this.node.description})`;
+		let stringValue = `Symbol(${this.object.description})`;
 		return factory.createPrimitive(stringValue);
 	}, 0, "Symbol.prototype.toString"));
 
 	proto.define("valueOf", factory.createBuiltInFunction(function () {
-		assertIsNotGeneric(this.node, "Symbol", "Symbol.prototype.valueOf");
-		return this.node;
+		assertIsNotGeneric(this.object, "Symbol", "Symbol.prototype.valueOf");
+		return this.object;
 	}, 0, "Symbol.prototype.valueOf"));
 
 	["hasInstance", "isConcatSpreadable", "iterator", "replace", "species", "toStringTag"].forEach(key => {

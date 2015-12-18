@@ -4,27 +4,27 @@ import {UNDEFINED} from "../../types/primitive-type";
 export default function ($target, env, factory) {
 	$target.define("shift", factory.createBuiltInFunction(function* () {
 		let obj;
-		let length = yield toLength(this.node);
+		let length = yield toLength(this.object);
 		let i = 0;
 
 		if (length > 0) {
-			if (this.node.has(i)) {
-				obj = this.node.getValue(i);
-				this.node.deleteProperty(i);
+			if (this.object.has(i)) {
+				obj = this.object.getValue(i);
+				this.object.deleteProperty(i);
 			}
 
 			while (++i < length) {
-				if (this.node.has(i)) {
-					this.node.setValue(i - 1, this.node.getValue(i));
+				if (this.object.has(i)) {
+					this.object.setValue(i - 1, this.object.getValue(i));
 				} else {
-					this.node.deleteProperty(i);
+					this.object.deleteProperty(i);
 				}
 			}
 
-			this.node.deleteProperty(length - 1);
+			this.object.deleteProperty(length - 1);
 		}
 
-		this.node.setValue("length", factory.createPrimitive(length === 0 ? 0 : --length));
+		this.object.setValue("length", factory.createPrimitive(length === 0 ? 0 : --length));
 		return obj || UNDEFINED;
 	}, 0, "Array.prototype.shift"));
 }

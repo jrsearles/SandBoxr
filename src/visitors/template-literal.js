@@ -1,14 +1,14 @@
 import {map} from "../utils/async";
 import {toString} from "../utils/native";
 
-export default function* TemplateLiteral (context) {
-	let values = yield map(context.node.expressions, function* (expr) {
-		let value = yield context.create(expr).execute();
+export default function* TemplateLiteral (node, context, next) {
+	let values = yield map(node.expressions, function* (expr) {
+		let value = yield next(expr, context);
 		return yield toString(value.result.getValue());
 	});
 
 	let result = [];
-	let quasis = context.node.quasis;
+	let quasis = node.quasis;
 
 	for (let i = 0, ln = quasis.length; i < ln; i++) {
 		result.push(quasis[i].value.cooked);

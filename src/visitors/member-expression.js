@@ -1,12 +1,13 @@
 import {PropertyReference} from "../env/property-reference";
 import {toString} from "../utils/native";
 
-export default function* MemberExpression (context) {
-	let obj = (yield context.create(context.node.object).execute()).result.getValue();
+export default function* MemberExpression (node, context, next) {
+	let obj = (yield next(node.object, context)).result.getValue();
 	let key, value;
 
-	if (context.node.computed) {
-		let id = (yield context.create(context.node.property).execute()).result.getValue();
+	if (node.computed) {
+		let id = (yield next(node.property, context)).result.getValue();
+	
 		if (id.isSymbol) {
 			// if the identifier is a symbol, keep as is - property reference will handle it accordingly
 			key = id;
@@ -14,7 +15,7 @@ export default function* MemberExpression (context) {
 			key = yield toString(id);
 		}
 	} else {
-		key = context.node.property.name;
+		key = node.property.name;
 	}
 
 	value = new PropertyReference(key, obj, context.env);

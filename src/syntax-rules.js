@@ -1,55 +1,59 @@
 import {assertIsValidName, assertIsValidIdentifier, assertAreValidArguments, isOctalLiteral} from "./utils/contracts";
 
 function validateAssignment (left, strict) {
-	if (strict && left.type === "Identifier") {
+	if (strict && left.isIdentifier()) {
 		assertIsValidName(left.name, true);
+		assertIsValidIdentifier(left.name, true);
 	}
 }
 
 const rules = {
-	AssignmentExpression (node, parent, state) {
-		validateAssignment(node.left, state.strict);
+	AssignmentExpression (node, context) {
+		validateAssignment(node.left, node.isStrict() || context.env.isStrict());
 	},
 
-	CatchClause (node, parent, state) {
-		assertIsValidName(node.param.name, state.strict);
+	CatchClause (node, context) {
+		assertIsValidName(node.param.name, node.isStrict() || context.env.isStrict());
+	},
+	
+	Declarator (node, context) {
+		assertIsValidIdentifier(node.id.name, node.isStrict() || context.env.isStrict());
 	},
 
-	Identifier (node, parent, state) {
-		assertIsValidIdentifier(node.name, state.strict);
-	},
-
-	FunctionDeclaration (node, parent, state) {
-		assertIsValidName(node.id.name, state.strict);
-		assertAreValidArguments(node.params, state.strict);
-	},
-
-	FunctionExpression (node, parent, state) {
+	["Function"] (node, context) {
 		if (node.id) {
-			assertIsValidName(node.id.name, state.strict);
+			assertIsValidName(node.id.name, node.isStrict() || context.env.isStrict());
 		}
-
-		assertAreValidArguments(node.params, state.strict);
+		
+		assertAreValidArguments(node.params, node.isStrict() || context.env.isStrict());
 	},
 
-	Literal (node, parent, state) {
-		if (state.strict && node.raw) {
+	// FunctionExpression (node, parent, state) {
+	// 	if (node.id) {
+	// 		assertIsValidName(node.id.name, node.isStrict() || context.env.isStrict());
+	// 	}
+
+	// 	assertAreValidArguments(node.params, node.isStrict() || context.env.isStrict());
+	// },
+
+	Literal (node, context) {
+		if (node.raw && (node.isStrict() || context.env.isStrict())) {
 			if (isOctalLiteral(node.raw, node.value)) {
 				throw SyntaxError("Octal literals are not allowed in strict mode.");
 			}
 		}
 	},
 
-	UpdateExpression (node, parent, state) {
-		validateAssignment(node.argument, state.strict);
+	UpdateExpression (node, context) {
+		validateAssignment(node.argument, node.isStrict() || context.env.isStrict());
 	},
 
-	VariableDeclarator (node, parent, state) {
-		assertIsValidName(node.id.name, state.strict);
-	},
+	// VariableDeclarator (node, parent, state) {
+	// 	assertIsValidName(node.id.name, node.isStrict() || context.env.isStrict());
+	// },
 
-	WithStatement (node, parent, state) {
-		if (state.strict) {
+	WithStatement (node, context) {
+		if (node.isStrict() || context.env.isStrict()) {
 			throw SyntaxError("Strict mode code may not include a with statement");
 		}
 	}

@@ -1,13 +1,13 @@
 import {UNDEFINED} from "../types/primitive-type";
 
-export default function* BinaryExpression (context) {
-	let left = (yield context.create(context.node.left).execute()).result;
+export default function* BinaryExpression (node, context, next) {
+	let left = (yield next(node.left, context)).result;
 	let leftValue = left.getValue() || UNDEFINED;
 
-	let right = (yield context.create(context.node.right).execute()).result;
+	let right = (yield next(node.right, context)).result;
 	let rightValue = right.getValue() || UNDEFINED;
 
-	let op = context.node.operator;
+	let op = node.operator;
 	let newValue = yield context.env.ops[op](leftValue, rightValue);
 
 	return context.result(context.env.objectFactory.createPrimitive(newValue));

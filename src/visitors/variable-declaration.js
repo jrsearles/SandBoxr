@@ -1,7 +1,9 @@
-export default function* VariableDeclaration (context) {
-	for (let decl of context.node.declarations) {
-		yield context.create(decl).execute();
-	}
+import {each} from "../utils/async";
+
+export default function* VariableDeclaration (node, context, next) {
+	yield each(node.declarations, function* (decl) {
+		yield next(decl, context);
+	});
 
 	return context.empty();
 }

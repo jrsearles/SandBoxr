@@ -5,9 +5,9 @@ import {executeCallback} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("filter", factory.createBuiltInFunction(function* (callback, thisArg) {
-		assertIsNotNullOrUndefined(this.node, "Array.prototype.filter");
+		assertIsNotNullOrUndefined(this.object, "Array.prototype.filter");
 
-		let arr = toObject(env, this.node);
+		let arr = toObject(env, this.object);
 		let length = yield toLength(arr);
 		assertIsFunction(callback, arr);
 

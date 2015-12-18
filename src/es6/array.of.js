@@ -2,13 +2,13 @@ import {isConstructor} from "../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("of", factory.createBuiltInFunction(function* (...items) {
-		if (this.node === $target || !isConstructor(this.node)) {
+		if (this.object === $target || !isConstructor(this.object)) {
 			return factory.createArray(items);
 		}
 
 		let length = items.length;
 		let lengthValue = factory.createPrimitive(length);
-		let arr = yield this.node.construct(this.node, [lengthValue]);
+		let arr = yield this.object.construct(this.object, [lengthValue]);
 		let i = 0;
 
 		while (i < length) {

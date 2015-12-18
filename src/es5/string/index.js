@@ -61,7 +61,7 @@ export default function (env) {
 
 	["charAt", "charCodeAt", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"].forEach(name => {
 		proto.define(name, objectFactory.createBuiltInFunction(function* () {
-			let stringValue = yield toString(this.node);
+			let stringValue = yield toString(this.object);
 			let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
 
 			return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));

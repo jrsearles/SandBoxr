@@ -3,8 +3,8 @@ import {toString} from "../utils/native";
 
 export default function (target, env, factory) {
 	target.define("normalize", factory.createBuiltInFunction(function* (form) {
-		assertIsNotNullOrUndefined(this.node, "String.prototype.normalize");
-		let stringValue = yield toString(this.node);
+		assertIsNotNullOrUndefined(this.object, "String.prototype.normalize");
+		let stringValue = yield toString(this.object);
 
 		let formValue = "NFC";
 		if (!isUndefined(form)) {

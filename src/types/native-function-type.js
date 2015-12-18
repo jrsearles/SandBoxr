@@ -47,7 +47,7 @@ export class NativeFunctionType extends FunctionType {
 		this.addPoison();
 	}
 
-	*call (thisArg, args = [], callee) {
+	*call (thisArg, args, callee) {
 		callee = callee || this;
 		let env = this[Symbol.for("env")];
 
@@ -63,17 +63,17 @@ export class NativeFunctionType extends FunctionType {
 		let scope = env.createExecutionScope(this, thisArg);
 
 		return yield scope.use(function* () {
-			return yield self.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args);
+			return yield self.nativeFunction.apply(env.createExecutionContext(thisArg, callee), args || []);
 		});
 	}
 
-	*construct (thisArg, args = []) {
+	*construct (thisArg, args) {
 		let self = this;
 		let env = this[Symbol.for("env")];
 		let scope = env.createExecutionScope(this, thisArg);
 
 		return yield scope.use(function* () {
-			return yield self.nativeFunction.apply(env.createExecutionContext(thisArg, self, true), args);
+			return yield self.nativeFunction.apply(env.createExecutionContext(thisArg, self, true), args || []);
 		});
 	}
 }

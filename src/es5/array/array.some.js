@@ -5,10 +5,10 @@ import {executeCallback} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("some", factory.createBuiltInFunction(function* (callback, thisArg) {
-		assertIsNotNullOrUndefined(this.node, "Array.prototype.some");
-		let arr = toObject(env, this.node);
-		let length = yield toLength(this.node);
-		assertIsFunction(callback, this.node);
+		assertIsNotNullOrUndefined(this.object, "Array.prototype.some");
+		let arr = toObject(env, this.object);
+		let length = yield toLength(this.object);
+		assertIsFunction(callback, this.object);
 
 		for (let entry of iterate.forward(arr, 0, length)) {
 			let passed = toBoolean(yield executeCallback(env, callback, entry, thisArg, arr));

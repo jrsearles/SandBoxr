@@ -88,6 +88,8 @@ export function assertIsValidIdentifier (name, strict) {
 	if (strict && isStrictReserved(name)) {
 		throw SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
 	}
+	
+	assertIsValidName(name, strict);
 }
 
 export function assertAreValidArguments (params, strict) {

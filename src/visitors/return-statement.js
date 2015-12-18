@@ -1,9 +1,10 @@
 import {UNDEFINED} from "../types/primitive-type";
 
-export default function* ReturnStatement (context) {
-	if (context.node.argument) {
-		return context.exit((yield context.create(context.node.argument).execute()).result.getValue());
+export default function* ReturnStatement (node, context, next) {
+	let arg = UNDEFINED;
+	if (node.argument) {
+		arg = (yield next(node.argument, context)).result.getValue();
 	}
 
-	return context.exit(UNDEFINED);
+	return context.exit(arg);
 }

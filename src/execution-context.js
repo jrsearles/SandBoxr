@@ -2,10 +2,11 @@ import {UNDEFINED} from "./types/primitive-type";
 import {ExecutionResult} from "./execution-result";
 import {visitors} from "./visitors";
 import {step} from "./estree";
+import rules from "./syntax-rules";
 
 export class ExecutionContext {
-	constructor (env, node, callee, isNew) {
-		this.node = node;
+	constructor (env, obj, callee, isNew) {
+		this.object = obj;
 		this.callee = callee;
 		this.env = env;
 		this.isNew = !!isNew;
@@ -15,12 +16,11 @@ export class ExecutionContext {
 		this.strict = false;
 	}
 
-	*execute () {
+	*execute (node, callee) {
 		let executionResult;
 		
 		try {
-			// executionResult = yield expressionVisitor.visit(this);
-			executionResult = yield step(this.node, visitors, this);
+			executionResult = yield step(node, visitors, this, rules);
 		} catch (nativeError) {
 			executionResult = this.raise(nativeError);
 		}
@@ -38,9 +38,16 @@ export class ExecutionContext {
 		return context;
 	}
 
-	createLabel (node, label) {
-		let context = this.create(node);
+	createLabel (label) {
+		let context = this.create();
 		context.label = label;
+		return context;
+	}
+	
+	createLoop () {
+		let context = this.create();
+		context.label = this.label;
+		context.loop = true;
 		return context;
 	}
 
@@ -57,7 +64,8 @@ export class ExecutionContext {
 	}
 
 	raise (err) {
-		let result = this.result(err);
+		let wrappedError = this.env.objectFactory.create("Error", err);
+		let result = this.result(wrappedError);
 		result.raised = result.exit = true;
 		return result;
 	}
@@ -77,5 +85,42 @@ export class ExecutionContext {
 
 	empty () {
 		return this.result(UNDEFINED);
+	}
+	
+	abrupt (result, priorResult) {
+		if (priorResult && !result.raised && !result.exit) {
+			result.result = priorResult.result;
+		}
+		
+		return result || this.empty();
+	}
+	
+	shouldBreak (result) {
+		if (!result) {
+			return false;
+		}
+		
+		if (result.exit || result.raised) {
+			return true;
+		}
+
+		if (!result.cancel && !result.skip) {
+			return false;
+		}
+
+		let breaking = true;
+		if (result.name && result.name === this.label) {
+			breaking = result.cancelled = result.cancel;
+			result.cancel = result.skip = false;
+
+			return breaking;
+		}
+
+		if (this.loop && !result.name) {
+			breaking = result.cancelled = result.cancel;
+			result.cancel = result.skip = false;
+		}
+
+		return breaking;
 	}
 };

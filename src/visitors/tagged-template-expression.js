@@ -26,15 +26,15 @@ function buildTemplateObject (env, node) {
 	return templateObjectCache[key] = tag;
 }
 
-export default function* TaggedTemplateExpression (context) {
-	let templateObject = buildTemplateObject(context.env, context.node.quasi);
+export default function* TaggedTemplateExpression (node, context, next) {
+	let templateObject = buildTemplateObject(context.env, node.quasi);
 
-	let values = yield map(context.node.quasi.expressions, function* (expr) {
-		let value = yield context.create(expr).execute();
+	let values = yield map(node.quasi.expressions, function* (expr) {
+		let value = next(expr, context);
 		return yield value.result.getValue();
 	});
 
-	let callee = (yield context.create(context.node.tag).execute()).result;
+	let callee = (yield next(node.tag, context)).result;
 	let func = callee.getValue();
 	let value = yield func.call(callee.base, [templateObject, ...values], callee);
 	return context.result(value);

@@ -1,31 +1,38 @@
-import * as SandBoxr from "../";
-import path from  "path";
-// import test262 from "test262-streamer";
-import streamer6 from "../../test262-6-streamer";
-import gulp from "gulp";
-import gutil from "gulp-util";
-import through from "through2";
-import * as parser from "../test/ast-parser";
-import yargs from "yargs";
+// import * as SandBoxr from "../";
+// import path from  "path";
+// import test262 from "../../test262-5-streamer";
+// import streamer6 from "../../test262-6-streamer";
+// import gulp from "gulp";
+// import gutil from "gulp-util";
+// import through from "through2";
+// import * as parser from "../test/ast-parser";
+// import yargs from "yargs";
+var yargs = require("yargs");
+var acorn = require("acorn");
+var through = require("through2");
+var gulp = require("gulp");
+var gutil = require("gulp-util");
+var SandBoxr = require("../dist/sandboxr");
+var path = require("path");
 
-let args = 	yargs.default("verbose", false)
+var args = 	yargs.default("verbose", false)
 	.alias("v", "verbose")
 	.argv;
 
-let descMatcher = /\*.*@description\s+(.*)\s*\n/i;
-let negativeMatcher = /\*.*@negative\b/i;
-let verbose = args.verbose;
+var descMatcher = /\*.*@description\s+(.*)\s*\n/i;
+var negativeMatcher = /\*.*@negative\b/i;
+var verbose = args.verbose;
 
-let results = {
+var results = {
 	passed: 0,
 	skipped: 0,
 	failed: 0
 };
 
-let failed = gutil.colors.bold.red("failed:");
-let passed = gutil.colors.green("passed:");
-let skipped = gutil.colors.blue("skipped:");
-let stopOnFail = false;
+var failed = gutil.colors.bold.red("failed:");
+var passed = gutil.colors.green("passed:");
+var skipped = gutil.colors.blue("skipped:");
+var stopOnFail = false;
 
 function testsCompleted () {
 	gutil.log("TOTALS ==============================");
@@ -42,9 +49,10 @@ function testsCompleted () {
 }
 
 gulp.task("test262-6", function () {
-	let descriptionMatcher = /^description:\s*([\s\S]+)(?:^--)/mi;
-	let negMatcher = /^negative:/mi;
-
+	var descriptionMatcher = /^description:\s*([\s\S]+)(?:^--)/mi;
+	var negMatcher = /^negative:/mi;
+	var streamer6 = require("../../test262-6-streamer");
+	
 	// types +
 	// white-space +
 
@@ -68,11 +76,11 @@ gulp.task("test262-6", function () {
 
 	return streamer6({ files: ["/language/statements/let/**/*.js"] })
 		.pipe(through.obj(function (file, enc, cb) {
-			let filename = path.basename(file.path);
+			var filename = path.basename(file.path);
 
 			try {
-				let src = file.contents.toString();
-				let desc = descriptionMatcher.exec(src);
+				var src = file.contents.toString();
+				var desc = descriptionMatcher.exec(src);
 				desc = desc && desc[1];
 
 				if (negMatcher.test(src)) {
@@ -85,17 +93,17 @@ gulp.task("test262-6", function () {
 					return;
 				}
 
-				let useStrictMatcher = /^flags:.*\bonlystrict\b.*$/mi;
-				let useStrict = useStrictMatcher.test(src);
+				var useStrictMatcher = /^flags:.*\bonlystrict\b.*$/mi;
+				var useStrict = useStrictMatcher.test(src);
 
 				if (verbose) {
 					gutil.log("starting:", filename, "-", desc);
 					gutil.log("strict:", String(useStrict));
 				}
 
-				let parseFn = function (text) { return parser.parse(text, { ecmaVersion: 6 }); };
-				let ast = parseFn(src);
-				let box = SandBoxr.create(ast, { ecmaVersion: 6, useStrict: useStrict, parser: parseFn });
+				var parseFn = function (text) { return acorn.parse(text, { ecmaVersion: 6 }); };
+				var ast = parseFn(src);
+				var box = SandBoxr.create(ast, { ecmaVersion: 6, useStrict: useStrict, parser: parseFn });
 
 				// console.log(ast);
 
@@ -116,15 +124,16 @@ gulp.task("test262-6", function () {
 		.on("finish", testsCompleted);
 });
 
-gulp.task("test262", () => {
-	let base = path.join(__dirname, "../node_modules/test262/test/suite/");
+gulp.task("test262", function () {
+	var test262 = require("../../test262-5-streamer");
+	var base = path.join(__dirname, "../node_modules/test262/test/suite/");
 	
 	// "!ch15/15.1/**/*.js",
-	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
-		.pipe(through.obj((file, enc, cb) => {
-			let filename = path.basename(file.path);
-			let src = file.contents.toString();
-			let desc = descMatcher.exec(src);
+	return test262({ files: ["ch15/15.10/**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
+		.pipe(through.obj(function (file, enc, cb) {
+			var filename = path.basename(file.path);
+			var src = file.contents.toString();
+			var desc = descMatcher.exec(src);
 			desc = desc && desc[1];
 
 			if (negativeMatcher.test(src)) {
@@ -137,16 +146,16 @@ gulp.task("test262", () => {
 				gutil.log("starting:", filename, "-", desc);
 			}
 
-			let ast;
+			var ast;
 			try {
-				ast = parser.parse(src);
+				ast = acorn.parse(src);
 			} catch (err) {
 				results.failed++;
 				cb(null, results);
 				return;
 			}
 
-			let box = SandBoxr.create(ast, { parser: parser.parse, useStrict: file.useStrict });
+			var box = SandBoxr.create(ast, { parser: acorn.parse, useStrict: file.useStrict });
 
 			try {
 				box.execute();

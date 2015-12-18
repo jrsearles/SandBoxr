@@ -46,7 +46,7 @@ export default function functionApi (env) {
 				if (this.isNew) {
 					thisArg = objectFactory.createObject(funcInstance);
 				} else {
-					thisArg = this.node;
+					thisArg = this.object;
 
 					if (!strict && isUndefined(thisArg)) {
 						thisArg = globalObject;
@@ -58,7 +58,7 @@ export default function functionApi (env) {
 				let $args = objectFactory.createArray(arguments);
 				env.createVariable("$args").setValue($args);
 
-				let executionResult = yield env.createExecutionContext(ast).execute();
+				let executionResult = yield this.execute(ast);
 				if (this.isNew) {
 					return thisArg;
 				}

@@ -1,21 +1,25 @@
 import {assertIsValidIdentifier} from "../utils/contracts";
 import {each} from "../utils/async";
 
-function* executeBlock (context, body, swallow) {
+function* tryCatch (node, context, next) {
+	try {
+		return yield next(node, context);
+	} catch (thrownError) {
+		return context.raise(thrownError);
+	}
+}
+
+function* executeBlock (context, body, swallow, next) {
 	let result;
 
 	yield each(body, function* (node, i, all, abort) {
 		if (swallow) {
-			try {
-				result = yield context.create(node).execute();
-			} catch (thrownError) {
-				result = context.raise(thrownError);
-			}
+			result = yield* tryCatch(node, context, next);
 		} else {
-			result = yield context.create(node).execute();
+			result = yield next(node, context);
 		}
 
-		if (result.canBreak()) {
+		if (result.isAbrupt()) {
 			abort();
 		}
 	});
@@ -23,15 +27,15 @@ function* executeBlock (context, body, swallow) {
 	return result;
 }
 
-export default function* TryStatement (context) {
-	let result = yield executeBlock(context, context.node.block.body, true);
+export default function* TryStatement (node, context, next) {
+	let result = yield executeBlock(context, node.block.body, true, next);
 	let finalizerResult;
 	// let shouldRaise = false;
 	// let shouldReturn = false;
 
 	if (result && result.raised) {
-		if (context.node.handler) {
-			let errVar = context.node.handler.param.name;
+		if (node.handler) {
+			let errVar = node.handler.param.name;
 			assertIsValidIdentifier(errVar, context.env.isStrict());
 
 			let scope = context.env.createScope();
@@ -39,14 +43,15 @@ export default function* TryStatement (context) {
 			context.env.setValue(errVar, result.result);
 
 			result = yield scope.use(function* () {
-				return yield executeBlock(context, context.node.handler.body.body, true);
+				return yield executeBlock(context, node.handler.body.body, true, next);
 			});
 		}
 	}
 
-	if (!context.node.finalizer) {
-		return result;
-	}
+	// result = result || context.empty();
+	// if (!node.finalizer) {
+	// 	return result;
+	// }
 
 	// let shouldThrow = result && result.raised;
 
@@ -56,9 +61,9 @@ export default function* TryStatement (context) {
 	// 	// yield result;
 	// }
 
-	if (context.node.finalizer) {
-		finalizerResult = yield executeBlock(context, context.node.finalizer.body);
-		if (finalizerResult && finalizerResult.canBreak()) {
+	if (node.finalizer) {
+		finalizerResult = yield executeBlock(context, node.finalizer.body, false, next);
+		if (finalizerResult && finalizerResult.isAbrupt()) {
 			return finalizerResult;
 			// shouldReturn = true;
 		}
@@ -76,5 +81,5 @@ export default function* TryStatement (context) {
 	// 	}
 	// }
 
-	return result;
+	return result || context.empty();
 }

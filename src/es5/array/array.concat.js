@@ -6,7 +6,7 @@ export default function ($target, env, factory) {
 		let newArray = factory.createArray();
 
 		// add "this" array to bunch
-		arrays.unshift(toObject(env, this.node));
+		arrays.unshift(toObject(env, this.object));
 
 		let index = 0;
 		while (arrays.length > 0) {

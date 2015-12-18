@@ -24,7 +24,7 @@ export default function (globalObject, env, factory) {
 			replacer = yield toString(replaceValue);
 		}
 
-		return factory.createPrimitive(stringValue.replace(this.node.source, replacer));
+		return factory.createPrimitive(stringValue.replace(this.object.source, replacer));
 	}, 2, "RegExp.prototype[Symbol.replace]"));
 
 	["source", "global", "ignoreCase", "multiline"].forEach(key => {

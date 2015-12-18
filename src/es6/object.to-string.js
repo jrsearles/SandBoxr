@@ -21,11 +21,11 @@ export default function (target, env, factory) {
 	};
 
 	target.define("toString", factory.createBuiltInFunction(function () {
-		return objectToString(this.node);
+		return objectToString(this.object);
 	}, 0, "Object.prototype.toString"));
 
 	target.define("toLocaleString", factory.createBuiltInFunction(function () {
-		assertIsNotNullOrUndefined(this.node, "Object.prototype.toLocaleString");
-		return objectToString(this.node);
+		assertIsNotNullOrUndefined(this.object, "Object.prototype.toLocaleString");
+		return objectToString(this.object);
 	}, 0, "Object.prototype.toLocaleString"));
 }

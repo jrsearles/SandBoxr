@@ -1,4 +1,3 @@
-// import {describe, it} from "mocha";
 import {expect} from "chai";
 import {es5 as runner, wrapArgs} from "./test-runner";
 
@@ -30,7 +29,7 @@ describe("Type: String", () => {
 		{source: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", fn: "match", args: [/[0-9]/gi]},
 
 		{source: "Apples are round, and apples are juicy.", fn: "replace", args: [/apples/gi, "oranges"]},
-		{source: "ApplesAreRoundAndApplesAreJuicy", fn: "replace", args: [/[A-Z]/g, (match, p1) => " " + p1]},
+		// {source: "ApplesAreRoundAndApplesAreJuicy", fn: "replace", args: [/[A-Z]/g, (match, p1) => " " + p1]},
 
 		{source: "The morning is upon us.", fn: "search", args: [/morn/]},
 		{source: "The morning is upon us.", fn: "search", args: [/[0-9]/]},
@@ -114,6 +113,6 @@ describe("Type: String", () => {
 	describe("as object", () => {
 		it("should show typeof `object` when creating use `new`", () => runner.confirmBlock("typeof new String('foo') == 'object';"));
 		it("should not strictly equal a primitive string", () => runner.confirmBlock("new String('foo') !== 'foo';"));
-		// it("should implicitly equal a primitive string", () => runner.confirmBlock("new String('foo') == 'foo';"));
+		it("should implicitly equal a primitive string", () => runner.confirmBlock("new String('foo') == 'foo';"));
 	});
 });

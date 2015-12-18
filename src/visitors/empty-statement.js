@@ -1,3 +1,3 @@
-export default function EmptyStatement (context) {
+export default function EmptyStatement (node, context) {
 	return context.empty();
 }

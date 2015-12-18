@@ -4,9 +4,9 @@ export default function ($target, env, factory) {
 	$target.define("test", factory.createBuiltInFunction(function* (str) {
 		let stringValue = yield toString(str);
 
-		this.node.source.lastIndex = yield toInt32(this.node.getValue("lastIndex"));
-		let testValue = this.node.source.test(stringValue);
-		this.node.setValue("lastIndex", factory.createPrimitive(this.node.source.lastIndex));
+		this.object.source.lastIndex = yield toInt32(this.object.getValue("lastIndex"));
+		let testValue = this.object.source.test(stringValue);
+		this.object.setValue("lastIndex", factory.createPrimitive(this.object.source.lastIndex));
 
 		return factory.createPrimitive(testValue);
 	}, 1, "RegExp.prototype.test"));

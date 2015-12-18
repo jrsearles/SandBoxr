@@ -25,6 +25,10 @@ export function* map (arr, func) {
 }
 
 export function* each (arr, func) {
+	if (arr.length === 0) {
+		return;
+	}
+	
 	let aborted = false;
 	let aborter = function () { aborted = true; };
 

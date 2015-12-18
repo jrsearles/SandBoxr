@@ -36,7 +36,7 @@ export default function ($target, env, factory) {
 			};
 		}
 
-		let arr = yield createArray(this.node, items);
+		let arr = yield createArray(this.object, items);
 		let it = iterate.getIterator(items);
 		let length = 0;
 		let done = false;

@@ -6,7 +6,7 @@ import {getStartIndex} from "./array-helpers";
 export default function ($target, env, factory) {
 	$target.define("indexOf", factory.createBuiltInFunction(function* (searchElement, fromIndex) {
 		searchElement = searchElement || UNDEFINED;
-		let length = yield toLength(this.node);
+		let length = yield toLength(this.object);
 		let index = arguments.length === 1 ? 0 : (yield toInteger(fromIndex));
 		let notFound = factory.createPrimitive(-1);
 
@@ -16,7 +16,7 @@ export default function ($target, env, factory) {
 
 		index = getStartIndex(index, length);
 
-		for (let {key, value} of iterate.forward(this.node, index, length)) {
+		for (let {key, value} of iterate.forward(this.object, index, length)) {
 			if (env.ops.strictEquals(searchElement, value || UNDEFINED)) {
 				return factory.createPrimitive(key);
 			}

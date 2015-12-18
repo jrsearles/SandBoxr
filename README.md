@@ -116,8 +116,8 @@ var obj = env.objectFactory.createObject();
 obj.define("doSomething", env.objectFactory.createFunction(function () {
 	// all arguments will be wrapped objects
 
-	// `this` is available via `this.node`
-	this.node == obj; // true
+	// `this` is available via `this.object`
+	this.object == obj; // true
 
 	// todo: more documentation on available APIs
 });

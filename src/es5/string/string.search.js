@@ -2,7 +2,7 @@ import {toString} from "../../utils/native";
 
 export default function ($target, env, factory) {
 	$target.define("search", factory.createBuiltInFunction(function* (regex) {
-		let stringValue = yield toString(this.node);
+		let stringValue = yield toString(this.object);
 		let underlyingRegex;
 
 		if (regex) {

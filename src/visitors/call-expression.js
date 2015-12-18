@@ -20,20 +20,18 @@ function assignThis (env, fnMember, fn, isNew, native) {
 	return null;
 }
 
-export default function* CallExpression (context) {
-	let node = context.node;
-	let isNew = context.node.type === "NewExpression";
-
-	let fnMember = (yield context.create(node.callee).execute()).result;
+export default function* CallExpression (node, context, next) {
+	let isNew = node.isNewExpression();
+	let fnMember = (yield next(node.callee, context)).result;
 	let fn = fnMember.getValue();
 
 	let args = yield* map(node.arguments, function* (arg) {
-		return (yield context.create(arg).execute()).result.getValue();
+		return (yield next(arg, context)).result.getValue();
 	});
 
 	if (!fn || fn.className !== "Function") {
 		let stringValue = yield toString(fn);
-		return context.raise(TypeError(`${stringValue} not a function`));
+		throw TypeError(`${stringValue} not a function`);
 	}
 
 	let native = fn.native;

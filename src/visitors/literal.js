@@ -1,3 +1,3 @@
-export default function Literal (context) {
-	return context.result(context.env.objectFactory.createPrimitive(context.node.value));
+export default function Literal (node, context) {
+	return context.result(context.env.objectFactory.createPrimitive(node.value));
 }

@@ -1,12 +1,15 @@
 import {toBoolean} from "../utils/native";
 
-export default function* IfStatement (context) {
-	let testValue = (yield context.create(context.node.test).execute()).result.getValue();
+export default function* IfStatement (node, context, next) {
+	let testValue = (yield next(node.test, context)).result.getValue();
+	
 	if (toBoolean(testValue)) {
-		return yield context.create(context.node.consequent).execute();
+		return yield next(node.consequent, context);
 	}
 
-	if (context.node.alternate) {
-		return yield context.create(context.node.alternate).execute();
+	if (node.alternate) {
+		return yield next(node.alternate, context);
 	}
+	
+	return context.empty();
 }

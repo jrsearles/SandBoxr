@@ -1,10 +1,10 @@
 import {each} from "../utils/async";
 
-function* executeStatements (context, statements) {
+function* executeStatements (context, statements, next) {
 	let result;
 
 	yield each(statements, function* (statement, i, all, abort) {
-		result = yield context.create(statement).execute();
+		result = yield next(statement, context, next);
 		if (result && result.isAbrupt()) {
 			abort();
 		}
@@ -13,15 +13,15 @@ function* executeStatements (context, statements) {
 	return result;
 }
 
-export default function* SwitchStatement (context) {
-	let testValue = (yield context.create(context.node.discriminant).execute()).result.getValue();
+export default function* SwitchStatement (node, context, next) {
+	let testValue = (yield next(node.discriminant, context)).result.getValue();
 	let passed = false;
 	let value, defaultCase;
 
-	for (let current of context.node.cases) {
+	for (let current of node.cases) {
 		if (!passed) {
 			if (current.test) {
-				let caseValue = (yield context.create(current.test).execute()).result.getValue();
+				let caseValue = (yield next(current.test, context)).result.getValue();
 				if (!context.env.ops.strictEquals(caseValue, testValue)) {
 					continue;
 				}
@@ -33,7 +33,7 @@ export default function* SwitchStatement (context) {
 		}
 
 		passed = true;
-		value = yield executeStatements(context, current.consequent);
+		value = yield executeStatements(context, current.consequent, next);
 		if (value && value.isAbrupt()) {
 			value.cancel = false;
 			return value;
@@ -41,7 +41,7 @@ export default function* SwitchStatement (context) {
 	}
 
 	if (!passed && defaultCase && defaultCase.consequent) {
-		value = yield executeStatements(context, defaultCase.consequent);
+		value = yield executeStatements(context, defaultCase.consequent, next);
 		value.cancel = false;
 		return value;
 	}

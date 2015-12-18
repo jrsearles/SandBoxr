@@ -35,7 +35,7 @@ export default function ($target, env, factory) {
 	}
 
 	$target.define("sort", factory.createBuiltInFunction(function* (compareFunc) {
-		let arr = this.node;
+		let arr = this.object;
 		let length = yield toLength(arr);
 		let i = 0;
 

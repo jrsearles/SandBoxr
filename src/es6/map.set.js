@@ -3,15 +3,15 @@ import {findIndex} from "./collection-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("set", factory.createBuiltInFunction(function (key, value) {
-		assertIsMap(this.node, "Map.prototype.set");
+		assertIsMap(this.object, "Map.prototype.set");
 
-		let index = findIndex(this.node, key);
+		let index = findIndex(this.object, key);
 		if (index >= 0) {
-			this.node.data[index].value = value;
-			return this.node;
+			this.object.data[index].value = value;
+			return this.object;
 		}
 
-		this.node.data.push({key, value});
-		return this.node;
+		this.object.data.push({key, value});
+		return this.object;
 	}, 2, "Map.prototype.set"));
 }

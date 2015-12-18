@@ -8,7 +8,7 @@ export default function (target, env, factory) {
 	iteratorProto.className = "String Iterator";
 
 	iteratorProto.define("next", factory.createBuiltInFunction(function () {
-		let result = this.node.advance();
+		let result = this.object.advance();
 		if (result.value) {
 			return result.value;
 		}
@@ -38,8 +38,8 @@ export default function (target, env, factory) {
 
 	let iteratorKey = SymbolType.getByKey("iterator");
 	target.define(iteratorKey, factory.createBuiltInFunction(function* () {
-		assertIsNotNullOrUndefined(this.node, "String.protoype[Symbol.iterator]");
-		let stringValue = yield toString(this.node);
+		assertIsNotNullOrUndefined(this.object, "String.protoype[Symbol.iterator]");
+		let stringValue = yield toString(this.object);
 		let it = getIterator(stringValue);
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "[Symbol.iterator]"));

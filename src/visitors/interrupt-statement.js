@@ -1,10 +1,11 @@
-export default function InterruptStatement (context) {
+export default function InterruptStatement (node, context) {
 	let label;
-	if (context.node.label) {
-		label = context.node.label.name;
+	
+	if (node.label) {
+		label = node.label.name;
 	}
 
-	if (context.node.type === "BreakStatement") {
+	if (node.isBreakStatement()) {
 		return context.cancel(label);
 	}
 

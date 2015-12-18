@@ -62,8 +62,9 @@ export default function ($target, env, factory) {
 		}
 
 		let scope = createScope(ast.body, isDirectCall(this));
+		let context = this;
 		let executionResult = yield scope.use(function* () {
-			return yield env.createExecutionContext(ast).execute();
+			return yield context.execute(ast);
 		});
 
 		return executionResult && executionResult.result ? executionResult.result.getValue() : UNDEFINED;

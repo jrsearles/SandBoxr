@@ -10,9 +10,9 @@ export default function ($target, env, factory) {
 		}
 
 		let args = yield toArray(argsArray);
-		thisArg = defineThis(env, this.node, thisArg);
-		this.node.bindThis(thisArg);
+		thisArg = defineThis(env, this.object, thisArg);
+		this.object.bindThis(thisArg);
 
-		return yield* this.node.call(thisArg, args);
+		return yield* this.object.call(thisArg, args);
 	}, 2, "Function.prototype.apply"));
 }

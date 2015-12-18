@@ -3,7 +3,7 @@ import {toPrimitive} from "../../utils/native";
 
 export default function ($target, env, factory) {
 	$target.define("toString", factory.createBuiltInFunction(function* (radix) {
-		assertIsNotGeneric(this.node, "Number", "Number.prototype.toString");
+		assertIsNotGeneric(this.object, "Number", "Number.prototype.toString");
 
 		let radixValue = 10;
 		if (radix) {
@@ -13,6 +13,6 @@ export default function ($target, env, factory) {
 			}
 		}
 
-		return factory.createPrimitive(this.node.value == null ? "0" : this.node.value.toString(radixValue));
+		return factory.createPrimitive(this.object.value == null ? "0" : this.object.value.toString(radixValue));
 	}, 1, "Number.prototype.toString"));
 }

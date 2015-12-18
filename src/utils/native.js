@@ -199,8 +199,8 @@ export function	toNativeFunction (env, fn, name) {
 	return env.objectFactory.createBuiltInFunction(function* () {
 		let thisArg = undefined;
 
-		if (this && this.node && (this.node.isPrimitive || this.node.className === "Date")) {
-			thisArg = this.node.value;
+		if (this && this.object && (this.object.isPrimitive || this.object.className === "Date")) {
+			thisArg = this.object.value;
 		}
 
 		let args = yield getValues(arguments);

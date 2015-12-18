@@ -1,10 +1,9 @@
-// import {describe, it} from "mocha";
 import {expect} from "chai";
 import * as parser from "./ast-parser";
 import * as SandBoxr from "../index";
 
 describe("API", () => {
-	it("should allow a variable to be defined", done => {
+	it("should allow a variable to be defined", () => {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -13,14 +12,12 @@ describe("API", () => {
 
 		let ast = parser.parse("a === 99;");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve(env)
-			.then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+		let result = sandbox.execute(env);
+		
+		expect(result.value).to.be.true;
 	});
 
-	it("should allow an object to be defined", done => {
+	it("should allow an object to be defined", () => {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -32,14 +29,12 @@ describe("API", () => {
 
 		let ast = parser.parse("a.foo === 99;");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve(env)
-			.then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+		let result = sandbox.execute(env);
+		
+		expect(result.value).to.be.true;
 	});
 
-	it("should allow function to be removed", done => {
+	it("should allow function to be removed", () => {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -47,14 +42,12 @@ describe("API", () => {
 
 		let ast = parser.parse("typeof String.prototype.trim === 'undefined';");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve(env)
-			.then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+		let result = sandbox.execute(env);
+		
+		expect(result.value).to.be.true;
 	});
 
-	it("should allow functions to be added", done => {
+	it("should allow functions to be added", () => {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -69,14 +62,12 @@ describe("API", () => {
 
 		let ast = parser.parse("String.concat('foo','bar')==='foobar';");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve(env)
-			.then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+		let result = sandbox.execute(env);
+		
+		expect(result.value).to.be.true;
 	});
 
-	it("should keep variables and values if environment is reused", done => {
+	it("should keep variables and values if environment is reused", () => {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -86,19 +77,16 @@ describe("API", () => {
 		let ast = parser.parse("a++;");
 		let sandbox = SandBoxr.create(ast);
 
-		sandbox.resolve(env)
-			.then(() => {
-				ast = parser.parse("a===100;");
-				sandbox = SandBoxr.create(ast);
-				return sandbox.resolve(env);
-			})
-			.then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+		sandbox.execute(env);
+			
+		ast = parser.parse("a===100;");
+		sandbox = SandBoxr.create(ast);
+		let result = sandbox.execute(env);
+			
+		expect(result.value).to.be.true;
 	});
 
-	it("should lose variables and values if environment is reinitialized", done => {
+	it("should lose variables and values if environment is reinitialized", () => {
 		let env = SandBoxr.createEnvironment();
 		env.init();
 
@@ -107,63 +95,55 @@ describe("API", () => {
 
 		let ast = parser.parse("a++;");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve(env)
-			.then(() => {
-				env.init();
-				ast = parser.parse("typeof a === 'undefined';");
-				sandbox = SandBoxr.create(ast);
-				return sandbox.resolve(env);
-			})
-			.then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+		sandbox.execute(env);
+		
+		env.init();
+		ast = parser.parse("typeof a === 'undefined';");
+		sandbox = SandBoxr.create(ast);
+		let result = sandbox.execute(env);
+		
+		expect(result.value).to.be.true;
 	});
 
-	it("should allow an object to be converted to a native object", done => {
+	it("should allow an object to be converted to a native object", () => {
 		let ast = parser.parse("({foo:true});");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve().then(result => {
-			expect(result.toNative().foo).to.be.true;
-			done();
-		});
+		let result = sandbox.execute();
+		
+		expect(result.toNative().foo).to.be.true;
 	});
 
-	it("should allow a primitive to be toNativeped", done => {
+	it("should allow a primitive to be toNativeped", () => {
 		let ast = parser.parse("(1);");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve().then(result => {
-			expect(result.toNative()).to.equal(1);
-			done();
-		});
+		let result = sandbox.execute();
+		
+		expect(result.toNative()).to.equal(1);
 	});
 
-	it("should allow an array to be toNativeped", done => {
+	it("should allow an array to be toNativeped", () => {
 		let ast = parser.parse("([1,2,3]);");
 		let sandbox = SandBoxr.create(ast);
-		sandbox.resolve().then(result => {
-			expect(result.toNative()[2]).to.equal(3);
-			done();
-		});
+		let result = sandbox.execute();
+		
+		expect(result.toNative()[2]).to.equal(3);
 	});
 
 	describe("Exclusions", () => {
-		it("should be able to exclude api's", done => {
+		it("should be able to exclude api's", () => {
 			let ast = parser.parse("typeof JSON === 'undefined'");
 			let sandbox = SandBoxr.create(ast, {exclude: ["JSON"]});
-			sandbox.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = sandbox.execute();
+			
+			expect(result.value).to.be.true;
 		});
 
-		it("should be able to exclude methods from prototype", done => {
+		it("should be able to exclude methods from prototype", () => {
 			let ast = parser.parse("typeof String.prototype.trim === 'undefined'");
 			let sandbox = SandBoxr.create(ast, {exclude: ["String.prototype.trim"]});
-			sandbox.resolve().then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			let result = sandbox.execute();
+			
+			expect(result.value).to.be.true;
 		});
 
 		it("should not throw if api does not exist", () => {
@@ -173,7 +153,7 @@ describe("API", () => {
 	});
 
 	describe("Operators", () => {
-		it("should be able to replace an operators", done => {
+		it("should be able to replace an operators", () => {
 			let env = SandBoxr.createEnvironment();
 			env.init({
 				operators: {
@@ -194,17 +174,14 @@ describe("API", () => {
 			let ast = parser.parse("0 == '0'");
 			let sandbox = SandBoxr.create(ast);
 
-			sandbox.resolve(env).then(result => {
-				expect(result.value).to.be.false;
+			let result = sandbox.execute(env);
+			expect(result.value).to.be.false;
 
-				ast = parser.parse("0 != '0'");
-				sandbox = SandBoxr.create(ast);
+			ast = parser.parse("0 != '0'");
+			sandbox = SandBoxr.create(ast);
 
-				return sandbox.resolve();
-			}).then(result => {
-				expect(result.value).to.be.true;
-				done();
-			});
+			result = sandbox.execute(env);
+			expect(result.value).to.be.true;	
 		});
 	});
 });

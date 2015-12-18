@@ -7,7 +7,7 @@ export default function ($target, env, factory) {
 	};
 
 	let getterFunc = factory.createGetter(function () {
-		return getter.call(this.node);
+		return getter.call(this.object);
 	}, "size");
 
 	$target.define("size", null, {

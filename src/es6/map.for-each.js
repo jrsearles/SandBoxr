@@ -3,18 +3,18 @@ import {assertIsMap, assertIsFunction} from "../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("forEach", factory.createBuiltInFunction(function* (callback, thisArg) {
-		assertIsMap(this.node, "Map.prototype.forEach");
+		assertIsMap(this.object, "Map.prototype.forEach");
 		assertIsFunction(callback, "callback");
 
 		thisArg = thisArg || UNDEFINED;
-		let data = this.node.data;
+		let data = this.object.data;
 		let index = 0;
 
 		// length might change during iteration
 		while (index < data.length) {
 			let entry = data[index++];
 			if (entry) {
-				let args = [entry.value, entry.key, this.node];
+				let args = [entry.value, entry.key, this.object];
 				yield callback.call(thisArg, args);
 			}
 		}

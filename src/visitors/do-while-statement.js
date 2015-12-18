@@ -1,22 +1,25 @@
 import {toBoolean} from "../utils/native";
 
-export default function* DoWhileStatement (context) {
+export default function* DoWhileStatement (node, context, next) {
+	context = context.createLoop();
+	
 	let result, priorResult;
 	let passed = true;
 
-	if (context.node.type === "WhileStatement") {
-		passed = toBoolean((yield context.create(context.node.test).execute()).result.getValue());
+	if (node.isWhileStatement()) {
+		passed = toBoolean((yield next(node.test, context)).result.getValue());
 	}
 
 	while (passed) {
-		result = yield context.create(context.node.body).execute();
-		if (result && result.shouldBreak(context, true, priorResult)) {
-			return result;
+		result = yield next(node.body, context);
+		
+		if (context.shouldBreak(result)) {
+			return context.abrupt(result, priorResult);
 		}
 
-		passed = toBoolean((yield context.create(context.node.test).execute()).result.getValue());
+		passed = toBoolean((yield next(node.test, context)).result.getValue());
 		priorResult = result;
 	}
 
-	return result;
+	return result || context.empty();
 }

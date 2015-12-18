@@ -3,7 +3,7 @@ import {isNullOrUndefined} from "../../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("slice", factory.createBuiltInFunction(function* (start, end) {
-		let stringValue = yield toString(this.node);
+		let stringValue = yield toString(this.object);
 		let startValue = yield toInteger(start);
 		let endValue;
 

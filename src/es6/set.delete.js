@@ -2,9 +2,9 @@ import {assertIsSet} from "../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("delete", factory.createBuiltInFunction(function (value) {
-		assertIsSet(this.node, "Set.prototype.delete");
+		assertIsSet(this.object, "Set.prototype.delete");
 
-		let entries = this.node.data;
+		let entries = this.object.data;
 		let index = entries.length;
 
 		while (index--) {

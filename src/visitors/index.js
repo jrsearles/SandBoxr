@@ -78,13 +78,3 @@ export const visitors = {
 	Program: BlockStatement,
 	WhileStatement: DoWhileStatement
 };
-
-// export default {
-// 	*visit (context) {
-// 		if (!(context.node.type in visitors)) {
-// 			throw TypeError(`No handler defined for: ${context.node.type}`);
-// 		}
-
-// 		return yield visitors[context.node.type](context);
-// 	}
-// };

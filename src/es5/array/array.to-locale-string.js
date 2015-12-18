@@ -3,14 +3,14 @@ import {isNullOrUndefined} from "../../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("toLocaleString", factory.createBuiltInFunction(function* () {
-		let length = yield toLength(this.node);
+		let length = yield toLength(this.object);
 		let arr = new Array(length);
 		let i = 0;
 		let current;
 
 		while (i < length) {
-			if (this.node.has(i)) {
-				current = this.node.getValue(i);
+			if (this.object.has(i)) {
+				current = this.object.getValue(i);
 
 				if (isNullOrUndefined(current)) {
 					arr[i] = "";

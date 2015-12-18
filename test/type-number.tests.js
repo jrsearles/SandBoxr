@@ -1,4 +1,3 @@
-// import {describe, it} from "mocha";
 import {es5 as runner} from "./test-runner";
 
 describe("Type: Number", () => {
@@ -12,7 +11,7 @@ describe("Type: Number", () => {
 	describe("as object", () => {
 		it("should return as object if called with `new`", () => runner.confirmBlock("typeof new Number(1) == 'object';"));
 		it("should not strictly equal a number primitive", () => runner.confirmBlock("!(1 === new Number(1));"));
-		// it("should implicitly equal a number primitive", () => runner.confirmBlock("1 == new Number(1);"));
+		it("should implicitly equal a number primitive", () => runner.confirmBlock("1 == new Number(1);"));
 	});
 
 	describe("when converting", () => {

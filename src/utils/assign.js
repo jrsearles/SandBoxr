@@ -17,7 +17,7 @@ export function* assign (env, leftNode, rightValue) {
 	switch (leftNode.type) {
 		case "Identifier":
 		case "MemberExpression":
-			let left = (yield env.createExecutionContext(leftNode).execute()).result;
+			let left = (yield env.createExecutionContext().execute(leftNode)).result;
 			left.setValue(rightValue, env.isStrict());
 			break;
 
@@ -49,7 +49,7 @@ function* destructure (env, leftNode, rightValue, cb) {
 
 function* handleDefault (env, left, rightValue, cb) {
 	if (rightValue === UNDEFINED) {
-		let defaultValue = (yield env.createExecutionContext(left.right).execute());
+		let defaultValue = (yield env.createExecutionContext().execute(left.right));
 		rightValue = defaultValue.result.getValue();
 	}
 
@@ -67,7 +67,7 @@ function* destructureArray (env, pattern, arr, cb) {
 
 function* getObjectKey (env, keyNode) {
 	if (keyNode.computed) {
-		let key = (yield env.createExecutionContext(keyNode).execute()).result.getValue();
+		let key = (yield env.createExecutionContext().execute(keyNode)).result.getValue();
 		return yield toPropertyKey(key);
 	}
 

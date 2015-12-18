@@ -20,17 +20,17 @@ export default function ($target, env, factory) {
 	}
 
 	$target.define("replace", factory.createBuiltInFunction(function* (regexOrSubstr, substrOrFn) {
-		assertIsNotNullOrUndefined(this.node, "String.prototype.replace");
+		assertIsNotNullOrUndefined(this.object, "String.prototype.replace");
 
 		let replaceKey = SymbolType.getByKey("replace");
 		if (replaceKey && !isNullOrUndefined(regexOrSubstr)) {
 			let replaceMethod = getMethod(regexOrSubstr, replaceKey);
 			if (replaceMethod) {
-				return yield replaceMethod.call(regexOrSubstr, [this.node, substrOrFn]);
+				return yield replaceMethod.call(regexOrSubstr, [this.object, substrOrFn]);
 			}
 		}
 
-		let stringValue = yield toString(this.node);
+		let stringValue = yield toString(this.object);
 
 		let matcher;
 		if (regexOrSubstr && regexOrSubstr.className === "RegExp") {

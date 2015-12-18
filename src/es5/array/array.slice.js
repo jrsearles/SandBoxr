@@ -4,8 +4,8 @@ import iterate from "../../iterators/";
 
 export default function ($target, env, factory) {
 	$target.define("slice", factory.createBuiltInFunction(function* (begin, end) {
-		let source = this.node;
-		let length = yield toLength(this.node);
+		let source = this.object;
+		let length = yield toLength(this.object);
 		begin = begin ? (yield toInteger(begin)) : 0;
 
 		if (!end || end.type === "undefined") {
