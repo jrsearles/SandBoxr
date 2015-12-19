@@ -104,6 +104,13 @@ export function assertAreValidArguments (params, strict) {
 	});
 }
 
+export function assertAreValidSetterArguments (params, strict) {
+	assertAreValidArguments(params, strict);
+	if (params.some(p => p.isRestElement())) {
+		throw SyntaxError("A rest element cannot be used with a setter");
+	}
+}
+
 export function assertIsMap (obj, methodName) {
 	if (!obj || obj.className !== "Map") {
 		throw TypeError(`The object must be a map when calling ${methodName}`);

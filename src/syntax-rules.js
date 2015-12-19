@@ -28,14 +28,6 @@ const rules = {
 		assertAreValidArguments(node.params, node.isStrict() || context.env.isStrict());
 	},
 
-	// FunctionExpression (node, parent, state) {
-	// 	if (node.id) {
-	// 		assertIsValidName(node.id.name, node.isStrict() || context.env.isStrict());
-	// 	}
-
-	// 	assertAreValidArguments(node.params, node.isStrict() || context.env.isStrict());
-	// },
-
 	Literal (node, context) {
 		if (node.raw && (node.isStrict() || context.env.isStrict())) {
 			if (isOctalLiteral(node.raw, node.value)) {
@@ -47,10 +39,6 @@ const rules = {
 	UpdateExpression (node, context) {
 		validateAssignment(node.argument, node.isStrict() || context.env.isStrict());
 	},
-
-	// VariableDeclarator (node, parent, state) {
-	// 	assertIsValidName(node.id.name, node.isStrict() || context.env.isStrict());
-	// },
 
 	WithStatement (node, context) {
 		if (node.isStrict() || context.env.isStrict()) {

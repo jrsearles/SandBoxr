@@ -1,7 +1,5 @@
 import {UNDEFINED} from "../types/primitive-type";
-import * as EstreeIterator from "../estree/";
 import {isStrictNode, assertIsValidParameterName} from "../utils/contracts";
-import rules from "../syntax-rules";
 import {each} from "../utils/async";
 import {declare} from "../utils/assign";
 
@@ -24,16 +22,10 @@ export class Scope {
 			return;
 		}
 
-		// let self = this;
 		let env = this.env;
-		this.scope.strict = node.isStrict(); // isStrictNode(node.body);
+		this.scope.strict = node.isStrict(); 
 
 		let strict = this.scope.strict || env.isStrict();
-		// if (strict && node.isProgram()) {
-		// 	// todo: see if we can combine below for a single iteration
-		// 	EstreeIterator.walk(node, rules, {strict: true});
-		// }
-		
 		node.getBindings().forEach(decl => {
 			let name = decl.id.name;
 			
@@ -45,7 +37,7 @@ export class Scope {
 			
 			if (decl.isFunction()) {
 				initialized = true;
-				let strictFunc = strict || decl.isStrict(); // isStrictNode(decl.body.body);
+				let strictFunc = strict || decl.isStrict(); 
 				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc});
 				value.bindScope(this);
 			} else if (env.has(name)) {
@@ -57,54 +49,6 @@ export class Scope {
 				newVar.setValue(value);
 			}
 		});
-		
-		// hoist variables
-		// EstreeIterator.walk(node, {
-		// 	// skip functions
-		// 	FunctionExpression: false,
-			
-		// 	// do not hoist variables declared within tests
-		// 	IfStatement: ["consequent", "alternate"],
-			
-		// 	FunctionDeclaration (context) {
-		// 		let {node} = context;
-		// 		let name = node.id.name;
-				
-		// 		assertIsValidParameterName(name, strict);
-		// 		let strictFunc = strict || isStrictNode(node.body.body);
-		// 		let value = env.objectFactory.createFunction(node, undefined, {strict: strictFunc});
-		// 		value.bindScope(self);
-				
-		// 		let newVar = env.createVariable(name, {configurable: false});
-		// 		newVar.setValue(value);
-				
-		// 		// do not scan body
-		// 		return false;
-		// 	},
-			
-		// 	VariableDeclarator (context) {
-		// 		let {node} = context;
-		// 		let parent = context.parent.node;
-				
-		// 		let name = node.id.name;
-		// 		let writable = parent.kind !== "const";
-		// 		let initialized = parent.kind === "var";
-				
-		// 		assertIsValidParameterName(name, strict);
-				
-		// 		if (self.scope.has(name)) {
-		// 			return;
-		// 		}
-				
-		// 		let newVar = env.createVariable(name, {configurable: false, writable, initialized});
-				
-		// 		if (initialized) {
-		// 			newVar.setValue(UNDEFINED);
-		// 		}
-				
-		// 		return false;
-		// 	}
-		// });
 	}
 
 	*loadComplexArgs (params, args, callee) {
@@ -118,7 +62,7 @@ export class Scope {
 		let argLength = args.length;
 
 		yield each(params, function* (param, index) {
-			if (param.type === "RestElement") {
+			if (param.isRestElement()) {
 				let rest = env.objectFactory.createArray();
 				let restIndex = 0;
 
@@ -126,9 +70,9 @@ export class Scope {
 					rest.setValue(restIndex++, args[argIndex++] || UNDEFINED);
 				}
 
-				scope.setValue(param.name, rest);
+				yield declare(env, param.argument, rest);
 			} else {
-				yield declare(env, param, args[argIndex++] || UNDEFINED, true);
+				yield declare(env, param, args[argIndex++] || UNDEFINED);
 			}
 		});
 

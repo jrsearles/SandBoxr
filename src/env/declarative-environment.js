@@ -51,15 +51,12 @@ export class DeclarativeEnvironment {
 
 	setValue (key, value, throwOnError) {
 		if (this.has(key)) {
-			if (!this.properties[key].writable) {
-				if (throwOnError) {
-					throw TypeError(`Cannot write to immutable binding: ${key}`);
-				}
-
-				return false;
+			let propInfo = this.properties[key];
+			if (propInfo.initialized && !propInfo.writable) {
+				throw TypeError(`Cannot write to immutable binding: ${key}`);
 			}
 
-			this.properties[key].setValue(value);
+			propInfo.setValue(value);
 			return true;
 		} else {
 			return this.parent.setValue(...arguments);

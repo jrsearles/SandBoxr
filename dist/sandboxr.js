@@ -1,3 +1,9 @@
+/**
+ * SandBoxr JavaScript library v1.0.0
+ * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr
+ * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+ */
+
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.SandBoxr = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
@@ -4625,15 +4631,12 @@ var DeclarativeEnvironment = exports.DeclarativeEnvironment = (function () {
 		key: "setValue",
 		value: function setValue(key, value, throwOnError) {
 			if (this.has(key)) {
-				if (!this.properties[key].writable) {
-					if (throwOnError) {
-						throw TypeError("Cannot write to immutable binding: " + key);
-					}
-
-					return false;
+				var propInfo = this.properties[key];
+				if (propInfo.initialized && !propInfo.writable) {
+					throw TypeError("Cannot write to immutable binding: " + key);
 				}
 
-				this.properties[key].setValue(value);
+				propInfo.setValue(value);
 				return true;
 			} else {
 				var _parent;
@@ -5266,23 +5269,11 @@ exports.Scope = undefined;
 
 var _primitiveType = require("../types/primitive-type");
 
-var _estree = require("../estree/");
-
-var EstreeIterator = _interopRequireWildcard(_estree);
-
 var _contracts = require("../utils/contracts");
-
-var _syntaxRules = require("../syntax-rules");
-
-var _syntaxRules2 = _interopRequireDefault(_syntaxRules);
 
 var _async = require("../utils/async");
 
 var _assign = require("../utils/assign");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -5312,16 +5303,10 @@ var Scope = exports.Scope = (function () {
 				return;
 			}
 
-			// let self = this;
 			var env = this.env;
-			this.scope.strict = node.isStrict(); // isStrictNode(node.body);
+			this.scope.strict = node.isStrict();
 
 			var strict = this.scope.strict || env.isStrict();
-			// if (strict && node.isProgram()) {
-			// 	// todo: see if we can combine below for a single iteration
-			// 	EstreeIterator.walk(node, rules, {strict: true});
-			// }
-
 			node.getBindings().forEach(function (decl) {
 				var name = decl.id.name;
 
@@ -5333,7 +5318,7 @@ var Scope = exports.Scope = (function () {
 
 				if (decl.isFunction()) {
 					initialized = true;
-					var strictFunc = strict || decl.isStrict(); // isStrictNode(decl.body.body);
+					var strictFunc = strict || decl.isStrict();
 					value = env.objectFactory.createFunction(decl, undefined, { strict: strictFunc });
 					value.bindScope(_this);
 				} else if (env.has(name)) {
@@ -5345,54 +5330,6 @@ var Scope = exports.Scope = (function () {
 					newVar.setValue(value);
 				}
 			});
-
-			// hoist variables
-			// EstreeIterator.walk(node, {
-			// 	// skip functions
-			// 	FunctionExpression: false,
-
-			// 	// do not hoist variables declared within tests
-			// 	IfStatement: ["consequent", "alternate"],
-
-			// 	FunctionDeclaration (context) {
-			// 		let {node} = context;
-			// 		let name = node.id.name;
-
-			// 		assertIsValidParameterName(name, strict);
-			// 		let strictFunc = strict || isStrictNode(node.body.body);
-			// 		let value = env.objectFactory.createFunction(node, undefined, {strict: strictFunc});
-			// 		value.bindScope(self);
-
-			// 		let newVar = env.createVariable(name, {configurable: false});
-			// 		newVar.setValue(value);
-
-			// 		// do not scan body
-			// 		return false;
-			// 	},
-
-			// 	VariableDeclarator (context) {
-			// 		let {node} = context;
-			// 		let parent = context.parent.node;
-
-			// 		let name = node.id.name;
-			// 		let writable = parent.kind !== "const";
-			// 		let initialized = parent.kind === "var";
-
-			// 		assertIsValidParameterName(name, strict);
-
-			// 		if (self.scope.has(name)) {
-			// 			return;
-			// 		}
-
-			// 		let newVar = env.createVariable(name, {configurable: false, writable, initialized});
-
-			// 		if (initialized) {
-			// 			newVar.setValue(UNDEFINED);
-			// 		}
-
-			// 		return false;
-			// 	}
-			// });
 		}
 	}, {
 		key: "loadComplexArgs",
@@ -5417,8 +5354,8 @@ var Scope = exports.Scope = (function () {
 									while (1) {
 										switch (_context.prev = _context.next) {
 											case 0:
-												if (!(param.type === "RestElement")) {
-													_context.next = 7;
+												if (!param.isRestElement()) {
+													_context.next = 8;
 													break;
 												}
 
@@ -5429,15 +5366,18 @@ var Scope = exports.Scope = (function () {
 													rest.setValue(restIndex++, args[argIndex++] || _primitiveType.UNDEFINED);
 												}
 
-												scope.setValue(param.name, rest);
-												_context.next = 9;
+												_context.next = 6;
+												return (0, _assign.declare)(env, param.argument, rest);
+
+											case 6:
+												_context.next = 10;
 												break;
 
-											case 7:
-												_context.next = 9;
-												return (0, _assign.declare)(env, param, args[argIndex++] || _primitiveType.UNDEFINED, true);
+											case 8:
+												_context.next = 10;
+												return (0, _assign.declare)(env, param, args[argIndex++] || _primitiveType.UNDEFINED);
 
-											case 9:
+											case 10:
 											case "end":
 												return _context.stop();
 										}
@@ -5647,7 +5587,7 @@ var Scope = exports.Scope = (function () {
 	return Scope;
 })();
 
-},{"../estree/":356,"../syntax-rules":370,"../types/primitive-type":381,"../utils/assign":387,"../utils/async":388,"../utils/contracts":389}],198:[function(require,module,exports){
+},{"../types/primitive-type":381,"../utils/assign":387,"../utils/async":388,"../utils/contracts":389}],198:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21300,6 +21240,7 @@ exports.assertIsValidName = assertIsValidName;
 exports.assertIsNotGeneric = assertIsNotGeneric;
 exports.assertIsValidIdentifier = assertIsValidIdentifier;
 exports.assertAreValidArguments = assertAreValidArguments;
+exports.assertAreValidSetterArguments = assertAreValidSetterArguments;
 exports.assertIsMap = assertIsMap;
 exports.assertIsSet = assertIsSet;
 exports.isValidArrayLength = isValidArrayLength;
@@ -21424,6 +21365,15 @@ function assertAreValidArguments(params, strict) {
 			}
 		}
 	});
+}
+
+function assertAreValidSetterArguments(params, strict) {
+	assertAreValidArguments(params, strict);
+	if (params.some(function (p) {
+		return p.isRestElement();
+	})) {
+		throw TypeError();
+	}
 }
 
 function assertIsMap(obj, methodName) {
@@ -24157,7 +24107,7 @@ function setDescriptor(env, obj, descriptor) {
 	}
 
 	if (descriptor.set) {
-		(0, _contracts.assertAreValidArguments)(descriptor.set.node.params, strict);
+		(0, _contracts.assertAreValidSetterArguments)(descriptor.set.node.params, strict);
 		descriptor.setter = regeneratorRuntime.mark(function _callee2(value) {
 			return regeneratorRuntime.wrap(function _callee2$(_context2) {
 				while (1) {
