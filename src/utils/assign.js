@@ -2,8 +2,25 @@ import {UNDEFINED} from "../types/primitive-type";
 import {each} from "./async";
 import {toPropertyKey} from "./native";
 
+export function* reset (env, leftNode, priorScope, newScope) {
+	if (leftNode.isVariableDeclaration()) {
+		yield each(leftNode.declarations, function* (decl) { yield reset(env, decl, priorScope, newScope); });
+	} else if (leftNode.isLet() || leftNode.isConst()) {
+		let currentBinding = priorScope.getVariable(leftNode.id.name);
+		newScope.getVariable(leftNode.id.name).setValue(currentBinding.getValue());
+	} else {
+		yield destructure(env, leftNode, null, (env, left) => reset(env, left, priorScope, newScope));
+	}
+}
+
 export function* declare (env, leftNode, rightValue) {
-	if (leftNode.type === "Identifier") {
+  if (leftNode.isVariableDeclaration()) {
+    for (let decl of leftNode.declarations) {
+      yield declare(env, decl, rightValue);
+    }
+  } else if (leftNode.isVariableDeclarator()) {
+    yield declare(env, leftNode.id, rightValue);
+  } else if (leftNode.isIdentifier()) {
 		let left = env.createVariable(leftNode.name);
 		left.setValue(rightValue);
 	} else {

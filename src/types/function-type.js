@@ -1,7 +1,7 @@
 import {ObjectType} from "./object-type";
 import {PropertyDescriptor} from "./property-descriptor";
 import {UNDEFINED} from "./primitive-type";
-import {isStrictNode, isNullOrUndefined, isObject} from "../utils/contracts";
+import {isNullOrUndefined, isObject} from "../utils/contracts";
 
 function getParameterLength (params) {
 	for (let i = 0, ln = params.length; i < ln; i++) {
@@ -86,8 +86,8 @@ export class FunctionType extends ObjectType {
 		yield scope.loadArgs(this.node.params, args || [], this);
 		scope.init(this.node);
 		
-		if (this.name) {
-			env.createVariable(this.name).setValue(this);
+		if (this.node.id) {
+			env.createVariable(this.node.id.name).setValue(this);
 		}
 
 		return yield scope.use(function* () {
@@ -132,7 +132,7 @@ export class FunctionType extends ObjectType {
 			return false;
 		}
 
-		return (this.strict = isStrictNode(this.node.body.body));
+		return this.node.body.isStrict();
 	}
 
 	hasInstance (obj) {

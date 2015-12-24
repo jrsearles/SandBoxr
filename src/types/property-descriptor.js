@@ -102,7 +102,7 @@ export class PropertyDescriptor {
 
 	getValue () {
 		if (!this.initialized) {
-			throw TypeError();
+			throw ReferenceError(`${this.key} has not been initialized`);
 		}
 		
 		if (this.dataProperty) {
@@ -136,5 +136,10 @@ export class PropertyDescriptor {
 
 	hasValue () {
 		return !!this.value || !!this.getter;
+	}
+	
+	init (value) {
+		this.initialized = true;
+		this.value = value;
 	}
 }

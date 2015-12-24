@@ -1,7 +1,7 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {isStrictNode, assertIsValidParameterName} from "../utils/contracts";
+import {assertIsValidParameterName} from "../utils/contracts";
 import {each} from "../utils/async";
-import {declare} from "../utils/assign";
+import {declare, reset} from "../utils/assign";
 
 export class Scope {
 	constructor (env, scope) {
@@ -9,7 +9,7 @@ export class Scope {
 
 		this.scope = scope;
 		this.env = env;
-		this.priorScope = (env.current || env.globalScope).scope;
+		this.parentScope = (env.current || env.globalScope).scope;
 	}
 
 	/**
@@ -38,22 +38,22 @@ export class Scope {
 			if (decl.isFunction()) {
 				initialized = true;
 				let strictFunc = strict || decl.isStrict(); 
-				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc});
-				value.bindScope(this);
+				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc, name});
+				// value.bindScope(this);
 			} else if (env.has(name)) {
 				return;
 			}
 		
 			let newVar = env.createVariable(name, {configurable: false, writable, initialized});
 			if (initialized) {
-				newVar.setValue(value);
+				newVar.init(value);
 			}
 		});
 	}
 
 	*loadComplexArgs (params, args, callee) {
 		let env = this.env;
-		let strict = env.isStrict() || isStrictNode(callee.node);
+		let strict = env.isStrict() || callee.node.isStrict();
 
 		// create a temporary scope for the argument declarations
 		let scope = this.createParameterScope();
@@ -117,7 +117,7 @@ export class Scope {
 
 		// todo: this method is getting far too complex
 		let {env, scope} = this;
-		let strictCallee = isStrictNode(callee.node);
+		let strictCallee = callee.node.isStrict();
 		let strict = env.isStrict() || strictCallee;
 
 		let argumentList = env.objectFactory.createArguments(args, callee, strict);
@@ -180,7 +180,7 @@ export class Scope {
 	}
 
 	/**
-	 * Runs the passed in function and exits the scope when the function completes,
+	 * uses the passed in function and exits the scope when the function completes,
 	 * returning the environment back to the previos state.
 	 * @param {Function} inner - The function to execute.
 	 * @returns {Iterator} The function results
@@ -202,6 +202,6 @@ export class Scope {
 	 * @returns {void}
 	 */
 	exit () {
-		this.env.setScope(this.priorScope);
+		this.env.setScope(this.parentScope);
 	}
 }

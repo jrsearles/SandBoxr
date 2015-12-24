@@ -8,6 +8,7 @@ import es6 from "../es6";
 import {default as operators} from "../utils/operators";
 import {assertIsValidIdentifier} from "../utils/contracts";
 import {Scope} from "./scope";
+import {BlockScope} from "./block-scope";
 
 const defaultOptions = {
 	allowDebugger: false,
@@ -81,6 +82,28 @@ export class Environment {
 		this.current.scope.deleteVariable(key);
 	}
 
+	declare (key, value) {
+		let propInfo = this.getVariable(key);
+		if (!propInfo) {
+			propInfo = this.createVariable(key);
+		}	
+		
+		propInfo.init(value);
+	}
+	
+	getVariable (key) {
+    let scope = this.current && this.current.scope;
+    while (scope) {
+      if (scope.owns(key)) {
+        return scope.getVariable(key);
+      }
+      
+      scope = scope.parent;
+    }
+    
+		return null;
+	}
+	
 	/**
 	 * Declares a variable within the current scope.
 	 * @param {String} key - the key of the variable.
@@ -157,7 +180,7 @@ export class Environment {
 	}
 
 	createExecutionScope (fn, thisArg) {
-		let priorScope = this.current.scope;
+		let parentScope = this.current.scope;
 
 		// if a parent scope is defined we need to limit this scope to that scope
 		if (fn.boundScope) {
@@ -170,8 +193,19 @@ export class Environment {
 		}
 
 		let scope = this.createScope(thisArg);
-		scope.priorScope = priorScope;
+		scope.parentScope = parentScope;
 		return scope;
+	}
+	
+	createBlockScope (node) {
+		let scope = this.current.scope;
+		if (node.hasBindings() && !node.isProgram()) {
+			scope = scope.createChildScope();
+		}
+	
+		this.current = new BlockScope(this, scope, node);
+		this.current.init(node);
+		return this.current;
 	}
 
 	/**

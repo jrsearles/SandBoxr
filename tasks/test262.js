@@ -1,18 +1,8 @@
-// import * as SandBoxr from "../";
-// import path from  "path";
-// import test262 from "../../test262-5-streamer";
-// import streamer6 from "../../test262-6-streamer";
-// import gulp from "gulp";
-// import gutil from "gulp-util";
-// import through from "through2";
-// import * as parser from "../test/ast-parser";
-// import yargs from "yargs";
 var yargs = require("yargs");
 var acorn = require("acorn");
 var through = require("through2");
 var gulp = require("gulp");
 var gutil = require("gulp-util");
-var SandBoxr = require("../dist/sandboxr");
 var path = require("path");
 
 var args = 	yargs.default("verbose", false)
@@ -48,7 +38,8 @@ function testsCompleted () {
 	}
 }
 
-gulp.task("test262-6", function () {
+gulp.task("test262-6", ["build"], function () {
+	var SandBoxr = require("../dist/sandboxr");
 	var descriptionMatcher = /^description:\s*([\s\S]+)(?:^--)/mi;
 	var negMatcher = /^negative:/mi;
 	var streamer6 = require("../../test262-6-streamer");
@@ -74,7 +65,7 @@ gulp.task("test262-6", function () {
 	//	- Set -8 (needs WeakSet)
 	//	- SetIterator +
 
-	return streamer6({ files: ["/language/statements/let/**/*.js"] })
+	return streamer6({ files: ["/language/statements/const/**/*.js"] })
 		.pipe(through.obj(function (file, enc, cb) {
 			var filename = path.basename(file.path);
 
@@ -124,12 +115,13 @@ gulp.task("test262-6", function () {
 		.on("finish", testsCompleted);
 });
 
-gulp.task("test262", function () {
+gulp.task("test262", ["build"], function () {
+	var SandBoxr = require("../dist/sandboxr");
 	var test262 = require("../../test262-5-streamer");
 	var base = path.join(__dirname, "../node_modules/test262/test/suite/");
 	
 	// "!ch15/15.1/**/*.js",
-	return test262({ files: ["ch15/15.10/**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
+	return test262({ files: ["ch07/**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
 		.pipe(through.obj(function (file, enc, cb) {
 			var filename = path.basename(file.path);
 			var src = file.contents.toString();

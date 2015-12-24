@@ -117,27 +117,3 @@ export function exhaust (it, value, stack = [], state = "next") {
 
 	return value;
 }
-
-/**
- * Normalizes a result into a promise, whether it is a generator, promise,
- * or normal value.
- *
- * @param {Iterator} [it] - The iterator.
- * @returns {Promise} A promise which resolves or rejects based on the result.
- */
-export function promisify (it) {
-	try {
-		let result = exhaust(it);
-		if (isNextable(result)) {
-			return result;
-		}
-
-		return Promise.resolve(result);
-	} catch (err) {
-		if (typeof err === "object" && typeof err.toNative === "function") {
-			err = err.toNative();
-		}
-
-		return Promise.reject(err);
-	}
-}

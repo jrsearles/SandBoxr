@@ -1,5 +1,6 @@
 import {Reference} from "./reference";
 import {PropertyDescriptor} from "../types/property-descriptor";
+import {UNDEFINED} from "../types/primitive-type";
 
 export class DeclarativeEnvironment {
 	constructor (parent, thisArg, env, strict) {
@@ -8,6 +9,10 @@ export class DeclarativeEnvironment {
 		this.thisBinding = thisArg;
 		this.env = env;
 		this.strict = strict;
+	}
+	
+	createChildScope () {
+		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict);
 	}
 
 	setParent (parent) {
@@ -26,6 +31,10 @@ export class DeclarativeEnvironment {
 
 	owns (key) {
 		return this.has(key);
+	}
+	
+	getVariable (key) {
+		return this.properties[key];
 	}
 
 	deleteVariable (key) {
@@ -50,8 +59,12 @@ export class DeclarativeEnvironment {
 	}
 
 	setValue (key, value, throwOnError) {
-		if (this.has(key)) {
-			let propInfo = this.properties[key];
+		let propInfo = this.properties[key];
+		if (propInfo) {
+			if (!propInfo.initialized) {
+				throw ReferenceError(`${key} cannot be set before it has been declared`);
+			}
+			
 			if (propInfo.initialized && !propInfo.writable) {
 				throw TypeError(`Cannot write to immutable binding: ${key}`);
 			}
@@ -73,7 +86,7 @@ export class DeclarativeEnvironment {
 			throw ReferenceError(`${key} is not defined`);
 		}
 		
-		return undefined;
+		return UNDEFINED;
 	}
 
 	getThisBinding () {

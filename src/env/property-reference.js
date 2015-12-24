@@ -27,9 +27,13 @@ export class PropertyReference extends Reference {
 	 * @returns {Boolean} The result of the value assignment.
 	 */
 	setValue (value, throwOnError) {
+		let propInfo = this.base.getProperty(this.key);
+		if (propInfo && !propInfo.initialized) {
+			throw ReferenceError(`Cannot ${this.key} before it has been initialized`);
+		}
+		
 		if (throwOnError) {
 			// todo: why can't this go in the setValue function?
-			let propInfo = this.base.getProperty(this.key);
 			if (propInfo && !propInfo.canSetValue()) {
 				throw TypeError(`Cannot assign to read only property '${this.key}'`);
 			}

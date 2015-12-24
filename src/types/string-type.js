@@ -47,8 +47,8 @@ export class StringType extends PrimitiveType {
 		return super.getOwnProperty(...arguments);
 	}
 
-	getOwnPropertyKeys (key) {
-		lazyInit(this, key);
+	getOwnPropertyKeys () {
+		lazyInit(this, 0);
 		return super.getOwnPropertyKeys(...arguments);
 	}
 

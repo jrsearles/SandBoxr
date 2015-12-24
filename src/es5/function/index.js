@@ -68,10 +68,10 @@ export default function functionApi (env) {
 
 			wrappedFunc.nativeLength = callee.params.length;
 			wrappedFunc.strict = strict;
-			funcInstance = objectFactory.createFunction(wrappedFunc, undefined, {strict});
+			funcInstance = objectFactory.createFunction(wrappedFunc, undefined, {strict, name: "anonymous"});
 			funcInstance.bindScope(env.globalScope);
 		} else {
-			funcInstance = objectFactory.createFunction(function () {});
+			funcInstance = objectFactory.createFunction(function () {}, undefined, {name: "anonymous"});
 		}
 
 		funcInstance.setValue("constructor", funcClass);

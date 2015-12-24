@@ -11,7 +11,7 @@ var uglify = require("gulp-uglify");
 var rename = require("gulp-rename");
 var header = require("gulp-header");
 
-// require("./tasks/test262");
+require("./tasks/test262");
 
 // import browserify from "browserify";
 // import babelify from "babelify";

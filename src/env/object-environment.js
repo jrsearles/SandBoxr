@@ -1,4 +1,5 @@
 import {PropertyReference} from "./property-reference";
+import {DeclarativeEnvironment} from "./declarative-environment";
 
 export class ObjectEnvironment {
 	constructor (parent, obj, thisArg, env, strict) {
@@ -7,6 +8,10 @@ export class ObjectEnvironment {
 		this.thisBinding = thisArg || obj;
 		this.env = env;
 		this.strict = strict;
+	}
+	
+	createChildScope () {
+		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict);
 	}
 
 	getReference (key, unqualified) {

@@ -281,7 +281,7 @@ export class ObjectFactory {
 	 * @param {Object} [options] - Property values to be used for the prototype.
 	 * @returns {FunctionType} The function instance.
 	 */
-	createFunction (fnOrNode, proto, {configurable = false, enumerable = false, writable = true, strict = false, name = "anonymous"} = {}) {
+	createFunction (fnOrNode, proto, {configurable = false, enumerable = false, writable = true, strict = false, name} = {}) {
 		let instance;
 
 		if (typeof fnOrNode === "function") {
@@ -291,12 +291,12 @@ export class ObjectFactory {
 		}
 
 		instance.init(this.env, proto, {configurable, enumerable, writable}, strict);
-		instance.name = name;
-
-		if (this.options.ecmaVersion > 5) {
-			instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
+		instance.name = name || "";
+		
+		if (name) {
+			instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
 		}
-
+		
 		setProto("Function", instance, this);
 		return instance;
 	}

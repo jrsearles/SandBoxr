@@ -24,9 +24,9 @@ export const es6 = {
 
 			expect(false).to.be.true;
 		} catch (err) {
-			if (typeof err === "object" && err.toNative) {
-				err = err.toNative();
-			}
+			// if (typeof err === "object" && err.toNative) {
+			// 	err = err.toNative();
+			// }
 			
 			expect(err).to.be.instanceOf(errType);
 		}
@@ -51,9 +51,9 @@ export const es5 = {
 			expect(false).to.be.true;
 			done && done();
 		} catch (err) {
-			if (typeof err === "object" && err.toNative) {
-				err = err.toNative();
-			}
+			// if (typeof err === "object" && err.toNative) {
+			// 	err = err.toNative();
+			// }
 			
 			expect(err).to.be.instanceOf(errType);
 			done && done();
@@ -65,8 +65,7 @@ export const es5 = {
 		env.init();
 
 		let runner = getRunner(code);
-		return runner.resolve(env).then(function () {
-			return env;
-		});
+		runner.execute(env);
+		return env;
 	}
 };

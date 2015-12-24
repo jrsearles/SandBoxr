@@ -1,3 +1,8 @@
 export default function FunctionDeclaration (node, context) {
-	return context.result(context.env.getValue(node.id.name));
+	let func = context.env.getValue(node.id.name);
+	if (func && func.className === "Function") {
+		func.bindScope(context.env.current);
+	}
+	
+	return context.result(func);
 }

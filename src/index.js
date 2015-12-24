@@ -1,5 +1,6 @@
 import {Environment} from "./env";
 import {exhaust as x, isThenable} from "./utils/async";
+import {ErrorType} from "./types/error-type";
 
 export class Sandbox {
 	/**
@@ -26,7 +27,17 @@ export class Sandbox {
 			env.init(this.options);
 		}
 
-		let executionResult = x(env.createExecutionContext().execute(this.ast));
+		let executionResult;
+		try {
+			executionResult = x(env.createExecutionContext().execute(this.ast));
+		} catch (err) {
+			if (err instanceof ErrorType) {
+				err = err.toNative();
+			}
+			
+			throw err;
+		}
+		
 		if (isThenable(executionResult)) {
 			return executionResult.then(res => res.result);
 		}

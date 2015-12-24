@@ -68,10 +68,10 @@ export class TraversalContext {
 		let currentBlock = this._parent ? this._parent.blockParent : this;
 		
 		if (this.isDeclarator()) {
-			currentScope._bindings.push(this);
-			
-			if (this.isBlockScope() && currentScope !== currentBlock) {
+			if (this.isBlockScope()) {
 				currentBlock._bindings.push(this);
+			} else {
+				currentScope._bindings.push(this);
 			}
 		}
 		
@@ -124,6 +124,10 @@ export class TraversalContext {
 	
 	getBindings () {
 		return this._bindings || [];
+	}
+	
+	hasBindings () {
+		return this.getBindings().length > 0;
 	}
 	
 	getParent () {

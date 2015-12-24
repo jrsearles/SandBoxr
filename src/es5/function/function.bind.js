@@ -14,9 +14,9 @@ export default function ($target, env, factory) {
 		};
 
 		nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
-		nativeFunc.strict = env.isStrict() || !fn.native && isStrictNode(fn.node.body.body);
+		nativeFunc.strict = env.isStrict() || !fn.native && fn.node.body.isStrict();
 
-		let boundFunc = factory.createFunction(nativeFunc, null);
+		let boundFunc = factory.createFunction(nativeFunc, null, {name: "bound " + fn.name});
 		boundFunc.canConstruct = this.object.canConstruct;
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
