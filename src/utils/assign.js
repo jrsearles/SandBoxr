@@ -14,13 +14,13 @@ export function* reset (env, leftNode, priorScope, newScope) {
 }
 
 export function* declare (env, leftNode, rightValue) {
-  if (leftNode.isVariableDeclaration()) {
-    for (let decl of leftNode.declarations) {
-      yield declare(env, decl, rightValue);
-    }
-  } else if (leftNode.isVariableDeclarator()) {
-    yield declare(env, leftNode.id, rightValue);
-  } else if (leftNode.isIdentifier()) {
+	if (leftNode.isVariableDeclaration()) {
+		for (let decl of leftNode.declarations) {
+			yield declare(env, decl, rightValue);
+		}
+	} else if (leftNode.isVariableDeclarator()) {
+		yield declare(env, leftNode.id, rightValue);
+	} else if (leftNode.isIdentifier()) {
 		let left = env.createVariable(leftNode.name);
 		left.setValue(rightValue);
 	} else {
@@ -75,10 +75,26 @@ function* handleDefault (env, left, rightValue, cb) {
 
 function* destructureArray (env, pattern, arr, cb) {
 	yield each(pattern.elements, function* (current, index) {
-		let propInfo = arr.getProperty(index);
-		let value = propInfo ? propInfo.getValue() : UNDEFINED;
+		if (!current) {
+			return;
+		}
+		
+		if (current.isRestElement()) {
+			let rest = [];
+			
+			// todo: fully iterate
+			while (arr.has(index)) {
+				rest.push(arr.getProperty(index).getValue());
+				index++;
+			}
+			
+			yield cb(env, current.argument, env.objectFactory.createArray(rest));
+		}	else {
+			let propInfo = arr.getProperty(index);
+			let value = propInfo ? propInfo.getValue() : UNDEFINED;
 
-		yield cb(env, current, value);
+			yield cb(env, current, value);
+		}
 	});
 }
 
@@ -93,7 +109,13 @@ function* getObjectKey (env, keyNode) {
 
 function* destructureObject (env, pattern, obj, cb) {
 	yield each(pattern.properties, function* (current) {
-		let key = yield getObjectKey(env, current.key);
+		let key;
+		if (current.computed) {
+			key = yield toPropertyKey((yield env.createExecutionContext().execute(current.key)).result.getValue());
+		} else {
+			key = yield getObjectKey(env, current.key);
+		}
+		
 		let propInfo = obj.getProperty(key);
 		let value = propInfo ? propInfo.getValue() : UNDEFINED;
 
