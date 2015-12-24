@@ -8,6 +8,10 @@ export default class IterableIterator {
 		this.iterator = it;
 		this.advancer = it.getValue("next");
 	}
+	
+	[Symbol.iterator] () {
+		return this;
+	}
 
 	next () {
 		let result = x(this.advancer.call(this.iterator));

@@ -82,7 +82,7 @@ export class ExecutionContext {
 		this.value = value;
 		return new ExecutionResult(value, name, obj);
 	}
-
+	
 	empty () {
 		return this.result(UNDEFINED);
 	}

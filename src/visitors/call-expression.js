@@ -1,7 +1,7 @@
 import {PropertyReference} from "../env/property-reference";
 import {toString, toObject} from "../utils/native";
-import {map} from "../utils/async";
 import {UNDEFINED} from "../types/primitive-type";
+import iterate from "../iterators/";
 
 function assignThis (env, fnMember, fn, isNew, native) {
 	if (isNew) {
@@ -25,9 +25,19 @@ export default function* CallExpression (node, context, next) {
 	let fnMember = (yield next(node.callee, context)).result;
 	let fn = fnMember.getValue();
 
-	let args = yield* map(node.arguments, function* (arg) {
-		return (yield next(arg, context)).result.getValue();
-	});
+	let args = [];
+	
+	for (let arg of node.arguments) {
+		let value = (yield next(arg, context)).result.getValue();
+		if (arg.isSpreadElement()) {
+			let it = iterate.getIterator(value);
+			for ({value} of it) {
+				args.push(value);
+			}
+		} else {
+			args.push(value);
+		}
+	}
 
 	if (!fn || fn.className !== "Function") {
 		let stringValue = yield toString(fn);

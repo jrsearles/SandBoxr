@@ -22,6 +22,7 @@ import MetaProperty from "./meta-property";
 import ObjectExpression from "./object-expression";
 import ReturnStatement from "./return-statement";
 import SequenceExpression from "./sequence-expression";
+import SpreadElement from "./spread-element";
 import SwitchStatement from "./switch-statement";
 import TaggedTemplateExpression from "./tagged-template-expression";
 import TemplateLiteral from "./template-literal";
@@ -59,6 +60,7 @@ export const visitors = {
 	ObjectExpression,
 	ReturnStatement,
 	SequenceExpression,
+  SpreadElement,
 	SwitchStatement,
 	TaggedTemplateExpression,
 	TemplateLiteral,

@@ -5274,10 +5274,6 @@ var PropertyReference = exports.PropertyReference = (function (_Reference) {
 				throw ReferenceError("Cannot " + this.key + " before it has been initialized");
 			}
 
-			// if (propInfo && !propInfo.writable) {
-			// 	throw TypeError();
-			// }
-
 			if (throwOnError) {
 				// todo: why can't this go in the setValue function?
 				if (propInfo && !propInfo.canSetValue()) {
@@ -14825,7 +14821,7 @@ exports.default = function ($target, env, factory) {
 					case 0:
 						(0, _contracts.assertIsObject)(target, "Reflect.getOwnPropertyDescriptor");
 						_context.next = 3;
-						return (0, _object.getOwnPropertyDescriptor)(env, target, propertyKey);
+						return (0, _objectHelpers.getOwnPropertyDescriptor)(env, target, propertyKey);
 
 					case 3:
 						return _context.abrupt("return", _context.sent);
@@ -14841,9 +14837,9 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-var _object = require("../es5/object/");
+var _objectHelpers = require("../es5/object/object-helpers");
 
-},{"../es5/object/":253,"../utils/contracts":390}],330:[function(require,module,exports){
+},{"../es5/object/object-helpers":254,"../utils/contracts":390}],330:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17557,6 +17553,11 @@ var IterableIterator = (function () {
 	}
 
 	_createClass(IterableIterator, [{
+		key: Symbol.iterator,
+		value: function value() {
+			return this;
+		}
+	}, {
 		key: "next",
 		value: function next() {
 			var result = (0, _async.exhaust)(this.advancer.call(this.iterator));
@@ -20007,7 +20008,7 @@ var PropertyDescriptor = exports.PropertyDescriptor = (function () {
 		key: "getValue",
 		value: function getValue() {
 			if (!this.initialized) {
-				throw ReferenceError();
+				throw ReferenceError(this.key + " has not been initialized");
 			}
 
 			if (this.dataProperty) {
@@ -20348,7 +20349,7 @@ var ProxyType = exports.ProxyType = (function (_ObjectType) {
 			}
 
 			var env = this[envSymbol];
-			var value = (0, _async.exhaust)(proxyMethod.call(this.handler, [this.target, normalizeKey(env, key), this]));
+			var value = (0, _async.exhaust)(proxyMethod.call(this.handler, [this.target, normalizeKey(env, key), target || this]));
 			var propInfo = this.target.getProperty(key);
 			if (propInfo && !propInfo.configurable) {
 				var targetValue = propInfo.getValue();
@@ -23145,63 +23146,142 @@ exports.default = ArrayExpression;
 
 var _async = require("../utils/async");
 
+var _iterators = require("../iterators/");
+
+var _iterators2 = _interopRequireDefault(_iterators);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var _marked = [ArrayExpression].map(regeneratorRuntime.mark);
 
 function ArrayExpression(node, context, next) {
+	var _this = this;
+
 	var objectFactory, arr;
-	return regeneratorRuntime.wrap(function ArrayExpression$(_context2) {
-		while (1) switch (_context2.prev = _context2.next) {
+	return regeneratorRuntime.wrap(function ArrayExpression$(_context3) {
+		while (1) switch (_context3.prev = _context3.next) {
 			case 0:
 				objectFactory = context.env.objectFactory;
 				arr = objectFactory.createArray();
 
 				if (!node.elements) {
-					_context2.next = 5;
+					_context3.next = 4;
 					break;
 				}
 
-				return _context2.delegateYield((0, _async.each)(node.elements, regeneratorRuntime.mark(function _callee(element, i) {
-					var item;
-					return regeneratorRuntime.wrap(function _callee$(_context) {
+				return _context3.delegateYield(regeneratorRuntime.mark(function _callee2() {
+					var spreadOffset;
+					return regeneratorRuntime.wrap(function _callee2$(_context2) {
 						while (1) {
-							switch (_context.prev = _context.next) {
+							switch (_context2.prev = _context2.next) {
 								case 0:
-									if (!element) {
-										_context.next = 5;
-										break;
-									}
+									spreadOffset = 0;
+									return _context2.delegateYield((0, _async.each)(node.elements, regeneratorRuntime.mark(function _callee(element, index) {
+										var value, it, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step;
 
-									_context.next = 3;
-									return next(element, context);
+										return regeneratorRuntime.wrap(function _callee$(_context) {
+											while (1) {
+												switch (_context.prev = _context.next) {
+													case 0:
+														if (!element) {
+															_context.next = 28;
+															break;
+														}
+
+														_context.next = 3;
+														return next(element, context);
+
+													case 3:
+														value = _context.sent.result.getValue();
+
+														if (!element.isSpreadElement()) {
+															_context.next = 27;
+															break;
+														}
+
+														it = _iterators2.default.getIterator(value);
+														_iteratorNormalCompletion = true;
+														_didIteratorError = false;
+														_iteratorError = undefined;
+														_context.prev = 9;
+
+														for (_iterator = it[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+															value = _step.value.value;
+
+															arr.setIndex(index + spreadOffset, value);
+															spreadOffset++;
+														}
+														_context.next = 17;
+														break;
+
+													case 13:
+														_context.prev = 13;
+														_context.t0 = _context["catch"](9);
+														_didIteratorError = true;
+														_iteratorError = _context.t0;
+
+													case 17:
+														_context.prev = 17;
+														_context.prev = 18;
+
+														if (!_iteratorNormalCompletion && _iterator.return) {
+															_iterator.return();
+														}
+
+													case 20:
+														_context.prev = 20;
+
+														if (!_didIteratorError) {
+															_context.next = 23;
+															break;
+														}
+
+														throw _iteratorError;
+
+													case 23:
+														return _context.finish(20);
+
+													case 24:
+														return _context.finish(17);
+
+													case 25:
+														_context.next = 28;
+														break;
+
+													case 27:
+														arr.setIndex(index + spreadOffset, value);
+
+													case 28:
+													case "end":
+														return _context.stop();
+												}
+											}
+										}, _callee, this, [[9, 13, 17, 25], [18,, 20, 24]]);
+									})), "t0", 2);
+
+								case 2:
+
+									arr.setValue("length", objectFactory.createPrimitive(node.elements.length + spreadOffset));
 
 								case 3:
-									item = _context.sent.result.getValue();
-
-									arr.setIndex(i, item);
-
-								case 5:
 								case "end":
-									return _context.stop();
+									return _context2.stop();
 							}
 						}
-					}, _callee, this);
-				})), "t0", 4);
+					}, _callee2, _this);
+				})(), "t0", 4);
 
 			case 4:
-
-				arr.setValue("length", objectFactory.createPrimitive(node.elements.length));
+				return _context3.abrupt("return", context.result(arr));
 
 			case 5:
-				return _context2.abrupt("return", context.result(arr));
-
-			case 6:
 			case "end":
-				return _context2.stop();
+				return _context3.stop();
 		}
 	}, _marked[0], this);
 }
 
-},{"../utils/async":389}],396:[function(require,module,exports){
+},{"../iterators/":366,"../utils/async":389}],396:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23337,11 +23417,6 @@ function BlockStatement(node, context, next) {
 							switch (_context2.prev = _context2.next) {
 								case 0:
 									result = undefined, priorResult = undefined;
-
-									// if (node.isProgram()) {
-									// 	context.env.current.init(node);
-									// }
-
 									return _context2.delegateYield((0, _async.each)(node.body, regeneratorRuntime.mark(function _callee(child, i, body, abort) {
 										return regeneratorRuntime.wrap(function _callee$(_context) {
 											while (1) {
@@ -23401,9 +23476,13 @@ var _propertyReference = require("../env/property-reference");
 
 var _native = require("../utils/native");
 
-var _async = require("../utils/async");
-
 var _primitiveType = require("../types/primitive-type");
+
+var _iterators = require("../iterators/");
+
+var _iterators2 = _interopRequireDefault(_iterators);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _marked = [CallExpression].map(regeneratorRuntime.mark);
 
@@ -23425,72 +23504,167 @@ function assignThis(env, fnMember, fn, isNew, native) {
 }
 
 function CallExpression(node, context, next) {
-	var isNew, fnMember, fn, args, stringValue, native, thisArg, callee, result;
-	return regeneratorRuntime.wrap(function CallExpression$(_context2) {
-		while (1) switch (_context2.prev = _context2.next) {
+	var isNew, fnMember, fn, args, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, arg, value, it, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, stringValue, native, thisArg, callee, result;
+
+	return regeneratorRuntime.wrap(function CallExpression$(_context) {
+		while (1) switch (_context.prev = _context.next) {
 			case 0:
 				isNew = node.isNewExpression();
-				_context2.next = 3;
+				_context.next = 3;
 				return next(node.callee, context);
 
 			case 3:
-				fnMember = _context2.sent.result;
+				fnMember = _context.sent.result;
 				fn = fnMember.getValue();
-				return _context2.delegateYield((0, _async.map)(node.arguments, regeneratorRuntime.mark(function _callee(arg) {
-					return regeneratorRuntime.wrap(function _callee$(_context) {
-						while (1) {
-							switch (_context.prev = _context.next) {
-								case 0:
-									_context.next = 2;
-									return next(arg, context);
+				args = [];
+				_iteratorNormalCompletion = true;
+				_didIteratorError = false;
+				_iteratorError = undefined;
+				_context.prev = 9;
+				_iterator = node.arguments[Symbol.iterator]();
 
-								case 2:
-									return _context.abrupt("return", _context.sent.result.getValue());
-
-								case 3:
-								case "end":
-									return _context.stop();
-							}
-						}
-					}, _callee, this);
-				})), "t0", 6);
-
-			case 6:
-				args = _context2.t0;
-
-				if (!(!fn || fn.className !== "Function")) {
-					_context2.next = 12;
+			case 11:
+				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+					_context.next = 43;
 					break;
 				}
 
-				_context2.next = 10;
+				arg = _step.value;
+				_context.next = 15;
+				return next(arg, context);
+
+			case 15:
+				value = _context.sent.result.getValue();
+
+				if (!arg.isSpreadElement()) {
+					_context.next = 39;
+					break;
+				}
+
+				it = _iterators2.default.getIterator(value);
+				_iteratorNormalCompletion2 = true;
+				_didIteratorError2 = false;
+				_iteratorError2 = undefined;
+				_context.prev = 21;
+
+				for (_iterator2 = it[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					value = _step2.value.value;
+
+					args.push(value);
+				}
+				_context.next = 29;
+				break;
+
+			case 25:
+				_context.prev = 25;
+				_context.t0 = _context["catch"](21);
+				_didIteratorError2 = true;
+				_iteratorError2 = _context.t0;
+
+			case 29:
+				_context.prev = 29;
+				_context.prev = 30;
+
+				if (!_iteratorNormalCompletion2 && _iterator2.return) {
+					_iterator2.return();
+				}
+
+			case 32:
+				_context.prev = 32;
+
+				if (!_didIteratorError2) {
+					_context.next = 35;
+					break;
+				}
+
+				throw _iteratorError2;
+
+			case 35:
+				return _context.finish(32);
+
+			case 36:
+				return _context.finish(29);
+
+			case 37:
+				_context.next = 40;
+				break;
+
+			case 39:
+				args.push(value);
+
+			case 40:
+				_iteratorNormalCompletion = true;
+				_context.next = 11;
+				break;
+
+			case 43:
+				_context.next = 49;
+				break;
+
+			case 45:
+				_context.prev = 45;
+				_context.t1 = _context["catch"](9);
+				_didIteratorError = true;
+				_iteratorError = _context.t1;
+
+			case 49:
+				_context.prev = 49;
+				_context.prev = 50;
+
+				if (!_iteratorNormalCompletion && _iterator.return) {
+					_iterator.return();
+				}
+
+			case 52:
+				_context.prev = 52;
+
+				if (!_didIteratorError) {
+					_context.next = 55;
+					break;
+				}
+
+				throw _iteratorError;
+
+			case 55:
+				return _context.finish(52);
+
+			case 56:
+				return _context.finish(49);
+
+			case 57:
+				if (!(!fn || fn.className !== "Function")) {
+					_context.next = 62;
+					break;
+				}
+
+				_context.next = 60;
 				return (0, _native.toString)(fn);
 
-			case 10:
-				stringValue = _context2.sent;
+			case 60:
+				stringValue = _context.sent;
 				throw TypeError(stringValue + " not a function");
 
-			case 12:
+			case 62:
 				native = fn.native;
 				thisArg = assignThis(context.env, fnMember, fn, isNew, native);
 				callee = fnMember;
 
 				callee.identifier = fn.name;
-				_context2.next = 18;
+				_context.next = 68;
 				return fn[isNew ? "construct" : "call"](thisArg, args, callee);
 
-			case 18:
-				result = _context2.sent;
-				return _context2.abrupt("return", context.result(result || _primitiveType.UNDEFINED));
+			case 68:
+				result = _context.sent;
+				return _context.abrupt("return", context.result(result || _primitiveType.UNDEFINED));
 
-			case 20:
+			case 70:
 			case "end":
-				return _context2.stop();
+				return _context.stop();
 		}
-	}, _marked[0], this);
+	}, _marked[0], this, [[9, 45, 49, 57], [21, 25, 29, 37], [30,, 32, 36], [50,, 52, 56]]);
 }
 
-},{"../env/property-reference":196,"../types/primitive-type":382,"../utils/async":389,"../utils/native":392}],400:[function(require,module,exports){
+},{"../env/property-reference":196,"../iterators/":366,"../types/primitive-type":382,"../utils/native":392}],400:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24072,6 +24246,10 @@ var _sequenceExpression = require("./sequence-expression");
 
 var _sequenceExpression2 = _interopRequireDefault(_sequenceExpression);
 
+var _spreadElement = require("./spread-element");
+
+var _spreadElement2 = _interopRequireDefault(_spreadElement);
+
 var _switchStatement = require("./switch-statement");
 
 var _switchStatement2 = _interopRequireDefault(_switchStatement);
@@ -24143,6 +24321,7 @@ var visitors = exports.visitors = {
 	ObjectExpression: _objectExpression2.default,
 	ReturnStatement: _returnStatement2.default,
 	SequenceExpression: _sequenceExpression2.default,
+	SpreadElement: _spreadElement2.default,
 	SwitchStatement: _switchStatement2.default,
 	TaggedTemplateExpression: _taggedTemplateExpression2.default,
 	TemplateLiteral: _templateLiteral2.default,
@@ -24163,7 +24342,7 @@ var visitors = exports.visitors = {
 	WhileStatement: _doWhileStatement2.default
 };
 
-},{"./array-expression":395,"./assignment-expression":396,"./binary-expression":397,"./block-statement":398,"./call-expression":399,"./debugger-statement":400,"./do-while-statement.js":401,"./empty-statement":402,"./expression-statement":403,"./for-in-statement":404,"./for-statement":405,"./function-declaration":406,"./function-expression":407,"./identifier":408,"./if-statement":409,"./interrupt-statement":411,"./labeled-statement":412,"./literal":413,"./logical-expression":414,"./member-expression":415,"./meta-property":416,"./object-expression":417,"./return-statement":418,"./sequence-expression":419,"./switch-statement":420,"./tagged-template-expression":421,"./template-literal":422,"./this-expression":423,"./throw-statement":424,"./try-statement":425,"./unary-expression":426,"./update-expression":427,"./variable-declaration":428,"./variable-declarator":429,"./with-statement":430}],411:[function(require,module,exports){
+},{"./array-expression":395,"./assignment-expression":396,"./binary-expression":397,"./block-statement":398,"./call-expression":399,"./debugger-statement":400,"./do-while-statement.js":401,"./empty-statement":402,"./expression-statement":403,"./for-in-statement":404,"./for-statement":405,"./function-declaration":406,"./function-expression":407,"./identifier":408,"./if-statement":409,"./interrupt-statement":411,"./labeled-statement":412,"./literal":413,"./logical-expression":414,"./member-expression":415,"./meta-property":416,"./object-expression":417,"./return-statement":418,"./sequence-expression":419,"./spread-element":420,"./switch-statement":421,"./tagged-template-expression":422,"./template-literal":423,"./this-expression":424,"./throw-statement":425,"./try-statement":426,"./unary-expression":427,"./update-expression":428,"./variable-declaration":429,"./variable-declarator":430,"./with-statement":431}],411:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24600,6 +24779,35 @@ function SequenceExpression(node, context, next) {
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+exports.default = SpreadElement;
+
+var _marked = [SpreadElement].map(regeneratorRuntime.mark);
+
+function SpreadElement(node, context, next) {
+	var args;
+	return regeneratorRuntime.wrap(function SpreadElement$(_context) {
+		while (1) switch (_context.prev = _context.next) {
+			case 0:
+				_context.next = 2;
+				return next(node.argument, context);
+
+			case 2:
+				args = _context.sent;
+				return _context.abrupt("return", context.result(args.result));
+
+			case 4:
+			case "end":
+				return _context.stop();
+		}
+	}, _marked[0], this);
+}
+
+},{}],421:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
 exports.default = SwitchStatement;
 
 var _async = require("../utils/async");
@@ -24786,7 +24994,7 @@ function SwitchStatement(node, context, next) {
 	}, _marked[1], this, [[8, 35, 39, 47], [40,, 42, 46]]);
 }
 
-},{"../utils/async":389}],421:[function(require,module,exports){
+},{"../utils/async":389}],422:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24878,7 +25086,7 @@ function TaggedTemplateExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":389}],422:[function(require,module,exports){
+},{"../utils/async":389}],423:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24945,7 +25153,7 @@ function TemplateLiteral(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":389,"../utils/native":392}],423:[function(require,module,exports){
+},{"../utils/async":389,"../utils/native":392}],424:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24964,7 +25172,7 @@ function ThisExpression(node, context) {
 	return context.result(thisArg);
 }
 
-},{"../utils/contracts":390}],424:[function(require,module,exports){
+},{"../utils/contracts":390}],425:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24993,7 +25201,7 @@ function ThrowStatement(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{}],425:[function(require,module,exports){
+},{}],426:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25170,7 +25378,7 @@ function TryStatement(node, context, next) {
 	}, _marked[2], this);
 }
 
-},{"../utils/async":389,"../utils/contracts":390}],426:[function(require,module,exports){
+},{"../utils/async":389,"../utils/contracts":390}],427:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25313,7 +25521,7 @@ function UnaryExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../env/property-reference":196,"../env/reference":197,"../utils/native":392}],427:[function(require,module,exports){
+},{"../env/property-reference":196,"../env/reference":197,"../utils/native":392}],428:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25370,7 +25578,7 @@ function UpdateExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/contracts":390,"../utils/native":392}],428:[function(require,module,exports){
+},{"../utils/contracts":390,"../utils/native":392}],429:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25413,7 +25621,7 @@ function VariableDeclaration(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":389}],429:[function(require,module,exports){
+},{"../utils/async":389}],430:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25460,7 +25668,7 @@ function VariableDeclarator(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../types/primitive-type":382}],430:[function(require,module,exports){
+},{"../types/primitive-type":382}],431:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

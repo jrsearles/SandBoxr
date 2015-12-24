@@ -171,7 +171,7 @@ export class ProxyType extends ObjectType {
 		}
 
 		let env = this[envSymbol];
-		let value = x(proxyMethod.call(this.handler, [this.target, normalizeKey(env, key), this]));
+		let value = x(proxyMethod.call(this.handler, [this.target, normalizeKey(env, key), target || this]));
 		let propInfo = this.target.getProperty(key);
 		if (propInfo && !propInfo.configurable) {
 			let targetValue = propInfo.getValue();

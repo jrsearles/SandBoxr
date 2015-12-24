@@ -1,18 +1,30 @@
 import {each} from "../utils/async";
+import iterate from "../iterators/";
 
 export default function* ArrayExpression (node, context, next) {
 	const objectFactory = context.env.objectFactory;
 	let arr = objectFactory.createArray();
 
 	if (node.elements) {
-		yield* each(node.elements, function* (element, i) {
+		let spreadOffset = 0;
+		
+		yield* each(node.elements, function* (element, index) {
 			if (element) {
-				let item = (yield next(element, context)).result.getValue();
-				arr.setIndex(i, item);
+				let value = (yield next(element, context)).result.getValue();
+				
+				if (element.isSpreadElement()) {
+					let it = iterate.getIterator(value);
+					for ({value} of it) {
+						arr.setIndex(index + spreadOffset, value);
+						spreadOffset++;
+					}
+				} else {
+					arr.setIndex(index + spreadOffset, value);
+				}
 			}
 		});
 
-		arr.setValue("length", objectFactory.createPrimitive(node.elements.length));
+		arr.setValue("length", objectFactory.createPrimitive(node.elements.length + spreadOffset));
 	}
 
 	return context.result(arr);
