@@ -1,5 +1,4 @@
 import {assertIsSet} from "../utils/contracts";
-import {SymbolType} from "../types/symbol-type";
 
 export default function ($target, env, factory) {
 	function* getIterator (obj, kind) {
@@ -26,7 +25,7 @@ export default function ($target, env, factory) {
 	}
 
 	let proto = factory.createObject();
-	proto.define(SymbolType.getByKey("toStringTag"), factory.createPrimitive("Set Iterator"), {writable: false});
+	proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Set Iterator"), {writable: false});
 
 	$target.define("entries", factory.createBuiltInFunction(function () {
 		assertIsSet(this.object, "Set.prototype.entries");
@@ -44,6 +43,6 @@ export default function ($target, env, factory) {
 	$target.define("values", valuesFunc);
 	$target.define("keys", valuesFunc);
 
-	let iteratorKey = SymbolType.getByKey("iterator");
+	let iteratorKey = env.getSymbol("iterator");
 	$target.define(iteratorKey, valuesFunc);
 }

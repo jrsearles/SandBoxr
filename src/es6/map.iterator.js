@@ -1,4 +1,3 @@
-import {SymbolType} from "../types/symbol-type";
 import {assertIsMap} from "../utils/contracts";
 
 export default function ($target, env, factory) {
@@ -35,7 +34,7 @@ export default function ($target, env, factory) {
 	}
 
 	let proto = factory.createObject();
-	proto.define(SymbolType.getByKey("toStringTag"), factory.createPrimitive("Map Iterator"), {writable: false});
+	proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Map Iterator"), {writable: false});
 
 	$target.define("keys", factory.createBuiltInFunction(function () {
 		assertIsMap(this.object, "Map.prototype.keys");
@@ -58,6 +57,6 @@ export default function ($target, env, factory) {
 
 	$target.define("entries", iteratorFunc);
 
-	let iteratorKey = SymbolType.getByKey("iterator");
+	let iteratorKey = env.getSymbol("iterator");
 	$target.define(iteratorKey, iteratorFunc);
 }

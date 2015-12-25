@@ -5,13 +5,13 @@ import {executeCallback} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("map", factory.createBuiltInFunction(function* (callback, thisArg) {
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		let length = yield toLength(arr);
 
 		assertIsNotNullOrUndefined(arr, "Array.prototype.map");
 		assertIsFunction(callback, arr);
 
-		let newArray = factory.createArray();
+		let newArray = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
 		newArray.setValue("length", factory.createPrimitive(length));
 
 		for (let entry of iterate.forward(arr, 0, length)) {

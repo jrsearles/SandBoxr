@@ -9,6 +9,7 @@ import {default as operators} from "../utils/operators";
 import {assertIsValidIdentifier} from "../utils/contracts";
 import {Scope} from "./scope";
 import {BlockScope} from "./block-scope";
+import {SymbolType} from "../types/symbol-type";
 
 const defaultOptions = {
 	allowDebugger: false,
@@ -64,6 +65,10 @@ export class Environment {
 		}
 
 		return new Reference(key, undefined, this);
+	}
+	
+	getSymbol (key) {
+		return SymbolType.getByKey(key);
 	}
 
 	getValue (key) {

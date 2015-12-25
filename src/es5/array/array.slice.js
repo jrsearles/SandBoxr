@@ -17,7 +17,7 @@ export default function ($target, env, factory) {
 		begin = getStartIndex(begin, length);
 		end = getEndIndex(end, length);
 
-		let arr = factory.createArray();
+		let arr = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
 		let newLength = 0;
 
 		for (let {key, value} of iterate.forward(source, begin, end)) {

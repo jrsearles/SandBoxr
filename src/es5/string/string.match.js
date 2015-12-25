@@ -1,8 +1,20 @@
 import {NULL} from "../../types/primitive-type";
 import {toString, toPrimitive} from "../../utils/native";
+import {getMethod} from "../../utils/func";
+import {assertIsNotNullOrUndefined} from "../../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("match", factory.createBuiltInFunction(function* (regex) {
+		if (!assertIsNotNullOrUndefined(regex)) {
+			let matchKey = env.getSymbol("match");
+			if (matchKey) {
+				let matcher = getMethod(regex, matchKey);
+				if (matcher) {
+					return yield matcher.call(regex, [this.object]);
+				}
+			} 
+		}
+		
 		let stringValue = yield toString(this.object);
 		let actualRegex;
 

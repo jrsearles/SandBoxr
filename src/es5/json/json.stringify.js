@@ -11,6 +11,11 @@ const primitives = {
 	"Date": true
 };
 
+const ignored = {
+	"Function": true,
+	"Symbol": true
+};
+
 export default function ($target, env, factory) {
 	const serializePrimitive = JSON.stringify;
 
@@ -18,12 +23,12 @@ export default function ($target, env, factory) {
 		if (!obj) {
 			return serializePrimitive();
 		}
-
-		if (obj.isPrimitive || obj.className in primitives) {
+		
+		if (obj.isPrimitive || primitives[obj.className]) {
 			return serializePrimitive(obj.value);
 		}
 
-		if (obj.className === "Function") {
+		if (ignored[obj.className]) {
 			return undefined;
 		}
 
@@ -75,7 +80,7 @@ export default function ($target, env, factory) {
 		for (let prop in obj.properties) {
 			if (obj.properties[prop].enumerable) {
 				value = yield replacer(obj, prop, obj.getValue(prop));
-				if (!isNullOrUndefined(value)) {
+				if (!isNullOrUndefined(value) && !ignored[value.className]) {
 					values.push(serializePrimitive(prop) + colon + (yield serialize(stack, value, replacer, gap, depth)));
 				}
 			}
@@ -94,7 +99,7 @@ export default function ($target, env, factory) {
 				value = yield replacer(arr, String(i), arr.getValue(i));
 			}
 
-			if (isNullOrUndefined(value)) {
+			if (isNullOrUndefined(value) || ignored[value.className]) {
 				// undefined positions are replaced with null
 				values.push("null");
 			} else {

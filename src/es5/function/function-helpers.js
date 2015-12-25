@@ -11,5 +11,5 @@ export function defineThis (env, fn, thisArg) {
 		return env.global;
 	}
 
-	return toObject(env, thisArg);
+	return toObject(thisArg);
 }

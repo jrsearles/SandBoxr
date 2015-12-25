@@ -1,11 +1,10 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {SymbolType} from "../types/symbol-type";
 import {isUndefined, isConstructor, assertIsFunction} from "../utils/contracts";
 import {toLength} from "../utils/native";
 import iterate from "../iterators/";
 
 export default function ($target, env, factory) {
-	let iteratorKey = SymbolType.getByKey("iterator");
+	let iteratorKey = env.getSymbol("iterator");
 
 	function* createArray (ctor, source) {
 		if (ctor === $target || !isConstructor(ctor)) {

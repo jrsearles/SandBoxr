@@ -66,14 +66,14 @@ export function primitiveToObject (env, value) {
 	return newValue;
 }
 
-export function	toObject (env, obj, throwOnError) {
+export function	toObject (obj, throwOnError) {
 	// todo: is this ES6 only?
 	if (throwOnError && obj.isPrimitive && obj.value == null) {
 		throw TypeError(`${obj.type} cannot be converted to an object`);
 	}
 
 	if (obj.isPrimitive && obj.value != null && obj.type !== "object") {
-		return primitiveToObject(env, obj.value);
+		return primitiveToObject(getEnv(obj), obj.value);
 	}
 
 	return obj;
@@ -130,17 +130,31 @@ export function* toArray (obj, length) {
 	return arr;
 }
 
+function* getNativeConversion (obj, key, hint) {
+	let env = obj[Symbol.for("env")];
+	let method = obj.getValue(key);
+	let value = yield method.call(obj, [env.objectFactory.createPrimitive(hint)]);
+	return value ? value.toNative() : undefined;
+}
+
 export function* toPrimitive (obj, preferredType) {
-	preferredType = preferredType && preferredType.toLowerCase();
-	if (!preferredType && obj) {
-		preferredType = obj.primitiveHint;
+	let hint = preferredType && preferredType.toLowerCase();
+	if (!hint && obj) {
+		hint = obj.primitiveHint;
 	}
-
+	
+	if (obj && (!obj.isPrimitive || obj.value != null)) {
+		let toPrimitiveKey = getEnv(obj).getSymbol("toPrimitive");
+		if (toPrimitiveKey && obj.has(toPrimitiveKey)) {
+			return yield getNativeConversion(obj, toPrimitiveKey, preferredType || "default");
+		}
+	}
+	
 	if (obj && obj.isSymbol) {
-		throw TypeError(`Cannot convert Symbol to a ${preferredType}`);
+		throw TypeError(`Cannot convert Symbol to a ${hint}`);
 	}
 
-	if (preferredType === "string") {
+	if (hint === "string") {
 		return yield getString(obj);
 	}
 

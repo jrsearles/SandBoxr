@@ -41,7 +41,7 @@ export default function (globalObject, env, factory) {
 		return this.object;
 	}, 0, "Symbol.prototype.valueOf"));
 
-	["hasInstance", "isConcatSpreadable", "iterator", "replace", "species", "toStringTag"].forEach(key => {
+	["hasInstance", "isConcatSpreadable", "iterator", "match", "replace", "search", "species", "split", "toPrimitive", "toStringTag"].forEach(key => {
 		let sym = factory.create("Symbol", "@@" + key);
 
 		// add to global registry

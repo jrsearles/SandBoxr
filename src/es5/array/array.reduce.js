@@ -6,7 +6,7 @@ import {executeAccumulator} from "./array-helpers";
 export default function ($target, env, factory) {
 	$target.define("reduce", factory.createBuiltInFunction(function* (callback, initialValue) {
 		assertIsNotNullOrUndefined(this.object, "Array.prototype.reduce");
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		let length = yield toLength(arr);
 		assertIsFunction(callback, arr);
 

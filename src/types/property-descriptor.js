@@ -2,6 +2,8 @@ import {default as ops} from "../utils/operators";
 import {exhaust as x} from "../utils/async";
 import {owns} from "../utils/object";
 
+let uid = 0;
+
 const defaultDescriptor = {
 	configurable: false,
 	enumerable: false,
@@ -15,7 +17,8 @@ export class PropertyDescriptor {
 		this.enumerable = config.enumerable || false;
 		this.initialized = config.initialized !== false;
 		this.key = key;
-
+		this.uid = ++uid;
+		
 		if ("get" in config || "set" in config) {
 			this.dataProperty = false;
 			this.get = config.get;

@@ -1,5 +1,4 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {SymbolType} from "../types/symbol-type";
 import {exhaust as x} from "../utils/async";
 import {toLength, toObject} from "../utils/native";
 
@@ -59,28 +58,28 @@ export default function ($target, env, factory) {
 	}
 
 	$target.define("keys", factory.createBuiltInFunction(function () {
-		let arr = toObject(env, this.object, true);
+		let arr = toObject(this.object, true);
 		let it = getIterator(arr, "key");
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.keys"));
 
 	$target.define("entries", factory.createBuiltInFunction(function () {
-		let arr = toObject(env, this.object, true);
+		let arr = toObject(this.object, true);
 		let it = getIterator(arr);
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.entries"));
 
-	let stringTagKey = SymbolType.getByKey("toStringTag");
+	let stringTagKey = env.getSymbol("toStringTag");
 	iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), {writable: false});
 
 	let iteratorFunc = factory.createBuiltInFunction(function () {
-		let arr = toObject(env, this.object, true);
+		let arr = toObject(this.object, true);
 		let it = getIterator(arr, "value");
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.values");
 
 	$target.define("values", iteratorFunc);
 
-	let iteratorKey = SymbolType.getByKey("iterator");
+	let iteratorKey = env.getSymbol("iterator");
 	$target.define(iteratorKey, iteratorFunc);
 }

@@ -46,7 +46,7 @@ export function* defineProperty (env, obj, key, descriptor, throwOnError = true)
 				options.get = getter;
 				options.getter = function* () {
 					let scope = env.setScope(currentScope);
-					let thisArg = getter.isStrict() ? this : toObject(env, this);
+					let thisArg = getter.isStrict() ? this : toObject(this);
 
 					return yield scope.use(function* () {
 						return yield getter.call(thisArg) || UNDEFINED;
@@ -68,7 +68,7 @@ export function* defineProperty (env, obj, key, descriptor, throwOnError = true)
 				options.set = setter;
 				options.setter = function* (value) {
 					let scope = env.setScope(currentScope);
-					let thisArg = setter.isStrict() ? this : toObject(env, this);
+					let thisArg = setter.isStrict() ? this : toObject(this);
 
 					return yield scope.use(function* () {
 						yield setter.call(thisArg, [value]);

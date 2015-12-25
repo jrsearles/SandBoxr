@@ -15,3 +15,17 @@ export function* tryExecute (obj, name, args = []) {
 
 	return false;
 }
+
+export function getMethod (obj, key) {
+	let propInfo = obj.getProperty(key);
+	if (!propInfo) {
+		return null;
+	}
+
+	let method = propInfo.getValue();
+	if (method.type !== "function") {
+		throw TypeError(`${key} is not a method`);
+	}
+
+	return method;
+}

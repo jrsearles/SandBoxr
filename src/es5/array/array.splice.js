@@ -18,7 +18,7 @@ export default function ($target, env, factory) {
 			deleteCount = Math.min(Math.max(deleteCount, 0), length - start);
 		}
 
-		let removed = factory.createArray();
+		let removed = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
 
 		let k = 0;
 		while (k < deleteCount) {

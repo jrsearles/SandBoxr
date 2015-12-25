@@ -1,8 +1,19 @@
 import {toString, toUInt32} from "../../utils/native";
-import {isUndefined} from "../../utils/contracts";
+import {isUndefined, isNullOrUndefined} from "../../utils/contracts";
+import {getMethod} from "../../utils/func";
 
 export default function ($target, env, factory) {
 	$target.define("split", factory.createBuiltInFunction(function* (separator, limit) {
+		if (!isNullOrUndefined(separator)) {
+			let splitKey = env.getSymbol("split");
+			if (splitKey) {
+				let splitter = getMethod(separator, splitKey);
+				if (splitter) {
+					return yield splitter.call(separator, [this.object, limit]);
+				}
+			}
+		}
+		
 		let stringValue = yield toString(this.object);
 		separator = separator && separator.getValue();
 		limit = limit && limit.getValue();

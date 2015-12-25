@@ -4830,6 +4830,8 @@ var _scope = require("./scope");
 
 var _blockScope = require("./block-scope");
 
+var _symbolType = require("../types/symbol-type");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4901,6 +4903,11 @@ var Environment = exports.Environment = (function () {
 			}
 
 			return new _reference.Reference(key, undefined, this);
+		}
+	}, {
+		key: "getSymbol",
+		value: function getSymbol(key) {
+			return _symbolType.SymbolType.getByKey(key);
 		}
 	}, {
 		key: "getValue",
@@ -5096,7 +5103,7 @@ var Environment = exports.Environment = (function () {
 	return Environment;
 })();
 
-},{"../es5":244,"../es6":299,"../execution-context":362,"../types/primitive-type":382,"../utils/contracts":390,"../utils/operators":394,"./block-scope":192,"./declarative-environment":193,"./object-environment":195,"./reference":197,"./scope":198}],195:[function(require,module,exports){
+},{"../es5":244,"../es6":299,"../execution-context":362,"../types/primitive-type":382,"../types/symbol-type":387,"../utils/contracts":390,"../utils/operators":394,"./block-scope":192,"./declarative-environment":193,"./object-environment":195,"./reference":197,"./scope":198}],195:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -5874,31 +5881,34 @@ exports.default = function ($target, env, factory) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						newArray = factory.createArray();
+						_context.next = 2;
+						return factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
+
+					case 2:
+						newArray = _context.sent;
 
 						// add "this" array to bunch
-
-						arrays.unshift((0, _native.toObject)(env, this.object));
+						arrays.unshift((0, _native.toObject)(this.object));
 
 						index = 0;
 
-					case 3:
+					case 5:
 						if (!(arrays.length > 0)) {
-							_context.next = 15;
+							_context.next = 17;
 							break;
 						}
 
 						current = arrays.shift();
 
 						if (!(0, _arrayHelpers.isSpreadable)(current)) {
-							_context.next = 12;
+							_context.next = 14;
 							break;
 						}
 
-						_context.next = 8;
+						_context.next = 10;
 						return (0, _native.toLength)(current);
 
-					case 8:
+					case 10:
 						length = _context.sent;
 
 						for (i = 0; i < length; i++) {
@@ -5908,22 +5918,22 @@ exports.default = function ($target, env, factory) {
 
 							index++;
 						}
-						_context.next = 13;
+						_context.next = 15;
 						break;
 
-					case 12:
+					case 14:
 						newArray.setIndex(index++, current);
 
-					case 13:
-						_context.next = 3;
+					case 15:
+						_context.next = 5;
 						break;
 
-					case 15:
+					case 17:
 
 						newArray.setValue("length", factory.createPrimitive(index));
 						return _context.abrupt("return", newArray);
 
-					case 17:
+					case 19:
 					case "end":
 						return _context.stop();
 				}
@@ -5952,7 +5962,7 @@ exports.default = function ($target, env, factory) {
 				switch (_context.prev = _context.next) {
 					case 0:
 						(0, _contracts.assertIsNotNullOrUndefined)(this.object, "Array.prototype.every");
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 4;
 						return (0, _native.toLength)(arr);
 
@@ -6068,7 +6078,7 @@ exports.default = function ($target, env, factory) {
 					case 0:
 						(0, _contracts.assertIsNotNullOrUndefined)(this.object, "Array.prototype.filter");
 
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 4;
 						return (0, _native.toLength)(arr);
 
@@ -6077,25 +6087,29 @@ exports.default = function ($target, env, factory) {
 
 						(0, _contracts.assertIsFunction)(callback, arr);
 
-						newArray = factory.createArray();
+						_context.next = 8;
+						return factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
+
+					case 8:
+						newArray = _context.sent;
 						index = 0;
 						_iteratorNormalCompletion = true;
 						_didIteratorError = false;
 						_iteratorError = undefined;
-						_context.prev = 11;
+						_context.prev = 13;
 						_iterator = _iterators2.default.forward(arr, 0, length)[Symbol.iterator]();
 
-					case 13:
+					case 15:
 						if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-							_context.next = 23;
+							_context.next = 25;
 							break;
 						}
 
 						entry = _step.value;
-						_context.next = 17;
+						_context.next = 19;
 						return (0, _arrayHelpers.executeCallback)(env, callback, entry, thisArg, arr);
 
-					case 17:
+					case 19:
 						_context.t0 = _context.sent;
 						passed = (0, _native.toBoolean)(_context.t0);
 
@@ -6103,54 +6117,54 @@ exports.default = function ($target, env, factory) {
 							newArray.setIndex(index++, entry.value);
 						}
 
-					case 20:
+					case 22:
 						_iteratorNormalCompletion = true;
-						_context.next = 13;
-						break;
-
-					case 23:
-						_context.next = 29;
+						_context.next = 15;
 						break;
 
 					case 25:
-						_context.prev = 25;
-						_context.t1 = _context["catch"](11);
+						_context.next = 31;
+						break;
+
+					case 27:
+						_context.prev = 27;
+						_context.t1 = _context["catch"](13);
 						_didIteratorError = true;
 						_iteratorError = _context.t1;
 
-					case 29:
-						_context.prev = 29;
-						_context.prev = 30;
+					case 31:
+						_context.prev = 31;
+						_context.prev = 32;
 
 						if (!_iteratorNormalCompletion && _iterator.return) {
 							_iterator.return();
 						}
 
-					case 32:
-						_context.prev = 32;
+					case 34:
+						_context.prev = 34;
 
 						if (!_didIteratorError) {
-							_context.next = 35;
+							_context.next = 37;
 							break;
 						}
 
 						throw _iteratorError;
 
-					case 35:
-						return _context.finish(32);
-
-					case 36:
-						return _context.finish(29);
-
 					case 37:
-						return _context.abrupt("return", newArray);
+						return _context.finish(34);
 
 					case 38:
+						return _context.finish(31);
+
+					case 39:
+						return _context.abrupt("return", newArray);
+
+					case 40:
 					case "end":
 						return _context.stop();
 				}
 			}
-		}, _callee, this, [[11, 25, 29, 37], [30,, 32, 36]]);
+		}, _callee, this, [[13, 27, 31, 39], [32,, 34, 38]]);
 	}), 1, "Array.prototype.filter"));
 };
 
@@ -6181,7 +6195,7 @@ exports.default = function ($target, env, factory) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 3;
 						return (0, _native.toLength)(arr);
 
@@ -6688,7 +6702,7 @@ exports.default = function ($target, env, factory) {
 						while (1) {
 								switch (_context.prev = _context.next) {
 										case 0:
-												arr = (0, _native.toObject)(env, this.object);
+												arr = (0, _native.toObject)(this.object);
 												_context.next = 3;
 												return (0, _native.toLength)(arr);
 
@@ -6698,79 +6712,83 @@ exports.default = function ($target, env, factory) {
 												(0, _contracts.assertIsNotNullOrUndefined)(arr, "Array.prototype.map");
 												(0, _contracts.assertIsFunction)(callback, arr);
 
-												newArray = factory.createArray();
+												_context.next = 8;
+												return factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
+
+										case 8:
+												newArray = _context.sent;
 
 												newArray.setValue("length", factory.createPrimitive(length));
 
 												_iteratorNormalCompletion = true;
 												_didIteratorError = false;
 												_iteratorError = undefined;
-												_context.prev = 11;
+												_context.prev = 13;
 												_iterator = _iterators2.default.forward(arr, 0, length)[Symbol.iterator]();
 
-										case 13:
+										case 15:
 												if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-														_context.next = 22;
+														_context.next = 24;
 														break;
 												}
 
 												entry = _step.value;
-												_context.next = 17;
+												_context.next = 19;
 												return (0, _arrayHelpers.executeCallback)(env, callback, entry, thisArg, arr);
 
-										case 17:
+										case 19:
 												value = _context.sent;
 
 												newArray.setIndex(entry.key, value);
 
-										case 19:
+										case 21:
 												_iteratorNormalCompletion = true;
-												_context.next = 13;
-												break;
-
-										case 22:
-												_context.next = 28;
+												_context.next = 15;
 												break;
 
 										case 24:
-												_context.prev = 24;
-												_context.t0 = _context["catch"](11);
+												_context.next = 30;
+												break;
+
+										case 26:
+												_context.prev = 26;
+												_context.t0 = _context["catch"](13);
 												_didIteratorError = true;
 												_iteratorError = _context.t0;
 
-										case 28:
-												_context.prev = 28;
-												_context.prev = 29;
+										case 30:
+												_context.prev = 30;
+												_context.prev = 31;
 
 												if (!_iteratorNormalCompletion && _iterator.return) {
 														_iterator.return();
 												}
 
-										case 31:
-												_context.prev = 31;
+										case 33:
+												_context.prev = 33;
 
 												if (!_didIteratorError) {
-														_context.next = 34;
+														_context.next = 36;
 														break;
 												}
 
 												throw _iteratorError;
 
-										case 34:
-												return _context.finish(31);
-
-										case 35:
-												return _context.finish(28);
-
 										case 36:
-												return _context.abrupt("return", newArray);
+												return _context.finish(33);
 
 										case 37:
+												return _context.finish(30);
+
+										case 38:
+												return _context.abrupt("return", newArray);
+
+										case 39:
 										case "end":
 												return _context.stop();
 								}
 						}
-				}, _callee, this, [[11, 24, 28, 36], [29,, 31, 35]]);
+				}, _callee, this, [[13, 26, 30, 38], [31,, 33, 37]]);
 		}), 1, "Array.prototype.map"));
 };
 
@@ -6910,7 +6928,7 @@ exports.default = function ($target, env, factory) {
 						length = _context.sent;
 
 						(0, _contracts.assertIsNotNullOrUndefined)(this.object, "Array.prototype.reduceRight");
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 
 						(0, _contracts.assertIsFunction)(callback, arr);
 
@@ -7063,7 +7081,7 @@ exports.default = function ($target, env, factory) {
 				switch (_context.prev = _context.next) {
 					case 0:
 						(0, _contracts.assertIsNotNullOrUndefined)(this.object, "Array.prototype.reduce");
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 4;
 						return (0, _native.toLength)(arr);
 
@@ -7369,12 +7387,16 @@ exports.default = function ($target, env, factory) {
 						begin = (0, _arrayHelpers.getStartIndex)(begin, length);
 						end = (0, _arrayHelpers.getEndIndex)(end, length);
 
-						arr = factory.createArray();
+						_context.next = 23;
+						return factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
+
+					case 23:
+						arr = _context.sent;
 						newLength = 0;
 						_iteratorNormalCompletion = true;
 						_didIteratorError = false;
 						_iteratorError = undefined;
-						_context.prev = 26;
+						_context.prev = 28;
 
 						for (_iterator = _iterators2.default.forward(source, begin, end)[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 							_step$value = _step.value;
@@ -7386,49 +7408,49 @@ exports.default = function ($target, env, factory) {
 							newLength = ++index;
 						}
 
-						_context.next = 34;
+						_context.next = 36;
 						break;
 
-					case 30:
-						_context.prev = 30;
-						_context.t1 = _context["catch"](26);
+					case 32:
+						_context.prev = 32;
+						_context.t1 = _context["catch"](28);
 						_didIteratorError = true;
 						_iteratorError = _context.t1;
 
-					case 34:
-						_context.prev = 34;
-						_context.prev = 35;
+					case 36:
+						_context.prev = 36;
+						_context.prev = 37;
 
 						if (!_iteratorNormalCompletion && _iterator.return) {
 							_iterator.return();
 						}
 
-					case 37:
-						_context.prev = 37;
+					case 39:
+						_context.prev = 39;
 
 						if (!_didIteratorError) {
-							_context.next = 40;
+							_context.next = 42;
 							break;
 						}
 
 						throw _iteratorError;
 
-					case 40:
-						return _context.finish(37);
-
-					case 41:
-						return _context.finish(34);
-
 					case 42:
+						return _context.finish(39);
+
+					case 43:
+						return _context.finish(36);
+
+					case 44:
 						arr.setValue("length", factory.createPrimitive(newLength));
 						return _context.abrupt("return", arr);
 
-					case 44:
+					case 46:
 					case "end":
 						return _context.stop();
 				}
 			}
-		}, _callee, this, [[26, 30, 34, 42], [35,, 37, 41]]);
+		}, _callee, this, [[28, 32, 36, 44], [37,, 39, 43]]);
 	}), 2, "Array.prototype.slice"));
 };
 
@@ -7458,7 +7480,7 @@ exports.default = function ($target, env, factory) {
 				switch (_context.prev = _context.next) {
 					case 0:
 						(0, _contracts.assertIsNotNullOrUndefined)(this.object, "Array.prototype.some");
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 4;
 						return (0, _native.toLength)(this.object);
 
@@ -7701,7 +7723,11 @@ exports.default = function ($target, env, factory) {
 							deleteCount = Math.min(Math.max(deleteCount, 0), length - start);
 						}
 
-						removed = factory.createArray();
+						_context.next = 13;
+						return factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
+
+					case 13:
+						removed = _context.sent;
 						k = 0;
 
 						while (k < deleteCount) {
@@ -7753,7 +7779,7 @@ exports.default = function ($target, env, factory) {
 						this.object.setValue("length", factory.createPrimitive(length - deleteCount + newCount));
 						return _context.abrupt("return", removed);
 
-					case 20:
+					case 22:
 					case "end":
 						return _context.stop();
 				}
@@ -8152,7 +8178,7 @@ function booleanApi(env) {
 
 		// called as new
 		if (this.isNew) {
-			return (0, _native.primitiveToObject)(env, booleanValue);
+			return (0, _native.primitiveToObject)(booleanValue);
 		}
 
 		return objectFactory.create("Boolean", booleanValue);
@@ -8749,7 +8775,7 @@ function defineThis(env, fn, thisArg) {
 		return env.global;
 	}
 
-	return (0, _native.toObject)(env, thisArg);
+	return (0, _native.toObject)(thisArg);
 }
 
 },{"../../types/primitive-type":382,"../../utils/contracts":390,"../../utils/native":392}],234:[function(require,module,exports){
@@ -9852,7 +9878,7 @@ exports.default = function ($target, env, factory) {
 						return _context.abrupt("return", serializePrimitive());
 
 					case 2:
-						if (!(obj.isPrimitive || obj.className in primitives)) {
+						if (!(obj.isPrimitive || primitives[obj.className])) {
 							_context.next = 4;
 							break;
 						}
@@ -9860,7 +9886,7 @@ exports.default = function ($target, env, factory) {
 						return _context.abrupt("return", serializePrimitive(obj.value));
 
 					case 4:
-						if (!(obj.className === "Function")) {
+						if (!ignored[obj.className]) {
 							_context.next = 6;
 							break;
 						}
@@ -9976,7 +10002,7 @@ exports.default = function ($target, env, factory) {
 					case 9:
 						value = _context2.sent;
 
-						if ((0, _contracts.isNullOrUndefined)(value)) {
+						if (!(!(0, _contracts.isNullOrUndefined)(value) && !ignored[value.className])) {
 							_context2.next = 18;
 							break;
 						}
@@ -10037,7 +10063,7 @@ exports.default = function ($target, env, factory) {
 						value = _context3.sent;
 
 					case 9:
-						if (!(0, _contracts.isNullOrUndefined)(value)) {
+						if (!((0, _contracts.isNullOrUndefined)(value) || ignored[value.className])) {
 							_context3.next = 13;
 							break;
 						}
@@ -10339,6 +10365,11 @@ var primitives = {
 	"Number": true,
 	"Boolean": true,
 	"Date": true
+};
+
+var ignored = {
+	"Function": true,
+	"Symbol": true
 };
 
 },{"../../types/primitive-type":382,"../../utils/async":389,"../../utils/contracts":390,"../../utils/func":391,"../../utils/native":392}],248:[function(require,module,exports){
@@ -10838,7 +10869,7 @@ function defineProperty(env, obj, key, descriptor) {
 																	switch (_context2.prev = _context2.next) {
 																		case 0:
 																			scope = env.setScope(currentScope);
-																			thisArg = getter.isStrict() ? this : (0, _native.toObject)(env, this);
+																			thisArg = getter.isStrict() ? this : (0, _native.toObject)(this);
 																			_context2.next = 4;
 																			return scope.use(regeneratorRuntime.mark(function _callee() {
 																				return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -10925,7 +10956,7 @@ function defineProperty(env, obj, key, descriptor) {
 																	switch (_context5.prev = _context5.next) {
 																		case 0:
 																			scope = env.setScope(currentScope);
-																			thisArg = setter.isStrict() ? this : (0, _native.toObject)(env, this);
+																			thisArg = setter.isStrict() ? this : (0, _native.toObject)(this);
 																			_context5.next = 4;
 																			return scope.use(regeneratorRuntime.mark(function _callee4() {
 																				return regeneratorRuntime.wrap(function _callee4$(_context4) {
@@ -11308,7 +11339,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = function ($target, env, factory) {
 	$target.define("getPrototypeOf", factory.createBuiltInFunction(function (obj) {
 		if (!(0, _objectHelpers.confirmObject)(obj, "Object.getPrototypeOf")) {
-			obj = (0, _native.toObject)(env, obj, true);
+			obj = (0, _native.toObject)(obj, true);
 		}
 
 		var objProto = obj.getPrototype();
@@ -11591,7 +11622,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("valueOf", factory.createBuiltInFunction(function () {
-		return (0, _native.toObject)(env, this.object, true);
+		return (0, _native.toObject)(this.object, true);
 	}, 0, "Object.prototype.valueOf"));
 };
 
@@ -12157,47 +12188,73 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("match", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(regex) {
-		var stringValue, actualRegex, match, _ret;
+		var matchKey, matcher, stringValue, actualRegex, match, _ret;
 
 		return regeneratorRuntime.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						_context.next = 2;
-						return (0, _native.toString)(this.object);
-
-					case 2:
-						stringValue = _context.sent;
-						actualRegex = undefined;
-
-						if (!(regex && regex.className === "RegExp")) {
+						if ((0, _contracts.assertIsNotNullOrUndefined)(regex)) {
 							_context.next = 8;
 							break;
 						}
 
-						actualRegex = regex.source;
-						_context.next = 14;
-						break;
+						matchKey = env.getSymbol("match");
+
+						if (!matchKey) {
+							_context.next = 8;
+							break;
+						}
+
+						matcher = (0, _func.getMethod)(regex, matchKey);
+
+						if (!matcher) {
+							_context.next = 8;
+							break;
+						}
+
+						_context.next = 7;
+						return matcher.call(regex, [this.object]);
+
+					case 7:
+						return _context.abrupt("return", _context.sent);
 
 					case 8:
+						_context.next = 10;
+						return (0, _native.toString)(this.object);
+
+					case 10:
+						stringValue = _context.sent;
+						actualRegex = undefined;
+
+						if (!(regex && regex.className === "RegExp")) {
+							_context.next = 16;
+							break;
+						}
+
+						actualRegex = regex.source;
+						_context.next = 22;
+						break;
+
+					case 16:
 						if (!regex) {
-							_context.next = 14;
+							_context.next = 22;
 							break;
 						}
 
 						_context.t0 = RegExp;
-						_context.next = 12;
+						_context.next = 20;
 						return (0, _native.toPrimitive)(regex);
 
-					case 12:
+					case 20:
 						_context.t1 = _context.sent;
 						actualRegex = new _context.t0(_context.t1);
 
-					case 14:
+					case 22:
 						match = stringValue.match(actualRegex);
 
 						if (!match) {
-							_context.next = 19;
+							_context.next = 27;
 							break;
 						}
 
@@ -12216,16 +12273,16 @@ exports.default = function ($target, env, factory) {
 						})();
 
 						if (!((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object")) {
-							_context.next = 19;
+							_context.next = 27;
 							break;
 						}
 
 						return _context.abrupt("return", _ret.v);
 
-					case 19:
+					case 27:
 						return _context.abrupt("return", _primitiveType.NULL);
 
-					case 20:
+					case 28:
 					case "end":
 						return _context.stop();
 				}
@@ -12238,9 +12295,13 @@ var _primitiveType = require("../../types/primitive-type");
 
 var _native = require("../../utils/native");
 
+var _func = require("../../utils/func");
+
+var _contracts = require("../../utils/contracts");
+
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-},{"../../types/primitive-type":382,"../../utils/native":392}],281:[function(require,module,exports){
+},{"../../types/primitive-type":382,"../../utils/contracts":390,"../../utils/func":391,"../../utils/native":392}],281:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12248,20 +12309,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function ($target, env, factory) {
-	function getMethod(obj, key) {
-		var propInfo = obj.getProperty(key);
-		if (!propInfo) {
-			return null;
-		}
-
-		var method = propInfo.getValue();
-		if (method.type !== "function") {
-			throw TypeError(key + " is not a method");
-		}
-
-		return method;
-	}
-
 	$target.define("replace", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(regexOrSubstr, substrOrFn) {
 		var replaceKey, replaceMethod, stringValue, matcher, replacer;
 		return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -12270,14 +12317,14 @@ exports.default = function ($target, env, factory) {
 					case 0:
 						(0, _contracts.assertIsNotNullOrUndefined)(this.object, "String.prototype.replace");
 
-						replaceKey = _symbolType.SymbolType.getByKey("replace");
+						replaceKey = env.getSymbol("replace");
 
 						if (!(replaceKey && !(0, _contracts.isNullOrUndefined)(regexOrSubstr))) {
 							_context.next = 8;
 							break;
 						}
 
-						replaceMethod = getMethod(regexOrSubstr, replaceKey);
+						replaceMethod = (0, _func.getMethod)(regexOrSubstr, replaceKey);
 
 						if (!replaceMethod) {
 							_context.next = 8;
@@ -12359,15 +12406,15 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-var _symbolType = require("../../types/symbol-type");
-
 var _primitiveType = require("../../types/primitive-type");
 
 var _native = require("../../utils/native");
 
 var _async = require("../../utils/async");
 
-},{"../../types/primitive-type":382,"../../types/symbol-type":387,"../../utils/async":389,"../../utils/contracts":390,"../../utils/native":392}],282:[function(require,module,exports){
+var _func = require("../../utils/func");
+
+},{"../../types/primitive-type":382,"../../utils/async":389,"../../utils/contracts":390,"../../utils/func":391,"../../utils/native":392}],282:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12375,46 +12422,72 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function ($target, env, factory) {
-	$target.define("search", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(regex) {
-		var stringValue, underlyingRegex;
+	$target.define("search", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(regexp) {
+		var searchKey, searcher, stringValue, underlyingRegex;
 		return regeneratorRuntime.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						_context.next = 2;
+						if ((0, _contracts.isNullOrUndefined)(regexp)) {
+							_context.next = 8;
+							break;
+						}
+
+						searchKey = env.getSymbol("search");
+
+						if (!searchKey) {
+							_context.next = 8;
+							break;
+						}
+
+						searcher = (0, _func.getMethod)(regexp, searchKey);
+
+						if (!searcher) {
+							_context.next = 8;
+							break;
+						}
+
+						_context.next = 7;
+						return searcher.call(regexp, [this.object]);
+
+					case 7:
+						return _context.abrupt("return", _context.sent);
+
+					case 8:
+						_context.next = 10;
 						return (0, _native.toString)(this.object);
 
-					case 2:
+					case 10:
 						stringValue = _context.sent;
 						underlyingRegex = undefined;
 
-						if (!regex) {
-							_context.next = 14;
+						if (!regexp) {
+							_context.next = 22;
 							break;
 						}
 
-						if (!(regex.className === "RegExp")) {
-							_context.next = 9;
+						if (!(regexp.className === "RegExp")) {
+							_context.next = 17;
 							break;
 						}
 
-						underlyingRegex = regex.source;
-						_context.next = 14;
+						underlyingRegex = regexp.source;
+						_context.next = 22;
 						break;
 
-					case 9:
+					case 17:
 						_context.t0 = RegExp;
-						_context.next = 12;
-						return (0, _native.toString)(regex);
+						_context.next = 20;
+						return (0, _native.toString)(regexp);
 
-					case 12:
+					case 20:
 						_context.t1 = _context.sent;
 						underlyingRegex = new _context.t0(_context.t1);
 
-					case 14:
+					case 22:
 						return _context.abrupt("return", factory.createPrimitive(stringValue.search(underlyingRegex)));
 
-					case 15:
+					case 23:
 					case "end":
 						return _context.stop();
 				}
@@ -12425,7 +12498,11 @@ exports.default = function ($target, env, factory) {
 
 var _native = require("../../utils/native");
 
-},{"../../utils/native":392}],283:[function(require,module,exports){
+var _contracts = require("../../utils/contracts");
+
+var _func = require("../../utils/func");
+
+},{"../../utils/contracts":390,"../../utils/func":391,"../../utils/native":392}],283:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12487,79 +12564,105 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("split", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(separator, limit) {
-		var stringValue, limitValue, arr, separatorValue, result;
+		var splitKey, splitter, stringValue, limitValue, arr, separatorValue, result;
 		return regeneratorRuntime.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						_context.next = 2;
+						if ((0, _contracts.isNullOrUndefined)(separator)) {
+							_context.next = 8;
+							break;
+						}
+
+						splitKey = env.getSymbol("split");
+
+						if (!splitKey) {
+							_context.next = 8;
+							break;
+						}
+
+						splitter = (0, _func.getMethod)(separator, splitKey);
+
+						if (!splitter) {
+							_context.next = 8;
+							break;
+						}
+
+						_context.next = 7;
+						return splitter.call(separator, [this.object, limit]);
+
+					case 7:
+						return _context.abrupt("return", _context.sent);
+
+					case 8:
+						_context.next = 10;
 						return (0, _native.toString)(this.object);
 
-					case 2:
+					case 10:
 						stringValue = _context.sent;
 
 						separator = separator && separator.getValue();
 						limit = limit && limit.getValue();
 
 						if (!(0, _contracts.isUndefined)(limit)) {
-							_context.next = 9;
+							_context.next = 17;
 							break;
 						}
 
 						_context.t0 = undefined;
-						_context.next = 12;
+						_context.next = 20;
 						break;
 
-					case 9:
-						_context.next = 11;
+					case 17:
+						_context.next = 19;
 						return (0, _native.toUInt32)(limit);
 
-					case 11:
+					case 19:
 						_context.t0 = _context.sent;
 
-					case 12:
+					case 20:
 						limitValue = _context.t0;
 						arr = factory.createArray();
 
 						if (!(0, _contracts.isUndefined)(separator)) {
-							_context.next = 18;
+							_context.next = 26;
 							break;
 						}
 
 						arr.setValue(0, factory.createPrimitive(stringValue));
-						_context.next = 28;
+						_context.next = 36;
 						break;
 
-					case 18:
+					case 26:
 						separatorValue = undefined;
 
 						if (!(separator.className === "RegExp")) {
-							_context.next = 23;
+							_context.next = 31;
 							break;
 						}
 
 						separatorValue = separator.source;
-						_context.next = 26;
+						_context.next = 34;
 						break;
 
-					case 23:
-						_context.next = 25;
+					case 31:
+						_context.next = 33;
 						return (0, _native.toString)(separator);
 
-					case 25:
+					case 33:
 						separatorValue = _context.sent;
 
-					case 26:
+					case 34:
 						result = stringValue.split(separatorValue, limitValue);
 
 						result.forEach(function (value, index) {
 							arr.setValue(index, factory.createPrimitive(value));
 						});
 
-					case 28:
+					case 36:
 						return _context.abrupt("return", arr);
 
-					case 29:
+					case 37:
 					case "end":
 						return _context.stop();
 				}
@@ -12572,7 +12675,9 @@ var _native = require("../../utils/native");
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":390,"../../utils/native":392}],285:[function(require,module,exports){
+var _func = require("../../utils/func");
+
+},{"../../utils/contracts":390,"../../utils/func":391,"../../utils/native":392}],285:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12761,7 +12866,7 @@ exports.default = function ($target, env, factory) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 3;
 						return (0, _native.toLength)(arr);
 
@@ -12854,7 +12959,7 @@ exports.default = function ($target, env, factory) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 3;
 						return (0, _native.toLength)(arr);
 
@@ -13011,7 +13116,7 @@ exports.default = function ($target, env, factory) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						arr = (0, _native.toObject)(env, this.object);
+						arr = (0, _native.toObject)(this.object);
 						_context.next = 3;
 						return (0, _native.toLength)(arr);
 
@@ -13082,7 +13187,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = function ($target, env, factory) {
 	var _marked = [createArray].map(regeneratorRuntime.mark);
 
-	var iteratorKey = _symbolType.SymbolType.getByKey("iterator");
+	var iteratorKey = env.getSymbol("iterator");
 
 	function createArray(ctor, source) {
 		var args, hasIterator, length;
@@ -13235,8 +13340,6 @@ exports.default = function ($target, env, factory) {
 
 var _primitiveType = require("../types/primitive-type");
 
-var _symbolType = require("../types/symbol-type");
-
 var _contracts = require("../utils/contracts");
 
 var _native = require("../utils/native");
@@ -13247,7 +13350,7 @@ var _iterators2 = _interopRequireDefault(_iterators);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../iterators/":366,"../types/primitive-type":382,"../types/symbol-type":387,"../utils/contracts":390,"../utils/native":392}],295:[function(require,module,exports){
+},{"../iterators/":366,"../types/primitive-type":382,"../utils/contracts":390,"../utils/native":392}],295:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13333,41 +13436,39 @@ exports.default = function ($target, env, factory) {
 	}
 
 	$target.define("keys", factory.createBuiltInFunction(function () {
-		var arr = (0, _native.toObject)(env, this.object, true);
+		var arr = (0, _native.toObject)(this.object, true);
 		var it = getIterator(arr, "key");
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.keys"));
 
 	$target.define("entries", factory.createBuiltInFunction(function () {
-		var arr = (0, _native.toObject)(env, this.object, true);
+		var arr = (0, _native.toObject)(this.object, true);
 		var it = getIterator(arr);
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.entries"));
 
-	var stringTagKey = _symbolType.SymbolType.getByKey("toStringTag");
+	var stringTagKey = env.getSymbol("toStringTag");
 	iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), { writable: false });
 
 	var iteratorFunc = factory.createBuiltInFunction(function () {
-		var arr = (0, _native.toObject)(env, this.object, true);
+		var arr = (0, _native.toObject)(this.object, true);
 		var it = getIterator(arr, "value");
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "Array.prototype.values");
 
 	$target.define("values", iteratorFunc);
 
-	var iteratorKey = _symbolType.SymbolType.getByKey("iterator");
+	var iteratorKey = env.getSymbol("iterator");
 	$target.define(iteratorKey, iteratorFunc);
 };
 
 var _primitiveType = require("../types/primitive-type");
 
-var _symbolType = require("../types/symbol-type");
-
 var _async = require("../utils/async");
 
 var _native = require("../utils/native");
 
-},{"../types/primitive-type":382,"../types/symbol-type":387,"../utils/async":389,"../utils/native":392}],296:[function(require,module,exports){
+},{"../types/primitive-type":382,"../utils/async":389,"../utils/native":392}],296:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13520,8 +13621,8 @@ exports.default = function (env) {
 	(0, _set2.default)($global, env, objectFactory);
 
 	// setup class symbols
-	var stringTagKey = _symbolType.SymbolType.getByKey("toStringTag");
-	var speciesKey = _symbolType.SymbolType.getByKey("species");
+	var stringTagKey = env.getSymbol("toStringTag");
+	var speciesKey = env.getSymbol("species");
 	["Function", "Number", "Boolean", "Object", "Array", "String", "Date", "RegExp", "JSON", "Error", "Math", "Map", "Set"].forEach(function (typeName) {
 		var ctor = $global.getValue(typeName);
 
@@ -13623,11 +13724,9 @@ var _regex = require("./regex");
 
 var _regex2 = _interopRequireDefault(_regex);
 
-var _symbolType = require("../types/symbol-type");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../es5/":244,"../types/symbol-type":387,"./array":296,"./map":306,"./math":309,"./number":314,"./object":320,"./proxy":323,"./reflect":334,"./regex":339,"./set":346,"./string":352,"./symbol":356}],300:[function(require,module,exports){
+},{"../es5/":244,"./array":296,"./map":306,"./math":309,"./number":314,"./object":320,"./proxy":323,"./reflect":334,"./regex":339,"./set":346,"./string":352,"./symbol":356}],300:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13851,7 +13950,7 @@ exports.default = function ($target, env, factory) {
 	}
 
 	var proto = factory.createObject();
-	proto.define(_symbolType.SymbolType.getByKey("toStringTag"), factory.createPrimitive("Map Iterator"), { writable: false });
+	proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Map Iterator"), { writable: false });
 
 	$target.define("keys", factory.createBuiltInFunction(function () {
 		(0, _contracts.assertIsMap)(this.object, "Map.prototype.keys");
@@ -13873,15 +13972,13 @@ exports.default = function ($target, env, factory) {
 
 	$target.define("entries", iteratorFunc);
 
-	var iteratorKey = _symbolType.SymbolType.getByKey("iterator");
+	var iteratorKey = env.getSymbol("iterator");
 	$target.define(iteratorKey, iteratorFunc);
 };
 
-var _symbolType = require("../types/symbol-type");
-
 var _contracts = require("../utils/contracts");
 
-},{"../types/symbol-type":387,"../utils/contracts":390}],306:[function(require,module,exports){
+},{"../utils/contracts":390}],306:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14554,7 +14651,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (target, env, factory) {
-	var stringTagKey = _symbolType.SymbolType.getByKey("toStringTag");
+	var stringTagKey = env.getSymbol("toStringTag");
 
 	function objectToString(obj) {
 		var tag = obj.className;
@@ -14584,9 +14681,7 @@ exports.default = function (target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-var _symbolType = require("../types/symbol-type");
-
-},{"../types/symbol-type":387,"../utils/contracts":390}],323:[function(require,module,exports){
+},{"../utils/contracts":390}],323:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14733,7 +14828,7 @@ exports.default = function ($target, env, factory) {
 						key = _context.sent;
 						_context.t0 = factory;
 						_context.next = 7;
-						return (0, _object.defineProperty)(env, target, key, descriptor, false);
+						return (0, _objectHelpers.defineProperty)(env, target, key, descriptor, false);
 
 					case 7:
 						_context.t1 = _context.sent;
@@ -14752,9 +14847,9 @@ var _contracts = require("../utils/contracts");
 
 var _native = require("../utils/native");
 
-var _object = require("../es5/object/");
+var _objectHelpers = require("../es5/object/object-helpers");
 
-},{"../es5/object/":253,"../utils/contracts":390,"../utils/native":392}],327:[function(require,module,exports){
+},{"../es5/object/object-helpers":254,"../utils/contracts":390,"../utils/native":392}],327:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15150,7 +15245,7 @@ exports.default = function (globalObject, env, factory) {
 	var regexClass = globalObject.getValue("RegExp");
 	var proto = regexClass.getValue("prototype");
 
-	var replaceKey = _symbolType.SymbolType.getByKey("replace");
+	var replaceKey = env.getSymbol("replace");
 	proto.define(replaceKey, factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(value, replaceValue) {
 		var stringValue, replacer;
 		return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -15203,6 +15298,130 @@ exports.default = function (globalObject, env, factory) {
 		}, _callee, this);
 	}), 2, "RegExp.prototype[Symbol.replace]"));
 
+	var matchKey = env.getSymbol("match");
+	proto.define(matchKey, factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee2(value) {
+		var stringValue, match, _ret;
+
+		return regeneratorRuntime.wrap(function _callee2$(_context2) {
+			while (1) {
+				switch (_context2.prev = _context2.next) {
+					case 0:
+						_context2.next = 2;
+						return (0, _native.toString)(value);
+
+					case 2:
+						stringValue = _context2.sent;
+						match = stringValue.match(this.object.source);
+
+						if (!match) {
+							_context2.next = 8;
+							break;
+						}
+
+						_ret = (function () {
+							var matches = factory.createArray();
+
+							match.forEach(function (value, index) {
+								matches.setValue(index, factory.createPrimitive(value));
+							});
+
+							matches.setValue("index", factory.createPrimitive(match.index));
+							matches.setValue("input", factory.createPrimitive(match.input));
+							return {
+								v: matches
+							};
+						})();
+
+						if (!((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object")) {
+							_context2.next = 8;
+							break;
+						}
+
+						return _context2.abrupt("return", _ret.v);
+
+					case 8:
+						return _context2.abrupt("return", _primitiveType.NULL);
+
+					case 9:
+					case "end":
+						return _context2.stop();
+				}
+			}
+		}, _callee2, this);
+	}), 1, "RegExp.prototype[Symbol.match]"));
+
+	var splitKey = env.getSymbol("split");
+	proto.define(splitKey, factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee3(value, limit) {
+		var stringValue, limitValue, arr, result;
+		return regeneratorRuntime.wrap(function _callee3$(_context3) {
+			while (1) {
+				switch (_context3.prev = _context3.next) {
+					case 0:
+						_context3.next = 2;
+						return (0, _native.toString)(value);
+
+					case 2:
+						stringValue = _context3.sent;
+
+						limit = limit && limit.getValue();
+
+						if (!(0, _contracts.isUndefined)(limit)) {
+							_context3.next = 8;
+							break;
+						}
+
+						_context3.t0 = undefined;
+						_context3.next = 11;
+						break;
+
+					case 8:
+						_context3.next = 10;
+						return (0, _native.toUInt32)(limit);
+
+					case 10:
+						_context3.t0 = _context3.sent;
+
+					case 11:
+						limitValue = _context3.t0;
+						arr = factory.createArray();
+						result = stringValue.split(this.object.source, limitValue);
+
+						result.forEach(function (val, index) {
+							arr.setValue(index, factory.createPrimitive(val));
+						});
+
+						return _context3.abrupt("return", arr);
+
+					case 16:
+					case "end":
+						return _context3.stop();
+				}
+			}
+		}, _callee3, this);
+	}), 2, "RegExp.prototype[Symbol.split]"));
+
+	var searchKey = env.getSymbol("search");
+	proto.define(searchKey, factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee4(value) {
+		var stringValue;
+		return regeneratorRuntime.wrap(function _callee4$(_context4) {
+			while (1) {
+				switch (_context4.prev = _context4.next) {
+					case 0:
+						_context4.next = 2;
+						return (0, _native.toString)(value);
+
+					case 2:
+						stringValue = _context4.sent;
+						return _context4.abrupt("return", factory.createPrimitive(stringValue.search(this.object.source)));
+
+					case 4:
+					case "end":
+						return _context4.stop();
+				}
+			}
+		}, _callee4, this);
+	}), 1, "RegExp.prototype[Symbol.search]"));
+
 	["source", "global", "ignoreCase", "multiline"].forEach(function (key) {
 		var source = RegExp.prototype;
 		var getter = function getter() {
@@ -15217,8 +15436,6 @@ exports.default = function (globalObject, env, factory) {
 	});
 };
 
-var _symbolType = require("../types/symbol-type");
-
 var _async = require("../utils/async");
 
 var _primitiveType = require("../types/primitive-type");
@@ -15227,7 +15444,9 @@ var _native = require("../utils/native");
 
 var _contracts = require("../utils/contracts");
 
-},{"../types/primitive-type":382,"../types/symbol-type":387,"../utils/async":389,"../utils/contracts":390,"../utils/native":392}],340:[function(require,module,exports){
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+},{"../types/primitive-type":382,"../utils/async":389,"../utils/contracts":390,"../utils/native":392}],340:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15438,7 +15657,7 @@ exports.default = function ($target, env, factory) {
 	}
 
 	var proto = factory.createObject();
-	proto.define(_symbolType.SymbolType.getByKey("toStringTag"), factory.createPrimitive("Set Iterator"), { writable: false });
+	proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Set Iterator"), { writable: false });
 
 	$target.define("entries", factory.createBuiltInFunction(function () {
 		(0, _contracts.assertIsSet)(this.object, "Set.prototype.entries");
@@ -15455,15 +15674,13 @@ exports.default = function ($target, env, factory) {
 	$target.define("values", valuesFunc);
 	$target.define("keys", valuesFunc);
 
-	var iteratorKey = _symbolType.SymbolType.getByKey("iterator");
+	var iteratorKey = env.getSymbol("iterator");
 	$target.define(iteratorKey, valuesFunc);
 };
 
 var _contracts = require("../utils/contracts");
 
-var _symbolType = require("../types/symbol-type");
-
-},{"../types/symbol-type":387,"../utils/contracts":390}],346:[function(require,module,exports){
+},{"../utils/contracts":390}],346:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15976,7 +16193,7 @@ exports.default = function (target, env, factory) {
 		}, _marked[0], this);
 	}
 
-	var iteratorKey = _symbolType.SymbolType.getByKey("iterator");
+	var iteratorKey = env.getSymbol("iterator");
 	target.define(iteratorKey, factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee() {
 		var stringValue, it;
 		return regeneratorRuntime.wrap(function _callee$(_context2) {
@@ -16003,13 +16220,11 @@ exports.default = function (target, env, factory) {
 
 var _primitiveType = require("../types/primitive-type");
 
-var _symbolType = require("../types/symbol-type");
-
 var _contracts = require("../utils/contracts");
 
 var _native = require("../utils/native");
 
-},{"../types/primitive-type":382,"../types/symbol-type":387,"../utils/contracts":390,"../utils/native":392}],352:[function(require,module,exports){
+},{"../types/primitive-type":382,"../utils/contracts":390,"../utils/native":392}],352:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16138,8 +16353,8 @@ exports.default = function (target, env, factory) {
 				switch (_context.prev = _context.next) {
 					case 0:
 						numberOfSubstitutions = _args.length;
-						cooked = (0, _native.toObject)(env, template, true);
-						raw = (0, _native.toObject)(env, cooked.getValue("raw"), true);
+						cooked = (0, _native.toObject)(template, true);
+						raw = (0, _native.toObject)(cooked.getValue("raw"), true);
 						_context.next = 5;
 						return (0, _native.toLength)(raw);
 
@@ -16361,7 +16576,7 @@ exports.default = function (globalObject, env, factory) {
 		return this.object;
 	}, 0, "Symbol.prototype.valueOf"));
 
-	["hasInstance", "isConcatSpreadable", "iterator", "replace", "species", "toStringTag"].forEach(function (key) {
+	["hasInstance", "isConcatSpreadable", "iterator", "match", "replace", "search", "species", "split", "toPrimitive", "toStringTag"].forEach(function (key) {
 		var sym = factory.create("Symbol", "@@" + key);
 
 		// add to global registry
@@ -18613,6 +18828,8 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
@@ -18644,6 +18861,37 @@ var IteratorType = exports.IteratorType = (function (_ObjectType) {
 	}
 
 	_createClass(IteratorType, [{
+		key: "init",
+		value: function init(env, proto) {
+			_get(Object.getPrototypeOf(IteratorType.prototype), "init", this).apply(this, arguments);
+			var factory = env.objectFactory;
+
+			if (!proto) {
+				proto = factory.createObject();
+				proto.className = "[Symbol.iterator]";
+			}
+
+			var iteratorKey = env.getSymbol("iterator");
+			if (iteratorKey) {
+				proto.define(iteratorKey, factory.createBuiltInFunction(function () {
+					return this.object;
+				}));
+			}
+
+			if (!proto.has("next")) {
+				proto.define("next", factory.createBuiltInFunction(function () {
+					var result = this.object.advance();
+					if (result.value) {
+						return result.value;
+					}
+
+					return factory.createIteratorResult({ done: true });
+				}));
+			}
+
+			this.setPrototype(proto);
+		}
+	}, {
 		key: "advance",
 		value: function advance() {
 			return this.iterable.next();
@@ -19127,26 +19375,34 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 	}, {
 		key: "createIterator",
 		value: function createIterator(iterable, proto) {
-			var self = this;
+			// let self = this;
 			var instance = new _iteratorType.IteratorType(iterable);
 
-			if (!proto) {
-				proto = this.createObject();
-				proto.className = "[Symbol.iterator]";
-			}
+			// if (!proto) {
+			// 	proto = this.createObject();
+			// 	proto.className = "[Symbol.iterator]";
+			// }
 
-			if (!proto.has("next")) {
-				proto.define("next", this.createBuiltInFunction(function () {
-					var result = this.object.advance();
-					if (result.value) {
-						return result.value;
-					}
+			// if (!proto.has("next")) {
+			// 	proto.define("next", this.createBuiltInFunction(function () {
+			// 		let result = this.object.advance();
+			// 		if (result.value) {
+			// 			return result.value;
+			// 		}
 
-					return self.createIteratorResult({ done: true });
-				}));
-			}
+			// 		return self.createIteratorResult({done: true});
+			// 	}));
+			// }
 
-			instance.setPrototype(proto);
+			// let iteratorKey = SymbolType.getByKey("iterator");
+			// if (!instance.has(iteratorKey)) {
+			// 	instance.define(iteratorKey, this.createBuiltInFunction(function () {
+			// 		return instance;
+			// 	}));
+			// }
+
+			// instance.setPrototype(proto);
+			instance.init(this.env, proto);
 			return instance;
 		}
 	}, {
@@ -19161,6 +19417,55 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 			result.defineOwnProperty("value", { value: value || _primitiveType.UNDEFINED });
 			return result;
 		}
+	}, {
+		key: "createFromSpeciesOrDefault",
+		value: regeneratorRuntime.mark(function createFromSpeciesOrDefault(obj, defaultCtor) {
+			var speciesKey, ctor, species;
+			return regeneratorRuntime.wrap(function createFromSpeciesOrDefault$(_context) {
+				while (1) {
+					switch (_context.prev = _context.next) {
+						case 0:
+							speciesKey = _symbolType.SymbolType.getByKey("species");
+
+							if (!speciesKey) {
+								_context.next = 9;
+								break;
+							}
+
+							ctor = obj.getValue("constructor");
+
+							if (!ctor) {
+								_context.next = 9;
+								break;
+							}
+
+							species = ctor.getValue(speciesKey);
+
+							if (!species) {
+								_context.next = 9;
+								break;
+							}
+
+							_context.next = 8;
+							return species.construct();
+
+						case 8:
+							return _context.abrupt("return", _context.sent);
+
+						case 9:
+							_context.next = 11;
+							return defaultCtor.construct();
+
+						case 11:
+							return _context.abrupt("return", _context.sent);
+
+						case 12:
+						case "end":
+							return _context.stop();
+					}
+				}
+			}, createFromSpeciesOrDefault, this);
+		})
 
 		/**
    * Creates a function instance.
@@ -19300,7 +19605,7 @@ var _marked = [propertyIterator].map(regeneratorRuntime.mark);
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var integerMatcher = /^\n+$/;
+var integerMatcher = /^\d+$/;
 
 function isSymbol(key) {
 	return key && (typeof key === "undefined" ? "undefined" : _typeof(key)) === "object" && key.isSymbol;
@@ -19416,19 +19721,19 @@ function propertyIterator(env, obj) {
 }
 
 function propertyKeyComparer(a, b) {
-	if (integerMatcher.test(a)) {
-		if (integerMatcher.test(b)) {
-			return a - b;
+	if (integerMatcher.test(a.key)) {
+		if (integerMatcher.test(b.key)) {
+			return a.key - b.key;
 		}
 
-		return 1;
-	}
-
-	if (integerMatcher.test(b)) {
 		return -1;
 	}
 
-	return 0;
+	if (integerMatcher.test(b.key)) {
+		return 1;
+	}
+
+	return a.uid - b.uid;
 }
 
 var ObjectType = exports.ObjectType = (function () {
@@ -19509,11 +19814,17 @@ var ObjectType = exports.ObjectType = (function () {
 	}, {
 		key: "getOwnPropertyKeys",
 		value: function getOwnPropertyKeys(keyType) {
+			var _this = this;
+
 			var keys = [];
 
 			if (keyType !== "Symbol") {
 				// note: this uses native sort which may not be stable
-				keys = Object.keys(this.properties).sort(propertyKeyComparer);
+				keys = Object.keys(this.properties).map(function (key) {
+					return _this.properties[key];
+				}).sort(propertyKeyComparer).map(function (prop) {
+					return String(prop.key);
+				});
 			}
 
 			if (keyType !== "String") {
@@ -19750,24 +20061,24 @@ var ObjectType = exports.ObjectType = (function () {
 	}, {
 		key: "each",
 		value: function each(func) {
-			var _this = this;
+			var _this2 = this;
 
 			["properties", "symbols"].forEach(function (source) {
-				for (var key in _this[source]) {
-					func(_this[source][key]);
+				for (var key in _this2[source]) {
+					func(_this2[source][key]);
 				}
 			});
 		}
 	}, {
 		key: "freeze",
 		value: function freeze() {
-			var _this2 = this;
+			var _this3 = this;
 
 			this.each(function (desc) {
 				if (desc.dataProperty) {
-					_this2.defineOwnProperty(desc.key, { writable: false, configurable: false });
+					_this3.defineOwnProperty(desc.key, { writable: false, configurable: false });
 				} else {
-					_this2.defineOwnProperty(desc.key, { configurable: false });
+					_this3.defineOwnProperty(desc.key, { configurable: false });
 				}
 			});
 
@@ -19782,10 +20093,10 @@ var ObjectType = exports.ObjectType = (function () {
 	}, {
 		key: "seal",
 		value: function seal() {
-			var _this3 = this;
+			var _this4 = this;
 
 			this.each(function (desc) {
-				_this3.defineOwnProperty(desc.key, { configurable: false }, true);
+				_this4.defineOwnProperty(desc.key, { configurable: false }, true);
 			});
 
 			this.preventExtensions();
@@ -19898,6 +20209,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var uid = 0;
+
 var defaultDescriptor = {
 	configurable: false,
 	enumerable: false,
@@ -19916,6 +20229,7 @@ var PropertyDescriptor = exports.PropertyDescriptor = (function () {
 		this.enumerable = config.enumerable || false;
 		this.initialized = config.initialized !== false;
 		this.key = key;
+		this.uid = ++uid;
 
 		if ("get" in config || "set" in config) {
 			this.dataProperty = false;
@@ -21202,17 +21516,47 @@ function destructureArray(env, pattern, arr, cb) {
 			case 0:
 				_context8.next = 2;
 				return (0, _async.each)(pattern.elements, regeneratorRuntime.mark(function _callee2(current, index) {
-					var propInfo, value;
+					var rest, propInfo, value;
 					return regeneratorRuntime.wrap(function _callee2$(_context7) {
 						while (1) {
 							switch (_context7.prev = _context7.next) {
 								case 0:
+									if (current) {
+										_context7.next = 2;
+										break;
+									}
+
+									return _context7.abrupt("return");
+
+								case 2:
+									if (!current.isRestElement()) {
+										_context7.next = 9;
+										break;
+									}
+
+									rest = [];
+
+									// todo: fully iterate
+
+									while (arr.has(index)) {
+										rest.push(arr.getProperty(index).getValue());
+										index++;
+									}
+
+									_context7.next = 7;
+									return cb(env, current.argument, env.objectFactory.createArray(rest));
+
+								case 7:
+									_context7.next = 13;
+									break;
+
+								case 9:
 									propInfo = arr.getProperty(index);
 									value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
-									_context7.next = 4;
+									_context7.next = 13;
 									return cb(env, current, value);
 
-								case 4:
+								case 13:
 								case "end":
 									return _context7.stop();
 							}
@@ -21269,17 +21613,40 @@ function destructureObject(env, pattern, obj, cb) {
 						while (1) {
 							switch (_context10.prev = _context10.next) {
 								case 0:
-									_context10.next = 2;
-									return getObjectKey(env, current.key);
+									key = undefined;
 
-								case 2:
-									key = _context10.sent;
-									propInfo = obj.getProperty(key);
-									value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
+									if (!current.computed) {
+										_context10.next = 10;
+										break;
+									}
+
+									_context10.next = 4;
+									return env.createExecutionContext().execute(current.key);
+
+								case 4:
+									_context10.t0 = _context10.sent.result.getValue();
 									_context10.next = 7;
-									return cb(env, current.value, value);
+									return (0, _native.toPropertyKey)(_context10.t0);
 
 								case 7:
+									key = _context10.sent;
+									_context10.next = 13;
+									break;
+
+								case 10:
+									_context10.next = 12;
+									return getObjectKey(env, current.key);
+
+								case 12:
+									key = _context10.sent;
+
+								case 13:
+									propInfo = obj.getProperty(key);
+									value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
+									_context10.next = 17;
+									return cb(env, current.value, value);
+
+								case 17:
 								case "end":
 									return _context10.stop();
 							}
@@ -21867,6 +22234,7 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.tryExecute = tryExecute;
+exports.getMethod = getMethod;
 
 var _primitiveType = require("../types/primitive-type");
 
@@ -21913,6 +22281,20 @@ function tryExecute(obj, name) {
 	}, _marked[0], this);
 }
 
+function getMethod(obj, key) {
+	var propInfo = obj.getProperty(key);
+	if (!propInfo) {
+		return null;
+	}
+
+	var method = propInfo.getValue();
+	if (method.type !== "function") {
+		throw TypeError(key + " is not a method");
+	}
+
+	return method;
+}
+
 },{"../types/primitive-type":382}],392:[function(require,module,exports){
 "use strict";
 
@@ -21935,7 +22317,7 @@ exports.toNativeFunction = toNativeFunction;
 
 var _func = require("../utils/func");
 
-var _marked = [getString, getPrimitive, getValues, toLength, toPropertyKey, toArray, toPrimitive, toString, toNumber, toInteger, toInt32, toUInt32].map(regeneratorRuntime.mark);
+var _marked = [getString, getPrimitive, getValues, toLength, toPropertyKey, toArray, getNativeConversion, toPrimitive, toString, toNumber, toInteger, toInt32, toUInt32].map(regeneratorRuntime.mark);
 
 var sign = Math.sign;
 var floor = Math.floor;
@@ -22103,14 +22485,14 @@ function primitiveToObject(env, value) {
 	return newValue;
 }
 
-function toObject(env, obj, throwOnError) {
+function toObject(obj, throwOnError) {
 	// todo: is this ES6 only?
 	if (throwOnError && obj.isPrimitive && obj.value == null) {
 		throw TypeError(obj.type + " cannot be converted to an object");
 	}
 
 	if (obj.isPrimitive && obj.value != null && obj.type !== "object") {
-		return primitiveToObject(env, obj.value);
+		return primitiveToObject(getEnv(obj), obj.value);
 	}
 
 	return obj;
@@ -22236,164 +22618,206 @@ function toArray(obj, length) {
 	}, _marked[5], this);
 }
 
-function toPrimitive(obj, preferredType) {
-	return regeneratorRuntime.wrap(function toPrimitive$(_context7) {
+function getNativeConversion(obj, key, hint) {
+	var env, method, value;
+	return regeneratorRuntime.wrap(function getNativeConversion$(_context7) {
 		while (1) switch (_context7.prev = _context7.next) {
 			case 0:
-				preferredType = preferredType && preferredType.toLowerCase();
-				if (!preferredType && obj) {
-					preferredType = obj.primitiveHint;
-				}
-
-				if (!(obj && obj.isSymbol)) {
-					_context7.next = 4;
-					break;
-				}
-
-				throw TypeError("Cannot convert Symbol to a " + preferredType);
+				env = obj[Symbol.for("env")];
+				method = obj.getValue(key);
+				_context7.next = 4;
+				return method.call(obj, [env.objectFactory.createPrimitive(hint)]);
 
 			case 4:
-				if (!(preferredType === "string")) {
-					_context7.next = 8;
-					break;
-				}
+				value = _context7.sent;
+				return _context7.abrupt("return", value ? value.toNative() : undefined);
 
-				_context7.next = 7;
-				return getString(obj);
-
-			case 7:
-				return _context7.abrupt("return", _context7.sent);
-
-			case 8:
-				_context7.next = 10;
-				return getPrimitive(obj);
-
-			case 10:
-				return _context7.abrupt("return", _context7.sent);
-
-			case 11:
+			case 6:
 			case "end":
 				return _context7.stop();
 		}
 	}, _marked[6], this);
 }
 
-function toString(obj) {
-	return regeneratorRuntime.wrap(function toString$(_context8) {
+function toPrimitive(obj, preferredType) {
+	var hint, toPrimitiveKey;
+	return regeneratorRuntime.wrap(function toPrimitive$(_context8) {
 		while (1) switch (_context8.prev = _context8.next) {
 			case 0:
-				_context8.next = 2;
-				return toPrimitive(obj, "string");
+				hint = preferredType && preferredType.toLowerCase();
 
-			case 2:
-				_context8.t0 = _context8.sent;
-				return _context8.abrupt("return", String(_context8.t0));
+				if (!hint && obj) {
+					hint = obj.primitiveHint;
+				}
 
-			case 4:
+				if (!(obj && (!obj.isPrimitive || obj.value != null))) {
+					_context8.next = 8;
+					break;
+				}
+
+				toPrimitiveKey = getEnv(obj).getSymbol("toPrimitive");
+
+				if (!(toPrimitiveKey && obj.has(toPrimitiveKey))) {
+					_context8.next = 8;
+					break;
+				}
+
+				_context8.next = 7;
+				return getNativeConversion(obj, toPrimitiveKey, preferredType || "default");
+
+			case 7:
+				return _context8.abrupt("return", _context8.sent);
+
+			case 8:
+				if (!(obj && obj.isSymbol)) {
+					_context8.next = 10;
+					break;
+				}
+
+				throw TypeError("Cannot convert Symbol to a " + hint);
+
+			case 10:
+				if (!(hint === "string")) {
+					_context8.next = 14;
+					break;
+				}
+
+				_context8.next = 13;
+				return getString(obj);
+
+			case 13:
+				return _context8.abrupt("return", _context8.sent);
+
+			case 14:
+				_context8.next = 16;
+				return getPrimitive(obj);
+
+			case 16:
+				return _context8.abrupt("return", _context8.sent);
+
+			case 17:
 			case "end":
 				return _context8.stop();
 		}
 	}, _marked[7], this);
 }
 
-function toNumber(obj) {
-	return regeneratorRuntime.wrap(function toNumber$(_context9) {
+function toString(obj) {
+	return regeneratorRuntime.wrap(function toString$(_context9) {
 		while (1) switch (_context9.prev = _context9.next) {
 			case 0:
-				if (!(!obj || obj.type === "undefined")) {
-					_context9.next = 2;
-					break;
-				}
-
-				return _context9.abrupt("return", NaN);
+				_context9.next = 2;
+				return toPrimitive(obj, "string");
 
 			case 2:
-				_context9.next = 4;
-				return toPrimitive(obj, "number");
+				_context9.t0 = _context9.sent;
+				return _context9.abrupt("return", String(_context9.t0));
 
 			case 4:
-				_context9.t0 = _context9.sent;
-				return _context9.abrupt("return", Number(_context9.t0));
-
-			case 6:
 			case "end":
 				return _context9.stop();
 		}
 	}, _marked[8], this);
 }
 
-function toInteger(obj) {
-	var value;
-	return regeneratorRuntime.wrap(function toInteger$(_context10) {
+function toNumber(obj) {
+	return regeneratorRuntime.wrap(function toNumber$(_context10) {
 		while (1) switch (_context10.prev = _context10.next) {
 			case 0:
-				_context10.next = 2;
-				return toNumber(obj);
+				if (!(!obj || obj.type === "undefined")) {
+					_context10.next = 2;
+					break;
+				}
+
+				return _context10.abrupt("return", NaN);
 
 			case 2:
-				value = _context10.sent;
+				_context10.next = 4;
+				return toPrimitive(obj, "number");
 
-				if (!isNaN(value)) {
-					_context10.next = 5;
-					break;
-				}
+			case 4:
+				_context10.t0 = _context10.sent;
+				return _context10.abrupt("return", Number(_context10.t0));
 
-				return _context10.abrupt("return", 0);
-
-			case 5:
-				if (!(value === 0 || !isFinite(value))) {
-					_context10.next = 7;
-					break;
-				}
-
-				return _context10.abrupt("return", value);
-
-			case 7:
-				return _context10.abrupt("return", sign(value) * floor(abs(value)));
-
-			case 8:
+			case 6:
 			case "end":
 				return _context10.stop();
 		}
 	}, _marked[9], this);
 }
 
-function toInt32(obj) {
+function toInteger(obj) {
 	var value;
-	return regeneratorRuntime.wrap(function toInt32$(_context11) {
+	return regeneratorRuntime.wrap(function toInteger$(_context11) {
 		while (1) switch (_context11.prev = _context11.next) {
 			case 0:
 				_context11.next = 2;
-				return toInteger(obj);
+				return toNumber(obj);
 
 			case 2:
 				value = _context11.sent;
-				return _context11.abrupt("return", isFinite(value) ? value : 0);
 
-			case 4:
+				if (!isNaN(value)) {
+					_context11.next = 5;
+					break;
+				}
+
+				return _context11.abrupt("return", 0);
+
+			case 5:
+				if (!(value === 0 || !isFinite(value))) {
+					_context11.next = 7;
+					break;
+				}
+
+				return _context11.abrupt("return", value);
+
+			case 7:
+				return _context11.abrupt("return", sign(value) * floor(abs(value)));
+
+			case 8:
 			case "end":
 				return _context11.stop();
 		}
 	}, _marked[10], this);
 }
 
-function toUInt32(obj) {
+function toInt32(obj) {
 	var value;
-	return regeneratorRuntime.wrap(function toUInt32$(_context12) {
+	return regeneratorRuntime.wrap(function toInt32$(_context12) {
 		while (1) switch (_context12.prev = _context12.next) {
 			case 0:
 				_context12.next = 2;
-				return toInt32(obj);
+				return toInteger(obj);
 
 			case 2:
 				value = _context12.sent;
-				return _context12.abrupt("return", value >>> 0);
+				return _context12.abrupt("return", isFinite(value) ? value : 0);
 
 			case 4:
 			case "end":
 				return _context12.stop();
 		}
 	}, _marked[11], this);
+}
+
+function toUInt32(obj) {
+	var value;
+	return regeneratorRuntime.wrap(function toUInt32$(_context13) {
+		while (1) switch (_context13.prev = _context13.next) {
+			case 0:
+				_context13.next = 2;
+				return toInt32(obj);
+
+			case 2:
+				value = _context13.sent;
+				return _context13.abrupt("return", value >>> 0);
+
+			case 4:
+			case "end":
+				return _context13.stop();
+		}
+	}, _marked[12], this);
 }
 
 function toBoolean(obj) {
@@ -22413,10 +22837,10 @@ function toNativeFunction(env, fn, name) {
 		var thisArg,
 		    args,
 		    value,
-		    _args13 = arguments;
-		return regeneratorRuntime.wrap(function _callee$(_context13) {
+		    _args14 = arguments;
+		return regeneratorRuntime.wrap(function _callee$(_context14) {
 			while (1) {
-				switch (_context13.prev = _context13.next) {
+				switch (_context14.prev = _context14.next) {
 					case 0:
 						thisArg = undefined;
 
@@ -22424,17 +22848,17 @@ function toNativeFunction(env, fn, name) {
 							thisArg = this.object.value;
 						}
 
-						_context13.next = 4;
-						return getValues(_args13);
+						_context14.next = 4;
+						return getValues(_args14);
 
 					case 4:
-						args = _context13.sent;
+						args = _context14.sent;
 						value = fn.apply(thisArg, args);
-						return _context13.abrupt("return", env.objectFactory.createPrimitive(value));
+						return _context14.abrupt("return", env.objectFactory.createPrimitive(value));
 
 					case 7:
 					case "end":
-						return _context13.stop();
+						return _context14.stop();
 				}
 			}
 		}, _callee, this);
@@ -23494,7 +23918,7 @@ function assignThis(env, fnMember, fn, isNew, native) {
 	if (fnMember instanceof _propertyReference.PropertyReference && (!fnMember.unqualified || fnMember.base !== env.global)) {
 		var thisArg = fnMember.base;
 		if (env.options.ecmaVersion === 5) {
-			return (0, _native.toObject)(env, thisArg);
+			return (0, _native.toObject)(thisArg);
 		}
 
 		return thisArg;
@@ -25631,15 +26055,17 @@ exports.default = VariableDeclarator;
 
 var _primitiveType = require("../types/primitive-type");
 
+var _assign = require("../utils/assign");
+
 var _marked = [VariableDeclarator].map(regeneratorRuntime.mark);
 
 function VariableDeclarator(node, context, next) {
-	var name, value;
+	var name, rightValue;
 	return regeneratorRuntime.wrap(function VariableDeclarator$(_context) {
 		while (1) switch (_context.prev = _context.next) {
 			case 0:
 				name = node.id.name;
-				value = undefined;
+				rightValue = undefined;
 
 				if (!node.init) {
 					_context.next = 6;
@@ -25650,25 +26076,28 @@ function VariableDeclarator(node, context, next) {
 				return next(node.init, context);
 
 			case 5:
-				value = _context.sent.result.getValue();
+				rightValue = _context.sent.result.getValue();
 
 			case 6:
-
-				// variables have already been hoisted so we just need to initialize them if defined
-				if (value || node.isLet()) {
-					context.env.declare(name, value || _primitiveType.UNDEFINED);
+				if (!(rightValue || node.isLet())) {
+					_context.next = 9;
+					break;
 				}
 
+				_context.next = 9;
+				return (0, _assign.declare)(context.env, node.id, rightValue || _primitiveType.UNDEFINED);
+
+			case 9:
 				return _context.abrupt("return", context.result(context.env.getReference(name)));
 
-			case 8:
+			case 10:
 			case "end":
 				return _context.stop();
 		}
 	}, _marked[0], this);
 }
 
-},{"../types/primitive-type":382}],431:[function(require,module,exports){
+},{"../types/primitive-type":382,"../utils/assign":388}],431:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

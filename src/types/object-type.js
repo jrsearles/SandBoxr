@@ -1,6 +1,6 @@
 import {default as ops} from "../utils/operators";
 import {PropertyDescriptor} from "./property-descriptor";
-const integerMatcher = /^\n+$/;
+const integerMatcher = /^\d+$/;
 
 function isSymbol (key) {
 	return key && typeof key === "object" && key.isSymbol;
@@ -37,19 +37,19 @@ function* propertyIterator (env, obj) {
 }
 
 function propertyKeyComparer (a, b) {
-	if (integerMatcher.test(a)) {
-		if (integerMatcher.test(b)) {
-			return a - b;
+	if (integerMatcher.test(a.key)) {
+		if (integerMatcher.test(b.key)) {
+			return a.key - b.key;
 		}
 
-		return 1;
-	}
-
-	if (integerMatcher.test(b)) {
 		return -1;
 	}
 
-	return 0;
+	if (integerMatcher.test(b.key)) {
+		return 1;
+	}
+
+	return a.uid - b.uid;
 }
 
 export class ObjectType {
@@ -125,7 +125,10 @@ export class ObjectType {
 
 		if (keyType !== "Symbol") {
 			// note: this uses native sort which may not be stable
-			keys = Object.keys(this.properties).sort(propertyKeyComparer);
+			keys = Object.keys(this.properties)
+				.map(key => this.properties[key])
+				.sort(propertyKeyComparer)
+				.map(prop => String(prop.key));
 		}
 
 		if (keyType !== "String") {

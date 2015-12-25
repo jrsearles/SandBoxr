@@ -1,5 +1,4 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {SymbolType} from "../types/symbol-type";
 import {assertIsNotNullOrUndefined} from "../utils/contracts";
 import {toString} from "../utils/native";
 
@@ -36,7 +35,7 @@ export default function (target, env, factory) {
 		}
 	}
 
-	let iteratorKey = SymbolType.getByKey("iterator");
+	let iteratorKey = env.getSymbol("iterator");
 	target.define(iteratorKey, factory.createBuiltInFunction(function* () {
 		assertIsNotNullOrUndefined(this.object, "String.protoype[Symbol.iterator]");
 		let stringValue = yield toString(this.object);

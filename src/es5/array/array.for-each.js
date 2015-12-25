@@ -5,7 +5,7 @@ import {executeCallback} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("forEach", factory.createBuiltInFunction(function* (callback, thisArg) {
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		let length = yield toLength(arr);
 		assertIsFunction(callback, arr);
 

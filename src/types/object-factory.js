@@ -243,26 +243,34 @@ export class ObjectFactory {
 	}
 
 	createIterator (iterable, proto) {
-		let self = this;
+		// let self = this;
 		let instance = new IteratorType(iterable);
 
-		if (!proto) {
-			proto = this.createObject();
-			proto.className = "[Symbol.iterator]";
-		}
+		// if (!proto) {
+		// 	proto = this.createObject();
+		// 	proto.className = "[Symbol.iterator]";
+		// }
 
-		if (!proto.has("next")) {
-			proto.define("next", this.createBuiltInFunction(function () {
-				let result = this.object.advance();
-				if (result.value) {
-					return result.value;
-				}
+		// if (!proto.has("next")) {
+		// 	proto.define("next", this.createBuiltInFunction(function () {
+		// 		let result = this.object.advance();
+		// 		if (result.value) {
+		// 			return result.value;
+		// 		}
 
-				return self.createIteratorResult({done: true});
-			}));
-		}
+		// 		return self.createIteratorResult({done: true});
+		// 	}));
+		// }
+		
+		// let iteratorKey = SymbolType.getByKey("iterator");
+		// if (!instance.has(iteratorKey)) {
+		// 	instance.define(iteratorKey, this.createBuiltInFunction(function () {
+		// 		return instance;
+		// 	}));
+		// }
 
-		instance.setPrototype(proto);
+		// instance.setPrototype(proto);
+		instance.init(this.env, proto);
 		return instance;
 	}
 
@@ -271,6 +279,21 @@ export class ObjectFactory {
 		result.defineOwnProperty("done", {value: this.createPrimitive(done)});
 		result.defineOwnProperty("value", {value: value || UNDEFINED});
 		return result;
+	}
+	
+	*createFromSpeciesOrDefault (obj, defaultCtor) {
+		let speciesKey = SymbolType.getByKey("species");
+		if (speciesKey) {
+			let ctor = obj.getValue("constructor");
+			if (ctor) {
+				let species = ctor.getValue(speciesKey);
+				if (species) {
+					return yield species.construct();
+				}
+			}
+		}
+		
+		return yield defaultCtor.construct();
 	}
 
 	/**

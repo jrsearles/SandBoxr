@@ -4,7 +4,7 @@ import {normalizeIndex} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("fill", factory.createBuiltInFunction(function* (value, start, end) {
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		let length = yield toLength(arr);
 		let k = start ? (yield toInteger(start)) : 0;
 		let final = isUndefined(end) ? length : (yield toInteger(end));

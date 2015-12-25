@@ -7,11 +7,11 @@ export default function ($target, env, factory) {
 	$target.define("filter", factory.createBuiltInFunction(function* (callback, thisArg) {
 		assertIsNotNullOrUndefined(this.object, "Array.prototype.filter");
 
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		let length = yield toLength(arr);
 		assertIsFunction(callback, arr);
 
-		let newArray = factory.createArray();
+		let newArray = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
 		let index = 0;
 
 		for (let entry of iterate.forward(arr, 0, length)) {

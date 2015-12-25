@@ -3,10 +3,10 @@ import {isSpreadable} from "./array-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("concat", factory.createBuiltInFunction(function* (...arrays) {
-		let newArray = factory.createArray();
+		let newArray = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
 
 		// add "this" array to bunch
-		arrays.unshift(toObject(env, this.object));
+		arrays.unshift(toObject(this.object));
 
 		let index = 0;
 		while (arrays.length > 0) {

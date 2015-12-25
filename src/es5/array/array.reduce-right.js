@@ -7,7 +7,7 @@ export default function ($target, env, factory) {
 	$target.define("reduceRight", factory.createBuiltInFunction(function* (callback, initialValue) {
 		let length = yield toLength(this.object);
 		assertIsNotNullOrUndefined(this.object, "Array.prototype.reduceRight");
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		assertIsFunction(callback, arr);
 
 		let accumulator;

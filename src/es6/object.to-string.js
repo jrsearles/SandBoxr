@@ -1,8 +1,7 @@
 import {isNullOrUndefined, assertIsNotNullOrUndefined} from "../utils/contracts";
-import {SymbolType} from "../types/symbol-type";
 
 export default function (target, env, factory) {
-	let stringTagKey = SymbolType.getByKey("toStringTag");
+	let stringTagKey = env.getSymbol("toStringTag");
 
 	function objectToString (obj) {
 		let tag = obj.className;

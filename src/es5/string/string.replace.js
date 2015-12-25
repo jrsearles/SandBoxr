@@ -1,28 +1,14 @@
 import {assertIsNotNullOrUndefined, isNullOrUndefined} from "../../utils/contracts";
-import {SymbolType} from "../../types/symbol-type";
 import {UNDEFINED} from "../../types/primitive-type";
 import {toString} from "../../utils/native";
 import {exhaust as x} from "../../utils/async";
+import {getMethod} from "../../utils/func";
 
 export default function ($target, env, factory) {
-	function getMethod (obj, key) {
-		let propInfo = obj.getProperty(key);
-		if (!propInfo) {
-			return null;
-		}
-
-		let method = propInfo.getValue();
-		if (method.type !== "function") {
-			throw TypeError(`${key} is not a method`);
-		}
-
-		return method;
-	}
-
 	$target.define("replace", factory.createBuiltInFunction(function* (regexOrSubstr, substrOrFn) {
 		assertIsNotNullOrUndefined(this.object, "String.prototype.replace");
 
-		let replaceKey = SymbolType.getByKey("replace");
+		let replaceKey = env.getSymbol("replace");
 		if (replaceKey && !isNullOrUndefined(regexOrSubstr)) {
 			let replaceMethod = getMethod(regexOrSubstr, replaceKey);
 			if (replaceMethod) {

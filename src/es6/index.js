@@ -10,7 +10,6 @@ import $Map from "./map";
 import $Math from "./math";
 import $Reflect from "./reflect";
 import $RegExp from "./regex";
-import {SymbolType} from "../types/symbol-type";
 
 export default function (env) {
 	ecma5(env);
@@ -31,8 +30,8 @@ export default function (env) {
 	$Set($global, env, objectFactory);
 
 	// setup class symbols
-	let stringTagKey = SymbolType.getByKey("toStringTag");
-	let speciesKey = SymbolType.getByKey("species");
+	let stringTagKey = env.getSymbol("toStringTag");
+	let speciesKey = env.getSymbol("species");
 	["Function", "Number", "Boolean", "Object", "Array", "String", "Date", "RegExp", "JSON", "Error", "Math", "Map", "Set"].forEach(typeName => {
 		let ctor = $global.getValue(typeName);
 

@@ -6,7 +6,7 @@ import {executeCallback} from "./array-helpers";
 export default function ($target, env, factory) {
 	$target.define("some", factory.createBuiltInFunction(function* (callback, thisArg) {
 		assertIsNotNullOrUndefined(this.object, "Array.prototype.some");
-		let arr = toObject(env, this.object);
+		let arr = toObject(this.object);
 		let length = yield toLength(this.object);
 		assertIsFunction(callback, this.object);
 

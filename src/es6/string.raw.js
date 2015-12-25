@@ -3,8 +3,8 @@ import {toObject, toLength, toString} from "../utils/native";
 export default function (target, env, factory) {
 	target.define("raw", factory.createBuiltInFunction(function* (template, ...substitutions) {
 		let numberOfSubstitutions = substitutions.length;
-		let cooked = toObject(env, template, true);
-		let raw = toObject(env, cooked.getValue("raw"), true);
+		let cooked = toObject(template, true);
+		let raw = toObject(cooked.getValue("raw"), true);
 		let literalSegments = yield toLength(raw);
 
 		if (literalSegments <= 0) {

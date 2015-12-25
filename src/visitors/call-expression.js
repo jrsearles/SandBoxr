@@ -11,7 +11,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 	if (fnMember instanceof PropertyReference && (!fnMember.unqualified || fnMember.base !== env.global)) {
 		let thisArg = fnMember.base;
 		if (env.options.ecmaVersion === 5) {
-			return toObject(env, thisArg);
+			return toObject(thisArg);
 		}
 
 		return thisArg;
