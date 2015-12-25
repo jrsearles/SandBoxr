@@ -17333,8 +17333,8 @@ var ExecutionContext = exports.ExecutionContext = (function () {
 		})
 	}, {
 		key: "create",
-		value: function create(node, callee, isNew) {
-			var context = new ExecutionContext(this.env, node, callee || this.callee, isNew);
+		value: function create() {
+			var context = new ExecutionContext(this.env, this.object, this.callee, this.isNew);
 			context.value = this.value;
 			return context;
 		}
@@ -18662,7 +18662,7 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 		}
 	}, {
 		key: "call",
-		value: regeneratorRuntime.mark(function call(thisArg, args, callee) {
+		value: regeneratorRuntime.mark(function call(thisArg, args, callee, isNew) {
 			var self, env, scope;
 			return regeneratorRuntime.wrap(function call$(_context2) {
 				while (1) {
@@ -18689,7 +18689,7 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 										switch (_context.prev = _context.next) {
 											case 0:
 												_context.next = 2;
-												return env.createExecutionContext().execute(self.node.body, callee);
+												return env.createExecutionContext(thisArg, self, isNew).execute(self.node.body, callee);
 
 											case 2:
 												executionResult = _context.sent;
@@ -18736,7 +18736,7 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 							}
 
 							_context3.next = 3;
-							return this.call(thisArg, args || [], callee);
+							return this.call(thisArg, args || [], callee, true);
 
 						case 3:
 							result = _context3.sent;
@@ -24960,8 +24960,12 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 exports.default = MetaProperty;
-function MetaProperty(context) {
-	throw Error("Meta properties not yet implemented");
+function MetaProperty(node, context) {
+	if (node.meta.name === "new" && node.property.name === "target" && context.isNew) {
+		return context.result(context.callee);
+	}
+
+	return context.empty();
 }
 
 },{}],417:[function(require,module,exports){

@@ -78,7 +78,7 @@ export class FunctionType extends ObjectType {
 		}
 	}
 
-	*call (thisArg, args, callee) {
+	*call (thisArg, args, callee, isNew) {
 		let self = this;
 		let env = this[Symbol.for("env")];
 		let scope = env.createExecutionScope(this, thisArg);
@@ -91,7 +91,7 @@ export class FunctionType extends ObjectType {
 		}
 
 		return yield scope.use(function* () {
-			let executionResult = yield env.createExecutionContext().execute(self.node.body, callee);
+			let executionResult = yield env.createExecutionContext(thisArg, self, isNew).execute(self.node.body, callee);
 			let shouldReturn = self.arrow || (executionResult && executionResult.exit);
 
 			if (shouldReturn && executionResult.result) {
@@ -107,7 +107,7 @@ export class FunctionType extends ObjectType {
 			thisArg = this[Symbol.for("env")].objectFactory.createObject(this);
 		}
 
-		let result = yield this.call(thisArg, args || [], callee);
+		let result = yield this.call(thisArg, args || [], callee, true);
 		if (result && !result.isPrimitive) {
 			return result;
 		}

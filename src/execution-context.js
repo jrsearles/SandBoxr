@@ -32,8 +32,8 @@ export class ExecutionContext {
 		return executionResult || this.empty();
 	}
 
-	create (node, callee, isNew) {
-		let context = new ExecutionContext(this.env, node, callee || this.callee, isNew);
+	create () {
+		let context = new ExecutionContext(this.env, this.object, this.callee, this.isNew);
 		context.value = this.value;
 		return context;
 	}
