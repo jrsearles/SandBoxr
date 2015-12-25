@@ -7,6 +7,10 @@ function getName (node) {
 		return node.id.name;
 	}
 	
+	if (node.isLiteral()) {
+		return node.value;
+	}
+	
 	let parent = node.getParent();
 	if (parent.isVariableDeclarator()) {
 		return getName(parent);

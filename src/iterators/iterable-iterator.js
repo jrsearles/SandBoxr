@@ -1,6 +1,7 @@
 import {toBoolean} from "../utils/native";
 import {exhaust as x} from "../utils/async";
 import {UNDEFINED} from "../types/primitive-type";
+import {getMethod} from "../utils/func";
 
 export default class IterableIterator {
 	constructor (it) {
@@ -45,9 +46,8 @@ export default class IterableIterator {
 	}
 
 	["return"] () {
-		let propInfo = this.iterator.getProperty("return");
-		if (propInfo) {
-			let returnFunc = propInfo.getValue();
+		let returnFunc = getMethod(this.iterator, "return");
+		if (returnFunc) {
 			return x(returnFunc.call(this.iterator));
 		}
 

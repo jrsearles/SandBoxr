@@ -11,6 +11,7 @@ import EmptyStatement from "./empty-statement";
 import ExpressionStatement from "./expression-statement";
 import ForStatement from "./for-statement";
 import ForInStatement from "./for-in-statement";
+import ForOfStatement from "./for-of-statement";
 import FunctionDeclaration from "./function-declaration";
 import FunctionExpression from "./function-expression";
 import Identifier from "./identifier";
@@ -49,6 +50,7 @@ export const visitors = {
 	ExpressionStatement,
 	ForStatement,
 	ForInStatement,
+	ForOfStatement,
 	FunctionDeclaration,
 	FunctionExpression,
 	Identifier,
@@ -60,7 +62,7 @@ export const visitors = {
 	ObjectExpression,
 	ReturnStatement,
 	SequenceExpression,
-  SpreadElement,
+	SpreadElement,
 	SwitchStatement,
 	TaggedTemplateExpression,
 	TemplateLiteral,

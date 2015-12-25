@@ -18,11 +18,11 @@ export function* tryExecute (obj, name, args = []) {
 
 export function getMethod (obj, key) {
 	let propInfo = obj.getProperty(key);
-	if (!propInfo) {
+	let method = propInfo && propInfo.getValue();
+	if (!method || (method.isPrimitive && method.value == null)) {
 		return null;
 	}
 
-	let method = propInfo.getValue();
 	if (method.type !== "function") {
 		throw TypeError(`${key} is not a method`);
 	}

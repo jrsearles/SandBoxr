@@ -17,7 +17,7 @@ export default function* ForInStatement (node, context, next) {
 	let result, priorResult;
 
 	while (!done) {
-    let scope = context.env.createBlockScope(node);
+		let scope = context.env.createBlockScope(node);
 		let itResult = yield advance.call(it);
 		done = toBoolean(itResult.getValue("done"));
 
