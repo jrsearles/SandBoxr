@@ -16544,16 +16544,13 @@ exports.default = function (globalObject, env, factory) {
 						instance = _symbolType.SymbolType.getByKey(keyString);
 
 						if (!instance) {
-							_context2.next = 6;
-							break;
+							instance = factory.create("Symbol", keyString);
+							_symbolType.SymbolType.add(keyString, instance);
 						}
 
 						return _context2.abrupt("return", instance);
 
 					case 6:
-						return _context2.abrupt("return", factory.create("Symbol", keyString));
-
-					case 7:
 					case "end":
 						return _context2.stop();
 				}
@@ -16562,7 +16559,7 @@ exports.default = function (globalObject, env, factory) {
 	}), 1, "Symbol.for"));
 
 	symbolClass.define("keyFor", factory.createBuiltInFunction(function (sym) {
-		return _symbolType.SymbolType.getByInstance(sym) || _primitiveType.UNDEFINED;
+		return factory.createPrimitive(sym.description);
 	}, 1, "Symbol.keyFor"));
 
 	var proto = symbolClass.getValue("prototype");
@@ -21243,6 +21240,12 @@ var _async = require("./async");
 
 var _native = require("./native");
 
+var _iterators = require("../iterators");
+
+var _iterators2 = _interopRequireDefault(_iterators);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var _marked = [reset, declare, assign, destructure, handleDefault, destructureArray, getObjectKey, destructureObject].map(regeneratorRuntime.mark);
 
 function reset(env, leftNode, priorScope, newScope) {
@@ -21512,54 +21515,184 @@ function handleDefault(env, left, rightValue, cb) {
 }
 
 function destructureArray(env, pattern, arr, cb) {
-	return regeneratorRuntime.wrap(function destructureArray$(_context8) {
+	var it, done, i, ln, element, value, current, _it$next, rest, _it$next2;
+
+	return regeneratorRuntime.wrap(function destructureArray$(_context7) {
+		while (1) switch (_context7.prev = _context7.next) {
+			case 0:
+				it = _iterators2.default.getIterator(arr);
+				done = false;
+				i = 0, ln = pattern.elements.length;
+
+			case 3:
+				if (!(i < ln)) {
+					_context7.next = 21;
+					break;
+				}
+
+				element = pattern.elements[i];
+				value = undefined, current = undefined;
+
+				if (!done) {
+					_it$next = it.next();
+					done = _it$next.done;
+					current = _it$next.value;
+
+					value = !done && current.value;
+				}
+
+				if (element) {
+					_context7.next = 9;
+					break;
+				}
+
+				return _context7.abrupt("continue", 18);
+
+			case 9:
+				if (!element.isRestElement()) {
+					_context7.next = 16;
+					break;
+				}
+
+				rest = value ? [value] : [];
+
+				while (!done) {
+					_it$next2 = it.next();
+					done = _it$next2.done;
+					current = _it$next2.value;
+
+					if (!done) {
+						rest.push(current.value);
+					}
+				}
+
+				_context7.next = 14;
+				return cb(env, element.argument, env.objectFactory.createArray(rest));
+
+			case 14:
+				_context7.next = 18;
+				break;
+
+			case 16:
+				_context7.next = 18;
+				return cb(env, element, value || _primitiveType.UNDEFINED);
+
+			case 18:
+				i++;
+				_context7.next = 3;
+				break;
+
+			case 21:
+
+				it.return();
+				// yield each(pattern.elements, function* (current, index) {
+				// 	if (!current) {
+				// 		return;
+				// 	}
+
+				// 	if (current.isRestElement()) {
+				// 		let rest = [];
+
+				// 		// todo: fully iterate
+				// 		while (arr.has(index)) {
+				// 			rest.push(arr.getProperty(index).getValue());
+				// 			index++;
+				// 		}
+
+				// 		yield cb(env, current.argument, env.objectFactory.createArray(rest));
+				// 	}	else {
+				// 		let propInfo = arr.getProperty(index);
+				// 		let value = propInfo ? propInfo.getValue() : UNDEFINED;
+
+				// 		yield cb(env, current, value);
+				// 	}
+				// });
+
+			case 22:
+			case "end":
+				return _context7.stop();
+		}
+	}, _marked[5], this);
+}
+
+function getObjectKey(env, keyNode) {
+	var key;
+	return regeneratorRuntime.wrap(function getObjectKey$(_context8) {
 		while (1) switch (_context8.prev = _context8.next) {
 			case 0:
-				_context8.next = 2;
-				return (0, _async.each)(pattern.elements, regeneratorRuntime.mark(function _callee2(current, index) {
-					var rest, propInfo, value;
-					return regeneratorRuntime.wrap(function _callee2$(_context7) {
+				if (!keyNode.computed) {
+					_context8.next = 7;
+					break;
+				}
+
+				_context8.next = 3;
+				return env.createExecutionContext().execute(keyNode);
+
+			case 3:
+				key = _context8.sent.result.getValue();
+				_context8.next = 6;
+				return (0, _native.toPropertyKey)(key);
+
+			case 6:
+				return _context8.abrupt("return", _context8.sent);
+
+			case 7:
+				return _context8.abrupt("return", keyNode.name);
+
+			case 8:
+			case "end":
+				return _context8.stop();
+		}
+	}, _marked[6], this);
+}
+
+function destructureObject(env, pattern, obj, cb) {
+	return regeneratorRuntime.wrap(function destructureObject$(_context10) {
+		while (1) switch (_context10.prev = _context10.next) {
+			case 0:
+				_context10.next = 2;
+				return (0, _async.each)(pattern.properties, regeneratorRuntime.mark(function _callee2(current) {
+					var key, propInfo, value;
+					return regeneratorRuntime.wrap(function _callee2$(_context9) {
 						while (1) {
-							switch (_context7.prev = _context7.next) {
+							switch (_context9.prev = _context9.next) {
 								case 0:
-									if (current) {
-										_context7.next = 2;
+									key = undefined;
+
+									if (!current.computed) {
+										_context9.next = 10;
 										break;
 									}
 
-									return _context7.abrupt("return");
+									_context9.next = 4;
+									return env.createExecutionContext().execute(current.key);
 
-								case 2:
-									if (!current.isRestElement()) {
-										_context7.next = 9;
-										break;
-									}
-
-									rest = [];
-
-									// todo: fully iterate
-
-									while (arr.has(index)) {
-										rest.push(arr.getProperty(index).getValue());
-										index++;
-									}
-
-									_context7.next = 7;
-									return cb(env, current.argument, env.objectFactory.createArray(rest));
+								case 4:
+									_context9.t0 = _context9.sent.result.getValue();
+									_context9.next = 7;
+									return (0, _native.toPropertyKey)(_context9.t0);
 
 								case 7:
-									_context7.next = 13;
+									key = _context9.sent;
+									_context9.next = 13;
 									break;
 
-								case 9:
-									propInfo = arr.getProperty(index);
-									value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
-									_context7.next = 13;
-									return cb(env, current, value);
+								case 10:
+									_context9.next = 12;
+									return getObjectKey(env, current.key);
+
+								case 12:
+									key = _context9.sent;
 
 								case 13:
+									propInfo = obj.getProperty(key);
+									value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
+									_context9.next = 17;
+									return cb(env, current.value, value);
+
+								case 17:
 								case "end":
-									return _context7.stop();
+									return _context9.stop();
 							}
 						}
 					}, _callee2, this);
@@ -21567,102 +21700,12 @@ function destructureArray(env, pattern, arr, cb) {
 
 			case 2:
 			case "end":
-				return _context8.stop();
-		}
-	}, _marked[5], this);
-}
-
-function getObjectKey(env, keyNode) {
-	var key;
-	return regeneratorRuntime.wrap(function getObjectKey$(_context9) {
-		while (1) switch (_context9.prev = _context9.next) {
-			case 0:
-				if (!keyNode.computed) {
-					_context9.next = 7;
-					break;
-				}
-
-				_context9.next = 3;
-				return env.createExecutionContext().execute(keyNode);
-
-			case 3:
-				key = _context9.sent.result.getValue();
-				_context9.next = 6;
-				return (0, _native.toPropertyKey)(key);
-
-			case 6:
-				return _context9.abrupt("return", _context9.sent);
-
-			case 7:
-				return _context9.abrupt("return", keyNode.name);
-
-			case 8:
-			case "end":
-				return _context9.stop();
-		}
-	}, _marked[6], this);
-}
-
-function destructureObject(env, pattern, obj, cb) {
-	return regeneratorRuntime.wrap(function destructureObject$(_context11) {
-		while (1) switch (_context11.prev = _context11.next) {
-			case 0:
-				_context11.next = 2;
-				return (0, _async.each)(pattern.properties, regeneratorRuntime.mark(function _callee3(current) {
-					var key, propInfo, value;
-					return regeneratorRuntime.wrap(function _callee3$(_context10) {
-						while (1) {
-							switch (_context10.prev = _context10.next) {
-								case 0:
-									key = undefined;
-
-									if (!current.computed) {
-										_context10.next = 10;
-										break;
-									}
-
-									_context10.next = 4;
-									return env.createExecutionContext().execute(current.key);
-
-								case 4:
-									_context10.t0 = _context10.sent.result.getValue();
-									_context10.next = 7;
-									return (0, _native.toPropertyKey)(_context10.t0);
-
-								case 7:
-									key = _context10.sent;
-									_context10.next = 13;
-									break;
-
-								case 10:
-									_context10.next = 12;
-									return getObjectKey(env, current.key);
-
-								case 12:
-									key = _context10.sent;
-
-								case 13:
-									propInfo = obj.getProperty(key);
-									value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
-									_context10.next = 17;
-									return cb(env, current.value, value);
-
-								case 17:
-								case "end":
-									return _context10.stop();
-							}
-						}
-					}, _callee3, this);
-				}));
-
-			case 2:
-			case "end":
-				return _context11.stop();
+				return _context10.stop();
 		}
 	}, _marked[7], this);
 }
 
-},{"../types/primitive-type":382,"./async":389,"./native":392}],389:[function(require,module,exports){
+},{"../iterators":366,"../types/primitive-type":382,"./async":389,"./native":392}],389:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25753,6 +25796,8 @@ var _contracts = require("../utils/contracts");
 
 var _async = require("../utils/async");
 
+var _assign = require("../utils/assign");
+
 var _marked = [tryCatch, executeBlock, TryStatement].map(regeneratorRuntime.mark);
 
 function tryCatch(node, context, next) {
@@ -25857,15 +25902,19 @@ function TryStatement(node, context, next) {
 					break;
 				}
 
+				// todo: isn't this check already handled?
 				errVar = node.handler.param.name;
 
 				(0, _contracts.assertIsValidIdentifier)(errVar, context.env.isStrict());
 
 				scope = context.env.createScope();
+				// context.env.createVariable(errVar);
+				// context.env.setValue(errVar, result.result);
 
-				context.env.createVariable(errVar);
-				context.env.setValue(errVar, result.result);
+				_context5.next = 11;
+				return (0, _assign.declare)(context.env, node.handler.param, result.result);
 
+			case 11:
 				_context5.next = 13;
 				return scope.use(regeneratorRuntime.mark(function _callee2() {
 					return regeneratorRuntime.wrap(function _callee2$(_context4) {
@@ -25918,7 +25967,7 @@ function TryStatement(node, context, next) {
 	}, _marked[2], this);
 }
 
-},{"../utils/async":389,"../utils/contracts":390}],428:[function(require,module,exports){
+},{"../utils/assign":388,"../utils/async":389,"../utils/contracts":390}],428:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

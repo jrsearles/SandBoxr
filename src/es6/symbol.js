@@ -17,17 +17,18 @@ export default function (globalObject, env, factory) {
 
 	symbolClass.define("for", factory.createBuiltInFunction(function* (key) {
 		let keyString = yield toString(key);
-
 		let instance = SymbolType.getByKey(keyString);
-		if (instance) {
-			return instance;
+		
+		if (!instance) {
+			instance = factory.create("Symbol", keyString);
+			SymbolType.add(keyString, instance);
 		}
-
-		return factory.create("Symbol", keyString);
+		
+		return instance;
 	}, 1, "Symbol.for"));
 
 	symbolClass.define("keyFor", factory.createBuiltInFunction(function (sym) {
-		return SymbolType.getByInstance(sym) || UNDEFINED;
+		return factory.createPrimitive(sym.description);
 	}, 1, "Symbol.keyFor"));
 
 	let proto = symbolClass.getValue("prototype");

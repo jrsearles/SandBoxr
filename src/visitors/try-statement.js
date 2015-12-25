@@ -1,5 +1,6 @@
 import {assertIsValidIdentifier} from "../utils/contracts";
 import {each} from "../utils/async";
+import {declare} from "../utils/assign";
 
 function* tryCatch (node, context, next) {
 	try {
@@ -35,13 +36,15 @@ export default function* TryStatement (node, context, next) {
 
 	if (result && result.raised) {
 		if (node.handler) {
+			// todo: isn't this check already handled?
 			let errVar = node.handler.param.name;
 			assertIsValidIdentifier(errVar, context.env.isStrict());
-
+			
 			let scope = context.env.createScope();
-			context.env.createVariable(errVar);
-			context.env.setValue(errVar, result.result);
-
+			// context.env.createVariable(errVar);
+			// context.env.setValue(errVar, result.result);
+			yield declare(context.env, node.handler.param, result.result);
+			
 			result = yield scope.use(function* () {
 				return yield executeBlock(context, node.handler.body.body, true, next);
 			});

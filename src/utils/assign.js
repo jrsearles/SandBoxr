@@ -1,6 +1,7 @@
 import {UNDEFINED} from "../types/primitive-type";
 import {each} from "./async";
 import {toPropertyKey} from "./native";
+import iterate from "../iterators";
 
 export function* reset (env, leftNode, priorScope, newScope) {
 	if (leftNode.isVariableDeclaration()) {
@@ -74,28 +75,39 @@ function* handleDefault (env, left, rightValue, cb) {
 }
 
 function* destructureArray (env, pattern, arr, cb) {
-	yield each(pattern.elements, function* (current, index) {
-		if (!current) {
-			return;
+	let it = iterate.getIterator(arr);
+	let done = false;
+
+	for (let i = 0, ln = pattern.elements.length; i < ln; i++) {
+		let element = pattern.elements[i];
+		let value, current;
+		
+		if (!done) {
+			({done, value: current} = it.next());
+			value = !done && current.value;
 		}
 		
-		if (current.isRestElement()) {
-			let rest = [];
+		if (!element) {
+			continue;
+		}
+		
+		if (element.isRestElement()) {
+			let rest = value ? [value] : [];
 			
-			// todo: fully iterate
-			while (arr.has(index)) {
-				rest.push(arr.getProperty(index).getValue());
-				index++;
+			while (!done) {
+				({done, value: current} = it.next());
+				if (!done) {
+					rest.push(current.value);
+				}
 			}
 			
-			yield cb(env, current.argument, env.objectFactory.createArray(rest));
-		}	else {
-			let propInfo = arr.getProperty(index);
-			let value = propInfo ? propInfo.getValue() : UNDEFINED;
-
-			yield cb(env, current, value);
+			yield cb(env, element.argument, env.objectFactory.createArray(rest));
+		} else {
+			yield cb(env, element, value || UNDEFINED);
 		}
-	});
+	}
+	
+	it.return();
 }
 
 function* getObjectKey (env, keyNode) {
