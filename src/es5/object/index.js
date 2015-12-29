@@ -39,7 +39,9 @@ export default function objectApi (env) {
 
 			if (value.isSymbol) {
 				// should return a new symbol instance
-				return objectFactory.create("Symbol", value.description);
+				let instance = objectFactory.create("Symbol", value.description);
+				instance.type = "object";
+				return instance;
 			}
 
 			// if an object is passed in just return
@@ -47,7 +49,7 @@ export default function objectApi (env) {
 		}
 
 		return objectFactory.createObject();
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "Object"});
 
 	$hasOwnProperty(proto, env, objectFactory);
 	$isPrototypeOf(proto, env, objectFactory);

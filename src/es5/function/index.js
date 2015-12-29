@@ -9,8 +9,6 @@ import $bind from "./function.bind";
 import $call from "./function.call";
 import $toString from "./function.to-string";
 
-const frozen = {configurable: false, enumerable: false, writable: false};
-
 export default function functionApi (env) {
 	const {global: globalObject, objectFactory, options} = env;
 
@@ -90,7 +88,7 @@ export default function functionApi (env) {
 	proto[Symbol.for("env")] = env;
 
 	funcCtor.nativeLength = 1;
-	funcClass = objectFactory.createFunction(funcCtor, proto, frozen);
+	funcClass = objectFactory.createFunction(funcCtor, proto, {configurable: false, enumerable: false, writable: false, name: "Function"});
 	funcClass.setValue("constructor", funcClass);
 
 	globalObject.define("Function", funcClass);

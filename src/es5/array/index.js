@@ -40,7 +40,7 @@ export default function (env) {
 		}
 
 		return objectFactory.createArray(arguments);
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "Array"});
 
 	$isArray(arrayClass, env, objectFactory);
 	$push(proto, env, objectFactory);

@@ -24,7 +24,7 @@ export default function (env) {
 		flags = isUndefined(flags) ? "" : (yield toString(flags));
 
 		return objectFactory.create("RegExp", new RegExp(patternString, flags));
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "RegExp"});
 
 	$exec(proto, env, objectFactory);
 	$test(proto, env, objectFactory);

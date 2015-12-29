@@ -20,7 +20,7 @@ export default function numberApi (env) {
 		}
 
 		return objectFactory.create("Number", numberValue);
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "Number"});
 
 	["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"].forEach(name => {
 		numberClass.define(name, objectFactory.createPrimitive(Number[name]), {configurable: false, enumerable: false, writable: false});

@@ -1,11 +1,11 @@
 import {toString} from "../utils/native";
 import {SymbolType} from "../types/symbol-type";
-import {UNDEFINED} from "../types/primitive-type";
 import {assertIsNotGeneric} from "../utils/contracts";
 
 export default function (globalObject, env, factory) {
 	let frozen = {configurable: false, enumerable: false, writable: false};
-
+	let proto = factory.createObject();
+	
 	let symbolClass = factory.createFunction(function* (desc) {
 		if (this.isNew) {
 			throw TypeError("Symbol is not a constructor");
@@ -13,7 +13,7 @@ export default function (globalObject, env, factory) {
 
 		let descString = yield toString(desc);
 		return factory.create("Symbol", descString);
-	});
+	}, proto, {name: "Symbol"});
 
 	symbolClass.define("for", factory.createBuiltInFunction(function* (key) {
 		let keyString = yield toString(key);
@@ -30,8 +30,7 @@ export default function (globalObject, env, factory) {
 	symbolClass.define("keyFor", factory.createBuiltInFunction(function (sym) {
 		return factory.createPrimitive(sym.description);
 	}, 1, "Symbol.keyFor"));
-
-	let proto = symbolClass.getValue("prototype");
+	
 	proto.define("toString", factory.createBuiltInFunction(function () {
 		let stringValue = `Symbol(${this.object.description})`;
 		return factory.createPrimitive(stringValue);

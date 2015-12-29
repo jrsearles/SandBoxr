@@ -4936,16 +4936,6 @@ var Environment = exports.Environment = (function () {
 		value: function deleteVariable(key) {
 			this.current.scope.deleteVariable(key);
 		}
-
-		// declare (key, value) {
-		// 	let propInfo = this.getVariable(key);
-		// 	if (!propInfo) {
-		// 		propInfo = this.createVariable(key);
-		// 	}	
-
-		// 	propInfo.init(value);
-		// }
-
 	}, {
 		key: "getVariable",
 		value: function getVariable(key) {
@@ -4964,15 +4954,14 @@ var Environment = exports.Environment = (function () {
 		/**
    * Declares a variable within the current scope.
    * @param {String} key - the key of the variable.
-   * @param {Object} [descriptor] - whether the variable is immutable or not.
+   * @param {String} [kind] - the type of variable to declare. Available options are "var", "let", and "const". "var" is the default.
    * @returns {PropertyDescriptor} The property descriptor for the new variabble.
    */
 
 	}, {
 		key: "createVariable",
-		value: function createVariable(key) {
-			var kind = arguments.length <= 1 || arguments[1] === undefined ? "var" : arguments[1];
-
+		value: function createVariable(key, kind) {
+			kind = kind ? kind.toLowerCase() : "var";
 			var attr = kindAttr[kind];
 			var scope = this.current.scope;
 
@@ -10733,7 +10722,9 @@ function objectApi(env) {
 
 			if (value.isSymbol) {
 				// should return a new symbol instance
-				return objectFactory.create("Symbol", value.description);
+				var instance = objectFactory.create("Symbol", value.description);
+				instance.type = "object";
+				return instance;
 			}
 
 			// if an object is passed in just return
@@ -13328,7 +13319,6 @@ exports.default = function ($target, env, factory) {
 						value = _context3.sent;
 
 						arr.defineOwnProperty(current.key, { value: value, configurable: true, enumerable: true, writable: true });
-						// arr.setValue(current.key, value);
 						length = current.key + 1;
 
 					case 21:
@@ -14836,8 +14826,6 @@ exports.default = function ($target, env, factory) {
 
 					case 4:
 						args = _context.sent;
-
-						// let callee = target.node || target;
 						proto = newTarget || target;
 						obj = factory.createObject(proto);
 						_context.next = 9;
@@ -17943,6 +17931,16 @@ var DESCENDING = function DESCENDING(a, b) {
 	return b - a;
 };
 
+var isInRange = function isInRange(value, start, end) {
+	return value >= start && value <= end;
+};
+
+var isValidIndex = function isValidIndex(keys, start, end) {
+	return function (key) {
+		return !(key in keys) && (0, _contracts.isInteger)(key) && isInRange(key, start, end);
+	};
+};
+
 var SparseIterator = (function () {
 	function SparseIterator(obj, start, end, desc) {
 		_classCallCheck(this, SparseIterator);
@@ -17975,26 +17973,10 @@ var SparseIterator = (function () {
 				this.prototypes.push(current);
 				this.version += current.version;
 
-				current.getOwnPropertyKeys("String").filter(function (key) {
-					return !(key in _this.props) && (0, _contracts.isInteger)(key);
-				}).forEach(function (key) {
-					var index = Number(key);
-
-					if (index >= _this.start && index <= _this.end) {
-						_this.props[key] = current.getProperty(key);
-						_this.keys.push(index);
-					}
+				current.getOwnPropertyKeys("String").filter(isValidIndex(this.props, this.start, this.end)).forEach(function (key) {
+					_this.props[key] = current.getProperty(key);
+					_this.keys.push(Number(key));
 				});
-				// for (let name in current.properties) {
-				// 	if (!(name in this.props) && isInteger(name)) {
-				// 		let index = Number(name);
-
-				// 		if (index >= this.start && index <= this.end) {
-				// 			this.props[name] = current.getOwnProperty(name);
-				// 			this.keys.push(index);
-				// 		}
-				// 	}
-				// }
 
 				current = current.getPrototype();
 			}
@@ -18009,11 +17991,11 @@ var SparseIterator = (function () {
 			}
 
 			if (this.keys.length > 0) {
-				var key = this.position = this.keys.shift();
+				var key = this.currentIndex = this.keys.shift();
 				var value = this.props[key].getValue();
 
 				return {
-					value: { value: value, key: key },
+					value: { key: key, value: value },
 					done: false
 				};
 			}
@@ -18030,9 +18012,9 @@ var SparseIterator = (function () {
 			}, 0);
 			if (currentVersion !== this.version) {
 				if (this.asc) {
-					this.start = this.position + 1;
+					this.start = this.currentIndex + 1;
 				} else {
-					this.end = this.position - 1;
+					this.end = this.currentIndex - 1;
 				}
 
 				return true;
@@ -18957,30 +18939,6 @@ var IteratorType = exports.IteratorType = (function (_ObjectType) {
 					}));
 				})();
 			}
-			// let factory = env.objectFactory;
-
-			// if (!proto) {
-			// 	proto = factory.createObject();
-			// 	proto.className = "[Symbol.iterator]";
-			// }
-
-			// let iteratorKey = env.getSymbol("iterator");
-			// if (iteratorKey) {
-			// 	proto.define(iteratorKey, factory.createBuiltInFunction(function () {
-			// 		return this.object;
-			// 	}));
-			// }
-
-			// if (!proto.has("next")) {
-			// 	proto.define("next", factory.createBuiltInFunction(function () {
-			// 		let result = this.object.advance();
-			// 		if (result.value) {
-			// 			return result.value;
-			// 		}
-
-			// 		return factory.createIteratorResult({done: true});
-			// 	}));
-			// }
 
 			this.setPrototype(proto);
 		}
@@ -21168,6 +21126,7 @@ function lazyInit(instance, key) {
 
 	for (var i = 0, ln = nativeValue.length; i < ln; i++) {
 		// we are not using the object factory to avoid circular loop
+		// todo: i think we can resolve that by having a string instance return itself for 1 length strings and 0 position
 		var c = new StringType(nativeValue[i]);
 		c[Symbol.for("env")] = instance[Symbol.for("env")];
 		c.setPrototype(instance.proto);
@@ -25892,8 +25851,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = TryStatement;
 
-var _contracts = require("../utils/contracts");
-
 var _async = require("../utils/async");
 
 var _assign = require("../utils/assign");
@@ -25989,8 +25946,6 @@ function TryStatement(node, context, next) {
 			case 2:
 				result = _context5.sent;
 				finalizerResult = undefined;
-				// let shouldRaise = false;
-				// let shouldReturn = false;
 
 				if (!(result && result.raised)) {
 					_context5.next = 12;
@@ -26002,14 +25957,7 @@ function TryStatement(node, context, next) {
 					break;
 				}
 
-				// todo: isn't this check already handled?
-				// let errVar = node.handler.param.name;
-				// assertIsValidIdentifier(errVar, context.env.isStrict());
-
 				scope = context.env.createScope();
-				// context.env.createVariable(errVar);
-				// context.env.setValue(errVar, result.result);
-
 				_context5.next = 9;
 				return (0, _assign.declare)(context.env, node.handler.param, result.result);
 
@@ -26066,7 +26014,7 @@ function TryStatement(node, context, next) {
 	}, _marked[2], this);
 }
 
-},{"../utils/assign":389,"../utils/async":390,"../utils/contracts":391}],429:[function(require,module,exports){
+},{"../utils/assign":389,"../utils/async":390}],429:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26328,7 +26276,6 @@ function VariableDeclarator(node, context, next) {
 	return regeneratorRuntime.wrap(function VariableDeclarator$(_context) {
 		while (1) switch (_context.prev = _context.next) {
 			case 0:
-				// let name = node.id.name;
 				rightValue = undefined;
 
 				if (!node.init) {
@@ -26348,6 +26295,7 @@ function VariableDeclarator(node, context, next) {
 					break;
 				}
 
+				// variables have already been hoisted so we just need to initialize them if defined
 				propInfo = context.env.getVariable(node.id.name);
 
 				if (rightValue || !propInfo.initialized) {

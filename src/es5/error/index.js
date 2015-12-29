@@ -20,7 +20,7 @@ export default function errorApi (env) {
 		}
 
 		return objectFactory.create("Error", new Error(messageString));
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "Error"});
 
 	$toString(proto, env, objectFactory);
 	globalObject.define("Error", errorClass);
@@ -36,7 +36,7 @@ export default function errorApi (env) {
 			let messageString = yield toString(message);
 			let nativeError = new global[errorType](messageString);
 			return objectFactory.create(errorType, nativeError);
-		}, typeProto, {configurable: false, enumerable: false, writable: false});
+		}, typeProto, {configurable: false, enumerable: false, writable: false, name: errorType});
 
 		globalObject.define(errorType, errClass);
 	});

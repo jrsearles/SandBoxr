@@ -19,7 +19,7 @@ export default function booleanApi (env) {
 		}
 
 		return objectFactory.create("Boolean", booleanValue);
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "Boolean"});
 
 	$toString(proto, env, objectFactory);
 	$valueOf(proto, env, objectFactory);

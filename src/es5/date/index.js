@@ -64,7 +64,7 @@ export default function dateApi (env) {
 
 		dateValue = Date(...args);
 		return objectFactory.createPrimitive(dateValue);
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "Date"});
 
 	$parse(dateClass, env, objectFactory);
 	$utc(dateClass, env, objectFactory);

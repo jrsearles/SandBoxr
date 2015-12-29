@@ -44,7 +44,7 @@ export default function (env) {
 		}
 
 		return objectFactory.createPrimitive(stringValue);
-	}, proto, {configurable: false, enumerable: false, writable: false});
+	}, proto, {configurable: false, enumerable: false, writable: false, name: "String"});
 
 	$fromCharCode(stringClass, env, objectFactory);
 
