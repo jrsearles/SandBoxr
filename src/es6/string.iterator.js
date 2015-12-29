@@ -4,6 +4,7 @@ import {toString} from "../utils/native";
 
 export default function (target, env, factory) {
 	let iteratorProto = factory.createObject();
+	iteratorProto.setPrototype(env.global.getValue("%IteratorPrototype%"));
 	iteratorProto.className = "String Iterator";
 
 	iteratorProto.define("next", factory.createBuiltInFunction(function () {

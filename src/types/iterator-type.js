@@ -12,27 +12,19 @@ export class IteratorType extends ObjectType {
 	
 	init (env, proto) {
 		super.init(...arguments);
-		let factory = env.objectFactory;
 		
 		if (!proto) {
+			let factory = env.objectFactory;
 			proto = factory.createObject();
 			proto.className = "[Symbol.iterator]";
-		}
-		
-		let iteratorKey = env.getSymbol("iterator");
-		if (iteratorKey) {
-			proto.define(iteratorKey, factory.createBuiltInFunction(function () {
-				return this.object;
-			}));
-		}
-		
-		if (!proto.has("next")) {
+			proto.setPrototype(env.global.getValue("%IteratorPrototype%"));
+			
 			proto.define("next", factory.createBuiltInFunction(function () {
 				let result = this.object.advance();
 				if (result.value) {
 					return result.value;
 				}
-
+				
 				return factory.createIteratorResult({done: true});
 			}));
 		}

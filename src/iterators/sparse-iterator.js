@@ -3,6 +3,16 @@ import {isInteger} from "../utils/contracts";
 const ASCENDING = (a, b) => a - b;
 const DESCENDING = (a, b) => b - a;
 
+const isInRange = (value, start, end) => value >= start && value <= end;
+
+const isValidIndex = function (keys, start, end) {
+	return function (key) {
+		return !(key in keys)
+			&& isInteger(key)
+			&& isInRange(key, start, end);
+	};
+};
+
 export default class SparseIterator {
 	constructor (obj, start, end, desc) {
 		this.object = obj;
@@ -28,16 +38,12 @@ export default class SparseIterator {
 			this.prototypes.push(current);
 			this.version += current.version;
 
-			for (let name in current.properties) {
-				if (!(name in this.props) && isInteger(name)) {
-					let index = Number(name);
-
-					if (index >= this.start && index <= this.end) {
-						this.props[name] = current.getOwnProperty(name);
-						this.keys.push(index);
-					}
-				}
-			}
+			current.getOwnPropertyKeys("String")
+				.filter(isValidIndex(this.props, this.start, this.end))
+				.forEach(key => {
+					this.props[key] = current.getProperty(key);
+					this.keys.push(Number(key));
+				}); 
 
 			current = current.getPrototype();
 		}
@@ -51,11 +57,11 @@ export default class SparseIterator {
 		}
 
 		if (this.keys.length > 0) {
-			let key = this.position = this.keys.shift();
+			let key = this.currentIndex = this.keys.shift();
 			let value = this.props[key].getValue();
 
 			return {
-				value: {value, key},
+				value: {key, value},
 				done: false
 			};
 		}
@@ -69,9 +75,9 @@ export default class SparseIterator {
 		let currentVersion = this.prototypes.reduce((v, o) => o.version + v, 0);
 		if (currentVersion !== this.version) {
 			if (this.asc) {
-				this.start = this.position + 1;
+				this.start = this.currentIndex + 1;
 			} else {
-				this.end = this.position - 1;
+				this.end = this.currentIndex - 1;
 			}
 
 			return true;

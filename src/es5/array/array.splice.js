@@ -23,11 +23,14 @@ export default function ($target, env, factory) {
 		let k = 0;
 		while (k < deleteCount) {
 			if (this.object.has(k + start)) {
-				removed.setIndex(k, this.object.getValue(k + start));
+				removed.defineOwnProperty(k, {value: this.object.getValue(k + start), configurable: true, enumerable: true, writable: true});
+				// removed.setIndex(k, this.object.getValue(k + start));
 			}
 
 			k++;
 		}
+		
+		removed.setValue("length", factory.createPrimitive(k));
 
 		let newCount = elements.length;
 		if (newCount < deleteCount) {
@@ -35,9 +38,10 @@ export default function ($target, env, factory) {
 
 			while (k < length - deleteCount) {
 				if (this.object.has(k + deleteCount)) {
+					// this.object.defineOwnProperty(k + newCount, {value: this.object.getValue(k + deleteCount), configurable: true, enumerable: true, writable: true});
 					this.object.setValue(k + newCount, this.object.getValue(k + deleteCount));
 				} else {
-					this.object.deleteProperty(k + deleteCount);
+					this.object.deleteProperty(k + newCount);
 				}
 
 				k++;
@@ -48,9 +52,10 @@ export default function ($target, env, factory) {
 				this.object.deleteProperty(--k);
 			}
 		} else if (newCount > deleteCount) {
-			k = length - start;
+			k = length - deleteCount;
 			while (k > start) {
 				if (this.object.has(k + deleteCount - 1)) {
+					// this.object.defineOwnProperty(k + newCount - 1, {value: this.object.getValue(k + deleteCount - 1), configurable: true, enumerable: true, writable: true});
 					this.object.setValue(k + newCount - 1, this.object.getValue(k + deleteCount - 1));
 				} else {
 					this.object.deleteProperty(k + newCount - 1);
@@ -62,6 +67,7 @@ export default function ($target, env, factory) {
 
 		k = start;
 		for (let i = 0; i < newCount; i++) {
+			// this.object.defineOwnProperty(k, {value: elements[i], configurable: true, enumerable: true, writable: true});
 			this.object.setValue(k, elements[i]);
 			k++;
 		}

@@ -17,6 +17,12 @@ const defaultOptions = {
 	ecmaVersion: 5
 };
 
+const kindAttr = {
+	"var": {configurable: false, writable: true, initialized: true, block: false},
+	"let": {configurable: false, writable: true, initialized: false, block: true},
+	"const": {configurable: false, writable: false, initialized: false, block: true}
+};
+
 export class Environment {
 	init (options = defaultOptions) {
 		// clear state in case of re-init
@@ -87,24 +93,15 @@ export class Environment {
 		this.current.scope.deleteVariable(key);
 	}
 
-	declare (key, value) {
-		let propInfo = this.getVariable(key);
-		if (!propInfo) {
-			propInfo = this.createVariable(key);
-		}	
-		
-		propInfo.init(value);
-	}
-	
 	getVariable (key) {
-    let scope = this.current && this.current.scope;
-    while (scope) {
-      if (scope.owns(key)) {
-        return scope.getVariable(key);
-      }
+		let scope = this.current && this.current.scope;
+		while (scope) {
+			if (scope.owns(key)) {
+				return scope.getVariable(key);
+			}
       
-      scope = scope.parent;
-    }
+			scope = scope.parent;
+		}
     
 		return null;
 	}
@@ -112,12 +109,27 @@ export class Environment {
 	/**
 	 * Declares a variable within the current scope.
 	 * @param {String} key - the key of the variable.
-	 * @param {Object} [descriptor] - whether the variable is immutable or not.
+	 * @param {String} [kind] - the type of variable to declare. Available options are "var", "let", and "const". "var" is the default.
 	 * @returns {PropertyDescriptor} The property descriptor for the new variabble.
 	 */
-	createVariable (key, {configurable = true, writable = true, intitialized = true} = {}) {
+	createVariable (key, kind) {
+		kind = kind ? kind.toLowerCase() : "var";
+		let attr = kindAttr[kind];
+		let scope = this.current.scope;
+		
 		assertIsValidIdentifier(key, this.isStrict());
-		return this.current.scope.createVariable(...arguments);
+		
+		if (!attr.block) {
+			while (scope) {
+				if (!scope.block || !scope.parent) {
+					break;
+				}
+				
+				scope = scope.parent;
+			}
+		}
+		
+		return scope.createVariable(key, attr);
 	}
 
 	/**

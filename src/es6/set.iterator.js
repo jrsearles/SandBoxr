@@ -25,6 +25,7 @@ export default function ($target, env, factory) {
 	}
 
 	let proto = factory.createObject();
+	proto.setPrototype(env.global.getValue("%IteratorPrototype%"));
 	proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Set Iterator"), {writable: false});
 
 	$target.define("entries", factory.createBuiltInFunction(function () {

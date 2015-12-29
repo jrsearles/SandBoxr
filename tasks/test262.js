@@ -121,7 +121,7 @@ gulp.task("test262", ["build"], function () {
 	var base = path.join(__dirname, "../node_modules/test262/test/suite/");
 	
 	// "!ch15/15.1/**/*.js",
-	return test262({ files: ["ch07/**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
+	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })
 		.pipe(through.obj(function (file, enc, cb) {
 			var filename = path.basename(file.path);
 			var src = file.contents.toString();

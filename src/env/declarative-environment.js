@@ -3,16 +3,17 @@ import {PropertyDescriptor} from "../types/property-descriptor";
 import {UNDEFINED} from "../types/primitive-type";
 
 export class DeclarativeEnvironment {
-	constructor (parent, thisArg, env, strict) {
+	constructor (parent, thisArg, env, strict, block) {
 		this.properties = Object.create(null);
 		this.parent = parent && parent.scope;
 		this.thisBinding = thisArg;
 		this.env = env;
 		this.strict = strict;
+		this.block = !!block;
 	}
 	
 	createChildScope () {
-		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict);
+		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
 	}
 
 	setParent (parent) {

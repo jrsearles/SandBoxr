@@ -8,10 +8,11 @@ export class ObjectEnvironment {
 		this.thisBinding = thisArg || obj;
 		this.env = env;
 		this.strict = strict;
+		this.block = false;
 	}
 	
 	createChildScope () {
-		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict);
+		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
 	}
 
 	getReference (key, unqualified) {
@@ -37,11 +38,14 @@ export class ObjectEnvironment {
 	}
 
 	createVariable (key, {configurable = true, writable = true, initialized = true} = {}) {
-		if (this.parent) {
-			return this.parent.createVariable(...arguments);
-		}
+		if (!this.owns(key)) {
+			if (this.parent) {
+				return this.parent.createVariable(...arguments);
+			}
 
-		this.object.defineOwnProperty(key, {value: undefined, enumerable: true, configurable, writable, initialized}, this.env.isStrict());
+			this.object.defineOwnProperty(key, {value: undefined, enumerable: true, configurable, writable, initialized}, this.env.isStrict());
+		}
+		
 		return this.object.getProperty(key);
 	}
 

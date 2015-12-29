@@ -1,8 +1,8 @@
 import {toObject, toLength, toString} from "../utils/native";
 
 export default function (target, env, factory) {
-	target.define("raw", factory.createBuiltInFunction(function* (template, ...substitutions) {
-		let numberOfSubstitutions = substitutions.length;
+	target.define("raw", factory.createBuiltInFunction(function* (template) {
+		let numberOfSubstitutions = arguments.length - 1;
 		let cooked = toObject(template, true);
 		let raw = toObject(cooked.getValue("raw"), true);
 		let literalSegments = yield toLength(raw);
@@ -24,7 +24,7 @@ export default function (target, env, factory) {
 
 			let next = "";
 			if (nextIndex < numberOfSubstitutions) {
-				next = yield toString(substitutions[nextIndex]);
+				next = yield toString(arguments[nextIndex + 1]);
 			}
 
 			stringElements.push(next);

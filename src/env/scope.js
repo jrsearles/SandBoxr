@@ -27,24 +27,26 @@ export class Scope {
 
 		let strict = this.scope.strict || env.isStrict();
 		node.getBindings().forEach(decl => {
-			let name = decl.id.name;
+			let key = decl.id.name;
 			
-			assertIsValidParameterName(name, strict);
+			assertIsValidParameterName(key, strict);
 			
 			let initialized = decl.isVar();
 			let value = UNDEFINED;
-			let writable = !decl.isConst();
+			let kind = decl.getParent().kind;
 			
 			if (decl.isFunction()) {
 				initialized = true;
+				kind = "var";
+				
 				let strictFunc = strict || decl.isStrict(); 
-				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc, name});
+				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc, name: key});
 				// value.bindScope(this);
-			} else if (env.has(name)) {
+			} else if (env.has(key)) {
 				return;
 			}
 		
-			let newVar = env.createVariable(name, {configurable: false, writable, initialized});
+			let newVar = env.createVariable(key, kind);
 			if (initialized) {
 				newVar.init(value);
 			}

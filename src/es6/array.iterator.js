@@ -4,6 +4,7 @@ import {toLength, toObject} from "../utils/native";
 
 export default function ($target, env, factory) {
 	let iteratorProto = factory.createObject();
+	iteratorProto.setPrototype(env.global.getValue("%IteratorPrototype%"));
 	iteratorProto.className = "Array Iterator";
 
 	iteratorProto.define("next", factory.createBuiltInFunction(function () {
@@ -72,11 +73,11 @@ export default function ($target, env, factory) {
 	let stringTagKey = env.getSymbol("toStringTag");
 	iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), {writable: false});
 
-	let iteratorFunc = factory.createBuiltInFunction(function () {
+	let iteratorFunc = factory.createFunction(function () {
 		let arr = toObject(this.object, true);
 		let it = getIterator(arr, "value");
 		return factory.createIterator(it, iteratorProto);
-	}, 0, "Array.prototype.values");
+	}, iteratorProto, {name: "Array.prototype.values"});
 
 	$target.define("values", iteratorFunc);
 

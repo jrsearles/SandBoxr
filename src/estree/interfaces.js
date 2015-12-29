@@ -11,5 +11,5 @@ export const interfaces = {
 			&& this.expression.type === "Literal"
 			&& typeof this.expression.value === "string";
 	},
-	"Scope": ["FunctionExpression", "FunctionDeclaration", "ArrowFunctionExpression", "Program"]
+	"Scope": ["FunctionExpression", "FunctionDeclaration", "Program"]
 };

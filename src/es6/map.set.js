@@ -1,4 +1,4 @@
-import {assertIsMap} from "../utils/contracts";
+import {assertIsMap, isNegativeZero} from "../utils/contracts";
 import {findIndex} from "./collection-helpers";
 
 export default function ($target, env, factory) {
@@ -9,6 +9,10 @@ export default function ($target, env, factory) {
 		if (index >= 0) {
 			this.object.data[index].value = value;
 			return this.object;
+		}
+		
+		if (isNegativeZero(key)) {
+			key = factory.createPrimitive(+0);
 		}
 
 		this.object.data.push({key, value});

@@ -12,7 +12,9 @@ function lazyInit (instance, key) {
 
 	for (let i = 0, ln = nativeValue.length; i < ln; i++) {
 		// we are not using the object factory to avoid circular loop
+		// todo: i think we can resolve that by having a string instance return itself for 1 length strings and 0 position
 		let c = new StringType(nativeValue[i]);
+		c[Symbol.for("env")] = instance[Symbol.for("env")];
 		c.setPrototype(instance.proto);
 		c.define("0", c, charAttrs);
 
@@ -34,7 +36,7 @@ export class StringType extends PrimitiveType {
 			enumerable: false,
 			writable: false,
 			value: env.objectFactory.createPrimitive(length)
-		});
+		}, "length");
 	}
 
 	getProperty (key) {

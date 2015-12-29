@@ -15,7 +15,7 @@ export default function booleanApi (env) {
 
 		// called as new
 		if (this.isNew) {
-			return primitiveToObject(booleanValue);
+			return primitiveToObject(env, booleanValue);
 		}
 
 		return objectFactory.create("Boolean", booleanValue);

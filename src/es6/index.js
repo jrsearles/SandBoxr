@@ -10,6 +10,7 @@ import $Map from "./map";
 import $Math from "./math";
 import $Reflect from "./reflect";
 import $RegExp from "./regex";
+import $Iterator from "./iterator";
 
 export default function (env) {
 	ecma5(env);
@@ -18,6 +19,7 @@ export default function (env) {
 	let $global = env.global;
 
 	$Symbol($global, env, objectFactory);
+	$Iterator($global, env, objectFactory);
 	$Object($global, env, objectFactory);
 	$String($global, env, objectFactory);
 	$Array($global, env, objectFactory);

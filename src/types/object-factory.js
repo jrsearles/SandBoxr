@@ -285,7 +285,7 @@ export class ObjectFactory {
 		let speciesKey = SymbolType.getByKey("species");
 		if (speciesKey) {
 			let ctor = obj.getValue("constructor");
-			if (ctor) {
+			if (ctor && ctor !== NULL && ctor !== UNDEFINED) {
 				let species = ctor.getValue(speciesKey);
 				if (species) {
 					return yield species.construct();

@@ -75,7 +75,7 @@ export class TraversalContext {
 			}
 		}
 		
-		if (this.isFunction() || this.isProgram()) {
+		if (this.isScope()) {
 			this.scopeParent = this.blockParent = this;
 		} else if (this.isBlock()) {
 			this.scopeParent = currentScope;

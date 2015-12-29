@@ -47,7 +47,7 @@ export default function ($target, env, factory) {
 
 				if (!done) {
 					let value = yield mapper(current.value || UNDEFINED, current.key);
-					arr.setValue(current.key, value);
+					arr.defineOwnProperty(current.key, {value, configurable: true, enumerable: true, writable: true});
 					length = current.key + 1;
 				}
 			} catch (err) {

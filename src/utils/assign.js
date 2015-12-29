@@ -14,18 +14,22 @@ export function* reset (env, leftNode, priorScope, newScope) {
 	}
 }
 
-export function* declare (env, leftNode, rightValue) {
+export function* declare (env, leftNode, rightValue, kind) {
+	kind = kind || "var";
+	
 	if (leftNode.isVariableDeclaration()) {
+		kind = leftNode.kind;
+		
 		for (let decl of leftNode.declarations) {
-			yield declare(env, decl, rightValue);
+			yield declare(env, decl, rightValue, kind);
 		}
 	} else if (leftNode.isVariableDeclarator()) {
-		yield declare(env, leftNode.id, rightValue);
+		yield declare(env, leftNode.id, rightValue, kind);
 	} else if (leftNode.isIdentifier()) {
 		let left = env.createVariable(leftNode.name);
 		left.setValue(rightValue);
 	} else {
-		yield destructure(env, leftNode, rightValue, declare);
+		yield destructure(env, leftNode, rightValue, function* (e, l, v) { return yield declare(e, l, v, kind); });
 	}
 
 	return rightValue;

@@ -164,6 +164,10 @@ export function isNumber (obj) {
 	return obj && obj.type === "number";
 }
 
+export function isNegativeZero (obj) {
+	return isNumber(obj) && obj.value === 0 && 1 / obj.value < 0;
+}
+
 export function isOctalLiteral (rawValue, actualValue) {
 	if (typeof actualValue === "number" && octalPattern.test(rawValue)) {
 		return true;
