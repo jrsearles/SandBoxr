@@ -46,7 +46,7 @@ export class Reference {
 			throw ReferenceError(`${this.key} is not defined`);
 		}
 
-		return this.env.global.defineOwnProperty(this.key, {
+		return this.env.global.defineProperty(this.key, {
 			value: value,
 			configurable: true,
 			enumerable: true,

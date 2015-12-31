@@ -33,7 +33,7 @@ export default function (env) {
 	// prototype can be coerced into an empty string
 	proto.value = "";
 	proto.className = "String";
-	proto.defineOwnProperty("length", {value: objectFactory.createPrimitive(0)});
+	proto.defineProperty("length", {value: objectFactory.createPrimitive(0)});
 
 	let stringClass = objectFactory.createFunction(function* (value) {
 		let stringValue = yield getString(value, this.isNew);

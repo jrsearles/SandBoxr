@@ -12,7 +12,7 @@ export class ArrayType extends ObjectType {
 
 	init (env) {
 		super.init(...arguments);
-		this.defineOwnProperty("length", {value: env.objectFactory.createPrimitive(0), writable: true});
+		this.defineProperty("length", {value: env.objectFactory.createPrimitive(0), writable: true});
 	}
 
 	setValue (name, value) {
@@ -31,7 +31,7 @@ export class ArrayType extends ObjectType {
 		let lengthValue = lengthProperty.getValue().toNative();
 
 		if ((!lengthProperty.canSetValue() && index >= lengthValue)
-			|| !super.defineOwnProperty(key, descriptor)) {
+			|| !super.defineProperty(key, descriptor)) {
 
 			if (throwOnError) {
 				throw TypeError(`Cannot define property: ${key}, object is not extensible.`);
@@ -42,7 +42,7 @@ export class ArrayType extends ObjectType {
 
 		if (index >= lengthValue) {
 			let newLength = this[Symbol.for("env")].objectFactory.createPrimitive(index + 1);
-			this.defineOwnProperty("length", {value: newLength});
+			this.defineProperty("length", {value: newLength});
 		}
 
 		return true;
@@ -62,7 +62,7 @@ export class ArrayType extends ObjectType {
 		assertIsValidArrayLength(newLength.toNative());
 
 		if (newLength.toNative() >= currentLength.toNative()) {
-			return super.defineOwnProperty("length", descriptor, throwOnError);
+			return super.defineProperty("length", descriptor, throwOnError);
 		}
 
 		let isWritable = this.getProperty("length").writable;
@@ -81,7 +81,7 @@ export class ArrayType extends ObjectType {
 		}
 
 		let i = currentLength.toNative();
-		if (!super.defineOwnProperty("length", descriptor, throwOnError)) {
+		if (!super.defineProperty("length", descriptor, throwOnError)) {
 			return false;
 		}
 
@@ -91,7 +91,7 @@ export class ArrayType extends ObjectType {
 			for (let {key} of iterate.reverse(this, i - 1, newLength.toNative())) {
 				if (!this.deleteProperty(key, false)) {
 					newLength = env.objectFactory.createPrimitive(key + 1);
-					this.defineOwnProperty("length", {value: newLength});
+					this.defineProperty("length", {value: newLength});
 					succeeded = false;
 					break;
 				}
@@ -99,7 +99,7 @@ export class ArrayType extends ObjectType {
 		}
 
 		if (notWritable) {
-			this.defineOwnProperty("length", {writable: false});
+			this.defineProperty("length", {writable: false});
 		}
 
 		if (!succeeded && throwOnError) {
@@ -109,7 +109,7 @@ export class ArrayType extends ObjectType {
 		return succeeded;
 	}
 
-	defineOwnProperty (name, descriptor, throwOnError) {
+	defineProperty (name, descriptor, throwOnError) {
 		if (isInteger(name) && isValidArrayLength(Number(name) + 1) && !this.owns(name)) {
 			return this.setIndex(name, null, descriptor, throwOnError);
 		}
@@ -118,7 +118,7 @@ export class ArrayType extends ObjectType {
 			return this.setLength(descriptor, throwOnError);
 		}
 
-		return super.defineOwnProperty(...arguments);
+		return super.defineProperty(...arguments);
 	}
 
 	toNative () {

@@ -3,7 +3,11 @@ import {toString, toObject} from "../utils/native";
 import {UNDEFINED} from "../types/primitive-type";
 import iterate from "../iterators/";
 
-function assignThis (env, fnMember, fn, isNew, native) {
+function assignThis (env, fnMember, isNew, callee) {	
+	if (callee.isSuper() || (callee.object && callee.object.isSuper())) {
+		return env.getThisBinding();
+	}
+
 	if (isNew) {
 		return null;
 	}
@@ -21,7 +25,7 @@ function assignThis (env, fnMember, fn, isNew, native) {
 }
 
 export default function* CallExpression (node, context, next) {
-	let isNew = node.isNewExpression();
+	let isNew = node.isNewExpression() || node.callee.isSuper();
 	let fnMember = (yield next(node.callee, context)).result;
 	let fn = fnMember.getValue();
 
@@ -44,8 +48,7 @@ export default function* CallExpression (node, context, next) {
 		throw TypeError(`${stringValue} not a function`);
 	}
 
-	let native = fn.native;
-	let thisArg = assignThis(context.env, fnMember, fn, isNew, native);
+	let thisArg = assignThis(context.env, fnMember, isNew, node.callee);
 	let callee = fnMember;
 
 	callee.identifier = fn.name;

@@ -43,7 +43,7 @@ export class ObjectEnvironment {
 				return this.parent.createVariable(...arguments);
 			}
 
-			this.object.defineOwnProperty(key, {value: undefined, enumerable: true, configurable, writable, initialized}, this.env.isStrict());
+			this.object.defineProperty(key, {value: undefined, enumerable: true, configurable, writable, initialized}, this.env.isStrict());
 		}
 		
 		return this.object.getProperty(key);

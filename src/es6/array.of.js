@@ -12,7 +12,7 @@ export default function ($target, env, factory) {
 		let i = 0;
 
 		while (i < length) {
-			arr.defineOwnProperty(i, {value: items[i], configurable: true, enumerable: true, writable: true}, true);
+			arr.defineProperty(i, {value: items[i], configurable: true, enumerable: true, writable: true}, true);
 			i++;
 		}
 

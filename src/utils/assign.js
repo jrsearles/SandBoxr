@@ -26,7 +26,7 @@ export function* declare (env, leftNode, rightValue, kind) {
 	} else if (leftNode.isVariableDeclarator()) {
 		yield declare(env, leftNode.id, rightValue, kind);
 	} else if (leftNode.isIdentifier()) {
-		let left = env.createVariable(leftNode.name);
+		let left = env.createVariable(leftNode.name, kind);
 		left.setValue(rightValue);
 	} else {
 		yield destructure(env, leftNode, rightValue, function* (e, l, v) { return yield declare(e, l, v, kind); });

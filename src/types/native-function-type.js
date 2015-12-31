@@ -10,9 +10,12 @@ export class NativeFunctionType extends FunctionType {
 		this.nativeFunction = fn;
 	}
 
-	init (env, proto, descriptor) {
+	init (env, proto, {configurable = false, enumerable = false, writable = true, isConstructor = false, homeObject} = {}) {
 		this[Symbol.for("env")] = env;
-
+		
+		this.isConstructor = isConstructor;
+		this.homeObject = homeObject;
+		
 		let length = this.nativeFunction.length;
 		if ("nativeLength" in this.nativeFunction) {
 			length = this.nativeFunction.nativeLength;
@@ -22,7 +25,7 @@ export class NativeFunctionType extends FunctionType {
 			this.strict = this.nativeFunction.strict;
 		}
 
-		this.defineOwnProperty("length", {
+		this.defineProperty("length", {
 			value: env.objectFactory.createPrimitive(length),
 			configurable: false,
 			enumerable: false,
@@ -33,21 +36,24 @@ export class NativeFunctionType extends FunctionType {
 			proto = proto || env.objectFactory.createObject();
 			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this});
 
-			descriptor = descriptor || {configurable: false, enumerable: false, writable: true};
 			let protoDescriptor = {
 				value: proto,
-				configurable: descriptor.configurable,
-				enumerable: descriptor.enumerable,
-				writable: descriptor.writable
+				configurable: configurable,
+				enumerable: enumerable,
+				writable: writable
 			};
 
-			this.defineOwnProperty("prototype", protoDescriptor);
+			this.defineProperty("prototype", protoDescriptor);
 		}
 
 		this.addPoison();
 	}
 
 	*call (thisArg, args, callee) {
+		if (this.isConstructor) {
+			throw TypeError();
+		}
+		
 		callee = callee || this;
 		let env = this[Symbol.for("env")];
 
@@ -67,13 +73,14 @@ export class NativeFunctionType extends FunctionType {
 		});
 	}
 
-	*construct (thisArg, args) {
+	*construct (thisArg, args, callee) {
 		let self = this;
+		let target = (callee || this).getValue();
 		let env = this[Symbol.for("env")];
-		let scope = env.createExecutionScope(this, thisArg);
+		let scope = env.createExecutionScope(this, thisArg, target);
 
 		return yield scope.use(function* () {
-			return yield self.nativeFunction.apply(env.createExecutionContext(thisArg, self, true), args || []);
+			return yield self.nativeFunction.apply(env.createExecutionContext(thisArg, self, target), args || []);
 		});
 	}
 }

@@ -20,7 +20,7 @@ function buildTemplateObject (env, node) {
 	}
 
 	raw.freeze();
-	tag.defineOwnProperty("raw", {value: raw});
+	tag.defineProperty("raw", {value: raw});
 	tag.freeze();
 
 	return templateObjectCache[key] = tag;

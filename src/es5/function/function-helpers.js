@@ -3,7 +3,7 @@ import {isNullOrUndefined} from "../../utils/contracts";
 import {toObject} from "../../utils/native";
 
 export function defineThis (env, fn, thisArg) {
-	if (fn.builtIn || fn.isStrict()) {
+	if (fn.builtIn || fn.isProxy || fn.isStrict()) {
 		return thisArg || UNDEFINED;
 	}
 

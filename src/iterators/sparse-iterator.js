@@ -41,7 +41,8 @@ export default class SparseIterator {
 			current.getOwnPropertyKeys("String")
 				.filter(isValidIndex(this.props, this.start, this.end))
 				.forEach(key => {
-					this.props[key] = current.getProperty(key);
+					// wrap in function - avoid calling until iteration
+					this.props[key] = current.getValue.bind(current, key);
 					this.keys.push(Number(key));
 				}); 
 
@@ -58,7 +59,7 @@ export default class SparseIterator {
 
 		if (this.keys.length > 0) {
 			let key = this.currentIndex = this.keys.shift();
-			let value = this.props[key].getValue();
+			let value = this.props[key]();
 
 			return {
 				value: {key, value},

@@ -10,9 +10,9 @@ export default function ($target, env, factory) {
 		}
 
 		let args = yield toArray(argsArray);
-		let proto = newTarget || target;
-
-		let obj = factory.createObject(proto);
-		return yield target.construct(obj, args, proto);
+		let ctor = newTarget || target;
+		let obj = factory.createObject(ctor);
+		
+		return yield target.construct(obj, args, ctor);
 	}, 2, "Reflect.construct"));
 }

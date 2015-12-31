@@ -13,9 +13,6 @@ export function* executeCallback (env, callback, entry, thisArg, arr) {
 		thisArg = callback.isStrict() ? UNDEFINED : env.global;
 	}
 
-	let scope = env.createExecutionScope(callback, thisArg);
-	scope.init(callback.node.body);
-
 	let args = [entry.value, env.objectFactory.createPrimitive(entry.key), arr];
 	return yield callback.call(thisArg, args) || UNDEFINED;
 }

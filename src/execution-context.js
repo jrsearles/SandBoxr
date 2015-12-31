@@ -5,12 +5,13 @@ import {step} from "./estree";
 import rules from "./syntax-rules";
 
 export class ExecutionContext {
-	constructor (env, obj, callee, isNew) {
+	constructor (env, obj, callee, newTarget) {
 		this.object = obj;
 		this.callee = callee;
 		this.env = env;
-		this.isNew = !!isNew;
-
+		this.isNew = !!newTarget;
+		this.newTarget = newTarget;
+		
 		this.label = "";
 		this.value = null;
 		this.strict = false;
@@ -33,7 +34,7 @@ export class ExecutionContext {
 	}
 
 	create () {
-		let context = new ExecutionContext(this.env, this.object, this.callee, this.isNew);
+		let context = new ExecutionContext(this.env, this.object, this.callee, this.newTarget);
 		context.value = this.value;
 		return context;
 	}

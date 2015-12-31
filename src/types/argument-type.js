@@ -10,7 +10,7 @@ export class ArgumentType extends ObjectType {
 
 	mapProperty (index, binding) {
 		index = String(index);
-		super.defineOwnProperty(index, {configurable: true, enumerable: true, writable: true, value: undefined}, true);
+		super.defineProperty(index, {configurable: true, enumerable: true, writable: true, value: undefined}, true);
 		this.parameterMap[index] = binding;
 	}
 
@@ -38,10 +38,10 @@ export class ArgumentType extends ObjectType {
 		return super.getOwnProperty(name);
 	}
 
-	defineOwnProperty (name, descriptor, throwOnError) {
+	defineProperty (name, descriptor, throwOnError) {
 		name = String(name);
 
-		let allowed = super.defineOwnProperty(...arguments);
+		let allowed = super.defineProperty(...arguments);
 		if (allowed && name in this.parameterMap) {
 			if ("set" in descriptor || "get" in descriptor) {
 				delete this.parameterMap[name];

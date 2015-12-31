@@ -17,10 +17,12 @@ const defaultOptions = {
 	ecmaVersion: 5
 };
 
-const kindAttr = {
+const declareKinds = {
 	"var": {configurable: false, writable: true, initialized: true, block: false},
 	"let": {configurable: false, writable: true, initialized: false, block: true},
-	"const": {configurable: false, writable: false, initialized: false, block: true}
+	"const": {configurable: false, writable: false, initialized: false, block: true},
+	"function": {configurable: false, writable: true, initialized: true, block: false},
+	"class": {configurable: false, writable: true, initialized: false, block: true}
 };
 
 export class Environment {
@@ -114,7 +116,7 @@ export class Environment {
 	 */
 	createVariable (key, kind) {
 		kind = kind ? kind.toLowerCase() : "var";
-		let attr = kindAttr[kind];
+		let attr = declareKinds[kind];
 		let scope = this.current.scope;
 		
 		assertIsValidIdentifier(key, this.isStrict());
@@ -170,18 +172,17 @@ export class Environment {
 		return this.global;
 	}
 
-	createExecutionContext (obj, callee, isNew) {
-		return new ExecutionContext(this, obj, callee, isNew);
+	createExecutionContext (obj, callee, newTarget) {
+		return new ExecutionContext(this, obj, callee, newTarget);
 	}
 
 	/**
 	 * Creates a new declarative scope.
 	 * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
-	 * @param {Boolean} [strict] - Indicates whether the scope is in strict mode.
 	 * @returns {Scope} The new scope.
 	 */
-	createScope (thisArg, strict) {
-		return this.setScope(new DeclarativeEnvironment(this.current, thisArg, this, strict || this.isStrict()));
+	createScope (thisArg) {
+		return this.setScope(new DeclarativeEnvironment(this.current, thisArg, this, this.isStrict()));
 	}
 
 	/**
@@ -189,11 +190,10 @@ export class Environment {
 	 * statement, as well as the global scope.
 	 * @param {ObjectType} obj - The object to bind the scope to.
 	 * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
-	 * @param {Boolean} [strict] - Indicates whether the scope is in strict mode.
 	 * @returns {Scope} The new scope.
 	 */
-	createObjectScope (obj, thisArg, strict) {
-		return this.setScope(new ObjectEnvironment(this.current, obj, thisArg, this, strict || this.isStrict()));
+	createObjectScope (obj, thisArg) {
+		return this.setScope(new ObjectEnvironment(this.current, obj, thisArg, this, this.isStrict()));
 	}
 
 	createExecutionScope (fn, thisArg) {
@@ -205,12 +205,12 @@ export class Environment {
 		}
 
 		thisArg = fn.boundThis || thisArg;
-		if (fn.arrow) {
-			thisArg = this.getThisBinding();
-		}
+		// if (fn.arrow) {
+		// 	thisArg = this.getThisBinding();
+		// }
 
 		let scope = this.createScope(thisArg);
-		scope.parentScope = parentScope;
+		scope.setParent(parentScope);
 		return scope;
 	}
 	
@@ -227,10 +227,10 @@ export class Environment {
 
 	/**
 	 * Sets the current scope.
-	 * @param {Environment} scope - Sets the current environment.
+	 * @param {Environment} lexicalEnvironment - Sets the current environment.
 	 * @returns {Scope} The created scope.
 	 */
-	setScope (scope) {
-		return this.current = new Scope(this, scope);
+	setScope (lexicalEnvironment) {
+		return this.current = new Scope(this, lexicalEnvironment);
 	}
 }

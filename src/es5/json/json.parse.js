@@ -47,7 +47,7 @@ export default function ($target, env, factory) {
 					if (value.hasOwnProperty(prop)) {
 						propValue = yield reviver(obj, prop, yield deserialize(value[prop], reviver));
 						if (!isUndefined(propValue)) {
-							obj.defineOwnProperty(prop, {value: propValue, configurable: true, enumerable: true, writable: true});
+							obj.defineProperty(prop, {value: propValue, configurable: true, enumerable: true, writable: true});
 						}
 					}
 				}

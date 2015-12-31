@@ -135,7 +135,7 @@ export class TraversalContext {
 	}
 	
 	isBlockScope () {
-		return this.isLet() || this.isConst();
+		return this.isLet() || this.isConst() || this.isClassDeclaration();
 	}
 	
 	isStrict () {

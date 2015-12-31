@@ -15,7 +15,7 @@ export class SymbolType extends ObjectType {
 		this.isSymbol = true;
 	}
 
-	defineOwnProperty (key, descriptor) {
+	defineProperty (key, descriptor) {
 		return false;
 	}
 
@@ -30,6 +30,10 @@ export class SymbolType extends ObjectType {
 	toString () {
 		// this method is here so symbols can be coerced into strings for property lookups
 		return "@@" + this.uid;
+	}
+	
+	toSymbolString () {
+		return this.description ? `[${this.description}]` : "";
 	}
 
 	static add (key, sym) {

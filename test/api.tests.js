@@ -22,7 +22,7 @@ describe("API", () => {
 		env.init();
 
 		let obj = env.objectFactory.createObject();
-		obj.defineOwnProperty("foo", {value: env.objectFactory.createPrimitive(99)});
+		obj.defineProperty("foo", {value: env.objectFactory.createPrimitive(99)});
 
 		let a = env.createVariable("a");
 		a.setValue(obj);

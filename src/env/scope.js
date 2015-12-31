@@ -1,17 +1,22 @@
 import {UNDEFINED} from "../types/primitive-type";
 import {assertIsValidParameterName} from "../utils/contracts";
 import {each} from "../utils/async";
-import {declare, reset} from "../utils/assign";
+import {declare} from "../utils/assign";
 
 export class Scope {
-	constructor (env, scope) {
+	constructor (env, scope, newTarget) {
 		env.globalScope = env.globalScope || this;
 
 		this.scope = scope;
 		this.env = env;
+		this.newTarget = newTarget;
 		this.parentScope = (env.current || env.globalScope).scope;
 	}
 
+	setParent (parentScope) {
+		this.parentScope = parentScope;	
+	}
+	
 	/**
 	 * Initializes the scope by validating the function body and hoisting variables.
 	 * @param {AST} node - The node to be executed.
@@ -37,12 +42,14 @@ export class Scope {
 			
 			if (decl.isFunction()) {
 				initialized = true;
-				kind = "var";
+				kind = "function";
 				
 				let strictFunc = strict || decl.isStrict(); 
 				value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc, name: key});
 				// value.bindScope(this);
-			} else if (env.has(key)) {
+			} else if (decl.isClass()) {
+				kind = "class";
+			}	else if (env.has(key)) {
 				return;
 			}
 		
@@ -85,7 +92,7 @@ export class Scope {
 			scope.setValue("arguments", argumentList);
 
 			args.forEach(function (value, index) {
-				argumentList.defineOwnProperty(index, {
+				argumentList.defineProperty(index, {
 					value: value,
 					configurable: true,
 					enumerable: true,
@@ -93,7 +100,7 @@ export class Scope {
 				});
 			});
 
-			argumentList.defineOwnProperty("length", {
+			argumentList.defineProperty("length", {
 				value: env.objectFactory.createPrimitive(args.length),
 				configurable: true,
 				writable: true
@@ -112,7 +119,8 @@ export class Scope {
 	 * @returns {void}
 	 */
 	*loadArgs (params, args, callee) {
-		if (params && params.some(p => p.type !== "Identifier")) {
+		params = params || [];
+		if (callee.arrow || params.some(p => !p.isIdentifier())) {
 			yield this.loadComplexArgs(params, args, callee);
 			return;
 		}
@@ -143,7 +151,7 @@ export class Scope {
 				}
 
 				if (!shouldMap && i < argsLength) {
-					argumentList.defineOwnProperty(i, {
+					argumentList.defineProperty(i, {
 						value: value,
 						configurable: true,
 						enumerable: true,
@@ -159,7 +167,7 @@ export class Scope {
 		// just set value if additional, unnamed arguments are passed in
 		let i = params ? params.length : 0;
 		for (; i < argsLength; i++) {
-			argumentList.defineOwnProperty(i, {
+			argumentList.defineProperty(i, {
 				value: args[i],
 				configurable: true,
 				enumerable: true,
@@ -167,7 +175,7 @@ export class Scope {
 			});
 		}
 
-		argumentList.defineOwnProperty("length", {
+		argumentList.defineProperty("length", {
 			value: env.objectFactory.createPrimitive(argsLength),
 			configurable: true,
 			writable: true

@@ -83,7 +83,7 @@ export function* defineProperty (env, obj, key, descriptor, throwOnError = true)
 		}
 	}
 
-	return obj.defineOwnProperty(key, options, throwOnError, env);
+	return obj.defineProperty(key, options, throwOnError, env);
 }
 
 export function confirmObject (obj, methodName) {

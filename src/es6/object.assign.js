@@ -12,7 +12,7 @@ export default function (objectClass, env, factory) {
 				source.getOwnPropertyKeys().forEach(key => {
 					let desc = source.getOwnProperty(key);
 					if (desc && desc.enumerable) {
-						if (!to.setValue(key, desc.getValue())) {
+						if (!to.setValue(key, source.getValue(key))) {
 							throw TypeError(`Cannot assign to read only property '${key}'`);
 						}
 					}

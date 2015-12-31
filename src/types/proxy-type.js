@@ -342,12 +342,12 @@ export class ProxyType extends ObjectType {
 		return result;
 	}
 
-	defineOwnProperty (key, descriptor, throwOnError) {
+	defineProperty (key, descriptor, throwOnError) {
 		assertIsNotRevoked(this, "defineProperty");
 
 		let proxyMethod = getProxyMethod(this, "defineProperty");
 		if (isUndefined(proxyMethod)) {
-			return this.target.defineOwnProperty(...arguments);
+			return this.target.defineProperty(...arguments);
 		}
 
 		let env = this[envSymbol];

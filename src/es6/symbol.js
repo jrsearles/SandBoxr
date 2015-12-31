@@ -1,6 +1,6 @@
 import {toString} from "../utils/native";
 import {SymbolType} from "../types/symbol-type";
-import {assertIsNotGeneric} from "../utils/contracts";
+import {assertIsNotGeneric, isUndefined} from "../utils/contracts";
 
 export default function (globalObject, env, factory) {
 	let frozen = {configurable: false, enumerable: false, writable: false};
@@ -10,8 +10,8 @@ export default function (globalObject, env, factory) {
 		if (this.isNew) {
 			throw TypeError("Symbol is not a constructor");
 		}
-
-		let descString = yield toString(desc);
+		
+		let descString = isUndefined(desc) ? "" : yield toString(desc);
 		return factory.create("Symbol", descString);
 	}, proto, {name: "Symbol"});
 

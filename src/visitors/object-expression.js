@@ -19,16 +19,25 @@ function setDescriptor (env, obj, descriptor) {
 		};
 	}
 
-	obj.defineOwnProperty(descriptor.key, descriptor);
+	obj.defineProperty(descriptor.key, descriptor);
 }
 
-function createDescriptor (key, value) {
-	return {key: key, value: value, configurable: true, enumerable: true, writable: true};
+function findOrCreateDescriptor (arr, key) {
+	let i = arr.length;
+	while (i--) {
+		if (arr[i] === key) {
+			return arr[i];
+		}
+	}
+	
+	let descriptor = {configurable: true, enumerable: true, key};
+	arr.push(descriptor);
+	return descriptor;
 }
 
 export default function* ObjectExpression (node, context, next) {
 	let obj = context.env.objectFactory.createObject();
-	let descriptors = Object.create(null);
+	let descriptors = [];
 
 	yield* each(node.properties, function* (property) {
 		let value = (yield next(property.value, context)).result.getValue();
@@ -41,22 +50,24 @@ export default function* ObjectExpression (node, context, next) {
 			key = property.key.name || property.key.value;
 		}
 
+		let descriptor = findOrCreateDescriptor(descriptors, key);
 		switch (property.kind) {
 			case "get":
 			case "set":
-				descriptors[key] = descriptors[key] || createDescriptor(key);
-				descriptors[key][property.kind] = value;
+				descriptor[property.kind] = value;
 				break;
 
 			default:
-				obj.defineOwnProperty(key, createDescriptor(key, value));
+				descriptor.value = value;
+				descriptor.writable = true;
 				break;
 		}
 	});
 
-	for (let prop in descriptors) {
-		setDescriptor(context.env, obj, descriptors[prop]);
-	}
+	descriptors.forEach(desc => setDescriptor(context.env, obj, desc));
+	// for (let prop in descriptors) {
+	// 	setDescriptor(context.env, obj, descriptors[prop]);
+	// }
 
 	return context.result(obj);
 }

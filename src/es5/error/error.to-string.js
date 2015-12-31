@@ -1,19 +1,18 @@
 import {toString} from "../../utils/native";
+import {isUndefined} from "../../utils/contracts";
 
 export default function ($target, env, factory) {
 	$target.define("toString", factory.createBuiltInFunction(function* () {
-		let name = this.object.getValue("name");
-		let msg;
-
-		if (this.object.has("message")) {
-			msg = yield toString(this.object.getValue("message"));
+		let nameValue = this.object.getValue("name");
+		let name = isUndefined(nameValue) ? "Error" : yield toString(nameValue);
+		
+		let messageValue = this.object.getValue("message");
+		let message = isUndefined(messageValue) ? "" : yield toString(messageValue);
+		
+		if (name && message) {
+			return factory.createPrimitive(name + ": " + message);
 		}
 
-		name = name && (yield toString(name));
-		if (name && msg) {
-			return factory.create("String", name + ": " + msg);
-		}
-
-		return factory.create("String", name || msg);
+		return factory.createPrimitive(name || message);
 	}, 0, "Error.prototype.toString"));
 }

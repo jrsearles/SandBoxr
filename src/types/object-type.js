@@ -199,7 +199,7 @@ export class ObjectType {
 			}
 
 			if (!receiver.owns(key)) {
-				return receiver.defineOwnProperty(key, {
+				return receiver.defineProperty(key, {
 					value: value,
 					configurable: true,
 					enumerable: true,
@@ -211,7 +211,7 @@ export class ObjectType {
 			return true;
 		}
 
-		return receiver.defineOwnProperty(key, {
+		return receiver.defineProperty(key, {
 			value: value,
 			configurable: true,
 			enumerable: true,
@@ -219,39 +219,7 @@ export class ObjectType {
 		}, false);
 	}
 
-	// putValue (key, value, throwOnError) {
-	// 	if (this.isPrimitive) {
-	// 		return;
-	// 	}
-
-	// 	let descriptor = this.getProperty(key);
-	// 	if (descriptor) {
-	// 		if (!descriptor.canSetValue()) {
-	// 			if (throwOnError) {
-	// 				throw TypeError(`Cannot assign to read only property '${key}'`);
-	// 			}
-
-	// 			return;
-	// 		}
-
-	// 		if (descriptor.dataProperty && !this.owns(key)) {
-	// 			this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, {
-	// 				value: value,
-	// 				configurable: descriptor.configurable,
-	// 				enumerable: descriptor.enumerable,
-	// 				writable: descriptor.writable
-	// 			}, key);
-
-	// 			this.version++;
-	// 		} else {
-	// 			descriptor.setValue(value);
-	// 		}
-	// 	} else {
-	// 		this.defineOwnProperty(key, {value: value, configurable: true, enumerable: true, writable: true}, throwOnError);
-	// 	}
-	// }
-
-	defineOwnProperty (key, descriptor, throwOnError) {
+	defineProperty (key, descriptor, throwOnError) {
 		if (this.isPrimitive) {
 			if (throwOnError) {
 				throw TypeError(`Cannot define property: ${key}, object is not extensible`);
@@ -350,9 +318,9 @@ export class ObjectType {
 	freeze () {
 		this.each(desc => {
 			if (desc.dataProperty) {
-				this.defineOwnProperty(desc.key, {writable: false, configurable: false});
+				this.defineProperty(desc.key, {writable: false, configurable: false});
 			} else {
-				this.defineOwnProperty(desc.key, {configurable: false});
+				this.defineProperty(desc.key, {configurable: false});
 			}
 		});
 
@@ -366,7 +334,7 @@ export class ObjectType {
 
 	seal () {
 		this.each(desc => {
-			this.defineOwnProperty(desc.key, {configurable: false}, true);
+			this.defineProperty(desc.key, {configurable: false}, true);
 		});
 
 		this.preventExtensions();

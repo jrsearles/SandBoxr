@@ -65,7 +65,7 @@ gulp.task("test262-6", ["build"], function () {
 	//	- Set -8 (needs WeakSet)
 	//	- SetIterator +
 
-	return streamer6({ files: ["/language/statements/const/**/*.js"] })
+	return streamer6({ files: ["/language/expressions/arrow-function/**/*.js"] })
 		.pipe(through.obj(function (file, enc, cb) {
 			var filename = path.basename(file.path);
 

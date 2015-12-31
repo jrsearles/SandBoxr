@@ -13,7 +13,7 @@ import ForStatement from "./for-statement";
 import ForInStatement from "./for-in-statement";
 import ForOfStatement from "./for-of-statement";
 import FunctionDeclaration from "./function-declaration";
-import FunctionExpression from "./function-expression";
+import {FunctionExpression, ClassDeclaration} from "./function-expression";
 import Identifier from "./identifier";
 import LabeledStatement from "./labeled-statement";
 import Literal from "./literal";
@@ -24,6 +24,7 @@ import ObjectExpression from "./object-expression";
 import ReturnStatement from "./return-statement";
 import SequenceExpression from "./sequence-expression";
 import SpreadElement from "./spread-element";
+import Super from "./super";
 import SwitchStatement from "./switch-statement";
 import TaggedTemplateExpression from "./tagged-template-expression";
 import TemplateLiteral from "./template-literal";
@@ -43,6 +44,7 @@ export const visitors = {
 	BlockStatement,
 	BreakStatement,
 	CallExpression,
+	ClassDeclaration,
 	ConditionalExpression,
 	DebuggerStatement,
 	DoWhileStatement,
@@ -63,6 +65,7 @@ export const visitors = {
 	ReturnStatement,
 	SequenceExpression,
 	SpreadElement,
+	Super,
 	SwitchStatement,
 	TaggedTemplateExpression,
 	TemplateLiteral,
@@ -76,6 +79,7 @@ export const visitors = {
 	WithStatement,
 
 	ArrowFunctionExpression: FunctionExpression,
+	ClassExpression: ClassDeclaration,
 	ContinueStatement: BreakStatement,
 	IfStatement: ConditionalExpression,
 	NewExpression: CallExpression,

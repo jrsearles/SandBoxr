@@ -6,12 +6,30 @@ import {isNullOrUndefined, isObject} from "../utils/contracts";
 function getParameterLength (params) {
 	for (let i = 0, ln = params.length; i < ln; i++) {
 		// parameter length should only include the first "Formal" parameters
-		if (!params[i].isIdentifier()) {
+		if (params[i].isRestElement() || params[i].isAssignmentPattern()) {
 			return i;
 		}
 	}
 
 	return params.length;
+}
+
+function* execute (func, thisArg, args, callee, newTarget) {
+	let env = func[Symbol.for("env")];
+	let scope = env.createExecutionScope(func, thisArg, newTarget);
+
+	callee = callee || func;
+	yield scope.loadArgs(func.node.params, args || [], func);
+	scope.init(func.node);
+	
+	if (func.node.id) {
+		env.createVariable(func.node.id.name).setValue(func);
+	}
+
+	return yield* scope.use(function* () {
+		let context = func.arrow ? env.currentExecutionContext : env.createExecutionContext(thisArg, callee, newTarget);
+		return yield context.execute(func.node.body, callee);
+	});	
 }
 
 export class FunctionType extends ObjectType {
@@ -23,26 +41,34 @@ export class FunctionType extends ObjectType {
 		this.node = node;
 
 		this.arrow = node && node.isArrowFunctionExpression();
+		this.isConstructor = false;
 		this.canConstruct = !this.arrow;
-
+		
+		this.kind = "base";
 		this.boundScope = null;
 		this.boundThis = null;
+		this.homeObject = null;
 	}
 
 	init (env, proto, descriptor, strict) {
 		super.init(...arguments);
-
+		
+		let {isConstructor = false, homeObject, kind = "base"} = descriptor || {};
+		this.isConstructor = isConstructor;
+		this.homeObject = homeObject;
+		this.kind = kind;
+		
 		if (strict !== undefined) {
 			this.strict = strict;
 		}
 
 		// set length property from the number of parameters
-		this.defineOwnProperty("length", {value: env.objectFactory.createPrimitive(getParameterLength(this.node.params))});
+		this.defineProperty("length", {value: env.objectFactory.createPrimitive(getParameterLength(this.node.params))});
 
-		if (!this.arrow) {
+		if (!this.arrow && proto !== null) {
 			// functions have a prototype
 			proto = proto || env.objectFactory.createObject();
-			this.defineOwnProperty("prototype", {value: proto, writable: true});
+			this.defineProperty("prototype", {value: proto, writable: true});
 
 			// set the contructor property as an instance of itself
 			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this});
@@ -78,40 +104,37 @@ export class FunctionType extends ObjectType {
 		}
 	}
 
-	*call (thisArg, args, callee, isNew) {
-		let self = this;
-		let env = this[Symbol.for("env")];
+	*call (thisArg, args, callee) {
+		if (this.isConstructor) {
+			throw TypeError(`Constructor function ${this.name} must be called with 'new'`);
+		}
 		
-		callee = callee || this;
-		let scope = env.createExecutionScope(this, thisArg);
+		let executionResult = yield execute(this, thisArg, args, callee);
+		let shouldReturn = this.arrow || (executionResult && executionResult.exit);
 
-		yield scope.loadArgs(this.node.params, args || [], this);
-		scope.init(this.node);
-		
-		if (this.node.id) {
-			env.createVariable(this.node.id.name).setValue(this);
+		if (shouldReturn && executionResult.result) {
+			return executionResult.result;
 		}
 
-		return yield scope.use(function* () {
-			let executionResult = yield env.createExecutionContext(thisArg, callee, isNew).execute(self.node.body, callee);
-			let shouldReturn = self.arrow || (executionResult && executionResult.exit);
-
-			if (shouldReturn && executionResult.result) {
-				return executionResult.result;
-			}
-
-			return UNDEFINED;
-		});
+		return UNDEFINED;
 	}
 
 	*construct (thisArg, args, callee) {
+		let target = (callee || this).getValue();
+		
 		if (!thisArg || thisArg === this) {
-			thisArg = this[Symbol.for("env")].objectFactory.createObject(this);
+			thisArg = this[Symbol.for("env")].objectFactory.createObject(target);
 		}
 
-		let result = yield this.call(thisArg, args || [], callee, true);
-		if (result && !result.isPrimitive) {
-			return result;
+		let executionResult = yield execute(this, thisArg, args, callee, target);
+		if (executionResult.exit && executionResult.result) {
+			if (executionResult.result.isPrimitive) {
+				if (this.kind === "classConstructor" && executionResult.result.value !== undefined) {
+					throw TypeError();
+				}
+			} else {
+				return executionResult.result;
+			}
 		}
 
 		return thisArg;

@@ -16,7 +16,7 @@ export default function ($target, env, factory) {
 
 		for (let entry of iterate.forward(arr, 0, length)) {
 			let value = yield executeCallback(env, callback, entry, thisArg, arr);
-			newArray.setIndex(entry.key, value);
+			newArray.defineProperty(entry.key, {value, configurable: true, enumerable: true, writable: true});
 		}
 
 		return newArray;

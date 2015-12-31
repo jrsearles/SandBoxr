@@ -18,12 +18,12 @@ export default class IterableIterator {
 		let result = x(this.advancer.call(this.iterator));
 		let value = {key: this.currentIndex++, value: UNDEFINED};
 
+		let done = toBoolean(result.getValue("done"));
 		let valueProperty = result.getProperty("value");
 		if (valueProperty) {
 			value.value = valueProperty.getValue();
 		}
 
-		let done = toBoolean(result.getValue("done"));
 		return {done, value};
 	}
 

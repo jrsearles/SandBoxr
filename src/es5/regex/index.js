@@ -31,10 +31,10 @@ export default function (env) {
 	$toString(proto, env, objectFactory);
 
 	proto.define("compile", toNativeFunction(env, RegExp.prototype.compile, "RegExp.prototype.compile"));
-	proto.defineOwnProperty("lastIndex", {value: objectFactory.createPrimitive(0), writable: true});
+	proto.defineProperty("lastIndex", {value: objectFactory.createPrimitive(0), writable: true});
 
 	["global", "ignoreCase", "multiline", "source"].forEach(name => {
-		proto.defineOwnProperty(name, {value: objectFactory.createPrimitive(RegExp.prototype[name])});
+		proto.defineProperty(name, {value: objectFactory.createPrimitive(RegExp.prototype[name])});
 	});
 
 	globalObject.define("RegExp", regexClass);

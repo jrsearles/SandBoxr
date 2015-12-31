@@ -123,7 +123,7 @@ export default function functionApi (env) {
 		configurable: true
 	};
 
-	proto.defineOwnProperty("caller", prop);
-	proto.defineOwnProperty("callee", prop);
-	proto.defineOwnProperty("arguments", prop);
+	proto.defineProperty("caller", prop);
+	proto.defineProperty("callee", prop);
+	proto.defineProperty("arguments", prop);
 }

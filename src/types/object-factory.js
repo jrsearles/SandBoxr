@@ -143,7 +143,7 @@ export class ObjectFactory {
 					typeName = value.name || typeName;
 					if (value.message) {
 						let message = this.createPrimitive(value.message);
-						instance.defineOwnProperty("message", createDataPropertyDescriptor(message, {enumerable: false}));
+						instance.defineProperty("message", createDataPropertyDescriptor(message, {enumerable: false}));
 					}
 				}
 
@@ -223,10 +223,10 @@ export class ObjectFactory {
 
 		if (strict) {
 			let thrower = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-			instance.defineOwnProperty("callee", thrower);
-			instance.defineOwnProperty("caller", thrower);
+			instance.defineProperty("callee", thrower);
+			instance.defineProperty("caller", thrower);
 		} else {
-			instance.defineOwnProperty("callee", {
+			instance.defineProperty("callee", {
 				configurable: true,
 				enumerable: false,
 				value: callee,
@@ -243,42 +243,16 @@ export class ObjectFactory {
 	}
 
 	createIterator (iterable, proto) {
-		// let self = this;
 		let instance = new IteratorType(iterable);
-
-		// if (!proto) {
-		// 	proto = this.createObject();
-		// 	proto.className = "[Symbol.iterator]";
-		// }
-
-		// if (!proto.has("next")) {
-		// 	proto.define("next", this.createBuiltInFunction(function () {
-		// 		let result = this.object.advance();
-		// 		if (result.value) {
-		// 			return result.value;
-		// 		}
-
-		// 		return self.createIteratorResult({done: true});
-		// 	}));
-		// }
-		
-		// let iteratorKey = SymbolType.getByKey("iterator");
-		// if (!instance.has(iteratorKey)) {
-		// 	instance.define(iteratorKey, this.createBuiltInFunction(function () {
-		// 		return instance;
-		// 	}));
-		// }
-
-		// instance.setPrototype(proto);
 		instance.init(this.env, proto);
 		return instance;
 	}
 
 	createIteratorResult ({value, done = false}) {
-		let result = this.createObject();
-		result.defineOwnProperty("done", {value: this.createPrimitive(done)});
-		result.defineOwnProperty("value", {value: value || UNDEFINED});
-		return result;
+		let instance = this.createObject();
+		instance.defineProperty("done", {value: this.createPrimitive(done)});
+		instance.defineProperty("value", {value: value || UNDEFINED});
+		return instance;
 	}
 	
 	*createFromSpeciesOrDefault (obj, defaultCtor) {
@@ -304,7 +278,7 @@ export class ObjectFactory {
 	 * @param {Object} [options] - Property values to be used for the prototype.
 	 * @returns {FunctionType} The function instance.
 	 */
-	createFunction (fnOrNode, proto, {configurable = false, enumerable = false, writable = true, strict = false, name} = {}) {
+	createFunction (fnOrNode, proto, {configurable = false, enumerable = false, writable = true, strict = false, isConstructor = false, name, homeObject, kind} = {}) {
 		let instance;
 
 		if (typeof fnOrNode === "function") {
@@ -313,15 +287,19 @@ export class ObjectFactory {
 			instance = new FunctionType(fnOrNode);
 		}
 
-		instance.init(this.env, proto, {configurable, enumerable, writable}, strict);
+		instance.init(this.env, proto, {configurable, enumerable, writable, isConstructor, strict, homeObject, kind}, strict);
 		instance.name = name || "";
 		
 		if (name) {
-			instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
+			instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
 		}
 		
 		setProto("Function", instance, this);
 		return instance;
+	}
+
+	createClass (fnOrNode, proto, {name, homeObject} = {}) {
+		return this.createFunction(fnOrNode, proto, {configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name, homeObject});
 	}
 
 	createGetter (func, key) {
@@ -352,12 +330,12 @@ export class ObjectFactory {
 		instance[Symbol.for("env")] = this.env;
 		instance.builtIn = true;
 		instance.canConstruct = false;
-		instance.defineOwnProperty("length", {value: this.createPrimitive(length), configurable: this.ecmaVersion > 5});
+		instance.defineProperty("length", {value: this.createPrimitive(length), configurable: this.ecmaVersion > 5});
 
 		let match = functionNameMatcher.exec(funcName);
 		let name = match && match[1] || funcName;
 
-		instance.defineOwnProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
+		instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
 
 		return instance;
 	}

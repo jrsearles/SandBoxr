@@ -4843,10 +4843,12 @@ var defaultOptions = {
 	ecmaVersion: 5
 };
 
-var kindAttr = {
+var declareKinds = {
 	"var": { configurable: false, writable: true, initialized: true, block: false },
 	"let": { configurable: false, writable: true, initialized: false, block: true },
-	"const": { configurable: false, writable: false, initialized: false, block: true }
+	"const": { configurable: false, writable: false, initialized: false, block: true },
+	"function": { configurable: false, writable: true, initialized: true, block: false },
+	"class": { configurable: false, writable: true, initialized: false, block: true }
 };
 
 var Environment = exports.Environment = (function () {
@@ -4962,7 +4964,7 @@ var Environment = exports.Environment = (function () {
 		key: "createVariable",
 		value: function createVariable(key, kind) {
 			kind = kind ? kind.toLowerCase() : "var";
-			var attr = kindAttr[kind];
+			var attr = declareKinds[kind];
 			var scope = this.current.scope;
 
 			(0, _contracts.assertIsValidIdentifier)(key, this.isStrict());
@@ -5025,21 +5027,20 @@ var Environment = exports.Environment = (function () {
 		}
 	}, {
 		key: "createExecutionContext",
-		value: function createExecutionContext(obj, callee, isNew) {
-			return new _executionContext.ExecutionContext(this, obj, callee, isNew);
+		value: function createExecutionContext(obj, callee, newTarget) {
+			return this.currentExecutionContext = new _executionContext.ExecutionContext(this, obj, callee, newTarget);
 		}
 
 		/**
    * Creates a new declarative scope.
    * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
-   * @param {Boolean} [strict] - Indicates whether the scope is in strict mode.
    * @returns {Scope} The new scope.
    */
 
 	}, {
 		key: "createScope",
-		value: function createScope(thisArg, strict) {
-			return this.setScope(new _declarativeEnvironment.DeclarativeEnvironment(this.current, thisArg, this, strict || this.isStrict()));
+		value: function createScope(thisArg, newTarget) {
+			return this.setScope(new _declarativeEnvironment.DeclarativeEnvironment(this.current, thisArg, this, this.isStrict()), newTarget);
 		}
 
 		/**
@@ -5047,18 +5048,17 @@ var Environment = exports.Environment = (function () {
    * statement, as well as the global scope.
    * @param {ObjectType} obj - The object to bind the scope to.
    * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
-   * @param {Boolean} [strict] - Indicates whether the scope is in strict mode.
    * @returns {Scope} The new scope.
    */
 
 	}, {
 		key: "createObjectScope",
-		value: function createObjectScope(obj, thisArg, strict) {
-			return this.setScope(new _objectEnvironment.ObjectEnvironment(this.current, obj, thisArg, this, strict || this.isStrict()));
+		value: function createObjectScope(obj, thisArg) {
+			return this.setScope(new _objectEnvironment.ObjectEnvironment(this.current, obj, thisArg, this, this.isStrict()));
 		}
 	}, {
 		key: "createExecutionScope",
-		value: function createExecutionScope(fn, thisArg) {
+		value: function createExecutionScope(fn, thisArg, newTarget) {
 			var parentScope = this.current.scope;
 
 			// if a parent scope is defined we need to limit this scope to that scope
@@ -5067,12 +5067,12 @@ var Environment = exports.Environment = (function () {
 			}
 
 			thisArg = fn.boundThis || thisArg;
-			if (fn.arrow) {
-				thisArg = this.getThisBinding();
-			}
+			// if (fn.arrow) {
+			// 	thisArg = this.getThisBinding();
+			// }
 
-			var scope = this.createScope(thisArg);
-			scope.parentScope = parentScope;
+			var scope = this.createScope(thisArg, newTarget);
+			scope.setParent(parentScope);
 			return scope;
 		}
 	}, {
@@ -5090,14 +5090,14 @@ var Environment = exports.Environment = (function () {
 
 		/**
    * Sets the current scope.
-   * @param {Environment} scope - Sets the current environment.
+   * @param {Environment} lexicalEnvironment - Sets the current environment.
    * @returns {Scope} The created scope.
    */
 
 	}, {
 		key: "setScope",
-		value: function setScope(scope) {
-			return this.current = new _scope.Scope(this, scope);
+		value: function setScope(lexicalEnvironment, newTarget) {
+			return this.current = new _scope.Scope(this, lexicalEnvironment, newTarget);
 		}
 	}]);
 
@@ -5183,7 +5183,7 @@ var ObjectEnvironment = exports.ObjectEnvironment = (function () {
 					return (_parent = this.parent).createVariable.apply(_parent, arguments);
 				}
 
-				this.object.defineOwnProperty(key, { value: undefined, enumerable: true, configurable: configurable, writable: writable, initialized: initialized }, this.env.isStrict());
+				this.object.defineProperty(key, { value: undefined, enumerable: true, configurable: configurable, writable: writable, initialized: initialized }, this.env.isStrict());
 			}
 
 			return this.object.getProperty(key);
@@ -5399,7 +5399,7 @@ var Reference = exports.Reference = (function () {
 				throw ReferenceError(this.key + " is not defined");
 			}
 
-			return this.env.global.defineOwnProperty(this.key, {
+			return this.env.global.defineProperty(this.key, {
 				value: value,
 				configurable: true,
 				enumerable: true,
@@ -5463,23 +5463,30 @@ var _assign = require("../utils/assign");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Scope = exports.Scope = (function () {
-	function Scope(env, scope) {
+	function Scope(env, scope, newTarget) {
 		_classCallCheck(this, Scope);
 
 		env.globalScope = env.globalScope || this;
 
 		this.scope = scope;
 		this.env = env;
+		this.newTarget = newTarget;
 		this.parentScope = (env.current || env.globalScope).scope;
 	}
 
-	/**
-  * Initializes the scope by validating the function body and hoisting variables.
-  * @param {AST} node - The node to be executed.
-  * @returns {void}
-  */
-
 	_createClass(Scope, [{
+		key: "setParent",
+		value: function setParent(parentScope) {
+			this.parentScope = parentScope;
+		}
+
+		/**
+   * Initializes the scope by validating the function body and hoisting variables.
+   * @param {AST} node - The node to be executed.
+   * @returns {void}
+   */
+
+	}, {
 		key: "init",
 		value: function init(node) {
 			if (!node) {
@@ -5501,12 +5508,14 @@ var Scope = exports.Scope = (function () {
 
 				if (decl.isFunction()) {
 					initialized = true;
-					kind = "var";
+					kind = "function";
 
 					var strictFunc = strict || decl.isStrict();
 					value = env.objectFactory.createFunction(decl, undefined, { strict: strictFunc, name: key });
 					// value.bindScope(this);
-				} else if (env.has(key)) {
+				} else if (decl.isClass()) {
+						kind = "class";
+					} else if (env.has(key)) {
 						return;
 					}
 
@@ -5580,7 +5589,7 @@ var Scope = exports.Scope = (function () {
 									scope.setValue("arguments", argumentList);
 
 									args.forEach(function (value, index) {
-										argumentList.defineOwnProperty(index, {
+										argumentList.defineProperty(index, {
 											value: value,
 											configurable: true,
 											enumerable: true,
@@ -5588,7 +5597,7 @@ var Scope = exports.Scope = (function () {
 										});
 									});
 
-									argumentList.defineOwnProperty("length", {
+									argumentList.defineProperty("length", {
 										value: env.objectFactory.createPrimitive(args.length),
 										configurable: true,
 										writable: true
@@ -5627,20 +5636,22 @@ var Scope = exports.Scope = (function () {
 				while (1) {
 					switch (_context3.prev = _context3.next) {
 						case 0:
-							if (!(params && params.some(function (p) {
-								return p.type !== "Identifier";
+							params = params || [];
+
+							if (!(callee.arrow || params.some(function (p) {
+								return !p.isIdentifier();
 							}))) {
-								_context3.next = 4;
+								_context3.next = 5;
 								break;
 							}
 
-							_context3.next = 3;
+							_context3.next = 4;
 							return this.loadComplexArgs(params, args, callee);
 
-						case 3:
+						case 4:
 							return _context3.abrupt("return");
 
-						case 4:
+						case 5:
 							env = this.env;
 							scope = this.scope;
 							strictCallee = callee.node.isStrict();
@@ -5669,7 +5680,7 @@ var Scope = exports.Scope = (function () {
 									}
 
 									if (!shouldMap && _i < argsLength) {
-										argumentList.defineOwnProperty(_i, {
+										argumentList.defineProperty(_i, {
 											value: value,
 											configurable: true,
 											enumerable: true,
@@ -5686,7 +5697,7 @@ var Scope = exports.Scope = (function () {
 							i = params ? params.length : 0;
 
 							for (; i < argsLength; i++) {
-								argumentList.defineOwnProperty(i, {
+								argumentList.defineProperty(i, {
 									value: args[i],
 									configurable: true,
 									enumerable: true,
@@ -5694,13 +5705,13 @@ var Scope = exports.Scope = (function () {
 								});
 							}
 
-							argumentList.defineOwnProperty("length", {
+							argumentList.defineProperty("length", {
 								value: env.objectFactory.createPrimitive(argsLength),
 								configurable: true,
 								writable: true
 							});
 
-						case 16:
+						case 17:
 						case "end":
 							return _context3.stop();
 					}
@@ -6746,7 +6757,7 @@ exports.default = function ($target, env, factory) {
 										case 19:
 												value = _context.sent;
 
-												newArray.setIndex(entry.key, value);
+												newArray.defineProperty(entry.key, { value: value, configurable: true, enumerable: true, writable: true });
 
 										case 21:
 												_iteratorNormalCompletion = true;
@@ -7739,7 +7750,7 @@ exports.default = function ($target, env, factory) {
 
 						while (k < deleteCount) {
 							if (this.object.has(k + start)) {
-								removed.defineOwnProperty(k, { value: this.object.getValue(k + start), configurable: true, enumerable: true, writable: true });
+								removed.defineProperty(k, { value: this.object.getValue(k + start), configurable: true, enumerable: true, writable: true });
 								// removed.setIndex(k, this.object.getValue(k + start));
 							}
 
@@ -7755,7 +7766,7 @@ exports.default = function ($target, env, factory) {
 
 							while (k < length - deleteCount) {
 								if (this.object.has(k + deleteCount)) {
-									// this.object.defineOwnProperty(k + newCount, {value: this.object.getValue(k + deleteCount), configurable: true, enumerable: true, writable: true});
+									// this.object.defineProperty(k + newCount, {value: this.object.getValue(k + deleteCount), configurable: true, enumerable: true, writable: true});
 									this.object.setValue(k + newCount, this.object.getValue(k + deleteCount));
 								} else {
 									this.object.deleteProperty(k + newCount);
@@ -7772,7 +7783,7 @@ exports.default = function ($target, env, factory) {
 							k = length - deleteCount;
 							while (k > start) {
 								if (this.object.has(k + deleteCount - 1)) {
-									// this.object.defineOwnProperty(k + newCount - 1, {value: this.object.getValue(k + deleteCount - 1), configurable: true, enumerable: true, writable: true});
+									// this.object.defineProperty(k + newCount - 1, {value: this.object.getValue(k + deleteCount - 1), configurable: true, enumerable: true, writable: true});
 									this.object.setValue(k + newCount - 1, this.object.getValue(k + deleteCount - 1));
 								} else {
 									this.object.deleteProperty(k + newCount - 1);
@@ -7784,7 +7795,7 @@ exports.default = function ($target, env, factory) {
 
 						k = start;
 						for (i = 0; i < newCount; i++) {
-							// this.object.defineOwnProperty(k, {value: elements[i], configurable: true, enumerable: true, writable: true});
+							// this.object.defineProperty(k, {value: elements[i], configurable: true, enumerable: true, writable: true});
 							this.object.setValue(k, elements[i]);
 							k++;
 						}
@@ -8006,7 +8017,7 @@ exports.default = function (env) {
 		}
 
 		return objectFactory.createArray(arguments);
-	}, proto, { configurable: false, enumerable: false, writable: false });
+	}, proto, { configurable: false, enumerable: false, writable: false, name: "Array" });
 
 	(0, _array2.default)(arrayClass, env, objectFactory);
 	(0, _array22.default)(proto, env, objectFactory);
@@ -8195,7 +8206,7 @@ function booleanApi(env) {
 		}
 
 		return objectFactory.create("Boolean", booleanValue);
-	}, proto, { configurable: false, enumerable: false, writable: false });
+	}, proto, { configurable: false, enumerable: false, writable: false, name: "Boolean" });
 
 	(0, _boolean2.default)(proto, env, objectFactory);
 	(0, _boolean4.default)(proto, env, objectFactory);
@@ -8542,7 +8553,7 @@ function dateApi(env) {
 				}
 			}
 		}, _callee2, this);
-	}), proto, { configurable: false, enumerable: false, writable: false });
+	}), proto, { configurable: false, enumerable: false, writable: false, name: "Date" });
 
 	(0, _date2.default)(dateClass, env, objectFactory);
 	(0, _date4.default)(dateClass, env, objectFactory);
@@ -8611,53 +8622,63 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("toString", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee() {
-		var name, msg;
+		var nameValue, name, messageValue, message;
 		return regeneratorRuntime.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						name = this.object.getValue("name");
-						msg = undefined;
+						nameValue = this.object.getValue("name");
 
-						if (!this.object.has("message")) {
-							_context.next = 6;
+						if (!(0, _contracts.isUndefined)(nameValue)) {
+							_context.next = 5;
 							break;
 						}
 
-						_context.next = 5;
-						return (0, _native.toString)(this.object.getValue("message"));
+						_context.t0 = "Error";
+						_context.next = 8;
+						break;
 
 					case 5:
-						msg = _context.sent;
+						_context.next = 7;
+						return (0, _native.toString)(nameValue);
 
-					case 6:
-						_context.t0 = name;
-
-						if (!_context.t0) {
-							_context.next = 11;
-							break;
-						}
-
-						_context.next = 10;
-						return (0, _native.toString)(name);
-
-					case 10:
+					case 7:
 						_context.t0 = _context.sent;
 
-					case 11:
+					case 8:
 						name = _context.t0;
+						messageValue = this.object.getValue("message");
 
-						if (!(name && msg)) {
+						if (!(0, _contracts.isUndefined)(messageValue)) {
 							_context.next = 14;
 							break;
 						}
 
-						return _context.abrupt("return", factory.create("String", name + ": " + msg));
+						_context.t1 = "";
+						_context.next = 17;
+						break;
 
 					case 14:
-						return _context.abrupt("return", factory.create("String", name || msg));
+						_context.next = 16;
+						return (0, _native.toString)(messageValue);
 
-					case 15:
+					case 16:
+						_context.t1 = _context.sent;
+
+					case 17:
+						message = _context.t1;
+
+						if (!(name && message)) {
+							_context.next = 20;
+							break;
+						}
+
+						return _context.abrupt("return", factory.createPrimitive(name + ": " + message));
+
+					case 20:
+						return _context.abrupt("return", factory.createPrimitive(name || message));
+
+					case 21:
 					case "end":
 						return _context.stop();
 				}
@@ -8668,7 +8689,9 @@ exports.default = function ($target, env, factory) {
 
 var _native = require("../../utils/native");
 
-},{"../../utils/native":393}],232:[function(require,module,exports){
+var _contracts = require("../../utils/contracts");
+
+},{"../../utils/contracts":391,"../../utils/native":393}],232:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -8726,7 +8749,7 @@ function errorApi(env) {
 				}
 			}
 		}, _callee, this);
-	}), proto, { configurable: false, enumerable: false, writable: false });
+	}), proto, { configurable: false, enumerable: false, writable: false, name: "Error" });
 
 	(0, _error2.default)(proto, env, objectFactory);
 	globalObject.define("Error", errorClass);
@@ -8758,7 +8781,7 @@ function errorApi(env) {
 					}
 				}
 			}, _callee2, this);
-		}), typeProto, { configurable: false, enumerable: false, writable: false });
+		}), typeProto, { configurable: false, enumerable: false, writable: false, name: errorType });
 
 		globalObject.define(errorType, errClass);
 	});
@@ -8780,7 +8803,7 @@ var _contracts = require("../../utils/contracts");
 var _native = require("../../utils/native");
 
 function defineThis(env, fn, thisArg) {
-	if (fn.builtIn || fn.isStrict()) {
+	if (fn.builtIn || fn.isProxy || fn.isStrict()) {
 		return thisArg || _primitiveType.UNDEFINED;
 	}
 
@@ -8858,16 +8881,19 @@ exports.default = function ($target, env, factory) {
 						args[_key - 1] = arguments[_key];
 				}
 
-				var fn, callee, params, nativeFunc, boundFunc, thrower;
+				var fn, length, nativeFunc, nameValue, name, boundFunc, thrower;
 				return regeneratorRuntime.wrap(function _callee$(_context2) {
 						while (1) {
 								switch (_context2.prev = _context2.next) {
 										case 0:
 												fn = this.object;
-												callee = fn.native ? fn : fn.node;
-												params = callee.params || [];
+												_context2.next = 3;
+												return (0, _native.toNumber)(fn.getValue("length"));
 
-												thisArg = (0, _functionHelpers.defineThis)(env, this.object, thisArg);
+										case 3:
+												length = _context2.sent;
+
+												thisArg = (0, _functionHelpers.defineThis)(env, fn, thisArg);
 
 												nativeFunc = regeneratorRuntime.mark(function nativeFunc() {
 														for (var _len2 = arguments.length, additionalArgs = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
@@ -8893,12 +8919,32 @@ exports.default = function ($target, env, factory) {
 														}, nativeFunc, this);
 												});
 
-												nativeFunc.nativeLength = Math.max(params.length - args.length, 0);
-												nativeFunc.strict = env.isStrict() || !fn.native && fn.node.body.isStrict();
+												nativeFunc.nativeLength = Math.max(length - args.length, 0);
+												nativeFunc.strict = env.isStrict() || fn.node && fn.node.body.isStrict();
 
-												boundFunc = factory.createFunction(nativeFunc, null, { name: "bound " + fn.name });
+												nameValue = fn.getValue("name");
 
-												boundFunc.canConstruct = this.object.canConstruct;
+												if (!(0, _contracts.isUndefined)(nameValue)) {
+														_context2.next = 13;
+														break;
+												}
+
+												_context2.t0 = "";
+												_context2.next = 16;
+												break;
+
+										case 13:
+												_context2.next = 15;
+												return (0, _native.toString)(nameValue);
+
+										case 15:
+												_context2.t0 = _context2.sent;
+
+										case 16:
+												name = _context2.t0;
+												boundFunc = factory.createFunction(nativeFunc, null, { name: "bound " + name });
+
+												boundFunc.canConstruct = fn.canConstruct;
 												boundFunc.bindScope(this.env.current);
 												boundFunc.bindThis(thisArg);
 
@@ -8909,13 +8955,13 @@ exports.default = function ($target, env, factory) {
 														// these will be added in strict mode, but should always be here for bound functions
 														thrower = factory.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
 
-														boundFunc.defineOwnProperty("caller", thrower);
-														boundFunc.defineOwnProperty("arguments", thrower);
+														boundFunc.defineProperty("caller", thrower);
+														boundFunc.defineProperty("arguments", thrower);
 												}
 
 												return _context2.abrupt("return", boundFunc);
 
-										case 13:
+										case 23:
 										case "end":
 												return _context2.stop();
 								}
@@ -8926,9 +8972,11 @@ exports.default = function ($target, env, factory) {
 
 var _functionHelpers = require("./function-helpers");
 
+var _native = require("../../utils/native");
+
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":391,"./function-helpers":233}],236:[function(require,module,exports){
+},{"../../utils/contracts":391,"../../utils/native":393,"./function-helpers":233}],236:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9016,8 +9064,6 @@ var _function7 = require("./function.to-string");
 var _function8 = _interopRequireDefault(_function7);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var frozen = { configurable: false, enumerable: false, writable: false };
 
 function functionApi(env) {
 	var globalObject = env.global;
@@ -9211,7 +9257,7 @@ function functionApi(env) {
 	proto[Symbol.for("env")] = env;
 
 	funcCtor.nativeLength = 1;
-	funcClass = objectFactory.createFunction(funcCtor, proto, frozen);
+	funcClass = objectFactory.createFunction(funcCtor, proto, { configurable: false, enumerable: false, writable: false, name: "Function" });
 	funcClass.setValue("constructor", funcClass);
 
 	globalObject.define("Function", funcClass);
@@ -9246,9 +9292,9 @@ function functionApi(env) {
 		configurable: true
 	};
 
-	proto.defineOwnProperty("caller", prop);
-	proto.defineOwnProperty("callee", prop);
-	proto.defineOwnProperty("arguments", prop);
+	proto.defineProperty("caller", prop);
+	proto.defineProperty("callee", prop);
+	proto.defineProperty("arguments", prop);
 }
 
 },{"../../types/native-function-type":380,"../../types/primitive-type":383,"../../utils/async":390,"../../utils/contracts":391,"../../utils/native":393,"./function.apply":234,"./function.bind":235,"./function.call":236,"./function.to-string":237}],239:[function(require,module,exports){
@@ -9807,7 +9853,7 @@ exports.default = function ($target, env, factory) {
 						propValue = _context2.sent;
 
 						if (!(0, _contracts.isUndefined)(propValue)) {
-							obj.defineOwnProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
+							obj.defineProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
 						}
 
 					case 43:
@@ -10479,7 +10525,7 @@ function numberApi(env) {
 				}
 			}
 		}, _callee, this);
-	}), proto, { configurable: false, enumerable: false, writable: false });
+	}), proto, { configurable: false, enumerable: false, writable: false, name: "Number" });
 
 	["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"].forEach(function (name) {
 		numberClass.define(name, objectFactory.createPrimitive(Number[name]), { configurable: false, enumerable: false, writable: false });
@@ -10732,7 +10778,7 @@ function objectApi(env) {
 		}
 
 		return objectFactory.createObject();
-	}, proto, { configurable: false, enumerable: false, writable: false });
+	}, proto, { configurable: false, enumerable: false, writable: false, name: "Object" });
 
 	(0, _object28.default)(proto, env, objectFactory);
 	(0, _object30.default)(proto, env, objectFactory);
@@ -11026,7 +11072,7 @@ function defineProperty(env, obj, key, descriptor) {
 				})(), "t0", 8);
 
 			case 8:
-				return _context8.abrupt("return", obj.defineOwnProperty(key, options, throwOnError, env));
+				return _context8.abrupt("return", obj.defineProperty(key, options, throwOnError, env));
 
 			case 9:
 			case "end":
@@ -11724,17 +11770,17 @@ exports.default = function (env) {
 				}
 			}
 		}, _callee, this);
-	}), proto, { configurable: false, enumerable: false, writable: false });
+	}), proto, { configurable: false, enumerable: false, writable: false, name: "RegExp" });
 
 	(0, _regex2.default)(proto, env, objectFactory);
 	(0, _regex4.default)(proto, env, objectFactory);
 	(0, _regex6.default)(proto, env, objectFactory);
 
 	proto.define("compile", (0, _native.toNativeFunction)(env, RegExp.prototype.compile, "RegExp.prototype.compile"));
-	proto.defineOwnProperty("lastIndex", { value: objectFactory.createPrimitive(0), writable: true });
+	proto.defineProperty("lastIndex", { value: objectFactory.createPrimitive(0), writable: true });
 
 	["global", "ignoreCase", "multiline", "source"].forEach(function (name) {
-		proto.defineOwnProperty(name, { value: objectFactory.createPrimitive(RegExp.prototype[name]) });
+		proto.defineProperty(name, { value: objectFactory.createPrimitive(RegExp.prototype[name]) });
 	});
 
 	globalObject.define("RegExp", regexClass);
@@ -11929,7 +11975,7 @@ exports.default = function (env) {
 	// prototype can be coerced into an empty string
 	proto.value = "";
 	proto.className = "String";
-	proto.defineOwnProperty("length", { value: objectFactory.createPrimitive(0) });
+	proto.defineProperty("length", { value: objectFactory.createPrimitive(0) });
 
 	var stringClass = objectFactory.createFunction(regeneratorRuntime.mark(function _callee(value) {
 		var stringValue;
@@ -11959,7 +12005,7 @@ exports.default = function (env) {
 				}
 			}
 		}, _callee, this);
-	}), proto, { configurable: false, enumerable: false, writable: false });
+	}), proto, { configurable: false, enumerable: false, writable: false, name: "String" });
 
 	(0, _string2.default)(stringClass, env, objectFactory);
 
@@ -12841,7 +12887,7 @@ function normalizeIndex(index, length) {
 }
 
 function executeCallback(env, callback, entry, thisArg, arr) {
-	var scope, args;
+	var args;
 	return regeneratorRuntime.wrap(function executeCallback$(_context) {
 		while (1) switch (_context.prev = _context.next) {
 			case 0:
@@ -12849,18 +12895,17 @@ function executeCallback(env, callback, entry, thisArg, arr) {
 					thisArg = callback.isStrict() ? _primitiveType.UNDEFINED : env.global;
 				}
 
-				scope = env.createExecutionScope(callback, thisArg);
-
-				scope.init(callback.node.body);
+				// let scope = env.createExecutionScope(callback, thisArg);
+				// scope.init(callback.node.body);
 
 				args = [entry.value, env.objectFactory.createPrimitive(entry.key), arr];
-				_context.next = 6;
+				_context.next = 4;
 				return callback.call(thisArg, args) || _primitiveType.UNDEFINED;
 
-			case 6:
+			case 4:
 				return _context.abrupt("return", _context.sent);
 
-			case 7:
+			case 5:
 			case "end":
 				return _context.stop();
 		}
@@ -13318,7 +13363,7 @@ exports.default = function ($target, env, factory) {
 					case 18:
 						value = _context3.sent;
 
-						arr.defineOwnProperty(current.key, { value: value, configurable: true, enumerable: true, writable: true });
+						arr.defineProperty(current.key, { value: value, configurable: true, enumerable: true, writable: true });
 						length = current.key + 1;
 
 					case 21:
@@ -13571,7 +13616,7 @@ exports.default = function ($target, env, factory) {
 						i = 0;
 
 						while (i < length) {
-							arr.defineOwnProperty(i, { value: items[i], configurable: true, enumerable: true, writable: true }, true);
+							arr.defineProperty(i, { value: items[i], configurable: true, enumerable: true, writable: true }, true);
 							i++;
 						}
 
@@ -14533,7 +14578,7 @@ exports.default = function (objectClass, env, factory) {
 					source.getOwnPropertyKeys().forEach(function (key) {
 						var desc = source.getOwnProperty(key);
 						if (desc && desc.enumerable) {
-							if (!to.setValue(key, desc.getValue())) {
+							if (!to.setValue(key, source.getValue(key))) {
 								throw TypeError("Cannot assign to read only property '" + key + "'");
 							}
 						}
@@ -14810,7 +14855,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("construct", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee(target, argsArray, newTarget) {
-		var args, proto, obj;
+		var args, ctor, obj;
 		return regeneratorRuntime.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
@@ -14826,10 +14871,10 @@ exports.default = function ($target, env, factory) {
 
 					case 4:
 						args = _context.sent;
-						proto = newTarget || target;
-						obj = factory.createObject(proto);
+						ctor = newTarget || target;
+						obj = factory.createObject(ctor);
 						_context.next = 9;
-						return target.construct(obj, args, proto);
+						return target.construct(obj, args, ctor);
 
 					case 9:
 						return _context.abrupt("return", _context.sent);
@@ -16548,6 +16593,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function (globalObject, env, factory) {
 	var frozen = { configurable: false, enumerable: false, writable: false };
+	var proto = factory.createObject();
 
 	var symbolClass = factory.createFunction(regeneratorRuntime.mark(function _callee(desc) {
 		var descString;
@@ -16563,20 +16609,33 @@ exports.default = function (globalObject, env, factory) {
 						throw TypeError("Symbol is not a constructor");
 
 					case 2:
-						_context.next = 4;
-						return (0, _native.toString)(desc);
+						if (!(0, _contracts.isUndefined)(desc)) {
+							_context.next = 6;
+							break;
+						}
 
-					case 4:
-						descString = _context.sent;
-						return _context.abrupt("return", factory.create("Symbol", descString));
+						_context.t0 = "";
+						_context.next = 9;
+						break;
 
 					case 6:
+						_context.next = 8;
+						return (0, _native.toString)(desc);
+
+					case 8:
+						_context.t0 = _context.sent;
+
+					case 9:
+						descString = _context.t0;
+						return _context.abrupt("return", factory.create("Symbol", descString));
+
+					case 11:
 					case "end":
 						return _context.stop();
 				}
 			}
 		}, _callee, this);
-	}));
+	}), proto, { name: "Symbol" });
 
 	symbolClass.define("for", factory.createBuiltInFunction(regeneratorRuntime.mark(function _callee2(key) {
 		var keyString, instance;
@@ -16610,7 +16669,6 @@ exports.default = function (globalObject, env, factory) {
 		return factory.createPrimitive(sym.description);
 	}, 1, "Symbol.keyFor"));
 
-	var proto = symbolClass.getValue("prototype");
 	proto.define("toString", factory.createBuiltInFunction(function () {
 		var stringValue = "Symbol(" + this.object.description + ")";
 		return factory.createPrimitive(stringValue);
@@ -16639,11 +16697,9 @@ var _native = require("../utils/native");
 
 var _symbolType = require("../types/symbol-type");
 
-var _primitiveType = require("../types/primitive-type");
-
 var _contracts = require("../utils/contracts");
 
-},{"../types/primitive-type":383,"../types/symbol-type":388,"../utils/contracts":391,"../utils/native":393}],358:[function(require,module,exports){
+},{"../types/symbol-type":388,"../utils/contracts":391,"../utils/native":393}],358:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16845,11 +16901,12 @@ Object.defineProperty(exports, "__esModule", {
 var interfaces = exports.interfaces = {
 	"Block": ["BlockStatement", "Program", "IfStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "LabeledStatement", "WhileStatement", "WithStatement"],
 	"Function": ["FunctionExpression", "FunctionDeclaration", "ArrowFunctionExpression"],
-	"Declaration": ["FunctionDeclaration", "VariableDeclaration"],
-	"Declarator": ["VariableDeclarator", "FunctionDeclaration"],
+	"Class": ["ClassExpression", "ClassDeclaration"],
+	"Declaration": ["FunctionDeclaration", "VariableDeclaration", "ClassDeclaration"],
+	"Declarator": ["VariableDeclarator", "FunctionDeclaration", "ClassDeclaration"],
 	"Statement": ["ExpressionStatement", "BlockStatement", "EmptyStatement", "DebuggerStatement", "WithStatement", "ReturnStatement", "LabeledStatement", "BreakStatement", "ContinueStatement", "IfStatement", "SwitchStatement", "SwitchCase"],
 	"Loop": ["WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement	"],
-	"Expression": ["ThisExpression", "ArrayExpression", "ObjectExpression", "Property", "FunctionExpression", "UnaryExpression", "UpdateExpression", "BinaryExpression", "AssignmentExpression", "LogicalExpression", "MemberExpression", "ConditionalExpression", "CallExpression", "NewExpression", "SequenceExpression", "TemplateLiteral", "TaggedTemplateExpression"],
+	"Expression": ["ThisExpression", "ArrayExpression", "ObjectExpression", "Property", "FunctionExpression", "UnaryExpression", "UpdateExpression", "BinaryExpression", "AssignmentExpression", "LogicalExpression", "MemberExpression", "ConditionalExpression", "CallExpression", "NewExpression", "SequenceExpression", "TemplateLiteral", "TaggedTemplateExpression", "ClassExpression"],
 	"Directive": function Directive() {
 		return this.type === "ExpressionStatement" && this.expression.type === "Literal" && typeof this.expression.value === "string";
 	},
@@ -17057,7 +17114,7 @@ var TraversalContext = exports.TraversalContext = (function () {
 	}, {
 		key: "isBlockScope",
 		value: function isBlockScope() {
-			return this.isLet() || this.isConst();
+			return this.isLet() || this.isConst() || this.isClassDeclaration();
 		}
 	}, {
 		key: "isStrict",
@@ -17156,10 +17213,11 @@ types.ObjectPattern = ["properties"];
 types.ArrayPattern = ["elements"];
 types.RestElement = ["argument"];
 types.AssignmentPattern = ["left", "right"];
-types.Class = types.ClassExpression = ["id", "superClass", "body"];
+types.ClassExpression = types.ClassDeclaration = ["id", "superClass", "body"];
 types.ClassBody = ["body"];
 types.MethodDefinition = ["key", "value"];
 types.MetaProperty = ["meta", "property"];
+types.Super = [];
 
 },{}],362:[function(require,module,exports){
 "use strict";
@@ -17321,13 +17379,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ExecutionContext = exports.ExecutionContext = (function () {
-	function ExecutionContext(env, obj, callee, isNew) {
+	function ExecutionContext(env, obj, callee, newTarget) {
 		_classCallCheck(this, ExecutionContext);
 
 		this.object = obj;
 		this.callee = callee;
 		this.env = env;
-		this.isNew = !!isNew;
+		this.isNew = !!newTarget;
+		this.newTarget = newTarget;
 
 		this.label = "";
 		this.value = null;
@@ -17379,7 +17438,7 @@ var ExecutionContext = exports.ExecutionContext = (function () {
 	}, {
 		key: "create",
 		value: function create() {
-			var context = new ExecutionContext(this.env, this.object, this.callee, this.isNew);
+			var context = new ExecutionContext(this.env, this.object, this.callee, this.newTarget);
 			context.value = this.value;
 			return context;
 		}
@@ -17828,12 +17887,12 @@ var IterableIterator = (function () {
 			var result = (0, _async.exhaust)(this.advancer.call(this.iterator));
 			var value = { key: this.currentIndex++, value: _primitiveType.UNDEFINED };
 
+			var done = (0, _native.toBoolean)(result.getValue("done"));
 			var valueProperty = result.getProperty("value");
 			if (valueProperty) {
 				value.value = valueProperty.getValue();
 			}
 
-			var done = (0, _native.toBoolean)(result.getValue("done"));
 			return { done: done, value: value };
 		}
 	}, {
@@ -17974,7 +18033,8 @@ var SparseIterator = (function () {
 				this.version += current.version;
 
 				current.getOwnPropertyKeys("String").filter(isValidIndex(this.props, this.start, this.end)).forEach(function (key) {
-					_this.props[key] = current.getProperty(key);
+					// wrap in function - avoid calling until iteration
+					_this.props[key] = current.getValue.bind(current, key);
 					_this.keys.push(Number(key));
 				});
 
@@ -17992,7 +18052,7 @@ var SparseIterator = (function () {
 
 			if (this.keys.length > 0) {
 				var key = this.currentIndex = this.keys.shift();
-				var value = this.props[key].getValue();
+				var value = this.props[key]();
 
 				return {
 					value: { key: key, value: value },
@@ -18222,7 +18282,7 @@ var ArgumentType = exports.ArgumentType = (function (_ObjectType) {
 		key: "mapProperty",
 		value: function mapProperty(index, binding) {
 			index = String(index);
-			_get(Object.getPrototypeOf(ArgumentType.prototype), "defineOwnProperty", this).call(this, index, { configurable: true, enumerable: true, writable: true, value: undefined }, true);
+			_get(Object.getPrototypeOf(ArgumentType.prototype), "defineProperty", this).call(this, index, { configurable: true, enumerable: true, writable: true, value: undefined }, true);
 			this.parameterMap[index] = binding;
 		}
 	}, {
@@ -18252,11 +18312,11 @@ var ArgumentType = exports.ArgumentType = (function (_ObjectType) {
 			return _get(Object.getPrototypeOf(ArgumentType.prototype), "getOwnProperty", this).call(this, name);
 		}
 	}, {
-		key: "defineOwnProperty",
-		value: function defineOwnProperty(name, descriptor, throwOnError) {
+		key: "defineProperty",
+		value: function defineProperty(name, descriptor, throwOnError) {
 			name = String(name);
 
-			var allowed = _get(Object.getPrototypeOf(ArgumentType.prototype), "defineOwnProperty", this).apply(this, arguments);
+			var allowed = _get(Object.getPrototypeOf(ArgumentType.prototype), "defineProperty", this).apply(this, arguments);
 			if (allowed && name in this.parameterMap) {
 				if ("set" in descriptor || "get" in descriptor) {
 					delete this.parameterMap[name];
@@ -18334,7 +18394,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 		key: "init",
 		value: function init(env) {
 			_get(Object.getPrototypeOf(ArrayType.prototype), "init", this).apply(this, arguments);
-			this.defineOwnProperty("length", { value: env.objectFactory.createPrimitive(0), writable: true });
+			this.defineProperty("length", { value: env.objectFactory.createPrimitive(0), writable: true });
 		}
 	}, {
 		key: "setValue",
@@ -18354,7 +18414,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 			var lengthProperty = this.getProperty("length");
 			var lengthValue = lengthProperty.getValue().toNative();
 
-			if (!lengthProperty.canSetValue() && index >= lengthValue || !_get(Object.getPrototypeOf(ArrayType.prototype), "defineOwnProperty", this).call(this, key, descriptor)) {
+			if (!lengthProperty.canSetValue() && index >= lengthValue || !_get(Object.getPrototypeOf(ArrayType.prototype), "defineProperty", this).call(this, key, descriptor)) {
 
 				if (throwOnError) {
 					throw TypeError("Cannot define property: " + key + ", object is not extensible.");
@@ -18365,7 +18425,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 
 			if (index >= lengthValue) {
 				var newLength = this[Symbol.for("env")].objectFactory.createPrimitive(index + 1);
-				this.defineOwnProperty("length", { value: newLength });
+				this.defineProperty("length", { value: newLength });
 			}
 
 			return true;
@@ -18386,7 +18446,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 			(0, _contracts.assertIsValidArrayLength)(newLength.toNative());
 
 			if (newLength.toNative() >= currentLength.toNative()) {
-				return _get(Object.getPrototypeOf(ArrayType.prototype), "defineOwnProperty", this).call(this, "length", descriptor, throwOnError);
+				return _get(Object.getPrototypeOf(ArrayType.prototype), "defineProperty", this).call(this, "length", descriptor, throwOnError);
 			}
 
 			var isWritable = this.getProperty("length").writable;
@@ -18405,7 +18465,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 			}
 
 			var i = currentLength.toNative();
-			if (!_get(Object.getPrototypeOf(ArrayType.prototype), "defineOwnProperty", this).call(this, "length", descriptor, throwOnError)) {
+			if (!_get(Object.getPrototypeOf(ArrayType.prototype), "defineProperty", this).call(this, "length", descriptor, throwOnError)) {
 				return false;
 			}
 
@@ -18422,7 +18482,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 
 						if (!this.deleteProperty(key, false)) {
 							newLength = env.objectFactory.createPrimitive(key + 1);
-							this.defineOwnProperty("length", { value: newLength });
+							this.defineProperty("length", { value: newLength });
 							succeeded = false;
 							break;
 						}
@@ -18444,7 +18504,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 			}
 
 			if (notWritable) {
-				this.defineOwnProperty("length", { writable: false });
+				this.defineProperty("length", { writable: false });
 			}
 
 			if (!succeeded && throwOnError) {
@@ -18454,8 +18514,8 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 			return succeeded;
 		}
 	}, {
-		key: "defineOwnProperty",
-		value: function defineOwnProperty(name, descriptor, throwOnError) {
+		key: "defineProperty",
+		value: function defineProperty(name, descriptor, throwOnError) {
 			if ((0, _contracts.isInteger)(name) && (0, _contracts.isValidArrayLength)(Number(name) + 1) && !this.owns(name)) {
 				return this.setIndex(name, null, descriptor, throwOnError);
 			}
@@ -18464,7 +18524,7 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 				return this.setLength(descriptor, throwOnError);
 			}
 
-			return _get(Object.getPrototypeOf(ArrayType.prototype), "defineOwnProperty", this).apply(this, arguments);
+			return _get(Object.getPrototypeOf(ArrayType.prototype), "defineProperty", this).apply(this, arguments);
 		}
 	}, {
 		key: "toNative",
@@ -18632,15 +18692,67 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var _marked = [execute].map(regeneratorRuntime.mark);
+
 function getParameterLength(params) {
 	for (var i = 0, ln = params.length; i < ln; i++) {
 		// parameter length should only include the first "Formal" parameters
-		if (!params[i].isIdentifier()) {
+		if (params[i].isRestElement() || params[i].isAssignmentPattern()) {
 			return i;
 		}
 	}
 
 	return params.length;
+}
+
+function execute(func, thisArg, args, callee, newTarget) {
+	var env, scope;
+	return regeneratorRuntime.wrap(function execute$(_context2) {
+		while (1) switch (_context2.prev = _context2.next) {
+			case 0:
+				env = func[Symbol.for("env")];
+				scope = env.createExecutionScope(func, thisArg, newTarget);
+
+				callee = callee || func;
+				_context2.next = 5;
+				return scope.loadArgs(func.node.params, args || [], func);
+
+			case 5:
+				scope.init(func.node);
+
+				if (func.node.id) {
+					env.createVariable(func.node.id.name).setValue(func);
+				}
+
+				return _context2.delegateYield(scope.use(regeneratorRuntime.mark(function _callee() {
+					var context;
+					return regeneratorRuntime.wrap(function _callee$(_context) {
+						while (1) {
+							switch (_context.prev = _context.next) {
+								case 0:
+									context = func.arrow ? env.currentExecutionContext : env.createExecutionContext(thisArg, callee, newTarget);
+									_context.next = 3;
+									return context.execute(func.node.body, callee);
+
+								case 3:
+									return _context.abrupt("return", _context.sent);
+
+								case 4:
+								case "end":
+									return _context.stop();
+							}
+						}
+					}, _callee, this);
+				})), "t0", 8);
+
+			case 8:
+				return _context2.abrupt("return", _context2.t0);
+
+			case 9:
+			case "end":
+				return _context2.stop();
+		}
+	}, _marked[0], this);
 }
 
 var FunctionType = exports.FunctionType = (function (_ObjectType) {
@@ -18657,10 +18769,13 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 		_this.node = node;
 
 		_this.arrow = node && node.isArrowFunctionExpression();
+		_this.isConstructor = false;
 		_this.canConstruct = !_this.arrow;
 
+		_this.kind = "base";
 		_this.boundScope = null;
 		_this.boundThis = null;
+		_this.homeObject = null;
 		return _this;
 	}
 
@@ -18669,17 +18784,29 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 		value: function init(env, proto, descriptor, strict) {
 			_get(Object.getPrototypeOf(FunctionType.prototype), "init", this).apply(this, arguments);
 
+			var _ref = descriptor || {};
+
+			var _ref$isConstructor = _ref.isConstructor;
+			var isConstructor = _ref$isConstructor === undefined ? false : _ref$isConstructor;
+			var homeObject = _ref.homeObject;
+			var _ref$kind = _ref.kind;
+			var kind = _ref$kind === undefined ? "base" : _ref$kind;
+
+			this.isConstructor = isConstructor;
+			this.homeObject = homeObject;
+			this.kind = kind;
+
 			if (strict !== undefined) {
 				this.strict = strict;
 			}
 
 			// set length property from the number of parameters
-			this.defineOwnProperty("length", { value: env.objectFactory.createPrimitive(getParameterLength(this.node.params)) });
+			this.defineProperty("length", { value: env.objectFactory.createPrimitive(getParameterLength(this.node.params)) });
 
-			if (!this.arrow) {
+			if (!this.arrow && proto !== null) {
 				// functions have a prototype
 				proto = proto || env.objectFactory.createObject();
-				this.defineOwnProperty("prototype", { value: proto, writable: true });
+				this.defineProperty("prototype", { value: proto, writable: true });
 
 				// set the contructor property as an instance of itself
 				proto.properties.constructor = new _propertyDescriptor.PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
@@ -18717,65 +18844,40 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 		}
 	}, {
 		key: "call",
-		value: regeneratorRuntime.mark(function call(thisArg, args, callee, isNew) {
-			var self, env, scope;
-			return regeneratorRuntime.wrap(function call$(_context2) {
+		value: regeneratorRuntime.mark(function call(thisArg, args, callee) {
+			var executionResult, shouldReturn;
+			return regeneratorRuntime.wrap(function call$(_context3) {
 				while (1) {
-					switch (_context2.prev = _context2.next) {
+					switch (_context3.prev = _context3.next) {
 						case 0:
-							self = this;
-							env = this[Symbol.for("env")];
-
-							callee = callee || this;
-							scope = env.createExecutionScope(this, thisArg);
-							_context2.next = 6;
-							return scope.loadArgs(this.node.params, args || [], this);
-
-						case 6:
-							scope.init(this.node);
-
-							if (this.node.id) {
-								env.createVariable(this.node.id.name).setValue(this);
+							if (!this.isConstructor) {
+								_context3.next = 2;
+								break;
 							}
 
-							_context2.next = 10;
-							return scope.use(regeneratorRuntime.mark(function _callee() {
-								var executionResult, shouldReturn;
-								return regeneratorRuntime.wrap(function _callee$(_context) {
-									while (1) {
-										switch (_context.prev = _context.next) {
-											case 0:
-												_context.next = 2;
-												return env.createExecutionContext(thisArg, callee, isNew).execute(self.node.body, callee);
+							throw TypeError("Constructor function " + this.name + " must be called with 'new'");
 
-											case 2:
-												executionResult = _context.sent;
-												shouldReturn = self.arrow || executionResult && executionResult.exit;
+						case 2:
+							_context3.next = 4;
+							return execute(this, thisArg, args, callee);
 
-												if (!(shouldReturn && executionResult.result)) {
-													_context.next = 6;
-													break;
-												}
+						case 4:
+							executionResult = _context3.sent;
+							shouldReturn = this.arrow || executionResult && executionResult.exit;
 
-												return _context.abrupt("return", executionResult.result);
+							if (!(shouldReturn && executionResult.result)) {
+								_context3.next = 8;
+								break;
+							}
 
-											case 6:
-												return _context.abrupt("return", _primitiveType.UNDEFINED);
+							return _context3.abrupt("return", executionResult.result);
 
-											case 7:
-											case "end":
-												return _context.stop();
-										}
-									}
-								}, _callee, this);
-							}));
+						case 8:
+							return _context3.abrupt("return", _primitiveType.UNDEFINED);
 
-						case 10:
-							return _context2.abrupt("return", _context2.sent);
-
-						case 11:
+						case 9:
 						case "end":
-							return _context2.stop();
+							return _context3.stop();
 					}
 				}
 			}, call, this);
@@ -18783,34 +18885,53 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 	}, {
 		key: "construct",
 		value: regeneratorRuntime.mark(function construct(thisArg, args, callee) {
-			var result;
-			return regeneratorRuntime.wrap(function construct$(_context3) {
+			var target, executionResult;
+			return regeneratorRuntime.wrap(function construct$(_context4) {
 				while (1) {
-					switch (_context3.prev = _context3.next) {
+					switch (_context4.prev = _context4.next) {
 						case 0:
+							target = (callee || this).getValue();
+
 							if (!thisArg || thisArg === this) {
-								thisArg = this[Symbol.for("env")].objectFactory.createObject(this);
+								thisArg = this[Symbol.for("env")].objectFactory.createObject(target);
 							}
 
-							_context3.next = 3;
-							return this.call(thisArg, args || [], callee, true);
+							_context4.next = 4;
+							return execute(this, thisArg, args, callee, target);
 
-						case 3:
-							result = _context3.sent;
+						case 4:
+							executionResult = _context4.sent;
 
-							if (!(result && !result.isPrimitive)) {
-								_context3.next = 6;
+							if (!(executionResult.exit && executionResult.result)) {
+								_context4.next = 12;
 								break;
 							}
 
-							return _context3.abrupt("return", result);
+							if (!executionResult.result.isPrimitive) {
+								_context4.next = 11;
+								break;
+							}
 
-						case 6:
-							return _context3.abrupt("return", thisArg);
+							if (!(this.kind === "classConstructor" && executionResult.result.value !== undefined)) {
+								_context4.next = 9;
+								break;
+							}
 
-						case 7:
+							throw TypeError();
+
+						case 9:
+							_context4.next = 12;
+							break;
+
+						case 11:
+							return _context4.abrupt("return", executionResult.result);
+
+						case 12:
+							return _context4.abrupt("return", thisArg);
+
+						case 13:
 						case "end":
-							return _context3.stop();
+							return _context4.stop();
 					}
 				}
 			}, construct, this);
@@ -18990,8 +19111,23 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 
 	_createClass(NativeFunctionType, [{
 		key: "init",
-		value: function init(env, proto, descriptor) {
+		value: function init(env, proto) {
+			var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+			var _ref$configurable = _ref.configurable;
+			var configurable = _ref$configurable === undefined ? false : _ref$configurable;
+			var _ref$enumerable = _ref.enumerable;
+			var enumerable = _ref$enumerable === undefined ? false : _ref$enumerable;
+			var _ref$writable = _ref.writable;
+			var writable = _ref$writable === undefined ? true : _ref$writable;
+			var _ref$isConstructor = _ref.isConstructor;
+			var isConstructor = _ref$isConstructor === undefined ? false : _ref$isConstructor;
+			var homeObject = _ref.homeObject;
+
 			this[Symbol.for("env")] = env;
+
+			this.isConstructor = isConstructor;
+			this.homeObject = homeObject;
 
 			var length = this.nativeFunction.length;
 			if ("nativeLength" in this.nativeFunction) {
@@ -19002,7 +19138,7 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 				this.strict = this.nativeFunction.strict;
 			}
 
-			this.defineOwnProperty("length", {
+			this.defineProperty("length", {
 				value: env.objectFactory.createPrimitive(length),
 				configurable: false,
 				enumerable: false,
@@ -19013,15 +19149,14 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 				proto = proto || env.objectFactory.createObject();
 				proto.properties.constructor = new _propertyDescriptor.PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
 
-				descriptor = descriptor || { configurable: false, enumerable: false, writable: true };
 				var protoDescriptor = {
 					value: proto,
-					configurable: descriptor.configurable,
-					enumerable: descriptor.enumerable,
-					writable: descriptor.writable
+					configurable: configurable,
+					enumerable: enumerable,
+					writable: writable
 				};
 
-				this.defineOwnProperty("prototype", protoDescriptor);
+				this.defineProperty("prototype", protoDescriptor);
 			}
 
 			this.addPoison();
@@ -19034,6 +19169,15 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 				while (1) {
 					switch (_context2.prev = _context2.next) {
 						case 0:
+							if (!this.isConstructor) {
+								_context2.next = 2;
+								break;
+							}
+
+							throw TypeError();
+
+						case 2:
+
 							callee = callee || this;
 							env = this[Symbol.for("env")];
 
@@ -19047,7 +19191,7 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 
 							self = this;
 							scope = env.createExecutionScope(this, thisArg);
-							_context2.next = 7;
+							_context2.next = 9;
 							return scope.use(regeneratorRuntime.mark(function _callee() {
 								return regeneratorRuntime.wrap(function _callee$(_context) {
 									while (1) {
@@ -19067,10 +19211,10 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 								}, _callee, this);
 							}));
 
-						case 7:
+						case 9:
 							return _context2.abrupt("return", _context2.sent);
 
-						case 8:
+						case 10:
 						case "end":
 							return _context2.stop();
 					}
@@ -19079,23 +19223,24 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 		})
 	}, {
 		key: "construct",
-		value: regeneratorRuntime.mark(function construct(thisArg, args) {
-			var self, env, scope;
+		value: regeneratorRuntime.mark(function construct(thisArg, args, callee) {
+			var self, target, env, scope;
 			return regeneratorRuntime.wrap(function construct$(_context4) {
 				while (1) {
 					switch (_context4.prev = _context4.next) {
 						case 0:
 							self = this;
+							target = (callee || this).getValue();
 							env = this[Symbol.for("env")];
-							scope = env.createExecutionScope(this, thisArg);
-							_context4.next = 5;
+							scope = env.createExecutionScope(this, thisArg, target);
+							_context4.next = 6;
 							return scope.use(regeneratorRuntime.mark(function _callee2() {
 								return regeneratorRuntime.wrap(function _callee2$(_context3) {
 									while (1) {
 										switch (_context3.prev = _context3.next) {
 											case 0:
 												_context3.next = 2;
-												return self.nativeFunction.apply(env.createExecutionContext(thisArg, self, true), args || []);
+												return self.nativeFunction.apply(env.createExecutionContext(thisArg, self, target), args || []);
 
 											case 2:
 												return _context3.abrupt("return", _context3.sent);
@@ -19108,10 +19253,10 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 								}, _callee2, this);
 							}));
 
-						case 5:
+						case 6:
 							return _context4.abrupt("return", _context4.sent);
 
-						case 6:
+						case 7:
 						case "end":
 							return _context4.stop();
 					}
@@ -19317,7 +19462,7 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 						typeName = value.name || typeName;
 						if (value.message) {
 							var message = this.createPrimitive(value.message);
-							instance.defineOwnProperty("message", createDataPropertyDescriptor(message, { enumerable: false }));
+							instance.defineProperty("message", createDataPropertyDescriptor(message, { enumerable: false }));
 						}
 					}
 
@@ -19405,10 +19550,10 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 
 			if (strict) {
 				var thrower = this.createThrower("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
-				instance.defineOwnProperty("callee", thrower);
-				instance.defineOwnProperty("caller", thrower);
+				instance.defineProperty("callee", thrower);
+				instance.defineProperty("caller", thrower);
 			} else {
-				instance.defineOwnProperty("callee", {
+				instance.defineProperty("callee", {
 					configurable: true,
 					enumerable: false,
 					value: callee,
@@ -19426,33 +19571,7 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 	}, {
 		key: "createIterator",
 		value: function createIterator(iterable, proto) {
-			// let self = this;
 			var instance = new _iteratorType.IteratorType(iterable);
-
-			// if (!proto) {
-			// 	proto = this.createObject();
-			// 	proto.className = "[Symbol.iterator]";
-			// }
-
-			// if (!proto.has("next")) {
-			// 	proto.define("next", this.createBuiltInFunction(function () {
-			// 		let result = this.object.advance();
-			// 		if (result.value) {
-			// 			return result.value;
-			// 		}
-
-			// 		return self.createIteratorResult({done: true});
-			// 	}));
-			// }
-
-			// let iteratorKey = SymbolType.getByKey("iterator");
-			// if (!instance.has(iteratorKey)) {
-			// 	instance.define(iteratorKey, this.createBuiltInFunction(function () {
-			// 		return instance;
-			// 	}));
-			// }
-
-			// instance.setPrototype(proto);
 			instance.init(this.env, proto);
 			return instance;
 		}
@@ -19463,10 +19582,10 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 			var _ref2$done = _ref2.done;
 			var done = _ref2$done === undefined ? false : _ref2$done;
 
-			var result = this.createObject();
-			result.defineOwnProperty("done", { value: this.createPrimitive(done) });
-			result.defineOwnProperty("value", { value: value || _primitiveType.UNDEFINED });
-			return result;
+			var instance = this.createObject();
+			instance.defineProperty("done", { value: this.createPrimitive(done) });
+			instance.defineProperty("value", { value: value || _primitiveType.UNDEFINED });
+			return instance;
 		}
 	}, {
 		key: "createFromSpeciesOrDefault",
@@ -19540,7 +19659,11 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 			var writable = _ref3$writable === undefined ? true : _ref3$writable;
 			var _ref3$strict = _ref3.strict;
 			var strict = _ref3$strict === undefined ? false : _ref3$strict;
+			var _ref3$isConstructor = _ref3.isConstructor;
+			var isConstructor = _ref3$isConstructor === undefined ? false : _ref3$isConstructor;
 			var name = _ref3.name;
+			var homeObject = _ref3.homeObject;
+			var kind = _ref3.kind;
 
 			var instance = undefined;
 
@@ -19550,15 +19673,25 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 				instance = new _functionType.FunctionType(fnOrNode);
 			}
 
-			instance.init(this.env, proto, { configurable: configurable, enumerable: enumerable, writable: writable }, strict);
+			instance.init(this.env, proto, { configurable: configurable, enumerable: enumerable, writable: writable, isConstructor: isConstructor, strict: strict, homeObject: homeObject, kind: kind }, strict);
 			instance.name = name || "";
 
 			if (name) {
-				instance.defineOwnProperty("name", { value: this.createPrimitive(name), configurable: true }, true);
+				instance.defineProperty("name", { value: this.createPrimitive(name), configurable: true }, true);
 			}
 
 			setProto("Function", instance, this);
 			return instance;
+		}
+	}, {
+		key: "createClass",
+		value: function createClass(fnOrNode, proto) {
+			var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+			var name = _ref4.name;
+			var homeObject = _ref4.homeObject;
+
+			return this.createFunction(fnOrNode, proto, { configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name: name, homeObject: homeObject });
 		}
 	}, {
 		key: "createGetter",
@@ -19594,12 +19727,12 @@ var ObjectFactory = exports.ObjectFactory = (function () {
 			instance[Symbol.for("env")] = this.env;
 			instance.builtIn = true;
 			instance.canConstruct = false;
-			instance.defineOwnProperty("length", { value: this.createPrimitive(length), configurable: this.ecmaVersion > 5 });
+			instance.defineProperty("length", { value: this.createPrimitive(length), configurable: this.ecmaVersion > 5 });
 
 			var match = functionNameMatcher.exec(funcName);
 			var name = match && match[1] || funcName;
 
-			instance.defineOwnProperty("name", { value: this.createPrimitive(name), configurable: true }, true, this.env);
+			instance.defineProperty("name", { value: this.createPrimitive(name), configurable: true }, true, this.env);
 
 			return instance;
 		}
@@ -19951,7 +20084,7 @@ var ObjectType = exports.ObjectType = (function () {
 				}
 
 				if (!receiver.owns(key)) {
-					return receiver.defineOwnProperty(key, {
+					return receiver.defineProperty(key, {
 						value: value,
 						configurable: true,
 						enumerable: true,
@@ -19963,7 +20096,7 @@ var ObjectType = exports.ObjectType = (function () {
 				return true;
 			}
 
-			return receiver.defineOwnProperty(key, {
+			return receiver.defineProperty(key, {
 				value: value,
 				configurable: true,
 				enumerable: true,
@@ -19999,13 +20132,13 @@ var ObjectType = exports.ObjectType = (function () {
 		// 			descriptor.setValue(value);
 		// 		}
 		// 	} else {
-		// 		this.defineOwnProperty(key, {value: value, configurable: true, enumerable: true, writable: true}, throwOnError);
+		// 		this.defineProperty(key, {value: value, configurable: true, enumerable: true, writable: true}, throwOnError);
 		// 	}
 		// }
 
 	}, {
-		key: "defineOwnProperty",
-		value: function defineOwnProperty(key, descriptor, throwOnError) {
+		key: "defineProperty",
+		value: function defineProperty(key, descriptor, throwOnError) {
 			if (this.isPrimitive) {
 				if (throwOnError) {
 					throw TypeError("Cannot define property: " + key + ", object is not extensible");
@@ -20127,9 +20260,9 @@ var ObjectType = exports.ObjectType = (function () {
 
 			this.each(function (desc) {
 				if (desc.dataProperty) {
-					_this3.defineOwnProperty(desc.key, { writable: false, configurable: false });
+					_this3.defineProperty(desc.key, { writable: false, configurable: false });
 				} else {
-					_this3.defineOwnProperty(desc.key, { configurable: false });
+					_this3.defineProperty(desc.key, { configurable: false });
 				}
 			});
 
@@ -20147,7 +20280,7 @@ var ObjectType = exports.ObjectType = (function () {
 			var _this4 = this;
 
 			this.each(function (desc) {
-				_this4.defineOwnProperty(desc.key, { configurable: false }, true);
+				_this4.defineProperty(desc.key, { configurable: false }, true);
 			});
 
 			this.preventExtensions();
@@ -20891,15 +21024,15 @@ var ProxyType = exports.ProxyType = (function (_ObjectType) {
 			return result;
 		}
 	}, {
-		key: "defineOwnProperty",
-		value: function defineOwnProperty(key, descriptor, throwOnError) {
+		key: "defineProperty",
+		value: function defineProperty(key, descriptor, throwOnError) {
 			assertIsNotRevoked(this, "defineProperty");
 
 			var proxyMethod = getProxyMethod(this, "defineProperty");
 			if ((0, _contracts.isUndefined)(proxyMethod)) {
 				var _target3;
 
-				return (_target3 = this.target).defineOwnProperty.apply(_target3, arguments);
+				return (_target3 = this.target).defineProperty.apply(_target3, arguments);
 			}
 
 			var env = this[envSymbol];
@@ -21063,7 +21196,7 @@ var RegexType = exports.RegexType = (function (_ObjectType) {
 			_get(Object.getPrototypeOf(RegexType.prototype), "init", this).apply(this, arguments);
 
 			// lastIndex is settable, all others are read-only attributes
-			this.defineOwnProperty("lastIndex", { value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true });
+			this.defineProperty("lastIndex", { value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true });
 
 			["source", "global", "ignoreCase", "multiline"].forEach(function (key) {
 				if (env.options.ecmaVersion > 5) {
@@ -21072,13 +21205,13 @@ var RegexType = exports.RegexType = (function (_ObjectType) {
 					};
 					var getterFunc = env.objectFactory.createGetter(getter, key);
 
-					_this2.defineOwnProperty(key, {
+					_this2.defineProperty(key, {
 						getter: getter,
 						get: getterFunc,
 						configurable: true
 					});
 				} else {
-					_this2.defineOwnProperty(key, { value: env.objectFactory.createPrimitive(_this2.source[key]) });
+					_this2.defineProperty(key, { value: env.objectFactory.createPrimitive(_this2.source[key]) });
 				}
 			});
 		}
@@ -21233,8 +21366,8 @@ var SymbolType = exports.SymbolType = (function (_ObjectType) {
 	}
 
 	_createClass(SymbolType, [{
-		key: "defineOwnProperty",
-		value: function defineOwnProperty(key, descriptor) {
+		key: "defineProperty",
+		value: function defineProperty(key, descriptor) {
 			return false;
 		}
 	}, {
@@ -21252,6 +21385,11 @@ var SymbolType = exports.SymbolType = (function (_ObjectType) {
 		value: function toString() {
 			// this method is here so symbols can be coerced into strings for property lookups
 			return "@@" + this.uid;
+		}
+	}, {
+		key: "toSymbolString",
+		value: function toSymbolString() {
+			return this.description ? "[" + this.description + "]" : "";
 		}
 	}], [{
 		key: "add",
@@ -21452,7 +21590,7 @@ function declare(env, leftNode, rightValue, kind) {
 					break;
 				}
 
-				left = env.createVariable(leftNode.name);
+				left = env.createVariable(leftNode.name, kind);
 
 				left.setValue(rightValue);
 				_context4.next = 43;
@@ -24013,7 +24151,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _marked = [CallExpression].map(regeneratorRuntime.mark);
 
-function assignThis(env, fnMember, fn, isNew, native) {
+function assignThis(env, fnMember, isNew, callee) {
+	if (callee.isSuper() || callee.object && callee.object.isSuper()) {
+		return env.getThisBinding();
+	}
+
 	if (isNew) {
 		return null;
 	}
@@ -24031,12 +24173,12 @@ function assignThis(env, fnMember, fn, isNew, native) {
 }
 
 function CallExpression(node, context, next) {
-	var isNew, fnMember, fn, args, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, arg, value, it, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, stringValue, native, thisArg, callee, result;
+	var isNew, fnMember, fn, args, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, arg, value, it, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, stringValue, thisArg, callee, result;
 
 	return regeneratorRuntime.wrap(function CallExpression$(_context) {
 		while (1) switch (_context.prev = _context.next) {
 			case 0:
-				isNew = node.isNewExpression();
+				isNew = node.isNewExpression() || node.callee.isSuper();
 				_context.next = 3;
 				return next(node.callee, context);
 
@@ -24172,19 +24314,18 @@ function CallExpression(node, context, next) {
 				throw TypeError(stringValue + " not a function");
 
 			case 62:
-				native = fn.native;
-				thisArg = assignThis(context.env, fnMember, fn, isNew, native);
+				thisArg = assignThis(context.env, fnMember, isNew, node.callee);
 				callee = fnMember;
 
 				callee.identifier = fn.name;
-				_context.next = 68;
+				_context.next = 67;
 				return fn[isNew ? "construct" : "call"](thisArg, args, callee);
 
-			case 68:
+			case 67:
 				result = _context.sent;
 				return _context.abrupt("return", context.result(result || _primitiveType.UNDEFINED));
 
-			case 70:
+			case 69:
 			case "end":
 				return _context.stop();
 		}
@@ -24662,47 +24803,410 @@ function FunctionDeclaration(node, context) {
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.default = FunctionExpression;
-function getName(node) {
-	if (node.name) {
-		return node.name;
-	}
+exports.FunctionExpression = FunctionExpression;
+exports.ClassDeclaration = ClassDeclaration;
 
-	if (node.id) {
-		return node.id.name;
-	}
+var _native = require("../utils/native");
 
-	if (node.isLiteral()) {
-		return node.value;
-	}
+var _primitiveType = require("../types/primitive-type");
 
-	var parent = node.getParent();
-	if (parent.isVariableDeclarator()) {
-		return getName(parent);
-	}
+var _marked = [getName, FunctionExpression, ClassDeclaration].map(regeneratorRuntime.mark);
 
-	if (parent.isProperty()) {
-		if (parent.kind === "get" || parent.kind === "set") {
-			return parent.kind + " " + getName(parent.key);
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+function getName(node, context, next) {
+	var parent, key, computedKey;
+	return regeneratorRuntime.wrap(function getName$(_context) {
+		while (1) switch (_context.prev = _context.next) {
+			case 0:
+				if (!node.name) {
+					_context.next = 2;
+					break;
+				}
+
+				return _context.abrupt("return", node.name);
+
+			case 2:
+				if (!node.id) {
+					_context.next = 4;
+					break;
+				}
+
+				return _context.abrupt("return", node.id.name);
+
+			case 4:
+				if (!node.isLiteral()) {
+					_context.next = 6;
+					break;
+				}
+
+				return _context.abrupt("return", node.value);
+
+			case 6:
+				parent = node.getParent();
+
+				if (!parent.isVariableDeclarator()) {
+					_context.next = 11;
+					break;
+				}
+
+				_context.next = 10;
+				return getName(parent, context, next);
+
+			case 10:
+				return _context.abrupt("return", _context.sent);
+
+			case 11:
+				if (!parent.isProperty()) {
+					_context.next = 29;
+					break;
+				}
+
+				key = undefined;
+
+				if (!parent.computed) {
+					_context.next = 23;
+					break;
+				}
+
+				_context.next = 16;
+				return next(parent.key, context);
+
+			case 16:
+				computedKey = _context.sent;
+				_context.next = 19;
+				return (0, _native.toPropertyKey)(computedKey.result.getValue());
+
+			case 19:
+				key = _context.sent;
+
+				if ((typeof key === "undefined" ? "undefined" : _typeof(key)) === "object" && key.isSymbol) {
+					key = key.toSymbolString();
+				}
+				_context.next = 26;
+				break;
+
+			case 23:
+				_context.next = 25;
+				return getName(parent.key, context, next);
+
+			case 25:
+				key = _context.sent;
+
+			case 26:
+				if (!(parent.kind === "get" || parent.kind === "set")) {
+					_context.next = 28;
+					break;
+				}
+
+				return _context.abrupt("return", parent.kind + " " + key);
+
+			case 28:
+				return _context.abrupt("return", key);
+
+			case 29:
+				return _context.abrupt("return", "");
+
+			case 30:
+			case "end":
+				return _context.stop();
 		}
+	}, _marked[0], this);
+}
 
-		return getName(parent.key);
+function setAccessors(target, descriptor) {
+	if (descriptor.get) {
+		descriptor.getter = regeneratorRuntime.mark(function _callee() {
+			return regeneratorRuntime.wrap(function _callee$(_context2) {
+				while (1) {
+					switch (_context2.prev = _context2.next) {
+						case 0:
+							_context2.next = 2;
+							return descriptor.get.call(this);
+
+						case 2:
+							return _context2.abrupt("return", _context2.sent);
+
+						case 3:
+						case "end":
+							return _context2.stop();
+					}
+				}
+			}, _callee, this);
+		});
 	}
 
-	return "";
+	if (descriptor.set) {
+		descriptor.setter = regeneratorRuntime.mark(function _callee2(value) {
+			return regeneratorRuntime.wrap(function _callee2$(_context3) {
+				while (1) {
+					switch (_context3.prev = _context3.next) {
+						case 0:
+							_context3.next = 2;
+							return descriptor.set.call(this, [value]);
+
+						case 2:
+						case "end":
+							return _context3.stop();
+					}
+				}
+			}, _callee2, this);
+		});
+	}
+
+	target.defineProperty(descriptor.key, descriptor);
 }
 
-function FunctionExpression(node, context) {
-	var objectFactory = context.env.objectFactory;
-	var strict = context.env.isStrict() || node.body.isStrict();
-	var func = objectFactory.createFunction(node, undefined, { strict: strict, name: getName(node) });
+function FunctionExpression(node, context, next) {
+	var objectFactory, strict, name, func;
+	return regeneratorRuntime.wrap(function FunctionExpression$(_context4) {
+		while (1) switch (_context4.prev = _context4.next) {
+			case 0:
+				objectFactory = context.env.objectFactory;
+				strict = context.env.isStrict() || node.body.isStrict();
+				_context4.next = 4;
+				return getName(node, context, next);
 
-	func.bindScope(context.env.current);
+			case 4:
+				name = _context4.sent;
+				func = objectFactory.createFunction(node, undefined, { strict: strict, name: name });
 
-	return context.result(func);
+				func.bindScope(context.env.current);
+
+				if (node.isArrowFunctionExpression()) {
+					func.bindThis(context.env.getThisBinding());
+				}
+
+				return _context4.abrupt("return", context.result(func));
+
+			case 9:
+			case "end":
+				return _context4.stop();
+		}
+	}, _marked[1], this);
 }
 
-},{}],410:[function(require,module,exports){
+function findOrCreate(arr, key, isStatic) {
+	var i = arr.length;
+	while (i--) {
+		var current = arr[i];
+		if (current.key === key && current.isStatic === isStatic) {
+			return current;
+		}
+	}
+
+	var entry = { enumerable: false, configurable: true, key: key, isStatic: isStatic };
+	arr.push(entry);
+	return entry;
+}
+
+function ClassDeclaration(node, context, next) {
+	var objectFactory, props, ctor, proto, parent, parentProto, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, method, kind, key, homeObject, computedKey, _name, entry, _entry, fn, name, def;
+
+	return regeneratorRuntime.wrap(function ClassDeclaration$(_context6) {
+		while (1) switch (_context6.prev = _context6.next) {
+			case 0:
+				objectFactory = context.env.objectFactory;
+				props = [];
+				ctor = undefined, proto = undefined, parent = undefined, parentProto = undefined;
+
+				if (!node.superClass) {
+					_context6.next = 9;
+					break;
+				}
+
+				_context6.next = 6;
+				return next(node.superClass, context);
+
+			case 6:
+				parent = _context6.sent.result.getValue();
+
+				parentProto = parent.getValue("prototype");
+
+				proto = objectFactory.createObject(parent === _primitiveType.NULL ? null : parent);
+
+			case 9:
+
+				proto = proto || objectFactory.createObject();
+
+				_iteratorNormalCompletion = true;
+				_didIteratorError = false;
+				_iteratorError = undefined;
+				_context6.prev = 13;
+				_iterator = node.body.body[Symbol.iterator]();
+
+			case 15:
+				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+					_context6.next = 46;
+					break;
+				}
+
+				method = _step.value;
+				kind = method.kind;
+				key = method.key.name;
+				homeObject = method.static ? parent : parentProto;
+
+				if (!(method.computed || method.key.isLiteral())) {
+					_context6.next = 27;
+					break;
+				}
+
+				_context6.next = 23;
+				return next(method.key, context);
+
+			case 23:
+				computedKey = _context6.sent;
+				_context6.next = 26;
+				return (0, _native.toPropertyKey)(computedKey.result.getValue());
+
+			case 26:
+				key = _context6.sent;
+
+			case 27:
+				_name = (typeof key === "undefined" ? "undefined" : _typeof(key)) === "object" && key.isSymbol ? key.toSymbolString() : key;
+				_context6.t0 = kind;
+				_context6.next = _context6.t0 === "constructor" ? 31 : _context6.t0 === "get" ? 33 : _context6.t0 === "set" ? 33 : 36;
+				break;
+
+			case 31:
+				ctor = method.value;
+				return _context6.abrupt("break", 43);
+
+			case 33:
+				entry = findOrCreate(props, key, method.static);
+
+				entry[kind] = objectFactory.createFunction(method.value, null, { strict: true, name: kind + " " + _name, homeObject: homeObject });
+				return _context6.abrupt("break", 43);
+
+			case 36:
+				if (!method.static) {
+					_context6.next = 40;
+					break;
+				}
+
+				_entry = findOrCreate(props, key, true);
+
+				_entry.value = objectFactory.createFunction(method.value, null, { strict: true, name: _name, homeObject: homeObject });
+				return _context6.abrupt("break", 43);
+
+			case 40:
+				fn = objectFactory.createFunction(method.value, null, { strict: true, name: _name, homeObject: homeObject });
+
+				proto.define(key, fn);
+				return _context6.abrupt("break", 43);
+
+			case 43:
+				_iteratorNormalCompletion = true;
+				_context6.next = 15;
+				break;
+
+			case 46:
+				_context6.next = 52;
+				break;
+
+			case 48:
+				_context6.prev = 48;
+				_context6.t1 = _context6["catch"](13);
+				_didIteratorError = true;
+				_iteratorError = _context6.t1;
+
+			case 52:
+				_context6.prev = 52;
+				_context6.prev = 53;
+
+				if (!_iteratorNormalCompletion && _iterator.return) {
+					_iterator.return();
+				}
+
+			case 55:
+				_context6.prev = 55;
+
+				if (!_didIteratorError) {
+					_context6.next = 58;
+					break;
+				}
+
+				throw _iteratorError;
+
+			case 58:
+				return _context6.finish(55);
+
+			case 59:
+				return _context6.finish(52);
+
+			case 60:
+
+				ctor = ctor || regeneratorRuntime.mark(function _callee3() {
+					var instance,
+					    _args5 = arguments;
+					return regeneratorRuntime.wrap(function _callee3$(_context5) {
+						while (1) {
+							switch (_context5.prev = _context5.next) {
+								case 0:
+									instance = objectFactory.createObject(null);
+
+									if (!parent) {
+										_context5.next = 4;
+										break;
+									}
+
+									_context5.next = 4;
+									return parent.construct(instance, _args5);
+
+								case 4:
+
+									instance.setPrototype(proto);
+									return _context5.abrupt("return", instance);
+
+								case 6:
+								case "end":
+									return _context5.stop();
+							}
+						}
+					}, _callee3, this);
+				});
+
+				_context6.next = 63;
+				return getName(node, context, next);
+
+			case 63:
+				name = _context6.sent;
+				def = objectFactory.createClass(ctor, proto, { name: name, homeObject: parent });
+
+				props.forEach(function (entry) {
+					var target = entry.isStatic ? def : proto;
+					setAccessors(target, entry);
+				});
+
+				// statics.forEach(entry => def.define(entry.key, entry.func));
+
+				// if (name) {
+				// 	context.env.createVariable(name).setValue(def);
+
+				// 	def.name = name;
+				// 	def.defineProperty("name", { value: objectFactory.createPrimitive(name), configurable: true }, true, context.env);
+				// }
+
+				if (!node.isClassDeclaration()) {
+					_context6.next = 69;
+					break;
+				}
+
+				context.env.getVariable(name).init(def);
+				// context.env.createVariable(name, "class").setValue(def);
+				return _context6.abrupt("return", context.empty());
+
+			case 69:
+				return _context6.abrupt("return", context.result(def));
+
+			case 70:
+			case "end":
+				return _context6.stop();
+		}
+	}, _marked[2], this, [[13, 48, 52, 60], [53,, 55, 59]]);
+}
+
+},{"../types/primitive-type":383,"../utils/native":393}],410:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -24710,11 +25214,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = Identifier;
 function Identifier(node, context) {
-	var name = node.name;
+	// let name = node.name;
 
-	if (context.callee && context.callee.identifier === name) {
-		return context.result(context.callee);
-	}
+	// if (context.callee && context.callee.identifier === name) {
+	// 	return context.result(context.callee);
+	// }
 
 	return context.result(context.env.getReference(node.name));
 }
@@ -24845,8 +25349,6 @@ var _functionDeclaration2 = _interopRequireDefault(_functionDeclaration);
 
 var _functionExpression = require("./function-expression");
 
-var _functionExpression2 = _interopRequireDefault(_functionExpression);
-
 var _identifier = require("./identifier");
 
 var _identifier2 = _interopRequireDefault(_identifier);
@@ -24886,6 +25388,10 @@ var _sequenceExpression2 = _interopRequireDefault(_sequenceExpression);
 var _spreadElement = require("./spread-element");
 
 var _spreadElement2 = _interopRequireDefault(_spreadElement);
+
+var _super = require("./super");
+
+var _super2 = _interopRequireDefault(_super);
 
 var _switchStatement = require("./switch-statement");
 
@@ -24940,6 +25446,7 @@ var visitors = exports.visitors = {
 	BlockStatement: _blockStatement2.default,
 	BreakStatement: _interruptStatement2.default,
 	CallExpression: _callExpression2.default,
+	ClassDeclaration: _functionExpression.ClassDeclaration,
 	ConditionalExpression: _ifStatement2.default,
 	DebuggerStatement: _debuggerStatement2.default,
 	DoWhileStatement: _doWhileStatement2.default,
@@ -24949,7 +25456,7 @@ var visitors = exports.visitors = {
 	ForInStatement: _forInStatement2.default,
 	ForOfStatement: _forOfStatement2.default,
 	FunctionDeclaration: _functionDeclaration2.default,
-	FunctionExpression: _functionExpression2.default,
+	FunctionExpression: _functionExpression.FunctionExpression,
 	Identifier: _identifier2.default,
 	LabeledStatement: _labeledStatement2.default,
 	Literal: _literal2.default,
@@ -24960,6 +25467,7 @@ var visitors = exports.visitors = {
 	ReturnStatement: _returnStatement2.default,
 	SequenceExpression: _sequenceExpression2.default,
 	SpreadElement: _spreadElement2.default,
+	Super: _super2.default,
 	SwitchStatement: _switchStatement2.default,
 	TaggedTemplateExpression: _taggedTemplateExpression2.default,
 	TemplateLiteral: _templateLiteral2.default,
@@ -24972,7 +25480,8 @@ var visitors = exports.visitors = {
 	VariableDeclarator: _variableDeclarator2.default,
 	WithStatement: _withStatement2.default,
 
-	ArrowFunctionExpression: _functionExpression2.default,
+	ArrowFunctionExpression: _functionExpression.FunctionExpression,
+	ClassExpression: _functionExpression.ClassDeclaration,
 	ContinueStatement: _interruptStatement2.default,
 	IfStatement: _ifStatement2.default,
 	NewExpression: _callExpression2.default,
@@ -24980,7 +25489,7 @@ var visitors = exports.visitors = {
 	WhileStatement: _doWhileStatement2.default
 };
 
-},{"./array-expression":396,"./assignment-expression":397,"./binary-expression":398,"./block-statement":399,"./call-expression":400,"./debugger-statement":401,"./do-while-statement.js":402,"./empty-statement":403,"./expression-statement":404,"./for-in-statement":405,"./for-of-statement":406,"./for-statement":407,"./function-declaration":408,"./function-expression":409,"./identifier":410,"./if-statement":411,"./interrupt-statement":413,"./labeled-statement":414,"./literal":415,"./logical-expression":416,"./member-expression":417,"./meta-property":418,"./object-expression":419,"./return-statement":420,"./sequence-expression":421,"./spread-element":422,"./switch-statement":423,"./tagged-template-expression":424,"./template-literal":425,"./this-expression":426,"./throw-statement":427,"./try-statement":428,"./unary-expression":429,"./update-expression":430,"./variable-declaration":431,"./variable-declarator":432,"./with-statement":433}],413:[function(require,module,exports){
+},{"./array-expression":396,"./assignment-expression":397,"./binary-expression":398,"./block-statement":399,"./call-expression":400,"./debugger-statement":401,"./do-while-statement.js":402,"./empty-statement":403,"./expression-statement":404,"./for-in-statement":405,"./for-of-statement":406,"./for-statement":407,"./function-declaration":408,"./function-expression":409,"./identifier":410,"./if-statement":411,"./interrupt-statement":413,"./labeled-statement":414,"./literal":415,"./logical-expression":416,"./member-expression":417,"./meta-property":418,"./object-expression":419,"./return-statement":420,"./sequence-expression":421,"./spread-element":422,"./super":423,"./switch-statement":424,"./tagged-template-expression":425,"./template-literal":426,"./this-expression":427,"./throw-statement":428,"./try-statement":429,"./unary-expression":430,"./update-expression":431,"./variable-declaration":432,"./variable-declarator":433,"./with-statement":434}],413:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25175,8 +25684,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = MetaProperty;
 function MetaProperty(node, context) {
-	if (node.meta.name === "new" && node.property.name === "target" && context.isNew) {
-		return context.result(context.callee);
+	if (node.meta.name === "new" && node.property.name === "target" && context.newTarget) {
+		return context.result(context.newTarget);
 	}
 
 	return context.empty();
@@ -25242,22 +25751,31 @@ function setDescriptor(env, obj, descriptor) {
 		});
 	}
 
-	obj.defineOwnProperty(descriptor.key, descriptor);
+	obj.defineProperty(descriptor.key, descriptor);
 }
 
-function createDescriptor(key, value) {
-	return { key: key, value: value, configurable: true, enumerable: true, writable: true };
+function findOrCreateDescriptor(arr, key) {
+	var i = arr.length;
+	while (i--) {
+		if (arr[i] === key) {
+			return arr[i];
+		}
+	}
+
+	var descriptor = { configurable: true, enumerable: true, key: key };
+	arr.push(descriptor);
+	return descriptor;
 }
 
 function ObjectExpression(node, context, next) {
-	var obj, descriptors, prop;
+	var obj, descriptors;
 	return regeneratorRuntime.wrap(function ObjectExpression$(_context4) {
 		while (1) switch (_context4.prev = _context4.next) {
 			case 0:
 				obj = context.env.objectFactory.createObject();
-				descriptors = Object.create(null);
+				descriptors = [];
 				return _context4.delegateYield((0, _async.each)(node.properties, regeneratorRuntime.mark(function _callee3(property) {
-					var value, key, keyValue;
+					var value, key, keyValue, descriptor;
 					return regeneratorRuntime.wrap(function _callee3$(_context3) {
 						while (1) {
 							switch (_context3.prev = _context3.next) {
@@ -25291,20 +25809,21 @@ function ObjectExpression(node, context, next) {
 									key = property.key.name || property.key.value;
 
 								case 14:
+									descriptor = findOrCreateDescriptor(descriptors, key);
 									_context3.t0 = property.kind;
-									_context3.next = _context3.t0 === "get" ? 17 : _context3.t0 === "set" ? 17 : 20;
+									_context3.next = _context3.t0 === "get" ? 18 : _context3.t0 === "set" ? 18 : 20;
 									break;
 
-								case 17:
-									descriptors[key] = descriptors[key] || createDescriptor(key);
-									descriptors[key][property.kind] = value;
-									return _context3.abrupt("break", 22);
+								case 18:
+									descriptor[property.kind] = value;
+									return _context3.abrupt("break", 23);
 
 								case 20:
-									obj.defineOwnProperty(key, createDescriptor(key, value));
-									return _context3.abrupt("break", 22);
+									descriptor.value = value;
+									descriptor.writable = true;
+									return _context3.abrupt("break", 23);
 
-								case 22:
+								case 23:
 								case "end":
 									return _context3.stop();
 							}
@@ -25314,9 +25833,12 @@ function ObjectExpression(node, context, next) {
 
 			case 3:
 
-				for (prop in descriptors) {
-					setDescriptor(context.env, obj, descriptors[prop]);
-				}
+				descriptors.forEach(function (desc) {
+					return setDescriptor(context.env, obj, desc);
+				});
+				// for (let prop in descriptors) {
+				// 	setDescriptor(context.env, obj, descriptors[prop]);
+				// }
 
 				return _context4.abrupt("return", context.result(obj));
 
@@ -25423,10 +25945,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = SpreadElement;
 
+var _symbolType = require("../types/symbol-type");
+
+var _native = require("../utils/native");
+
 var _marked = [SpreadElement].map(regeneratorRuntime.mark);
 
 function SpreadElement(node, context, next) {
-	var args;
+	var args, iteratorKey, iterable;
 	return regeneratorRuntime.wrap(function SpreadElement$(_context) {
 		while (1) switch (_context.prev = _context.next) {
 			case 0:
@@ -25435,16 +25961,53 @@ function SpreadElement(node, context, next) {
 
 			case 2:
 				args = _context.sent;
-				return _context.abrupt("return", context.result(args.result));
+				iteratorKey = _symbolType.SymbolType.getByKey("iterator");
+				iterable = args.result.getValue();
 
-			case 4:
+				if (iterable.has(iteratorKey)) {
+					_context.next = 12;
+					break;
+				}
+
+				_context.next = 8;
+				return (0, _native.toString)(iterable);
+
+			case 8:
+				_context.t0 = _context.sent;
+				_context.t1 = "Object " + _context.t0;
+				_context.t2 = _context.t1 + " cannot be spread because it is not iterable";
+				throw TypeError(_context.t2);
+
+			case 12:
+				return _context.abrupt("return", context.result(iterable));
+
+			case 13:
 			case "end":
 				return _context.stop();
 		}
 	}, _marked[0], this);
 }
 
-},{}],423:[function(require,module,exports){
+},{"../types/symbol-type":388,"../utils/native":393}],423:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.default = Super;
+function Super(node, context) {
+	var homeObject = context.callee.getValue().homeObject;
+
+	if (homeObject && context.newTarget && !node.getParent().isCallExpression()) {
+		// accessing `super` in a constructor without calling as function refers to prototype
+		// todo: confirm this
+		homeObject = homeObject.getValue("prototype");
+	}
+
+	return context.result(homeObject || context.env.getThisBinding());
+}
+
+},{}],424:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25636,7 +26199,7 @@ function SwitchStatement(node, context, next) {
 	}, _marked[1], this, [[8, 35, 39, 47], [40,, 42, 46]]);
 }
 
-},{"../utils/async":390}],424:[function(require,module,exports){
+},{"../utils/async":390}],425:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25672,7 +26235,7 @@ function buildTemplateObject(env, node) {
 	}
 
 	raw.freeze();
-	tag.defineOwnProperty("raw", { value: raw });
+	tag.defineProperty("raw", { value: raw });
 	tag.freeze();
 
 	return templateObjectCache[key] = tag;
@@ -25728,7 +26291,7 @@ function TaggedTemplateExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":390}],425:[function(require,module,exports){
+},{"../utils/async":390}],426:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25795,7 +26358,7 @@ function TemplateLiteral(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":390,"../utils/native":393}],426:[function(require,module,exports){
+},{"../utils/async":390,"../utils/native":393}],427:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25814,7 +26377,7 @@ function ThisExpression(node, context) {
 	return context.result(thisArg);
 }
 
-},{"../utils/contracts":391}],427:[function(require,module,exports){
+},{"../utils/contracts":391}],428:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25843,7 +26406,7 @@ function ThrowStatement(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{}],428:[function(require,module,exports){
+},{}],429:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26014,7 +26577,7 @@ function TryStatement(node, context, next) {
 	}, _marked[2], this);
 }
 
-},{"../utils/assign":389,"../utils/async":390}],429:[function(require,module,exports){
+},{"../utils/assign":389,"../utils/async":390}],430:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26157,7 +26720,7 @@ function UnaryExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../env/property-reference":196,"../env/reference":197,"../utils/native":393}],430:[function(require,module,exports){
+},{"../env/property-reference":196,"../env/reference":197,"../utils/native":393}],431:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26214,7 +26777,7 @@ function UpdateExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/contracts":391,"../utils/native":393}],431:[function(require,module,exports){
+},{"../utils/contracts":391,"../utils/native":393}],432:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26257,7 +26820,7 @@ function VariableDeclaration(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":390}],432:[function(require,module,exports){
+},{"../utils/async":390}],433:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26318,7 +26881,7 @@ function VariableDeclarator(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../types/primitive-type":383,"../utils/assign":389}],433:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/assign":389}],434:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
