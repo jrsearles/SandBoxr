@@ -1,4 +1,4 @@
-import {isInteger} from "../utils/contracts";
+import {isInteger} from "../utils/native";
 
 const ASCENDING = (a, b) => a - b;
 const DESCENDING = (a, b) => b - a;

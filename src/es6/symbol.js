@@ -1,6 +1,7 @@
 import {toString} from "../utils/native";
 import {SymbolType} from "../types/symbol-type";
-import {assertIsNotGeneric, isUndefined} from "../utils/contracts";
+import {assertIsNotGeneric} from "../utils/contracts";
+import {isUndefined} from "../utils/checks";
 
 export default function (globalObject, env, factory) {
 	let frozen = {configurable: false, enumerable: false, writable: false};
@@ -52,5 +53,14 @@ export default function (globalObject, env, factory) {
 	let toStringTagSymbol = SymbolType.getByKey("toStringTag");
 	proto.define(toStringTagSymbol, factory.createPrimitive("Symbol"), {writable: false});
 
+	let toPrimitiveKey = SymbolType.getByKey("toPrimitive");
+	proto.define(toPrimitiveKey, factory.createBuiltInFunction(function () {
+		if (this.object.className !== "Symbol") {
+			throw TypeError("[Symbol.toPrimitive] called on non-object");
+		}
+		
+		return this.object;
+	}, 1, "[Symbol.toPrimitive]"), {writable: false});
+	
 	globalObject.define("Symbol", symbolClass);
 }

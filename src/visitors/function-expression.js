@@ -64,7 +64,12 @@ export function* FunctionExpression (node, context, next) {
 	let strict = context.env.isStrict() || node.body.isStrict();
 	let name = yield getName(node, context, next);
 	
-	let func = objectFactory.createFunction(node, undefined, {strict, name});
+	let proto = null;
+	if (!node.isArrowFunctionExpression()) {
+		proto = objectFactory.createObject();
+	}
+	
+	let func = objectFactory.createFunction(node, proto, {strict, name});
 	func.bindScope(context.env.current);
 	
 	if (node.isArrowFunctionExpression()) {

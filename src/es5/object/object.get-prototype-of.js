@@ -4,7 +4,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("getPrototypeOf", factory.createBuiltInFunction(function (obj) {
-		if (!confirmObject(obj, "Object.getPrototypeOf")) {
+		if (!confirmObject(obj, "Object.getPrototypeOf", env.options)) {
 			obj = toObject(obj, true);
 		}
 

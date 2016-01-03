@@ -1,7 +1,7 @@
 import {exhaust as x} from "../utils/async";
 import {UNDEFINED, NULL} from "../types/primitive-type";
 import {toString, toUInt32} from "../utils/native";
-import {isFunction, isUndefined} from "../utils/contracts";
+import {isFunction, isUndefined} from "../utils/checks";
 
 export default function (globalObject, env, factory) {
 	let regexClass = globalObject.getValue("RegExp");

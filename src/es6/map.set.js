@@ -1,4 +1,5 @@
-import {assertIsMap, isNegativeZero} from "../utils/contracts";
+import {assertIsMap} from "../utils/contracts";
+import {isNegativeZero} from "../utils/checks";
 import {findIndex} from "./collection-helpers";
 
 export default function ($target, env, factory) {

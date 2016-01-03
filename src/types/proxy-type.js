@@ -1,6 +1,7 @@
 import {ObjectType} from "./object-type";
 import {UNDEFINED} from "./primitive-type";
-import {isUndefined, assertIsFunction, isObject, isNull} from "../utils/contracts";
+import {isUndefined, isObject, isNull} from "../utils/checks";
+import {assertIsFunction} from "../utils/contracts";
 import {exhaust as x} from "../utils/async";
 import {toBoolean, toArray} from "../utils/native";
 import {PropertyDescriptor} from "./property-descriptor";
@@ -154,7 +155,8 @@ export class ProxyType extends ObjectType {
 	}
 
 	owns (key) {
-		return this.target.owns(key);
+		return !!this.getOwnProperty(key);
+		// return this.target.owns(key);
 	}
 
 	getProperty (key, target) {

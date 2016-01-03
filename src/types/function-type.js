@@ -1,7 +1,7 @@
 import {ObjectType} from "./object-type";
 import {PropertyDescriptor} from "./property-descriptor";
 import {UNDEFINED} from "./primitive-type";
-import {isNullOrUndefined, isObject} from "../utils/contracts";
+import {isNullOrUndefined, isObject} from "../utils/checks";
 
 function getParameterLength (params) {
 	for (let i = 0, ln = params.length; i < ln; i++) {
@@ -22,12 +22,20 @@ function* execute (func, thisArg, args, callee, newTarget) {
 	yield scope.loadArgs(func.node.params, args || [], func);
 	scope.init(func.node);
 	
+	if (newTarget) {
+		scope.setMeta("newTarget", newTarget);
+	}
+	
+	if (func.homeObject) {
+		scope.setMeta("super", func.homeObject);
+	}
+	
 	if (func.node.id) {
 		env.createVariable(func.node.id.name).setValue(func);
 	}
 
 	return yield* scope.use(function* () {
-		let context = func.arrow ? env.currentExecutionContext : env.createExecutionContext(thisArg, callee, newTarget);
+		let context = env.createExecutionContext(thisArg, callee, newTarget);
 		return yield context.execute(func.node.body, callee);
 	});	
 }
@@ -63,9 +71,9 @@ export class FunctionType extends ObjectType {
 		}
 
 		// set length property from the number of parameters
-		this.defineProperty("length", {value: env.objectFactory.createPrimitive(getParameterLength(this.node.params))});
+		this.setLength(getParameterLength(this.node.params));
 
-		if (!this.arrow && proto !== null) {
+		if (proto !== null) {
 			// functions have a prototype
 			proto = proto || env.objectFactory.createObject();
 			this.defineProperty("prototype", {value: proto, writable: true});
@@ -75,6 +83,14 @@ export class FunctionType extends ObjectType {
 		}
 
 		this.addPoison();
+	}
+	
+	setLength (length) {
+		let env = this[Symbol.for("env")];
+		let value = env.objectFactory.createPrimitive(length);
+		let configurable = env.options.ecmaVersion > 5;
+
+		this.defineProperty("length", {value, configurable});		
 	}
 
 	addPoison () {
@@ -110,7 +126,7 @@ export class FunctionType extends ObjectType {
 		}
 		
 		let executionResult = yield execute(this, thisArg, args, callee);
-		let shouldReturn = this.arrow || (executionResult && executionResult.exit);
+		let shouldReturn = (this.arrow && !this.node.body.isBlockStatement()) || (executionResult && executionResult.exit);
 
 		if (shouldReturn && executionResult.result) {
 			return executionResult.result;
@@ -120,6 +136,10 @@ export class FunctionType extends ObjectType {
 	}
 
 	*construct (thisArg, args, callee) {
+		if (this.node.isArrowFunctionExpression()) {
+			throw TypeError(`Function ${this.name} is not a constructor.a`);
+		}
+		
 		let target = (callee || this).getValue();
 		
 		if (!thisArg || thisArg === this) {

@@ -1,4 +1,5 @@
-import {assertIsObject, assertIsFunction, isNullOrUndefined} from "../utils/contracts";
+import {assertIsObject, assertIsFunction} from "../utils/contracts";
+import {isNullOrUndefined} from "../utils/checks";
 import {UNDEFINED} from "../types/primitive-type";
 import iterate from "../iterators/";
 

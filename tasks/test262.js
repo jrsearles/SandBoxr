@@ -49,23 +49,25 @@ gulp.task("test262-6", ["build"], function () {
 
 
 	// built-ins
-	//	- Object -41
+	//	- Object -20
 	//	- Number -1 (needs typed arrays)
 	//	- Boolean +
-	//	- Array -21
-	//	- Date -8
+	//	- String -10
+	//	- Array -10
+	//	- Date -16
+	//	- Map -10 (needs WeakMap)
+	//	- MapIteratorPrototype +
+	//	- Set -7 (needs WeakSet)
+	//	- SetIteratorPrototype +
 	//	- undefined +
-	//	- Symbol -2
-	//	- String -2
+	//	- Reflect +		
+	//	- Symbol -4
 	//	- Error +
+	
 	//	- Proxy +
-	//	- Reflect +
-	//	- Map -11 (needs WeakMap)
-	//	- MapIterator +
-	//	- Set -8 (needs WeakSet)
-	//	- SetIterator +
 
-	return streamer6({ files: ["/language/expressions/arrow-function/**/*.js"] })
+
+	return streamer6({ files: ["/built-ins/Proxy/**/*.js"] })
 		.pipe(through.obj(function (file, enc, cb) {
 			var filename = path.basename(file.path);
 

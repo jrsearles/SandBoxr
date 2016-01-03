@@ -14,7 +14,7 @@ export default function (globalObject, env, factory) {
 		obj.define("proxy", proxy);
 		obj.define("revoke", factory.createBuiltInFunction(function () {
 			proxy.revoke();
-		}, 0, "revoke"));
+		}, 0));
 
 		return obj;
 	}, 2, "Proxy.revocable"));

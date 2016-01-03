@@ -1,6 +1,8 @@
 import ecma5 from "../es5/";
 import $Number from "./number";
 import $Array from "./array";
+import $Date from "./date";
+import $Error from "./error";
 import $Object from "./object";
 import $Symbol from "./symbol";
 import $String from "./string";
@@ -24,6 +26,8 @@ export default function (env) {
 	$String($global, env, objectFactory);
 	$Array($global, env, objectFactory);
 	$Number($global, env, objectFactory);
+	$Date($global, env, objectFactory);
+	$Error($global, env, objectFactory);
 	$Math($global, env, objectFactory);
 	$Proxy($global, env, objectFactory);
 	$RegExp($global, env, objectFactory);
@@ -34,22 +38,22 @@ export default function (env) {
 	// setup class symbols
 	let stringTagKey = env.getSymbol("toStringTag");
 	let speciesKey = env.getSymbol("species");
-	["Function", "Number", "Boolean", "Object", "Array", "String", "Date", "RegExp", "JSON", "Error", "Math", "Map", "Set"].forEach(typeName => {
+	
+	["RegExp", "Array", "Map", "Set"].forEach(typeName => {
 		let ctor = $global.getValue(typeName);
 
 		let speciesGetter = function () { return ctor; };
 		let speciesGetterFunc = objectFactory.createGetter(speciesGetter, "[Symbol.species]");
-		ctor.define(speciesKey, null, {getter: speciesGetter, get: speciesGetterFunc});
-
-		if (ctor.owns("prototype")) {
-			let proto = ctor.getValue("prototype");
-			// proto.define(stringTagKey, objectFactory.createPrimitive(typeName), { writable: false });
-
-			// prototypes in ES6 can't be coerced into primitives
-			proto.className = "Object";
-		} else {
-			ctor.define(stringTagKey, objectFactory.createPrimitive(typeName), {writable: false});
+		ctor.define(speciesKey, null, {getter: speciesGetter, get: speciesGetterFunc});		
+	});
+	
+	["JSON", "Math", "Map", "Set"].forEach(typeName => {
+		let obj = $global.getValue(typeName);
+		if (obj.has("prototype")) {
+			obj = obj.getValue("prototype");
 		}
+		
+		obj.define(stringTagKey, objectFactory.createPrimitive(typeName), {writable: false});
 	});
 
 	// update length attributes on built-ins

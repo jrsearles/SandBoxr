@@ -2,14 +2,14 @@
 
 [![NPM Version](https://img.shields.io/npm/v/sandboxr.svg)](https://www.npmjs.org/package/sandboxr)
 
-> A fully compliant [5.1 ECMAScript](http://www.ecma-international.org/ecma-262/5.1/index.html) runner. _SandBoxr_ runs JavaScript in a sandboxed environment.
+> A fully compliant [5.1 ECMAScript](http://www.ecma-international.org/ecma-262/5.1/index.html) runner. (And mostly [6.0 ECMAScript compliant](es6-kangax-compat.md) _SandBoxr_ runs JavaScript in a sandboxed environment.
 -----
 
 ## Purpose
 
-The purpose of this library is to safely allow user generated code to be run in isolation. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary usage is targetted towards the browser, though it works in non-browser environments as well.
+The purpose of this library is to safely allow user generated code to be run in isolation. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary usage is targetted towards the browser, though it works in server environments as well. The library works by evaluating a [ESTree](https://github.com/estree/estree) compliant syntax tree against a virtual environment.
 
-This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). Upon discovering the [Test 262 conformance suite](https://github.com/tc39/test262) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
+This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). Leveraging the [Test 262 conformance suite](https://github.com/tc39/test262) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
 
 -----
 
@@ -33,10 +33,10 @@ Vanilla usage without any customization, will run the code with full ES5.1 suppo
 // pass in the parsed syntax tree into the create method
 var sandbox = SandBoxr.create(ast);
 
-// execute the code, which returns a promise
+// execute the code, which returns the result
 var result = sandbox.execute();
 	
-// get the value
+// get the native value
 var nativeValue = result.toNative();
 ```
 
@@ -151,6 +151,7 @@ foo.setValue(fooFunc);
 ### What this library does not do...
 - **"Fix" JavaScript.** All those quirks you love to hate are kept intact. (To come will be extension points so that you can, if you so chose, alter aspects of JavaScript's implementation, for example for equality.)
 - **Run "safe" code.** This library does not protect you from writing bad code. If you write a circular loop, expect a stack overflow.
+- **Transpile code.** Code is not transpiled into another format - instead the syntax tree is evaluated. 
 - **Verify syntax.** This library expects a valid syntax tree. The syntax should be verified when parsed. If the syntax tree is malformed expect unexected results.
 - **Parse JavaScript** This library must be provided an abstract syntax tree compliant with [ESTree](https://github.com/estree/estree). Parser's supported include [Acorn](https://github.com/marijnh/acorn) and [Esprima](https://github.com/jquery/esprima).
 - **Support HTML manipulation** This library does not have access to the browser environment - `document` does not exist. This is a *feature*.

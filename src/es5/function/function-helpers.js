@@ -1,5 +1,5 @@
 import {UNDEFINED} from "../../types/primitive-type";
-import {isNullOrUndefined} from "../../utils/contracts";
+import {isNullOrUndefined} from "../../utils/checks";
 import {toObject} from "../../utils/native";
 
 export function defineThis (env, fn, thisArg) {

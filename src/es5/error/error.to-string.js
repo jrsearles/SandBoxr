@@ -1,5 +1,5 @@
 import {toString} from "../../utils/native";
-import {isUndefined} from "../../utils/contracts";
+import {isUndefined} from "../../utils/checks";
 
 export default function ($target, env, factory) {
 	$target.define("toString", factory.createBuiltInFunction(function* () {

@@ -1,6 +1,6 @@
 import {PrimitiveType} from "./primitive-type";
 import {PropertyDescriptor} from "./property-descriptor";
-import {isInteger} from "../utils/contracts";
+import {isInteger} from "../utils/native";
 
 const charAttrs = {writable: false, enumerable: true, configurable: false};
 

@@ -10,6 +10,8 @@ export class DeclarativeEnvironment {
 		this.env = env;
 		this.strict = strict;
 		this.block = !!block;
+		
+		this.meta = Object.create(null);
 	}
 	
 	createChildScope () {

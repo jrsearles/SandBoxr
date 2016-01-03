@@ -1,7 +1,7 @@
 import {toBoolean} from "../utils/native";
 import {exhaust as x} from "../utils/async";
 import {UNDEFINED} from "../types/primitive-type";
-import {getMethod} from "../utils/func";
+import {getMethod} from "../utils/helpers";
 
 export default class IterableIterator {
 	constructor (it) {

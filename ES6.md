@@ -4,19 +4,19 @@ The following ES6 features are implemented fully or partially.
 - [x] Assignment destructuring
 - [x] Rest Parameters
 - [x] Default Values
-- [ ] Spread Operator
+- [x] Spread Operator
 - [x] Arrow Functions
 - [x] Template Literals
 - [x] Object Literals
-	- [ ] Computed Property Names
+	- [x] Computed Property Names
 	- [x] Property shorthand
-- [ ] Classes
-- [ ] Let
-- [ ] Const
+- [x] Classes
+- [x] Let
+- [x] Const
 - Modules
 	- [ ] import
 	- [ ] export
-- [ ] For-of
+- [x] For-of
 	
 ## Built Ins
 - [ ] Generator

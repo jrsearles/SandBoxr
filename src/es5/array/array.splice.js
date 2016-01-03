@@ -1,4 +1,5 @@
 import {toLength, toInteger} from "../../utils/native";
+import {createDataProperty} from "../../utils/helpers";
 
 export default function ($target, env, factory) {
 	$target.define("splice", factory.createBuiltInFunction(function* (start, deleteCount, ...elements) {
@@ -11,19 +12,23 @@ export default function ($target, env, factory) {
 			start = Math.min(start, length);
 		}
 
-		deleteCount = yield toInteger(deleteCount);
-		if (deleteCount < 0) {
-			deleteCount = 0;
+		if (deleteCount) {
+			deleteCount = yield toInteger(deleteCount);
+			if (deleteCount < 0) {
+				deleteCount = 0;
+			} else {
+				deleteCount = Math.min(Math.max(deleteCount, 0), length - start);
+			}
 		} else {
-			deleteCount = Math.min(Math.max(deleteCount, 0), length - start);
+			deleteCount = length - start;
 		}
-
-		let removed = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
+		
+		let removed = yield factory.createArrayFromSpecies(this.object, deleteCount);
 
 		let k = 0;
 		while (k < deleteCount) {
 			if (this.object.has(k + start)) {
-				removed.defineProperty(k, {value: this.object.getValue(k + start), configurable: true, enumerable: true, writable: true});
+				createDataProperty(removed, k, this.object.getValue(k + start));
 			}
 
 			k++;
@@ -68,7 +73,10 @@ export default function ($target, env, factory) {
 			k++;
 		}
 
-		this.object.setValue("length", factory.createPrimitive(length - deleteCount + newCount));
+		if (!this.object.setValue("length", factory.createPrimitive(length - deleteCount + newCount))) {
+			throw TypeError("Unable to set length");
+		}
+		
 		return removed;
 	}, 2, "Array.prototype.splice"));
 }

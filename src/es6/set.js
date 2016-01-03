@@ -1,4 +1,6 @@
-import {assertIsFunction, assertIsObject, isNullOrUndefined} from "../utils/contracts";
+import {assertIsFunction, assertIsObject} from "../utils/contracts";
+import {isNullOrUndefined} from "../utils/checks";
+
 import iterate from "../iterators";
 
 import $add from "./set.add";

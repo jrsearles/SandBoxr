@@ -1,5 +1,5 @@
 import {toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/contracts";
+import {isNullOrUndefined} from "../../utils/checks";
 
 import $toString from "./error.to-string";
 

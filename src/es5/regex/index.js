@@ -1,5 +1,5 @@
 import {toString, toNativeFunction} from "../../utils/native";
-import {isUndefined} from "../../utils/contracts";
+import {isUndefined} from "../../utils/checks";
 
 import $exec from "./regex.exec";
 import $test from "./regex.test";

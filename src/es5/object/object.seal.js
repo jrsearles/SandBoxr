@@ -2,7 +2,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("seal", factory.createBuiltInFunction(function (obj) {
-		if (confirmObject(obj, "Object.seal")) {
+		if (confirmObject(obj, "Object.seal", env.options)) {
 			obj.seal();
 		}
 

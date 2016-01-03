@@ -11,8 +11,7 @@ export class NativeFunctionType extends FunctionType {
 	}
 
 	init (env, proto, {configurable = false, enumerable = false, writable = true, isConstructor = false, homeObject} = {}) {
-		this[Symbol.for("env")] = env;
-		
+		this[Symbol.for("env")] = env;		
 		this.isConstructor = isConstructor;
 		this.homeObject = homeObject;
 		
@@ -25,12 +24,7 @@ export class NativeFunctionType extends FunctionType {
 			this.strict = this.nativeFunction.strict;
 		}
 
-		this.defineProperty("length", {
-			value: env.objectFactory.createPrimitive(length),
-			configurable: false,
-			enumerable: false,
-			writable: false
-		});
+		this.setLength(length);
 
 		if (proto !== null) {
 			proto = proto || env.objectFactory.createObject();

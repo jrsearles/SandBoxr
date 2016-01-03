@@ -1,5 +1,5 @@
 import {toLength, toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/contracts";
+import {isNullOrUndefined} from "../../utils/checks";
 import {UNDEFINED} from "../../types/primitive-type";
 
 export default function ($target, env, factory) {

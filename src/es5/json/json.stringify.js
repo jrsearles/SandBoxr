@@ -1,8 +1,8 @@
 import {UNDEFINED} from "../../types/primitive-type";
-import {isUndefined, isNullOrUndefined} from "../../utils/contracts";
+import {isUndefined, isNullOrUndefined} from "../../utils/checks";
 import {toString, toNumber, toArray} from "../../utils/native";
 import {map} from "../../utils/async";
-import {tryExecute as tryExec} from "../../utils/func";
+import {getMethod} from "../../utils/helpers";
 
 const primitives = {
 	"String": true,
@@ -32,9 +32,10 @@ export default function ($target, env, factory) {
 			return undefined;
 		}
 
-		let jsonString = yield tryExec(obj, "toJSON");
-		if (jsonString) {
-			return serializePrimitive(jsonString.value);
+		let toJson = getMethod(obj, "toJSON");
+		if (toJson) {
+			let jsonString = yield toJson.call(obj);
+			return serializePrimitive(jsonString.toNative());
 		}
 
 		if (stack.indexOf(obj) >= 0) {
@@ -76,15 +77,26 @@ export default function ($target, env, factory) {
 		let colon = gap ? ": " : ":";
 		let values = [];
 		let value;
-
-		for (let prop in obj.properties) {
-			if (obj.properties[prop].enumerable) {
-				value = yield replacer(obj, prop, obj.getValue(prop));
+		
+		let keys = obj.getOwnPropertyKeys("String");
+		for (let key of keys) {
+			let desc = obj.getOwnProperty(key);
+			if (desc.enumerable) {
+				value = yield replacer(obj, key, obj.getValue(key));
 				if (!isNullOrUndefined(value) && !ignored[value.className]) {
-					values.push(serializePrimitive(prop) + colon + (yield serialize(stack, value, replacer, gap, depth)));
+					values.push(serializePrimitive(key) + colon + (yield serialize(stack, value, replacer, gap, depth)));
 				}
 			}
 		}
+
+		// for (let prop in obj.properties) {
+		// 	if (obj.properties[prop].enumerable) {
+		// 		value = yield replacer(obj, prop, obj.getValue(prop));
+		// 		if (!isNullOrUndefined(value) && !ignored[value.className]) {
+		// 			values.push(serializePrimitive(prop) + colon + (yield serialize(stack, value, replacer, gap, depth)));
+		// 		}
+		// 	}
+		// }
 
 		return "{" + formatValues(values, gap, depth, gap, depth) + "}";
 	}

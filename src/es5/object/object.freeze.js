@@ -2,7 +2,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("freeze", factory.createBuiltInFunction(function (obj) {
-		if (confirmObject(obj, "Object.freeze")) {
+		if (confirmObject(obj, "Object.freeze", env.options)) {
 			obj.freeze();
 		}
 

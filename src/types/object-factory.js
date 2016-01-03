@@ -12,10 +12,12 @@ import {IteratorType} from "./iterator-type";
 import {SymbolType} from "./symbol-type";
 import {CollectionType} from "./collection-type";
 import {ProxyType} from "./proxy-type";
-import {getType, assertIsObject} from "../utils/contracts";
+import {assertIsObject} from "../utils/contracts";
+import {getNativeType as getType} from "../utils/helpers";
+import {isNullOrUndefined, isConstructor} from "../utils/checks";
 
 let orphans = Object.create(null);
-const functionNameMatcher = /([^.]+(?:\[Symbol\.\w+\])?)$/;
+const functionNameMatcher = /((?:get |set )?\[Symbol\.\w+\]|[^.]+)$/;
 
 function setOrphans (scope) {
 	for (let typeName in orphans) {
@@ -255,19 +257,40 @@ export class ObjectFactory {
 		return instance;
 	}
 	
-	*createFromSpeciesOrDefault (obj, defaultCtor) {
-		let speciesKey = SymbolType.getByKey("species");
-		if (speciesKey) {
-			let ctor = obj.getValue("constructor");
-			if (ctor && ctor !== NULL && ctor !== UNDEFINED) {
-				let species = ctor.getValue(speciesKey);
-				if (species) {
-					return yield species.construct();
+	*createArrayFromSpecies (obj, length) {
+		let ctor = this.env.global.getValue("Array");
+		if (obj && obj.className === "Array") {
+			let speciesKey = SymbolType.getByKey("species");
+			if (speciesKey) {
+				let objCtor = obj.getValue("constructor");
+				if (objCtor !== ctor) {
+					let speciesCtor = objCtor.getValue(speciesKey);
+					if (isConstructor(speciesCtor)) {
+						ctor = speciesCtor;
+					}
 				}
 			}
 		}
 		
-		return yield defaultCtor.construct();
+		let lengthValue = this.createPrimitive(length);
+		return yield ctor.construct(null, [lengthValue]);
+	}
+
+	*createFromSpeciesOrDefault (obj, defaultCtor, args) {
+		args = args || [];
+		
+		let speciesKey = SymbolType.getByKey("species");
+		if (speciesKey) {
+			let ctor = obj.getValue("constructor");
+			if (!isNullOrUndefined(ctor)) {
+				let species = ctor.getValue(speciesKey);
+				if (species) {
+					return yield species.construct(null, args);
+				}
+			}
+		}
+		
+		return yield defaultCtor.construct(null, args);
 	}
 
 	/**
@@ -318,6 +341,7 @@ export class ObjectFactory {
 	 * @returns {NativeFunctionType} The function instance.
 	 */
 	createBuiltInFunction (func, length, funcName) {
+		// todo: change this to route to standard createFunction method with appropriate presets
 		let instance = new NativeFunctionType(function () {
 			if (this.isNew) {
 				throw TypeError(`${funcName} is not a constructor`);
@@ -330,12 +354,13 @@ export class ObjectFactory {
 		instance[Symbol.for("env")] = this.env;
 		instance.builtIn = true;
 		instance.canConstruct = false;
-		instance.defineProperty("length", {value: this.createPrimitive(length), configurable: this.ecmaVersion > 5});
+		instance.setLength(length);
+		// instance.defineProperty("length", {value: this.createPrimitive(length), configurable: this.ecmaVersion > 5});
 
 		let match = functionNameMatcher.exec(funcName);
 		let name = match && match[1] || funcName;
 
-		instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true, this.env);
+		instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
 
 		return instance;
 	}

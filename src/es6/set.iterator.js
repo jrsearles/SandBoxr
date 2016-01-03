@@ -28,6 +28,15 @@ export default function ($target, env, factory) {
 	proto.setPrototype(env.global.getValue("%IteratorPrototype%"));
 	proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Set Iterator"), {writable: false});
 
+	proto.define("next", factory.createBuiltInFunction(function () {
+		let result = this.object.advance();
+		if (result.value) {
+			return result.value;
+		}
+
+		return factory.createIteratorResult({done: result.done});
+	}, 0, "SetIterator.prototype.next"));
+
 	$target.define("entries", factory.createBuiltInFunction(function () {
 		assertIsSet(this.object, "Set.prototype.entries");
 		let it = getIterator(this.object, "key+value");

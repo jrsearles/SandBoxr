@@ -2,7 +2,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("isFrozen", factory.createBuiltInFunction(function (obj) {
-		if (!confirmObject(obj, "Object.isFrozen")) {
+		if (!confirmObject(obj, "Object.isFrozen", env.options)) {
 			return factory.createPrimitive(true);
 		}
 
@@ -10,12 +10,20 @@ export default function ($target, env, factory) {
 			return factory.createPrimitive(true);
 		}
 
-		if (!obj.extensible) {
-			for (let prop in obj.properties) {
-				if (obj.properties[prop].writable || obj.properties[prop].configurable) {
+		if (!obj.isExtensible()) {
+			let keys = obj.getOwnPropertyKeys();
+			for (let i = 0, ln = keys.length; i < ln; i++) {
+				let desc = obj.getOwnProperty(keys[i]);
+				if (desc.writable || desc.configurable) {
 					return factory.createPrimitive(false);
 				}
 			}
+			
+			// for (let prop in obj.properties) {
+			// 	if (obj.properties[prop].writable || obj.properties[prop].configurable) {
+			// 		return factory.createPrimitive(false);
+			// 	}
+			// }
 		}
 
 		return factory.createPrimitive(!obj.extensible);

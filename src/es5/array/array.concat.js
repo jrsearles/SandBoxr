@@ -1,10 +1,11 @@
 import {toObject, toLength} from "../../utils/native";
 import {isSpreadable} from "./array-helpers";
+import {createDataProperty} from "../../utils/helpers";
 
 export default function ($target, env, factory) {
 	$target.define("concat", factory.createBuiltInFunction(function* (...arrays) {
-		let newArray = yield factory.createFromSpeciesOrDefault(this.object, $target.getValue("constructor"));
-
+		let newArray = yield factory.createArrayFromSpecies(this.object, 0);
+		
 		// add "this" array to bunch
 		arrays.unshift(toObject(this.object));
 
@@ -16,13 +17,14 @@ export default function ($target, env, factory) {
 				let length = yield toLength(current);
 				for (let i = 0; i < length; i++) {
 					if (current.has(i)) {
-						newArray.setIndex(index, current.getValue(i));
+						let value = current.getValue(i);
+						createDataProperty(newArray, index, value);
 					}
 
 					index++;
 				}
 			} else {
-				newArray.setIndex(index++, current);
+				createDataProperty(newArray, index++, current);
 			}
 		}
 

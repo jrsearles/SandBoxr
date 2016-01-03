@@ -1,5 +1,5 @@
 import {toString, toBoolean, toObject, toPropertyKey} from "../../utils/native";
-import {isObject} from "../../utils/contracts";
+import {isObject} from "../../utils/checks";
 import {UNDEFINED} from "../../types/primitive-type";
 
 function getOptions (obj) {
@@ -86,12 +86,12 @@ export function* defineProperty (env, obj, key, descriptor, throwOnError = true)
 	return obj.defineProperty(key, options, throwOnError, env);
 }
 
-export function confirmObject (obj, methodName) {
+export function confirmObject (obj, methodName, options) {
 	if (isObject(obj)) {
 		return true;
 	}
 
-	if (getOptions(obj).ecmaVersion > 5) {
+	if (options.ecmaVersion > 5) {
 		return false;
 	}
 

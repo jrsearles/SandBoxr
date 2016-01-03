@@ -1,7 +1,7 @@
 import {NULL} from "../../types/primitive-type";
 import {toString, toPrimitive} from "../../utils/native";
-import {getMethod} from "../../utils/func";
-import {isNullOrUndefined} from "../../utils/contracts";
+import {getMethod} from "../../utils/helpers";
+import {isNullOrUndefined} from "../../utils/checks";
 
 export default function ($target, env, factory) {
 	$target.define("match", factory.createBuiltInFunction(function* (regex) {

@@ -1,4 +1,4 @@
-import {isNullOrUndefined} from "../utils/contracts";
+import {isNullOrUndefined} from "../utils/checks";
 
 export default function ThisExpression (node, context) {
 	let thisArg = context.env.getThisBinding();

@@ -1,6 +1,6 @@
 import {NativeFunctionType} from "../../types/native-function-type";
 import {UNDEFINED} from "../../types/primitive-type";
-import {isNull, isUndefined, isStrictNode} from "../../utils/contracts";
+import {isNull, isUndefined, isStrictNode} from "../../utils/checks";
 import {toString} from "../../utils/native";
 import {map} from "../../utils/async";
 

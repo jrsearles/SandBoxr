@@ -1,6 +1,6 @@
 import {ObjectType} from "./object-type";
-import {toNumber, toUInt32} from "../utils/native";
-import {assertIsValidArrayLength, isValidArrayLength, isInteger} from "../utils/contracts";
+import {toNumber, toUInt32, isInteger, isValidArrayLength} from "../utils/native";
+import {assertIsValidArrayLength} from "../utils/contracts";
 import iterate from "../iterators";
 import {exhaust as x} from "../utils/async";
 
@@ -122,7 +122,8 @@ export class ArrayType extends ObjectType {
 	}
 
 	toNative () {
-		let arr = [];
+		let length = this.properties.length.getValue().toNative();
+		let arr = new Array(length);
 
 		// this won't grab properties from the prototype - do we care?
 		// it's an edge case but we may want to address it

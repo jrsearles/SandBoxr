@@ -1,13 +1,14 @@
 import {default as ops} from "../utils/operators";
 import {exhaust as x} from "../utils/async";
-import {owns} from "../utils/object";
 
+let hasOwn = Object.prototype.hasOwnProperty;
 let uid = 0;
 
 const defaultDescriptor = {
 	configurable: false,
 	enumerable: false,
-	writable: false
+	writable: false,
+	value: undefined
 };
 
 export class PropertyDescriptor {
@@ -39,7 +40,7 @@ export class PropertyDescriptor {
 
 	update (descriptor) {
 		for (let prop in descriptor) {
-			if (owns(descriptor, prop)) {
+			if (hasOwn.call(descriptor, prop)) {
 				this[prop] = descriptor[prop];
 			}
 		}

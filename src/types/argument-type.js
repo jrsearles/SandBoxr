@@ -14,17 +14,17 @@ export class ArgumentType extends ObjectType {
 		this.parameterMap[index] = binding;
 	}
 
-	getProperty (name) {
-		let ownProperty = this.getOwnProperty(name);
+	getProperty (key) {
+		let ownProperty = this.getOwnProperty(key);
 		if (ownProperty) {
 			return ownProperty;
 		}
 
-		return super.getProperty(name);
+		return super.getProperty(key);
 	}
 
-	getOwnProperty (name) {
-		name = String(name);
+	getOwnProperty (key) {
+		let name = String(key);
 
 		if (name in this.parameterMap) {
 			let mappedProperty = this.properties[name];
@@ -35,11 +35,11 @@ export class ArgumentType extends ObjectType {
 			return mappedProperty;
 		}
 
-		return super.getOwnProperty(name);
+		return super.getOwnProperty(key);
 	}
 
-	defineProperty (name, descriptor, throwOnError) {
-		name = String(name);
+	defineProperty (key, descriptor, throwOnError) {
+		let name = String(key);
 
 		let allowed = super.defineProperty(...arguments);
 		if (allowed && name in this.parameterMap) {
@@ -57,8 +57,8 @@ export class ArgumentType extends ObjectType {
 		return allowed;
 	}
 
-	deleteProperty (name, throwOnError) {
-		name = String(name);
+	deleteProperty (key, throwOnError) {
+		let name = String(key);
 		if (name in this.parameterMap) {
 			delete this.parameterMap[name];
 		}

@@ -1,5 +1,5 @@
 import {toLength, toArray, toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/contracts";
+import {isNullOrUndefined} from "../../utils/checks";
 import {exhaust as x} from "../../utils/async";
 import {UNDEFINED} from "../../types/primitive-type";
 

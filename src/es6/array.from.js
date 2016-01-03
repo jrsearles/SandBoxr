@@ -1,6 +1,8 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {isUndefined, isConstructor, assertIsFunction} from "../utils/contracts";
+import {assertIsFunction} from "../utils/contracts";
+import {isUndefined, isConstructor} from "../utils/checks";
 import {toLength} from "../utils/native";
+import {createDataProperty} from "../utils/helpers";
 import iterate from "../iterators/";
 
 export default function ($target, env, factory) {
@@ -47,7 +49,8 @@ export default function ($target, env, factory) {
 
 				if (!done) {
 					let value = yield mapper(current.value || UNDEFINED, current.key);
-					arr.defineProperty(current.key, {value, configurable: true, enumerable: true, writable: true});
+					createDataProperty(arr, current.key, value, true);
+					// arr.defineProperty(current.key, {value, configurable: true, enumerable: true, writable: true});
 					length = current.key + 1;
 				}
 			} catch (err) {

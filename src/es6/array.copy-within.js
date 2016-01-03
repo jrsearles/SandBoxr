@@ -1,4 +1,4 @@
-import {isUndefined} from "../utils/contracts";
+import {isUndefined} from "../utils/checks";
 import {toInteger, toObject, toLength} from "../utils/native";
 import {normalizeIndex} from "./array-helpers";
 

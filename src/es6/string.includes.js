@@ -1,4 +1,5 @@
-import {isRegExp, isUndefined, assertIsNotNullOrUndefined} from "../utils/contracts";
+import {assertIsNotNullOrUndefined, isRegExp} from "../utils/contracts";
+import {isUndefined} from "../utils/checks";
 import {toString, toInteger} from "../utils/native";
 
 export default function (target, env, factory) {

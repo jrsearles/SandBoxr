@@ -1,4 +1,5 @@
-import {isObject, isNull, assertIsNotNullOrUndefined} from "../utils/contracts";
+import {assertIsNotNullOrUndefined} from "../utils/contracts";
+import {isObject, isNull} from "../utils/checks";
 
 export default function ($target, env, factory) {
 	$target.define("setPrototypeOf", factory.createBuiltInFunction(function (target, proto) {

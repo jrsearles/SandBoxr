@@ -1,5 +1,5 @@
 import {ObjectType} from "./object-type";
-import {getType} from "../utils/contracts";
+import {getNativeType as getType} from "../utils/helpers";
 
 export class PrimitiveType extends ObjectType {
 	constructor (value) {

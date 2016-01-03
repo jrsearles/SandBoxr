@@ -2,17 +2,34 @@ import {UNDEFINED} from "../types/primitive-type";
 import {assertIsValidParameterName} from "../utils/contracts";
 import {each} from "../utils/async";
 import {declare} from "../utils/assign";
+import {createDataProperty} from "../utils/helpers";
 
 export class Scope {
-	constructor (env, scope, newTarget) {
+	constructor (env, scope) {
 		env.globalScope = env.globalScope || this;
 
 		this.scope = scope;
 		this.env = env;
-		this.newTarget = newTarget;
 		this.parentScope = (env.current || env.globalScope).scope;
 	}
 
+	setMeta (key, value) {
+		this.scope.meta[key] = value;
+	}
+	
+	getMeta (key) {
+		let scope = this.scope;
+		while (scope) {
+			if (scope.meta[key]) {
+				return scope.meta[key];
+			}
+			
+			scope = scope.parent;
+		}
+		
+		return null;
+	}
+	
 	setParent (parentScope) {
 		this.parentScope = parentScope;	
 	}
@@ -91,13 +108,8 @@ export class Scope {
 			scope.createVariable("arguments");
 			scope.setValue("arguments", argumentList);
 
-			args.forEach(function (value, index) {
-				argumentList.defineProperty(index, {
-					value: value,
-					configurable: true,
-					enumerable: true,
-					writable: true
-				});
+			args.forEach((value, index) => {
+				createDataProperty(argumentList, index, value);
 			});
 
 			argumentList.defineProperty("length", {
@@ -135,44 +147,44 @@ export class Scope {
 		scope.setValue("arguments", argumentList);
 
 		let argsLength = args.length;
+		
 		if (params) {
 			let shouldMap = !strictCallee;
-
-			for (let i = 0, ln = params.length; i < ln; i++) {
+			let loadedParams = Object.create(null);
+			let i = params.length;
+			
+			while (i--) {
 				let param = params[i];
 				let value = args[i] || UNDEFINED;
 				let name = param.name;
-
-				if (shouldMap && !scope.has(name)) {
-					let descriptor = scope.createVariable(name);
-					if (argsLength > i) {
-						argumentList.mapProperty(i, descriptor);
+				let mapped = false;
+				
+				if (!loadedParams[name]) {
+					loadedParams[name] = true;
+					assertIsValidParameterName(name, strict);
+					
+					if (shouldMap) {
+						mapped = true;
+						
+						let descriptor = scope.createVariable(name);
+						if (i < argsLength) {
+							argumentList.mapProperty(i, descriptor);
+						}
 					}
+					
+					scope.setValue(name, value);
 				}
 
-				if (!shouldMap && i < argsLength) {
-					argumentList.defineProperty(i, {
-						value: value,
-						configurable: true,
-						enumerable: true,
-						writable: true
-					});
+				if (!mapped && i < argsLength) {
+					createDataProperty(argumentList, i, value);
 				}
-
-				assertIsValidParameterName(name, strict);
-				scope.setValue(name, value);
 			}
 		}
 
 		// just set value if additional, unnamed arguments are passed in
 		let i = params ? params.length : 0;
 		for (; i < argsLength; i++) {
-			argumentList.defineProperty(i, {
-				value: args[i],
-				configurable: true,
-				enumerable: true,
-				writable: true
-			});
+			createDataProperty(argumentList, i, args[i]);
 		}
 
 		argumentList.defineProperty("length", {

@@ -9,6 +9,8 @@ export class ObjectEnvironment {
 		this.env = env;
 		this.strict = strict;
 		this.block = false;
+		
+		this.meta = Object.create(null);
 	}
 	
 	createChildScope () {

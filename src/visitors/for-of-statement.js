@@ -1,4 +1,4 @@
-import {isNullOrUndefined} from "../utils/contracts";
+import {isNullOrUndefined} from "../utils/checks";
 import {declare} from "../utils/assign";
 import iterate from "../iterators/";
 

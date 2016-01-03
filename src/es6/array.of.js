@@ -1,4 +1,4 @@
-import {isConstructor} from "../utils/contracts";
+import {isConstructor} from "../utils/checks";
 
 export default function ($target, env, factory) {
 	$target.define("of", factory.createBuiltInFunction(function* (...items) {

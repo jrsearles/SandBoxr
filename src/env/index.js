@@ -205,9 +205,6 @@ export class Environment {
 		}
 
 		thisArg = fn.boundThis || thisArg;
-		// if (fn.arrow) {
-		// 	thisArg = this.getThisBinding();
-		// }
 
 		let scope = this.createScope(thisArg);
 		scope.setParent(parentScope);

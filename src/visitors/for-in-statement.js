@@ -1,5 +1,5 @@
 import {toBoolean} from "../utils/native";
-import {isNullOrUndefined} from "../utils/contracts";
+import {isNullOrUndefined} from "../utils/checks";
 import {declare} from "../utils/assign";
 
 export default function* ForInStatement (node, context, next) {

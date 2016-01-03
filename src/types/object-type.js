@@ -70,7 +70,7 @@ export class ObjectType {
 	}
 
 	getPrototype () {
-		return this.proto;
+		return this.proto || null;
 	}
 
 	setPrototype (proto) {
@@ -123,6 +123,7 @@ export class ObjectType {
 	getOwnPropertyKeys (keyType) {
 		let keys = [];
 
+		// add string keys
 		if (keyType !== "Symbol") {
 			// note: this uses native sort which may not be stable
 			keys = Object.keys(this.properties)
@@ -131,6 +132,7 @@ export class ObjectType {
 				.map(prop => String(prop.key));
 		}
 
+		// add symbol keys
 		if (keyType !== "String") {
 			for (let key in this.symbols) {
 				keys.push(this.symbols[key].key);
@@ -163,7 +165,7 @@ export class ObjectType {
 	}
 
 	owns (key) {
-		return String(key) in this[getPropertySource(key)];
+		return !!this.getOwnProperty(key);
 	}
 
 	setValue (key, value, receiver) {
@@ -308,10 +310,8 @@ export class ObjectType {
 	}
 
 	each (func) {
-		["properties", "symbols"].forEach(source => {
-			for (let key in this[source]) {
-				func(this[source][key]);
-			}
+		this.getOwnPropertyKeys().forEach(key => {
+			func(this.getOwnProperty(key));
 		});
 	}
 
@@ -342,16 +342,11 @@ export class ObjectType {
 
 	toNative () {
 		let unwrapped = {};
-		let current = this;
-
-		while (current) {
-			for (let name in current.properties) {
-				if (current.properties[name].enumerable && !(name in unwrapped)) {
-					unwrapped[name] = current.getValue(name).toNative();
-				}
+		
+		for (let name in this.properties) {
+			if (this.properties[name].enumerable) {
+				unwrapped[name] = this.getValue(name).toNative();
 			}
-
-			current = current.getPrototype();
 		}
 
 		return unwrapped;

@@ -1,6 +1,7 @@
 import {UNDEFINED} from "../../types/primitive-type";
-import {getType, isUndefined} from "../../utils/contracts";
+import {isUndefined} from "../../utils/checks";
 import {toString} from "../../utils/native";
+import {getNativeType as getType} from "../../utils/helpers";
 
 export default function ($target, env, factory) {
 	function createReviver (reviver) {

@@ -1,0 +1,11 @@
+- Refactor assertions/helpers
+- Refactor external tests/create logging
+- Promises
+- Subclassing
+- Generators
+- Make separate libs for estree, maybe es6
+- Website
+- Add to Kangax
+- Add mechanism to import scripts
+- WeakSet/WeakMap (maybe)
+- Promote

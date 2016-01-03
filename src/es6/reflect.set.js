@@ -1,4 +1,5 @@
-import {assertIsObject, isUndefined} from "../utils/contracts";
+import {assertIsObject} from "../utils/contracts";
+import {isUndefined} from "../utils/checks";
 import {toPropertyKey} from "../utils/native";
 
 export default function ($target, env, factory) {

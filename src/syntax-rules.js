@@ -1,4 +1,5 @@
-import {assertIsValidName, assertIsValidIdentifier, assertAreValidArguments, isOctalLiteral} from "./utils/contracts";
+import {assertIsValidName, assertIsValidIdentifier, assertAreValidArguments} from "./utils/contracts";
+import {isOctalLiteral} from "./utils/native";
 
 function validateAssignment (left, strict) {
 	if (strict && left.isIdentifier()) {

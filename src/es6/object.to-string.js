@@ -1,4 +1,5 @@
-import {isNullOrUndefined, assertIsNotNullOrUndefined} from "../utils/contracts";
+import {assertIsNotNullOrUndefined} from "../utils/contracts";
+import {isNullOrUndefined} from "../utils/checks";
 
 export default function (target, env, factory) {
 	let stringTagKey = env.getSymbol("toStringTag");

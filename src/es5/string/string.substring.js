@@ -1,5 +1,5 @@
 import {toString, toInteger} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/contracts";
+import {isNullOrUndefined} from "../../utils/checks";
 
 export default function ($target, env, factory) {
 	$target.define("substring", factory.createBuiltInFunction(function* (start, end) {

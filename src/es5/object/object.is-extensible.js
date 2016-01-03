@@ -2,7 +2,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("isExtensible", factory.createBuiltInFunction(function (obj) {
-		if (!confirmObject(obj, "Object.isExtensible")) {
+		if (!confirmObject(obj, "Object.isExtensible", env.options)) {
 			return factory.createPrimitive(false);
 		}
 

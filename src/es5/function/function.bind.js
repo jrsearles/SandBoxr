@@ -1,11 +1,19 @@
 import {defineThis} from "./function-helpers";
-import {toNumber, toString} from "../../utils/native";
-import {isUndefined} from "../../utils/contracts";
+import {toString, toInteger} from "../../utils/native";
+import {isUndefined} from "../../utils/checks";
 
 export default function ($target, env, factory) {
 	$target.define("bind", factory.createBuiltInFunction(function* (thisArg, ...args) {
 		let fn = this.object;
-		let length = yield toNumber(fn.getValue("length"));
+		let length = 0;
+		
+		if (fn.owns("length")) {
+			let lengthValue = fn.getValue("length");
+			if (lengthValue && lengthValue.type === "number") {
+				length = yield toInteger(lengthValue);
+				length = Math.max(length - args.length, 0);
+			}
+		}
 		
 		thisArg = defineThis(env, fn, thisArg);
 
@@ -14,7 +22,7 @@ export default function ($target, env, factory) {
 			return yield* fn[this.isNew ? "construct" : "call"](thisArg, mergedArgs);
 		};
 
-		nativeFunc.nativeLength = Math.max(length - args.length, 0);
+		nativeFunc.nativeLength = length;
 		nativeFunc.strict = env.isStrict() || (fn.node && fn.node.body.isStrict());
 
 		let nameValue = fn.getValue("name");
@@ -24,7 +32,8 @@ export default function ($target, env, factory) {
 		boundFunc.canConstruct = fn.canConstruct;
 		boundFunc.bindScope(this.env.current);
 		boundFunc.bindThis(thisArg);
-
+		boundFunc.setPrototype(fn.getPrototype());
+		
 		if (!nativeFunc.strict) {
 			boundFunc.remove("caller");
 			boundFunc.remove("arguments");

@@ -1,13 +1,17 @@
 import {assign} from "../utils/assign";
 
 export default function* AssignmentExpression (node, context, next) {
-	let right = (yield next(node.right, context)).result;
-	let rightValue = right.getValue();
-
+	let rightValue;
+	
 	if (node.operator === "=") {
+		let right = (yield next(node.right, context)).result;
+		rightValue = right.getValue();
+
 		yield assign(context.env, node.left, rightValue);
 	} else {
 		let left = (yield next(node.left, context)).result;
+		let right = (yield next(node.right, context)).result;
+		rightValue = right.getValue();
 
 		// remove equals
 		let op = node.operator.slice(0, -1);
