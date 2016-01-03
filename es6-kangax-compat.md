@@ -1,5 +1,6 @@
 ECMA 6 Kangax Compatibility Results
 
+
 ## default function parameters
 - [x]  basic functionality
 - [x]  explicit undefined defers to the default
@@ -8,12 +9,14 @@ ECMA 6 Kangax Compatibility Results
 - [x]  temporal dead zone
 - [x]  separate scope
 - [x]  new Function() support
+
 ## rest parameters
 - [x]  basic functionality
 - [x]  function 'length' property
 - [x]  arguments object interaction
 - [x]  can't be used in setters
 - [x]  new Function() support
+
 ## spread (...) operator
 - [x]  with arrays, in function calls
 - [x]  with arrays, in array literals
@@ -30,6 +33,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  with instances of iterables, in calls
 - [x]  with instances of iterables, in arrays
 - [x]  spreading non-iterables is a runtime error
+
 ## object literal extensions
 - [x]  computed properties
 - [x]  shorthand properties
@@ -37,6 +41,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  string-keyed shorthand methods
 - [x]  computed shorthand methods
 - [x]  computed accessors
+
 ## for..of loops
 - [x]  with arrays
 - [x]  with sparse arrays
@@ -47,22 +52,26 @@ ECMA 6 Kangax Compatibility Results
 - [x]  with instances of generic iterables
 - [x]  iterator closing, break
 - [x]  iterator closing, throw
+
 ## octal and binary literals
 - [x]  octal literals
 - [x]  binary literals
 - [x]  octal supported by Number()
 - [x]  binary supported by Number()
+
 ## template strings
 - [ ]  basic functionality
 - [x]  toString conversion
 - [x]  tagged template strings
 - [x]  passed array is frozen
 - [x]  line break normalisation
+
 ## RegExp "y" and "u" flags
 - [ ]  "y" flag
 - [ ]  "y" flag, lastIndex
 - [ ]  "u" flag
 - [ ]  "u" flag, Unicode code point escapes
+
 ## destructuring, declarations
 - [x]  with arrays
 - [x]  with sparse arrays
@@ -86,6 +95,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  rest
 - [x]  defaults
 - [x]  defaults, let temporal dead zone
+
 ## destructuring, assignment
 - [x]  with arrays
 - [x]  with sparse arrays
@@ -111,6 +121,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  nested rest
 - [x]  empty patterns
 - [x]  defaults
+
 ## destructuring, parameters
 - [x]  with arrays
 - [x]  with sparse arrays
@@ -135,12 +146,15 @@ ECMA 6 Kangax Compatibility Results
 - [x]  defaults
 - [x]  defaults, separate scope
 - [x]  defaults, new Function() support
+
 ## Unicode code point escapes
 - [x]  in strings
 - [x]  in identifiers
+
 ## new.target
 - [x]  in constructors
 - [x]  assignment is an early error
+
 ## const
 - [x]  basic support
 - [x]  is block-scoped
@@ -150,6 +164,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  is block-scoped (strict mode)
 - [x]  redefining a const (strict mode)
 - [x]  temporal dead zone (strict mode)
+
 ## let
 - [x]  basic support
 - [x]  is block-scoped
@@ -162,6 +177,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  temporal dead zone (strict mode)
 - [x]  for-loop iteration scope (strict mode)
 - [ ]  block-level function declaration
+
 ## arrow functions
 - [x]  0 parameters
 - [x]  1 parameter, no brackets
@@ -176,6 +192,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  lexical "super" binding in constructors
 - [x]  lexical "super" binding in methods
 - [x]  lexical "new.target" binding
+
 ## class
 - [x]  class statement
 - [x]  is block-scoped
@@ -200,6 +217,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  extends expressions
 - [ ]  extends null
 - [ ]  new.target
+
 ## super
 - [x]  statement in constructors
 - [x]  expression in constructors
@@ -209,6 +227,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  constructor calls use correct "new.target" binding
 - [x]  is statically bound
 - [x]  super() invokes the correct constructor
+
 ## generators
 - [ ]  basic functionality
 - [ ]  generator function expressions
@@ -235,6 +254,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  computed shorthand generators
 - [ ]  shorthand generator methods, classes
 - [ ]  computed shorthand generators, classes
+
 ## typed arrays
 - [ ]  Int8Array
 - [ ]  Uint8Array
@@ -282,6 +302,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  %TypedArray%.prototype.entries
 - [ ]  %TypedArray%.prototype[Symbol.iterator]
 - [ ]  %TypedArray%[Symbol.species]
+
 ## Map
 - [x]  basic functionality
 - [x]  constructor arguments
@@ -301,6 +322,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Map.prototype[Symbol.iterator]
 - [x]  Map iterator prototype chain
 - [x]  Map[Symbol.species]
+
 ## Set
 - [x]  basic functionality
 - [x]  constructor arguments
@@ -320,6 +342,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Set.prototype[Symbol.iterator]
 - [x]  Set iterator prototype chain
 - [x]  Set[Symbol.species]
+
 ## WeakMap
 - [ ]  basic functionality
 - [ ]  constructor arguments
@@ -331,6 +354,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  WeakMap.prototype.set returns this
 - [ ]  WeakMap.prototype.delete
 - [ ]  no WeakMap.prototype.clear method
+
 ## WeakSet
 - [ ]  basic functionality
 - [ ]  constructor arguments
@@ -341,6 +365,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  WeakSet.prototype.add returns this
 - [ ]  WeakSet.prototype.delete
 - [ ]  no WeakSet.prototype.clear method
+
 ## Proxy
 - [x]  constructor requires new
 - [x]  "get" handler
@@ -363,6 +388,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Proxy.revocable
 - [x]  Array.isArray support
 - [x]  JSON.stringify support
+
 ## Reflect
 - [x]  Reflect.get
 - [x]  Reflect.set
@@ -381,6 +407,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Reflect.construct
 - [x]  Reflect.construct sets new.target meta property
 - [x]  Reflect.construct creates instance from newTarget argument
+
 ## Promise
 - [ ]  basic functionality
 - [ ]  constructor requires new
@@ -389,6 +416,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  Promise.race
 - [ ]  Promise.race, generic iterables
 - [ ]  Promise[Symbol.species]
+
 ## Symbol
 - [x]  basic functionality
 - [x]  typeof support
@@ -400,6 +428,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  Object(symbol)
 - [x]  JSON.stringify ignores symbols
 - [x]  global symbol registry
+
 ## well-known symbols
 - [ ]  Symbol.hasInstance
 - [x]  Symbol.isConcatSpreadable
@@ -424,11 +453,13 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Symbol.toStringTag
 - [x]  Symbol.toStringTag, misc. built-ins
 - [ ]  Symbol.unscopables
+
 ## Object static methods
 - [x]  Object.assign
 - [x]  Object.is
 - [x]  Object.getOwnPropertySymbols
 - [x]  Object.setPrototypeOf
+
 ## function "name" property
 - [x]  function statements
 - [x]  function expressions
@@ -447,9 +478,11 @@ ECMA 6 Kangax Compatibility Results
 - [x]  class prototype methods
 - [x]  class static methods
 - [x]  isn't writable, is configurable
+
 ## String static methods
 - [x]  String.raw
 - [x]  String.fromCodePoint
+
 ## String.prototype methods
 - [x]  String.prototype.codePointAt
 - [x]  String.prototype.normalize
@@ -459,6 +492,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  String.prototype.includes
 - [x]  String.prototype[Symbol.iterator]
 - [x]  String iterator prototype chain
+
 ## RegExp.prototype properties
 - [ ]  RegExp.prototype.flags
 - [x]  RegExp.prototype[Symbol.match]
@@ -466,6 +500,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  RegExp.prototype[Symbol.split]
 - [x]  RegExp.prototype[Symbol.search]
 - [x]  RegExp[Symbol.species]
+
 ## Array static methods
 - [x]  Array.from, array-like objects
 - [ ]  Array.from, generator instances
@@ -478,6 +513,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Array.from, iterator closing
 - [x]  Array.of
 - [x]  Array[Symbol.species]
+
 ## Array.prototype methods
 - [x]  Array.prototype.copyWithin
 - [x]  Array.prototype.find
@@ -489,6 +525,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Array.prototype[Symbol.iterator]
 - [x]  Array iterator prototype chain
 - [ ]  Array.prototype[Symbol.unscopables]
+
 ## Number properties
 - [x]  Number.isFinite
 - [x]  Number.isInteger
@@ -497,6 +534,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Number.EPSILON
 - [x]  Number.MIN_SAFE_INTEGER
 - [x]  Number.MAX_SAFE_INTEGER
+
 ## Math methods
 - [x]  Math.clz32
 - [x]  Math.imul
@@ -515,6 +553,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Math.fround
 - [x]  Math.cbrt
 - [x]  Math.hypot
+
 ## Array is subclassable
 - [ ]  length property (accessing)
 - [ ]  length property (setting)
@@ -527,11 +566,13 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  Array.prototype.splice
 - [ ]  Array.from
 - [ ]  Array.of
+
 ## RegExp is subclassable
 - [ ]  basic functionality
 - [ ]  correct prototype chain
 - [ ]  RegExp.prototype.exec
 - [ ]  RegExp.prototype.test
+
 ## Function is subclassable
 - [ ]  can be called
 - [ ]  correct prototype chain
@@ -539,23 +580,27 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  Function.prototype.call
 - [ ]  Function.prototype.apply
 - [ ]  Function.prototype.bind
+
 ## Promise is subclassable
 - [ ]  basic functionality
 - [ ]  correct prototype chain
 - [ ]  Promise.all
 - [ ]  Promise.race
+
 ## miscellaneous subclassables
 - [ ]  Boolean is subclassable
 - [ ]  Number is subclassable
 - [ ]  String is subclassable
 - [ ]  Map is subclassable
 - [ ]  Set is subclassable
+
 ## prototype of bound functions
 - [x]  basic functions
 - [x]  generator functions
 - [x]  arrow functions
 - [x]  classes
 - [ ]  subclasses
+
 ## Proxy, internal 'get' calls
 - [ ]  ToPrimitive
 - [ ]  CreateListFromArrayLike
@@ -592,6 +637,7 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  String.prototype.search
 - [ ]  String.prototype.split
 - [ ]  Date.prototype.toJSON
+
 ## Proxy, internal 'set' calls
 - [x]  Object.assign
 - [x]  Array.from
@@ -604,9 +650,11 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Array.prototype.shift
 - [x]  Array.prototype.splice
 - [x]  Array.prototype.unshift
+
 ## Proxy, internal 'defineProperty' calls
 - [ ]  [[Set]]
 - [x]  SetIntegrityLevel
+
 ## Proxy, internal 'deleteProperty' calls
 - [x]  Array.prototype.copyWithin
 - [x]  Array.prototype.pop
@@ -614,15 +662,18 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Array.prototype.shift
 - [x]  Array.prototype.splice
 - [x]  Array.prototype.unshift
+
 ## Proxy, internal 'getOwnPropertyDescriptor' calls
 - [ ]  [[Set]]
 - [x]  Object.assign
 - [x]  Object.prototype.hasOwnProperty
 - [x]  Function.prototype.bind
+
 ## Proxy, internal 'ownKeys' calls
 - [x]  SetIntegrityLevel
 - [x]  TestIntegrityLevel
 - [x]  SerializeJSONObject
+
 ## Object static methods accept primitives
 - [x]  Object.getPrototypeOf
 - [x]  Object.getOwnPropertyDescriptor
@@ -634,6 +685,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  Object.isFrozen
 - [x]  Object.isExtensible
 - [x]  Object.keys
+
 ## own property order
 - [x]  for..in
 - [x]  Object.keys
@@ -643,6 +695,7 @@ ECMA 6 Kangax Compatibility Results
 - [x]  JSON.parse
 - [x]  Reflect.ownKeys, string key order
 - [x]  Reflect.ownKeys, symbol key order
+
 ## miscellaneous
 - [x]  no escaped reserved words as identifiers
 - [x]  duplicate property names in strict mode
@@ -654,16 +707,19 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  built-in prototypes are not instances
 - [x]  function 'length' is configurable
 - [ ]  String.prototype case methods, Unicode support
+
 ## non-strict function semantics
 - [ ]  hoisted block-level function declaration
 - [x]  labeled function statements
 - [ ]  function statements in if-statement clauses
+
 ## __proto__ in object literals
 - [ ]  basic support
 - [x]  multiple __proto__ is an error
 - [ ]  not a computed property
 - [ ]  not a shorthand property
 - [ ]  not a shorthand method
+
 ## Object.prototype.__proto__
 - [ ]  get prototype
 - [ ]  set prototype
@@ -671,11 +727,13 @@ ECMA 6 Kangax Compatibility Results
 - [ ]  present in hasOwnProperty()
 - [ ]  correct property descriptor
 - [ ]  present in Object.getOwnPropertyNames()
+
 ## String.prototype HTML methods
 - [ ]  existence
 - [ ]  tags' names are lowercase
 - [ ]  quotes in arguments are escaped
 - [x]  RegExp.prototype.compile
+
 ## RegExp syntax extensions
 - [x]  hyphens in character sets
 - [x]  invalid character escapes
