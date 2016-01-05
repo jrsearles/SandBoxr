@@ -28,7 +28,7 @@ export class NativeFunctionType extends FunctionType {
 
 		if (proto !== null) {
 			proto = proto || env.objectFactory.createObject();
-			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this});
+			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this}, "constructor");
 
 			let protoDescriptor = {
 				value: proto,

@@ -79,7 +79,7 @@ export class FunctionType extends ObjectType {
 			this.defineProperty("prototype", {value: proto, writable: true});
 
 			// set the contructor property as an instance of itself
-			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this});
+			proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this}, "constructor");
 		}
 
 		this.addPoison();

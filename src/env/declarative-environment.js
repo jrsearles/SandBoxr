@@ -58,7 +58,7 @@ export class DeclarativeEnvironment {
 			return this.properties[key];
 		}
 
-		return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized});
+		return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized}, key);
 	}
 
 	setValue (key, value, throwOnError) {

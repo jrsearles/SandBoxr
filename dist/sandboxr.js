@@ -4748,7 +4748,7 @@ var DeclarativeEnvironment = exports.DeclarativeEnvironment = (function () {
 				return this.properties[key];
 			}
 
-			return this.properties[key] = new _propertyDescriptor.PropertyDescriptor(this, { value: undefined, enumerable: true, configurable: configurable, writable: writable, initialized: initialized });
+			return this.properties[key] = new _propertyDescriptor.PropertyDescriptor(this, { value: undefined, enumerable: true, configurable: configurable, writable: writable, initialized: initialized }, key);
 		}
 	}, {
 		key: "setValue",
@@ -18817,7 +18817,8 @@ var ArrayType = exports.ArrayType = (function (_ObjectType) {
 	}, {
 		key: "toNative",
 		value: function toNative() {
-			var arr = [];
+			var length = this.properties.length.getValue().toNative();
+			var arr = new Array(length);
 
 			// this won't grab properties from the prototype - do we care?
 			// it's an edge case but we may want to address it
@@ -19105,7 +19106,7 @@ var FunctionType = exports.FunctionType = (function (_ObjectType) {
 				this.defineProperty("prototype", { value: proto, writable: true });
 
 				// set the contructor property as an instance of itself
-				proto.properties.constructor = new _propertyDescriptor.PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
+				proto.properties.constructor = new _propertyDescriptor.PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this }, "constructor");
 			}
 
 			this.addPoison();
@@ -19454,7 +19455,7 @@ var NativeFunctionType = exports.NativeFunctionType = (function (_FunctionType) 
 
 			if (proto !== null) {
 				proto = proto || env.objectFactory.createObject();
-				proto.properties.constructor = new _propertyDescriptor.PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this });
+				proto.properties.constructor = new _propertyDescriptor.PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this }, "constructor");
 
 				var protoDescriptor = {
 					value: proto,
@@ -20357,6 +20358,7 @@ var ObjectType = exports.ObjectType = (function () {
 
 			var keys = [];
 
+			// add string keys
 			if (keyType !== "Symbol") {
 				// note: this uses native sort which may not be stable
 				keys = Object.keys(this.properties).map(function (key) {
@@ -20366,6 +20368,7 @@ var ObjectType = exports.ObjectType = (function () {
 				});
 			}
 
+			// add symbol keys
 			if (keyType !== "String") {
 				for (var key in this.symbols) {
 					keys.push(this.symbols[key].key);
@@ -20403,7 +20406,6 @@ var ObjectType = exports.ObjectType = (function () {
 		key: "owns",
 		value: function owns(key) {
 			return !!this.getOwnProperty(key);
-			// return String(key) in this[getPropertySource(key)];
 		}
 	}, {
 		key: "setValue",
@@ -20610,16 +20612,11 @@ var ObjectType = exports.ObjectType = (function () {
 		key: "toNative",
 		value: function toNative() {
 			var unwrapped = {};
-			var current = this;
 
-			while (current) {
-				for (var name in current.properties) {
-					if (current.properties[name].enumerable && !(name in unwrapped)) {
-						unwrapped[name] = current.getValue(name).toNative();
-					}
+			for (var name in this.properties) {
+				if (this.properties[name].enumerable) {
+					unwrapped[name] = this.getValue(name).toNative();
 				}
-
-				current = current.getPrototype();
 			}
 
 			return unwrapped;
