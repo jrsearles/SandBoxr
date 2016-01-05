@@ -28,6 +28,7 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
+					<editor></editor>
           <h3>
 <a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
 
@@ -71,6 +72,123 @@
       </div>
     </div>
 
-  
+	<template id="editor-template">
+		<select data-bind="options: themes, optionsText: 'caption', optionsValue: 'theme', value: selectedTheme"></select>
+		<div id="editor" data-bind="aceEditor: { value: value, theme: selectedTheme }"></div>
+		<button id="executeButton">Execute</button>
+		<debug-node params="node: scope"></debug-node>
+	</template>
+	
+	<template id="debug-node-template">
+		<ul>
+			<li>
+				<a data-bind="text: node.key, click: node.toggleExpand.bind(node)"></a> [<!-- ko text: node.type --><!-- /ko -->]
+				<!-- ko if: node.expanded -->
+				<!-- ko foreach: node.props -->
+				<debug-node params="node: $data"></debug-node>
+				<!-- /ko -->
+				<!-- /ko -->
+			</li>
+		</ul>
+	</template>
+	
+	<script src="bower_components/knockout/dist/knockout.js"></script>
+  <script src="bower_components/ace-builds/src-noconflict/ace.js"></script>
+	<script src="bower_components/ace-builds/src-noconflict/ext-themelist.js"></script>
+	<script src="javascripts/sandboxr.js"></script>
+	<script>
+		var aceUID = 0;
+		
+		ko.bindingHandlers.aceEditor = {
+			init: function (element, valueAccessor) {
+				if (!element.id) {
+					element.id = "ACE_EDITOR_" + (++aceUID);
+				}
+				
+				var options = valueAccessor();
+				var editor = ace.edit(element.id);
+				var session = editor.getSession();
+				var value = options.value;
+				
+				session.setMode("ace/mode/javascript");
+				editor.setValue(ko.unwrap(value));
+				
+				if (ko.isWritableObservable(value)) {
+					session.on("change", function () {
+						value(editor.getValue());
+					});
+				}
+				
+				ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+        	editor.destroy();
+      	});
+			},
+			
+			update: function (element, valueAccessor) {
+				var options = valueAccessor();
+				var theme = ko.unwrap(options.theme);
+				
+				var editor = ace.edit(element.id);
+				if (theme) {
+					editor.setTheme(theme);
+				}
+			}
+		};
+		
+		function DebuggerNode (key, node) {
+			var loaded = false;
+			var self = this;
+			
+			this.key = key;
+			this.type = node.className;
+			
+			this.props = ko.observableArray();
+			this.expanded = ko.observable(false);
+			
+			this.toggleExpand = function () {
+				if (!loaded) {
+					var keys = node.getOwnPropertyKeys();
+					keys.forEach(function (k) {
+						var stringKey = k;
+						if (typeof k === "object") {
+							stringKey = k.toSymbolString();
+						}
+						
+						self.props.push(new DebuggerNode(stringKey, node.getValue(k)));
+					});
+				}
+				
+				this.expanded(!this.expanded());
+			};
+		}
+		
+		function Environment () {
+			this.value = ko.observable("new foo();");
+			
+			this.selectedTheme = ko.observable("ace/theme/monokai");
+			
+			this.themes = ace.require("ace/ext/themelist").themes
+				.sort(function (a, b) { return a.caption.localeCompare(b.caption); });
+				
+			var env = SandBoxr.createEnvironment();
+			env.init();
+			
+			this.scope = new DebuggerNode("root", env.global);
+		}
+		
+		ko.components.register("editor", {
+			viewModel: Environment,
+			template: { element: "editor-template" }
+		});
+		
+		ko.components.register("debug-node", {
+			viewModel: function (params) {
+				this.node = params.node;
+			},
+			template: { element: "debug-node-template" }
+		});
+		
+		ko.applyBindings(new Environment());
+	</script>
   </body>
 </html>
