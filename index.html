@@ -82,11 +82,17 @@
 	<template id="debug-node-template">
 		<ul>
 			<li>
+				<!-- ko if: node.canExpand -->
 				<a data-bind="text: node.key, click: node.toggleExpand.bind(node)"></a> [<!-- ko text: node.type --><!-- /ko -->]
 				<!-- ko if: node.expanded -->
 				<!-- ko foreach: node.props -->
 				<debug-node params="node: $data"></debug-node>
 				<!-- /ko -->
+				<!-- /ko -->
+				<!-- /ko -->
+				
+				<!-- ko ifnot: node.canExpand -->
+				<!-- ko text: node.key + ': ' + node.value --><!-- /ko -->
 				<!-- /ko -->
 			</li>
 		</ul>
@@ -135,15 +141,21 @@
 			}
 		};
 		
-		function DebuggerNode (key, node) {
+		function DebuggerNode (key, node, expanded) {
 			var loaded = false;
 			var self = this;
 			
 			this.key = key;
 			this.type = node.className;
+			this.canExpand = !node.isPrimitive && !node.isSymbol;
+			
+			this.value = null;
+			if (node.isPrimitive) {
+				this.value = JSON.stringify(node.toNative());
+			}
 			
 			this.props = ko.observableArray();
-			this.expanded = ko.observable(false);
+			this.expanded = ko.observable();
 			
 			this.toggleExpand = function () {
 				if (!loaded) {
@@ -160,6 +172,10 @@
 				
 				this.expanded(!this.expanded());
 			};
+			
+			if (expanded) {
+				this.toggleExpand();
+			}
 		}
 		
 		function Environment () {
@@ -171,9 +187,9 @@
 				.sort(function (a, b) { return a.caption.localeCompare(b.caption); });
 				
 			var env = SandBoxr.createEnvironment();
-			env.init();
+			env.init({ecmaVersion: 6});
 			
-			this.scope = new DebuggerNode("root", env.global);
+			this.scope = new DebuggerNode("root", env.global, true);
 		}
 		
 		ko.components.register("editor", {

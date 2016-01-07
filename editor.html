@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+		<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
+		<style type="text/css">
+		#editor {
+			position: absolute;
+			top: 200px;
+			bottom: 0;
+			left: 0;
+			right: 350px;
+		}
+		
+		#tree-panel {
+			position: absolute;
+			top: 200px;
+			right: 0;
+			bottom: 0;
+			width: 350px;
+			
+			overflow: scroll;
+		}
+		
+		.debug-nodes {
+			padding: 5px;
+		}
+		
+		.debug-nodes ul {
+			list-style-type: none;
+			padding-left: 0;
+		}
+		
+		.debug-nodes li ul {
+			padding-left: 15px;
+		}
+		
+		.open::before {
+			content: "-"
+		}
+		
+		.closed::before {
+			content: "+"
+		}
+		</style>
+			
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Sandboxr by jrsearles</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Sandboxr</h1>
+        <h2>Sandbox JavaScript</h2>
+        <a href="https://github.com/jrsearles/SandBoxr" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+		<div id="editor" data-bind="aceEditor: { value: text, theme: selectedTheme }"></div>
+		<debug-panel params="env: $data"></debug-panel>
+		
+	<template id="debug-node-template">
+		<ul data-bind="with: node">
+			<!-- ko if: canExpand -->
+			<li data-bind="css: {'open': expanded, 'closed': !expanded()}">
+				<a data-bind="click: toggleExpand">{{key}} [{{type}}]</a>
+				
+				<!-- ko if: expanded -->
+				<!-- ko foreach: props -->
+				<debug-node params="node: $data"></debug-node>
+				<!-- /ko -->
+				<!-- /ko -->
+			</li>
+			<!-- /ko -->
+			
+			<!-- ko ifnot: canExpand -->
+			<li>{{key}}: {{value}}</li>
+			<!-- /ko -->
+		</ul>
+	</template>
+	
+	<template id="debug-panel-template">
+		<div class="panel-group" id="tree-panel">
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingOne">
+					<h4 class="panel-title">
+						<a role="button" data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+							Setup
+						</a>
+					</h4>
+				</div>
+				<div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+					<div class="panel-body">
+						
+						<button class="btn btn-default" data-bind="click: env.execute">
+							<i class="glyphicon glyphicon-play" aria-hidden="true"></i>
+						</button>
+						
+						<label>
+							Theme
+							<select data-bind="options: env.themes, optionsText: 'caption', optionsValue: 'theme', value: env.selectedTheme"></select>
+						</label>
+									
+						<label>
+							ECMA Version
+							<select data-bind="options: env.versions, value: env.ecmaVersion"></select>
+						</label>
+					</div>
+				</div>
+			</div>
+			
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingTwo">
+					<h4 class="panel-title">
+						<a class="collapsed" role="button" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+							Scope
+						</a>
+					</h4>
+				</div>
+				<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+					<div class="panel-body debug-nodes">
+						<debug-node params="node: env.scope"></debug-node>
+					</div>
+				</div>
+			</div>
+			
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingThree">
+					<h4 class="panel-title">
+						<a class="collapsed" role="button" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+							Results
+						</a>
+					</h4>
+				</div>
+				<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+					<div class="panel-body">
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<script src="bower_components/jquery/dist/jquery.js"></script>
+	<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+	<script src="bower_components/knockout/dist/knockout.js"></script>
+	<script src="bower_components/knockout.punches/knockout.punches.js"></script>
+  <script src="bower_components/ace-builds/src-noconflict/ace.js"></script>
+	<script src="bower_components/ace-builds/src-noconflict/ext-themelist.js"></script>
+	<script src="javascripts/sandboxr.js"></script>
+	<script>
+		var aceUID = 0;
+		
+		ko.bindingHandlers.aceEditor = {
+			init: function (element, valueAccessor) {
+				if (!element.id) {
+					element.id = "ACE_EDITOR_" + (++aceUID);
+				}
+				
+				var options = valueAccessor();
+				var editor = ace.edit(element.id);
+				var session = editor.getSession();
+				var value = options.value;
+				
+				session.setMode("ace/mode/javascript");
+				editor.setValue(ko.unwrap(value));
+				
+				if (ko.isWritableObservable(value)) {
+					session.on("change", function () {
+						value(editor.getValue());
+					});
+				}
+				
+				ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+        	editor.destroy();
+      	});
+			},
+			
+			update: function (element, valueAccessor) {
+				var options = valueAccessor();
+				var theme = ko.unwrap(options.theme);
+				
+				var editor = ace.edit(element.id);
+				if (theme) {
+					editor.setTheme(theme);
+				}
+			}
+		};
+		
+		function primitiveToString (value) {
+			if (value === undefined) {
+				return "undefined";
+			}
+			
+			if (value === null) {
+				return "null";
+			}
+			
+			if (typeof value === "number") {
+				if (isNaN(value)) {
+					return "NaN";
+				}
+				
+				if (!isFinite(value)) {
+					return value > 0 ? "Infinity" : "-Infinity";
+				}
+			}
+			
+			return JSON.stringify(value);
+		}
+		
+		function DebuggerNode (key, node, expanded) {			
+			this.key = key;
+			this.type = node ? node.className : "Undefined";
+			this.canExpand = node && !node.isPrimitive && !node.isSymbol;
+			this.object = node;
+			
+			this.value = null;
+			if (!node || node.isPrimitive) {
+				this.value = primitiveToString(node && node.toNative());
+			}
+			
+			this.props = ko.observableArray();
+			this.expanded = ko.observable();
+
+			if (expanded) {
+				this.toggleExpand();
+			}
+		}
+		
+		DebuggerNode.prototype.load = function () {
+			if (this.loaded) {
+				return;
+			}
+			
+			var self = this;
+			this.loaded = true;
+					
+			var keys = this.object.getOwnPropertyKeys();
+			keys.forEach(function (k) {
+				var stringKey = k;
+				if (typeof k === "object") {
+					stringKey = k.toSymbolString();
+				}
+				
+				self.props.push(new DebuggerNode(stringKey, self.object.getValue(k)));
+			});
+			
+			var proto = this.object.getPrototype();
+			if (proto) {
+				this.props.push(new DebuggerNode("[[Prototype]]", proto));
+			}
+		};
+		
+		DebuggerNode.prototype.toggleExpand = function () {
+			this.load();
+			this.expanded(!this.expanded());
+		};
+
+		function Environment () {
+			this.text = ko.observable("new foo();");
+			
+			this.selectedTheme = ko.observable("ace/theme/monokai");
+			this.ecmaVersion = ko.observable(6);
+			
+			this.versions = [5, 6];
+			this.themes = ace.require("ace/ext/themelist").themes
+				.sort(function (a, b) { return a.caption.localeCompare(b.caption); });
+			
+			this.scope = ko.computed(function () {
+				var env = SandBoxr.createEnvironment();
+				env.init({ecmaVersion: this.ecmaVersion()});
+				
+				return new DebuggerNode("Global", env.global, true);
+			}, this);
+			
+			this.execute = function(){};
+		}
+
+		ko.components.register("debug-node", {
+			viewModel: function (params) {
+				this.node = params.node;
+			},
+			template: { element: "debug-node-template" }
+		});
+		
+		ko.components.register("debug-panel", {
+			viewModel: function (params) {
+				this.env = params.env
+			},
+			template: { element: "debug-panel-template" }
+		});
+		
+		ko.punches.enableAll();
+		ko.applyBindings(new Environment());
+	</script>
+  </body>
+</html>
