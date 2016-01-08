@@ -7,29 +7,30 @@
 
 ## Purpose
 
-The purpose of this library is to safely allow user generated code to be run in isolation. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary usage is targetted towards the browser, though it works in server environments as well. The library works by evaluating a [ESTree](https://github.com/estree/estree) compliant syntax tree against a virtual environment.
+The purpose of this library is to safely allow user generated code to be run in isolation. Code executed through the runner cannot alter state or maliciously exploit the executing environment. The primary usage is targetted towards the browser, though the server environment is supported as well. The library works by evaluating a [ESTree](https://github.com/estree/estree) compliant syntax tree against a virtual environment.
 
 This library was inspired by [Neil Fraser's](https://github.com/NeilFraser) very fine library [JS Interpreter](https://github.com/NeilFraser/JS-Interpreter). Leveraging the [Test 262 conformance suite](https://github.com/tc39/test262) the goals for this library became more ambitious. It became apparent that it would be feasible to completely implement the entire ECMAScript 5.1 specification. (The `mocha` tests found in the "test" directory serve as a quick sanity check used during refactoring and initial development. The primary testing mechanism are the Test 262 tests.)
 
 -----
 
-The current release can be considered a release candidate. Barring some low-level API changes and further documentation the release is now feature complete.
-
 ## TODO
 - Docs & Examples - would like to put together an interactive playground that can be used for demoing.
 - Performance measurements/optimizations
 - Add detection of infinite loops
-- Possible: allow stepping/pausing of code execution
+- Allow stepping/pausing of code execution
 - Possible: directly integrate external parser (with ability to override)
 
 ## ES6
-[ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html) support has begun but is [incomplete](ES6.md). Use the option `ecmaVersion` set to 6 to enable support.
+[ES6 - ECMAScript 2015](http://www.ecma-international.org/ecma-262/6.0/index.html) support has been added but is not yet [complete](ES6.md). Noteable omissions include Generators, Promises, and subclassing of built-in objects. Use the option `ecmaVersion` set to 6 to enable support.
 
 ## Usage
 
 Vanilla usage without any customization, will run the code with full ES5.1 support:
 
 ```js
+// use a parser, like acorn
+var ast = acorn.parse("var a = 1, b = 2; a + b;");
+
 // pass in the parsed syntax tree into the create method
 var sandbox = SandBoxr.create(ast);
 
@@ -38,6 +39,9 @@ var result = sandbox.execute();
 	
 // get the native value
 var nativeValue = result.toNative();
+
+nativeValue === 3;
+// true
 ```
 
 ### Options
@@ -149,7 +153,7 @@ foo.setValue(fooFunc);
 ```
 
 ### What this library does not do...
-- **"Fix" JavaScript.** All those quirks you love to hate are kept intact. (To come will be extension points so that you can, if you so chose, alter aspects of JavaScript's implementation, for example for equality.)
+- **"Fix" JavaScript.** All those quirks you love to hate are kept intact. (There are extension points so that you can, if you so chose, alter aspects of JavaScript's implementation, for example for equality.)
 - **Run "safe" code.** This library does not protect you from writing bad code. If you write a circular loop, expect a stack overflow.
 - **Transpile code.** Code is not transpiled into another format - instead the syntax tree is evaluated. 
 - **Verify syntax.** This library expects a valid syntax tree. The syntax should be verified when parsed. If the syntax tree is malformed expect unexected results.
