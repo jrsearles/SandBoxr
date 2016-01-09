@@ -5,7 +5,7 @@ import {UNDEFINED} from "../../types/primitive-type";
 
 export function getStartIndex (index, length) {
 	if (index < 0) {
-		return Math.max(length - Math.abs(index), 0);
+		return Math.max(length + index, 0);
 	}
 
 	return Math.min(index || 0, length);
@@ -30,7 +30,8 @@ export function* executeCallback (env, callback, entry, thisArg, arr) {
 }
 
 export function* executeAccumulator (env, callback, priorValue, entry, arr) {
-	let args = [priorValue || UNDEFINED, entry.value || UNDEFINED, env.objectFactory.createPrimitive(entry.key), arr];
+	let key = env.objectFactory.createPrimitive(entry.key);
+	let args = [priorValue || UNDEFINED, entry.value || UNDEFINED, key, arr];
 	return yield callback.call(UNDEFINED, args) || UNDEFINED;
 }
 

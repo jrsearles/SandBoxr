@@ -29,7 +29,18 @@ export default function (target, env, factory) {
 			if (index === length) {
 				done = true;
 			}	else {
-				value = factory.createPrimitive(stringValue[index++]);
+				let char = stringValue[index++];
+				if (index < length) {
+					let first = char.charCodeAt(0);
+					if (first >= 0xD800 && first <= 0xDBFF) {
+						let second = stringValue.charCodeAt(index);
+						if (second >= 0xDC00 && second <= 0xDFFF) {
+							char += stringValue[index++];
+						}
+					}
+				}
+			
+				value = factory.createPrimitive(char);
 			}
 
 			yield factory.createIteratorResult({value, done});
@@ -43,4 +54,7 @@ export default function (target, env, factory) {
 		let it = getIterator(stringValue);
 		return factory.createIterator(it, iteratorProto);
 	}, 0, "[Symbol.iterator]"));
+	
+	let stringTagKey = env.getSymbol("toStringTag");
+	iteratorProto.define(stringTagKey, factory.createPrimitive("String Iterator"), {writable: false});
 }

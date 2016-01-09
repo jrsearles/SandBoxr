@@ -19,7 +19,6 @@ export default function ($target, env, factory) {
 			let passed = toBoolean(yield executeCallback(env, callback, entry, thisArg, arr));
 			if (passed) {
 				createDataProperty(newArray, index++, entry.value);
-				// newArray.setIndex(index++, entry.value);
 			}
 		}
 

@@ -1,5 +1,5 @@
 import {getMethod} from "../utils/helpers";
-import {isNullOrUndefined, isFunction} from "./checks";
+import {isNullOrUndefined, isFunction, isUndefined, isNull} from "./checks";
 
 const sign = Math.sign;
 const floor = Math.floor;
@@ -176,14 +176,34 @@ export function* toPrimitiveOrdinary (obj, preferredType) {
 }
 
 export function* toString (obj) {
+	if (isUndefined(obj)) {
+		return "undefined";
+	}
+	
+	if (isNull(obj)) {
+		return "null";
+	}
+	
+	if (obj.isSymbol) {
+		throw TypeError("Symbol cannot be coerced into a string.");
+	}
+	
 	return String(yield toPrimitive(obj, "string"));
 }
 
 export function* toNumber (obj) {
-	if (!obj || obj.type === "undefined") {
+	if (isUndefined(obj)) {
 		return NaN;
 	}
-
+	
+	if (isNull(obj)) {
+		return 0;
+	}
+	
+	if (obj.isSymbol) {
+		throw TypeError("Symbol cannot be coerced into a number.")
+	}
+	
 	return Number(yield toPrimitive(obj, "number"));
 }
 

@@ -1,4 +1,4 @@
-import {toString, toNativeFunction} from "../../utils/native";
+import {toString, toNativeFunction, toBoolean} from "../../utils/native";
 import {isUndefined} from "../../utils/checks";
 
 import $exec from "./regex.exec";

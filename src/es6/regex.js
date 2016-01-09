@@ -1,6 +1,6 @@
 import {exhaust as x} from "../utils/async";
 import {UNDEFINED, NULL} from "../types/primitive-type";
-import {toString, toUInt32} from "../utils/native";
+import {toString, toUInt32, toBoolean} from "../utils/native";
 import {isFunction, isUndefined} from "../utils/checks";
 
 export default function (globalObject, env, factory) {
@@ -77,4 +77,27 @@ export default function (globalObject, env, factory) {
 			get: getterFunc
 		});
 	});
+	
+	let flagAliases = {
+		"global": "g",
+		"ignoreCase": "i",
+		"multiline": "m",
+		"unicode": "u",
+		"sticky": "y"
+	};
+	
+	let flags = ["global", "ignoreCase", "multiline", "unicode", "sticky"];
+	
+	let flagsGetter = function () {
+		let thisFlags = "";
+		flags.forEach(f => {
+			if (toBoolean(this.getValue(f))) {
+				thisFlags += flagAliases[f];
+			}
+		});
+
+		return factory.createPrimitive(thisFlags); 
+	};
+	
+	proto.defineProperty("flags", {configurable: true, get: factory.createGetter(flagsGetter, "flags"), getter: flagsGetter});
 }

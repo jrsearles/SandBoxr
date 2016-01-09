@@ -144,6 +144,15 @@ const ops = {
 
 		a = yield toPrimitive(a);
 		b = yield toPrimitive(b);
+				
+		if (a.type === "string" || b.type === "string") {
+			a = yield toString(a);
+			b = yield toString(b);
+		} else {
+			a = yield toNumber(a);
+			b = yield toNumber(b);
+		}
+
 		return a + b;
 	},
 	*["-"] (a, b) { return (yield toNumber(a)) - (yield toNumber(b)); },
