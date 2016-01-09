@@ -182,7 +182,7 @@ export class ObjectType {
 				descriptor = receiverDescriptor;
 			}
 
-			if (descriptor.hasValue() && receiver.owns(key) && ops.areSame(descriptor.getValue(), value)) {
+			if (descriptor.dataProperty && descriptor.hasValue() && receiver.owns(key) && ops.areSame(descriptor.getValue(), value)) {
 				return true;
 			}
 

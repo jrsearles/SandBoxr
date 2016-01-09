@@ -73,11 +73,11 @@ export default function ($target, env, factory) {
 	let stringTagKey = env.getSymbol("toStringTag");
 	iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), {writable: false});
 
-	let iteratorFunc = factory.createFunction(function () {
+	let iteratorFunc = factory.createBuiltInFunction(function () {
 		let arr = toObject(this.object, true);
 		let it = getIterator(arr, "value");
 		return factory.createIterator(it, iteratorProto);
-	}, iteratorProto, {name: "Array.prototype.values"});
+	}, 0, "Array.prototype.values");
 
 	$target.define("values", iteratorFunc);
 

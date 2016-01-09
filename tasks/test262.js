@@ -120,7 +120,7 @@ gulp.task("test262-6", ["build"], function () {
 gulp.task("test262", ["build"], function () {
 	var SandBoxr = require("../dist/sandboxr");
 	var test262 = require("../../test262-5-streamer");
-	var base = path.join(__dirname, "../node_modules/test262/test/suite/");
+	var base = path.join(__dirname, "../../test262/test/suite/");
 	
 	// "!ch15/15.1/**/*.js",
 	return test262({ files: ["**/*.js", "!ch15/15.1/**/*.js", "!intl402/**/*.js"], base: base })

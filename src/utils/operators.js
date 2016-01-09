@@ -142,19 +142,17 @@ const ops = {
 			return a.value + b.value;
 		}
 
-		a = yield toPrimitive(a);
-		b = yield toPrimitive(b);
-				
-		if (a.type === "string" || b.type === "string") {
-			a = yield toString(a);
-			b = yield toString(b);
-		} else {
-			a = yield toNumber(a);
-			b = yield toNumber(b);
+		let aa = yield toPrimitive(a);
+		let bb = yield toPrimitive(b);
+		
+		if (a.isSymbol || b.isSymbol) {
+			let convertType = typeof aa === "string" || typeof bb === "string" ? "string" : "number";
+			throw TypeError(`Cannot convert Symbol to a ${convertType}`);
 		}
-
-		return a + b;
+		
+		return aa + bb;
 	},
+	
 	*["-"] (a, b) { return (yield toNumber(a)) - (yield toNumber(b)); },
 
 	// multiplicative operators

@@ -13652,11 +13652,11 @@ exports.default = function ($target, env, factory) {
 	var stringTagKey = env.getSymbol("toStringTag");
 	iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), { writable: false });
 
-	var iteratorFunc = factory.createFunction(function () {
+	var iteratorFunc = factory.createBuiltInFunction(function () {
 		var arr = (0, _native.toObject)(this.object, true);
 		var it = getIterator(arr, "value");
 		return factory.createIterator(it, iteratorProto);
-	}, iteratorProto, { name: "Array.prototype.values" });
+	}, 0, "Array.prototype.values");
 
 	$target.define("values", iteratorFunc);
 
@@ -20477,7 +20477,7 @@ var ObjectType = exports.ObjectType = function () {
 					descriptor = receiverDescriptor;
 				}
 
-				if (descriptor.hasValue() && receiver.owns(key) && _operators2.default.areSame(descriptor.getValue(), value)) {
+				if (descriptor.dataProperty && descriptor.hasValue() && receiver.owns(key) && _operators2.default.areSame(descriptor.getValue(), value)) {
 					return true;
 				}
 
@@ -23816,6 +23816,7 @@ var ops = (_ops = {
 		}
 	}, _, this);
 })), _defineProperty(_ops, "+", regeneratorRuntime.mark(function _(a, b) {
+	var aa, bb, convertType;
 	return regeneratorRuntime.wrap(function _$(_context7) {
 		while (1) {
 			switch (_context7.prev = _context7.next) {
@@ -23832,47 +23833,25 @@ var ops = (_ops = {
 					return (0, _native.toPrimitive)(a);
 
 				case 4:
-					a = _context7.sent;
+					aa = _context7.sent;
 					_context7.next = 7;
 					return (0, _native.toPrimitive)(b);
 
 				case 7:
-					b = _context7.sent;
+					bb = _context7.sent;
 
-					if (!(a.type === "string" || b.type === "string")) {
-						_context7.next = 17;
+					if (!(a.isSymbol || b.isSymbol)) {
+						_context7.next = 11;
 						break;
 					}
 
-					_context7.next = 11;
-					return (0, _native.toString)(a);
+					convertType = typeof aa === "string" || typeof bb === "string" ? "string" : "number";
+					throw TypeError("Cannot convert Symbol to a " + convertType);
 
 				case 11:
-					a = _context7.sent;
-					_context7.next = 14;
-					return (0, _native.toString)(b);
+					return _context7.abrupt("return", aa + bb);
 
-				case 14:
-					b = _context7.sent;
-					_context7.next = 23;
-					break;
-
-				case 17:
-					_context7.next = 19;
-					return (0, _native.toNumber)(a);
-
-				case 19:
-					a = _context7.sent;
-					_context7.next = 22;
-					return (0, _native.toNumber)(b);
-
-				case 22:
-					b = _context7.sent;
-
-				case 23:
-					return _context7.abrupt("return", a + b);
-
-				case 24:
+				case 12:
 				case "end":
 					return _context7.stop();
 			}
