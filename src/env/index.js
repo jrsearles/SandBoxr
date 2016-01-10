@@ -10,6 +10,7 @@ import {assertIsValidIdentifier} from "../utils/contracts";
 import {Scope} from "./scope";
 import {BlockScope} from "./block-scope";
 import {SymbolType} from "../types/symbol-type";
+import {exhaust as x} from "../utils/async";
 
 const defaultOptions = {
 	allowDebugger: false,
@@ -53,6 +54,13 @@ export class Environment {
 				}
 
 				parent.remove(segments.shift());
+			});
+		}
+		
+		if (options.imports) {
+			options.imports.forEach(item => {
+				let ast = item.ast || options.parser(item.code);
+				x(this.createExecutionContext(this.global).execute(ast));
 			});
 		}
 	}

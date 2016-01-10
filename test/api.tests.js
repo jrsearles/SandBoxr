@@ -184,4 +184,24 @@ describe("API", () => {
 			expect(result.value).to.be.true;	
 		});
 	});
+	
+	describe("Imports", () => {
+		it("should allow an ast to be imported", () => {
+			let importAst = parser.parse("var a = 2");
+			
+			let ast = parser.parse("a==2;");
+			let sandbox = SandBoxr.create(ast, {imports:[{ast:importAst}]});
+			
+			let result = sandbox.execute();
+			expect(result.value).to.be.true;
+		});
+		
+		it("should allow text code to be passed if a parser is defined", () => {
+			let ast = parser.parse("a==2;");
+			let sandbox = SandBoxr.create(ast, {parser: parser.parse, imports: [{code: "var a = 2;"}]});
+			
+			let result = sandbox.execute();
+			expect(result.value).to.be.true;
+		});
+	});
 });

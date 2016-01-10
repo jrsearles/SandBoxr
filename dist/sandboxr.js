@@ -4835,6 +4835,8 @@ var _blockScope = require("./block-scope");
 
 var _symbolType = require("../types/symbol-type");
 
+var _async = require("../utils/async");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4891,6 +4893,13 @@ var Environment = exports.Environment = function () {
 					}
 
 					parent.remove(segments.shift());
+				});
+			}
+
+			if (options.imports) {
+				options.imports.forEach(function (item) {
+					var ast = item.ast || options.parser(item.code);
+					(0, _async.exhaust)(_this.createExecutionContext(_this.global).execute(ast));
 				});
 			}
 		}
@@ -5103,7 +5112,7 @@ var Environment = exports.Environment = function () {
 	return Environment;
 }();
 
-},{"../es5":244,"../es6":301,"../execution-context":365,"../types/primitive-type":385,"../types/symbol-type":390,"../utils/contracts":394,"../utils/operators":397,"./block-scope":192,"./declarative-environment":193,"./object-environment":195,"./reference":197,"./scope":198}],195:[function(require,module,exports){
+},{"../es5":244,"../es6":301,"../execution-context":365,"../types/primitive-type":385,"../types/symbol-type":390,"../utils/async":392,"../utils/contracts":394,"../utils/operators":397,"./block-scope":192,"./declarative-environment":193,"./object-environment":195,"./reference":197,"./scope":198}],195:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
