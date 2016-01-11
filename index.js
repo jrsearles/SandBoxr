@@ -2,7 +2,7 @@ import "babel-polyfill";
 import {Environment} from "./src/env";
 import {Sandbox} from "./src";
 
-export const version = "0.14.0";
+export const version = "0.15.0";
 
 /**
 	* Creates an environment instance.

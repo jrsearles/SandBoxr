@@ -1,5 +1,5 @@
 /**
- * SandBoxr JavaScript library v0.14.0
+ * SandBoxr JavaScript library v0.15.0
  * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr
  * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
@@ -20,7 +20,7 @@ var _env = require("./src/env");
 
 var _src = require("./src");
 
-var version = exports.version = "0.14.0";
+var version = exports.version = "0.15.0";
 
 /**
 	* Creates an environment instance.
@@ -17914,7 +17914,7 @@ var ExecutionContext = exports.ExecutionContext = function () {
 
 ;
 
-},{"./estree":360,"./execution-result":366,"./syntax-rules":374,"./types/primitive-type":385,"./visitors":415}],366:[function(require,module,exports){
+},{"./estree":360,"./execution-result":366,"./syntax-rules":374,"./types/primitive-type":385,"./visitors":416}],366:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -24903,14 +24903,11 @@ function EmptyStatement(node, context) {
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.ExportDeclaration = ExportDeclaration;
-exports.ImportDeclaration = ImportDeclaration;
-
-var _assign = require("../utils/assign");
+exports.default = ExportDeclaration;
 
 var _propertyReference = require("../env/property-reference");
 
-var _marked = [getSource, ExportDeclaration, ImportDeclaration].map(regeneratorRuntime.mark);
+var _marked = [getSource, ExportDeclaration].map(regeneratorRuntime.mark);
 
 function exportSpecified(target, key, env, source, alias) {
 	alias = alias || key;
@@ -25003,9 +25000,9 @@ function ExportDeclaration(node, context, next) {
 						while (1) {
 							switch (_context3.prev = _context3.next) {
 								case 0:
-									_context3.t0 = node.source;
+									source = null;
 
-									if (!_context3.t0) {
+									if (!node.source) {
 										_context3.next = 5;
 										break;
 									}
@@ -25014,22 +25011,22 @@ function ExportDeclaration(node, context, next) {
 									return getSource(context.env, node.source.value);
 
 								case 4:
-									_context3.t0 = _context3.sent;
+									source = _context3.sent;
 
 								case 5:
-									source = _context3.t0;
 
 									if (node.isExportAllDeclaration()) {
+										// if using a wildcard export, just copy all the properties to the current export object
 										source.getOwnPropertyKeys().forEach(function (key) {
 											return exportSpecified(target, key, context.env, source);
 										});
 									} else {
-										node.specifiers.forEach(function (id) {
-											return exportSpecified(target, id.local.name, context.env, source, id.exported.name);
+										node.specifiers.forEach(function (spec) {
+											return exportSpecified(target, spec.local.name, context.env, source, spec.exported.name);
 										});
 									}
 
-								case 7:
+								case 6:
 								case "end":
 									return _context3.stop();
 							}
@@ -25047,102 +25044,7 @@ function ExportDeclaration(node, context, next) {
 	}, _marked[1], this);
 }
 
-function ImportDeclaration(node, context, next) {
-	var ast, source, scope, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _step$value, local, imported, key;
-
-	return regeneratorRuntime.wrap(function ImportDeclaration$(_context6) {
-		while (1) switch (_context6.prev = _context6.next) {
-			case 0:
-				ast = context.env.imports[node.source.value];
-				source = context.env.exports = context.env.objectFactory.createObject();
-				scope = context.env.createScope(context.env.global);
-				_context6.next = 5;
-				return scope.use(regeneratorRuntime.mark(function _callee3() {
-					return regeneratorRuntime.wrap(function _callee3$(_context5) {
-						while (1) {
-							switch (_context5.prev = _context5.next) {
-								case 0:
-									_context5.next = 2;
-									return context.env.createExecutionContext(context.env.global).execute(ast);
-
-								case 2:
-								case "end":
-									return _context5.stop();
-							}
-						}
-					}, _callee3, this);
-				}));
-
-			case 5:
-				_iteratorNormalCompletion = true;
-				_didIteratorError = false;
-				_iteratorError = undefined;
-				_context6.prev = 8;
-				_iterator = node.specifiers[Symbol.iterator]();
-
-			case 10:
-				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
-					_context6.next = 20;
-					break;
-				}
-
-				_step$value = _step.value;
-				local = _step$value.local;
-				imported = _step$value.imported;
-				key = imported ? imported.name : "default";
-				_context6.next = 17;
-				return (0, _assign.declare)(context.env, local, source.getValue(key));
-
-			case 17:
-				_iteratorNormalCompletion = true;
-				_context6.next = 10;
-				break;
-
-			case 20:
-				_context6.next = 26;
-				break;
-
-			case 22:
-				_context6.prev = 22;
-				_context6.t0 = _context6["catch"](8);
-				_didIteratorError = true;
-				_iteratorError = _context6.t0;
-
-			case 26:
-				_context6.prev = 26;
-				_context6.prev = 27;
-
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
-				}
-
-			case 29:
-				_context6.prev = 29;
-
-				if (!_didIteratorError) {
-					_context6.next = 32;
-					break;
-				}
-
-				throw _iteratorError;
-
-			case 32:
-				return _context6.finish(29);
-
-			case 33:
-				return _context6.finish(26);
-
-			case 34:
-				return _context6.abrupt("return", context.empty());
-
-			case 35:
-			case "end":
-				return _context6.stop();
-		}
-	}, _marked[2], this, [[8, 22, 26, 34], [27,, 29, 33]]);
-}
-
-},{"../env/property-reference":196,"../utils/assign":391}],407:[function(require,module,exports){
+},{"../env/property-reference":196}],407:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -25992,6 +25894,132 @@ function IfStatement(node, context, next) {
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+exports.default = ImportDeclaration;
+
+var _assign = require("../utils/assign");
+
+var _marked = [ImportDeclaration].map(regeneratorRuntime.mark);
+
+function ImportDeclaration(node, context, next) {
+	var moduleName, ast, source, thisArg, scope, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, specifier, imported, local, value, key;
+
+	return regeneratorRuntime.wrap(function ImportDeclaration$(_context2) {
+		while (1) switch (_context2.prev = _context2.next) {
+			case 0:
+				moduleName = node.source.value;
+
+				if (moduleName in context.env.imports) {
+					_context2.next = 3;
+					break;
+				}
+
+				throw ReferenceError("Cannot find module '" + moduleName + "'");
+
+			case 3:
+				ast = context.env.imports[moduleName];
+				source = context.env.exports = context.env.objectFactory.createObject();
+				thisArg = context.env.global;
+				scope = context.env.createScope(thisArg);
+				_context2.next = 9;
+				return scope.use(regeneratorRuntime.mark(function _callee() {
+					return regeneratorRuntime.wrap(function _callee$(_context) {
+						while (1) {
+							switch (_context.prev = _context.next) {
+								case 0:
+									_context.next = 2;
+									return context.env.createExecutionContext(thisArg).execute(ast);
+
+								case 2:
+								case "end":
+									return _context.stop();
+							}
+						}
+					}, _callee, this);
+				}));
+
+			case 9:
+				_iteratorNormalCompletion = true;
+				_didIteratorError = false;
+				_iteratorError = undefined;
+				_context2.prev = 12;
+				_iterator = node.specifiers[Symbol.iterator]();
+
+			case 14:
+				if (_iteratorNormalCompletion = (_step = _iterator.next()).done) {
+					_context2.next = 25;
+					break;
+				}
+
+				specifier = _step.value;
+				imported = specifier.imported;
+				local = specifier.local;
+				value = source;
+
+				if (!specifier.isImportNamespaceSpecifier()) {
+					// wildcard imports use entire export object
+					key = imported ? imported.name : "default";
+
+					value = source.getValue(key);
+				}
+
+				_context2.next = 22;
+				return (0, _assign.declare)(context.env, local, value);
+
+			case 22:
+				_iteratorNormalCompletion = true;
+				_context2.next = 14;
+				break;
+
+			case 25:
+				_context2.next = 31;
+				break;
+
+			case 27:
+				_context2.prev = 27;
+				_context2.t0 = _context2["catch"](12);
+				_didIteratorError = true;
+				_iteratorError = _context2.t0;
+
+			case 31:
+				_context2.prev = 31;
+				_context2.prev = 32;
+
+				if (!_iteratorNormalCompletion && _iterator.return) {
+					_iterator.return();
+				}
+
+			case 34:
+				_context2.prev = 34;
+
+				if (!_didIteratorError) {
+					_context2.next = 37;
+					break;
+				}
+
+				throw _iteratorError;
+
+			case 37:
+				return _context2.finish(34);
+
+			case 38:
+				return _context2.finish(31);
+
+			case 39:
+				return _context2.abrupt("return", context.empty());
+
+			case 40:
+			case "end":
+				return _context2.stop();
+		}
+	}, _marked[0], this, [[12, 27, 31, 39], [32,, 34, 38]]);
+}
+
+},{"../utils/assign":391}],416:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
 exports.visitors = undefined;
 
 var _arrayExpression = require("./array-expression");
@@ -26034,7 +26062,9 @@ var _emptyStatement = require("./empty-statement");
 
 var _emptyStatement2 = _interopRequireDefault(_emptyStatement);
 
-var _exportImportDeclaration = require("./export-import-declaration");
+var _exportDeclaration = require("./export-declaration");
+
+var _exportDeclaration2 = _interopRequireDefault(_exportDeclaration);
 
 var _expressionStatement = require("./expression-statement");
 
@@ -26061,6 +26091,10 @@ var _functionExpression = require("./function-expression");
 var _identifier = require("./identifier");
 
 var _identifier2 = _interopRequireDefault(_identifier);
+
+var _importDeclaration = require("./import-declaration");
+
+var _importDeclaration2 = _interopRequireDefault(_importDeclaration);
 
 var _labeledStatement = require("./labeled-statement");
 
@@ -26167,7 +26201,7 @@ var visitors = exports.visitors = {
 	FunctionDeclaration: _functionDeclaration2.default,
 	FunctionExpression: _functionExpression.FunctionExpression,
 	Identifier: _identifier2.default,
-	ImportDeclaration: _exportImportDeclaration.ImportDeclaration,
+	ImportDeclaration: _importDeclaration2.default,
 	LabeledStatement: _labeledStatement2.default,
 	Literal: _literal2.default,
 	LogicalExpression: _logicalExpression2.default,
@@ -26193,16 +26227,16 @@ var visitors = exports.visitors = {
 	ArrowFunctionExpression: _functionExpression.FunctionExpression,
 	ClassExpression: _functionExpression.ClassDeclaration,
 	ContinueStatement: _interruptStatement2.default,
-	ExportAllDeclaration: _exportImportDeclaration.ExportDeclaration,
-	ExportNamedDeclaration: _exportImportDeclaration.ExportDeclaration,
-	ExportDefaultDeclaration: _exportImportDeclaration.ExportDeclaration,
+	ExportAllDeclaration: _exportDeclaration2.default,
+	ExportNamedDeclaration: _exportDeclaration2.default,
+	ExportDefaultDeclaration: _exportDeclaration2.default,
 	IfStatement: _ifStatement2.default,
 	NewExpression: _callExpression2.default,
 	Program: _blockStatement2.default,
 	WhileStatement: _doWhileStatement2.default
 };
 
-},{"./array-expression":398,"./assignment-expression":399,"./binary-expression":400,"./block-statement":401,"./call-expression":402,"./debugger-statement":403,"./do-while-statement.js":404,"./empty-statement":405,"./export-import-declaration":406,"./expression-statement":407,"./for-in-statement":408,"./for-of-statement":409,"./for-statement":410,"./function-declaration":411,"./function-expression":412,"./identifier":413,"./if-statement":414,"./interrupt-statement":416,"./labeled-statement":417,"./literal":418,"./logical-expression":419,"./member-expression":420,"./meta-property":421,"./object-expression":422,"./return-statement":423,"./sequence-expression":424,"./spread-element":425,"./super":426,"./switch-statement":427,"./tagged-template-expression":428,"./template-literal":429,"./this-expression":430,"./throw-statement":431,"./try-statement":432,"./unary-expression":433,"./update-expression":434,"./variable-declaration":435,"./variable-declarator":436,"./with-statement":437}],416:[function(require,module,exports){
+},{"./array-expression":398,"./assignment-expression":399,"./binary-expression":400,"./block-statement":401,"./call-expression":402,"./debugger-statement":403,"./do-while-statement.js":404,"./empty-statement":405,"./export-declaration":406,"./expression-statement":407,"./for-in-statement":408,"./for-of-statement":409,"./for-statement":410,"./function-declaration":411,"./function-expression":412,"./identifier":413,"./if-statement":414,"./import-declaration":415,"./interrupt-statement":417,"./labeled-statement":418,"./literal":419,"./logical-expression":420,"./member-expression":421,"./meta-property":422,"./object-expression":423,"./return-statement":424,"./sequence-expression":425,"./spread-element":426,"./super":427,"./switch-statement":428,"./tagged-template-expression":429,"./template-literal":430,"./this-expression":431,"./throw-statement":432,"./try-statement":433,"./unary-expression":434,"./update-expression":435,"./variable-declaration":436,"./variable-declarator":437,"./with-statement":438}],417:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26223,7 +26257,7 @@ function InterruptStatement(node, context) {
 	return context.skip(label);
 }
 
-},{}],417:[function(require,module,exports){
+},{}],418:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26252,7 +26286,7 @@ function LabeledStatement(node, context, next) {
 	}, _marked[0], this);
 };
 
-},{}],418:[function(require,module,exports){
+},{}],419:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26263,7 +26297,7 @@ function Literal(node, context) {
 	return context.result(context.env.objectFactory.createPrimitive(node.value));
 }
 
-},{}],419:[function(require,module,exports){
+},{}],420:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26316,7 +26350,7 @@ function LogicalExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/native":396}],420:[function(require,module,exports){
+},{"../utils/native":396}],421:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26389,7 +26423,7 @@ function MemberExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../env/property-reference":196,"../utils/native":396}],421:[function(require,module,exports){
+},{"../env/property-reference":196,"../utils/native":396}],422:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26407,7 +26441,7 @@ function MetaProperty(node, context) {
 	throw SyntaxError("Unknown MetaProperty: " + node.meta.name + "." + node.property.name);
 }
 
-},{"../types/primitive-type":385}],422:[function(require,module,exports){
+},{"../types/primitive-type":385}],423:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26565,7 +26599,7 @@ function ObjectExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":392,"../utils/contracts":394,"../utils/native":396}],423:[function(require,module,exports){
+},{"../utils/async":392,"../utils/contracts":394,"../utils/native":396}],424:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26605,7 +26639,7 @@ function ReturnStatement(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../types/primitive-type":385}],424:[function(require,module,exports){
+},{"../types/primitive-type":385}],425:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26653,7 +26687,7 @@ function SequenceExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":392}],425:[function(require,module,exports){
+},{"../utils/async":392}],426:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26704,7 +26738,7 @@ function SpreadElement(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../types/symbol-type":390,"../utils/native":396}],426:[function(require,module,exports){
+},{"../types/symbol-type":390,"../utils/native":396}],427:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26725,7 +26759,7 @@ function Super(node, context) {
 	return context.result(homeObject || context.env.getThisBinding());
 }
 
-},{}],427:[function(require,module,exports){
+},{}],428:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26917,7 +26951,7 @@ function SwitchStatement(node, context, next) {
 	}, _marked[1], this, [[8, 35, 39, 47], [40,, 42, 46]]);
 }
 
-},{"../utils/async":392}],428:[function(require,module,exports){
+},{"../utils/async":392}],429:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27009,7 +27043,7 @@ function TaggedTemplateExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":392}],429:[function(require,module,exports){
+},{"../utils/async":392}],430:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27076,7 +27110,7 @@ function TemplateLiteral(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":392,"../utils/native":396}],430:[function(require,module,exports){
+},{"../utils/async":392,"../utils/native":396}],431:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27095,7 +27129,7 @@ function ThisExpression(node, context) {
 	return context.result(thisArg);
 }
 
-},{"../utils/checks":393}],431:[function(require,module,exports){
+},{"../utils/checks":393}],432:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27124,7 +27158,7 @@ function ThrowStatement(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{}],432:[function(require,module,exports){
+},{}],433:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27295,7 +27329,7 @@ function TryStatement(node, context, next) {
 	}, _marked[2], this);
 }
 
-},{"../utils/assign":391,"../utils/async":392}],433:[function(require,module,exports){
+},{"../utils/assign":391,"../utils/async":392}],434:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27438,7 +27472,7 @@ function UnaryExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../env/property-reference":196,"../env/reference":197,"../utils/native":396}],434:[function(require,module,exports){
+},{"../env/property-reference":196,"../env/reference":197,"../utils/native":396}],435:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27495,7 +27529,7 @@ function UpdateExpression(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/contracts":394,"../utils/native":396}],435:[function(require,module,exports){
+},{"../utils/contracts":394,"../utils/native":396}],436:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27538,7 +27572,7 @@ function VariableDeclaration(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../utils/async":392}],436:[function(require,module,exports){
+},{"../utils/async":392}],437:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27599,7 +27633,7 @@ function VariableDeclarator(node, context, next) {
 	}, _marked[0], this);
 }
 
-},{"../types/primitive-type":385,"../utils/assign":391}],437:[function(require,module,exports){
+},{"../types/primitive-type":385,"../utils/assign":391}],438:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
