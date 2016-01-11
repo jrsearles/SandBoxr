@@ -46,13 +46,35 @@ const keywords = 	{
 		"package",
 		"protected",
 		"static",
-		"yield"],
+		"yield"]
 };
 
-export function isReserved (name) {
-	return keywords.es5.indexOf(name) >= 0;
+keywords.es6 = keywords.es5.slice().concat([
+	"class",
+	"const",
+	"debugger",
+	"enum",
+	"export",
+	"extends",
+	"super"
+]);
+
+keywords.es6strict = keywords.es5strict.slice().concat(["static", "implements"]);
+
+export function isReserved (name, ecmaVersion = 5) {
+	let v = "es" + ecmaVersion;
+	if (v in keywords) {
+		return keywords[v].indexOf(name) >= 0;
+	}
+	
+	return false;
 }
 
-export function	isStrictReserved (name) {
-	return keywords.es5strict.indexOf(name) >= 0;
+export function	isStrictReserved (name, ecmaVersion = 5) {
+	let v = `es${ecmaVersion}strict`;
+	if (v in keywords) {
+		return keywords[v].indexOf(name) >= 0;
+	}
+	
+	return false;
 }

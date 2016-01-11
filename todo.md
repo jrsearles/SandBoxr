@@ -1,6 +1,5 @@
 - Refactor external tests/create logging
 - Website
-- Add mechanism to import scripts
 - Refactor assertions/helpers
 - Subclassing
 - Promises

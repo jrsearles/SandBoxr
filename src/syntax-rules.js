@@ -1,16 +1,16 @@
 import {assertIsValidName, assertIsValidIdentifier, assertAreValidArguments} from "./utils/contracts";
 import {isOctalLiteral} from "./utils/native";
 
-function validateAssignment (left, strict) {
+function validateAssignment (left, strict, ecmaVersion) {
 	if (strict && left.isIdentifier()) {
 		assertIsValidName(left.name, true);
-		assertIsValidIdentifier(left.name, true);
+		assertIsValidIdentifier(left.name, true, ecmaVersion);
 	}
 }
 
 const rules = {
 	AssignmentExpression (node, context) {
-		validateAssignment(node.left, node.isStrict() || context.env.isStrict());
+		validateAssignment(node.left, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
 	},
 
 	CatchClause (node, context) {
@@ -18,7 +18,7 @@ const rules = {
 	},
 	
 	Declarator (node, context) {
-		assertIsValidIdentifier(node.id.name, node.isStrict() || context.env.isStrict());
+		assertIsValidIdentifier(node.id.name, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
 	},
 
 	["Function"] (node, context) {
@@ -38,7 +38,7 @@ const rules = {
 	},
 
 	UpdateExpression (node, context) {
-		validateAssignment(node.argument, node.isStrict() || context.env.isStrict());
+		validateAssignment(node.argument, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
 	},
 
 	WithStatement (node, context) {

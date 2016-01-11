@@ -14,8 +14,8 @@ The following ES6 features are implemented fully or partially.
 - [x] Let
 - [x] Const
 - Modules
-	- [ ] import
-	- [ ] export
+	- [x] import
+	- [x] export
 - [x] For-of
 	
 ## Built Ins

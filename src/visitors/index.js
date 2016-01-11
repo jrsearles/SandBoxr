@@ -8,6 +8,7 @@ import ConditionalExpression from "./if-statement";
 import DebuggerStatement from "./debugger-statement";
 import DoWhileStatement from "./do-while-statement.js";
 import EmptyStatement from "./empty-statement";
+import ExportDeclaration from "./export-declaration";
 import ExpressionStatement from "./expression-statement";
 import ForStatement from "./for-statement";
 import ForInStatement from "./for-in-statement";
@@ -15,6 +16,7 @@ import ForOfStatement from "./for-of-statement";
 import FunctionDeclaration from "./function-declaration";
 import {FunctionExpression, ClassDeclaration} from "./function-expression";
 import Identifier from "./identifier";
+import ImportDeclaration from "./import-declaration";
 import LabeledStatement from "./labeled-statement";
 import Literal from "./literal";
 import LogicalExpression from "./logical-expression";
@@ -56,6 +58,7 @@ export const visitors = {
 	FunctionDeclaration,
 	FunctionExpression,
 	Identifier,
+	ImportDeclaration,
 	LabeledStatement,
 	Literal,
 	LogicalExpression,
@@ -81,6 +84,9 @@ export const visitors = {
 	ArrowFunctionExpression: FunctionExpression,
 	ClassExpression: ClassDeclaration,
 	ContinueStatement: BreakStatement,
+	ExportAllDeclaration: ExportDeclaration,
+	ExportNamedDeclaration: ExportDeclaration,
+	ExportDefaultDeclaration: ExportDeclaration,
 	IfStatement: ConditionalExpression,
 	NewExpression: CallExpression,
 	Program: BlockStatement,

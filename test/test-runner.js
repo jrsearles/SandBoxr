@@ -30,6 +30,10 @@ export const es6 = {
 			
 			expect(err).to.be.instanceOf(errType);
 		}
+	},
+	
+	parse (code) {
+		return parser.parse(code, {ecmaVersion: 6, sourceType: "module"});
 	}
 };
 

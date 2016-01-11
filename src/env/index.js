@@ -31,7 +31,8 @@ export class Environment {
 		// clear state in case of re-init
 		this.current = null;
 		this.globalScope = null;
-
+		this.imports = Object.create(null);
+		
 		this.options = Object.assign({}, defaultOptions, options);
 		(options.ecmaVersion === 6 ? es6 : es5)(this);
 
@@ -60,7 +61,12 @@ export class Environment {
 		if (options.imports) {
 			options.imports.forEach(item => {
 				let ast = item.ast || options.parser(item.code);
-				x(this.createExecutionContext(this.global).execute(ast));
+
+				if (item.name) {
+					this.imports[item.name] = ast;
+				} else {
+					x(this.createExecutionContext().execute(ast));
+				}
 			});
 		}
 	}
@@ -127,7 +133,7 @@ export class Environment {
 		let attr = declareKinds[kind];
 		let scope = this.current.scope;
 		
-		assertIsValidIdentifier(key, this.isStrict());
+		assertIsValidIdentifier(key, this.isStrict(), this.options.ecmaVersion);
 		
 		if (!attr.block) {
 			while (scope) {

@@ -98,8 +98,6 @@ gulp.task("test262-6", ["build"], function () {
 				var ast = parseFn(src);
 				var box = SandBoxr.create(ast, { ecmaVersion: 6, useStrict: useStrict, parser: parseFn });
 
-				// console.log(ast);
-
 				box.execute();
 				if (verbose) {
 					gutil.log(passed, filename);

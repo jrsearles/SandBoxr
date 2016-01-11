@@ -68,6 +68,42 @@ Default: `false`
 
 Forces the runner to execute all code in *[strict mode](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode)*.
 
+#### options.imports
+Type: `Array<Object>`
+Default: `undefined`
+
+##### Import Definition
+`name`: (String) The name of the code to import. This is how it will be referenced in `import` statements.
+`ast`: (Object) The parsed AST for the code to import.
+OR
+`code`: (String) The text of the code to be imported. Requires that a parser is defined.
+
+When the environment is initialized, any unnamed imports will be run in the order that they are defined against the global scope. Named imports are not evaluated until they are imported and are done so in their own lexical scope. Named imports can use `export` statements to indicate the items to be shared.
+
+*Be sure the parser you are using is set to handle "module" source type if you are using import/export declarations.*
+
+```js
+	var parser = function (text) { return acorn.parse(text, { ecmaVersion: 6, sourceType: "module" }); };
+	var lib = {
+		name: "lib",
+		code: "export function area (radius) { return Math.PI * Math.pow(radius, 2); }"
+	};
+	
+	var ast = parser(`
+		import {area} from 'lib';
+		area(2);
+	`);
+	
+	var sandbox = SandBoxr.create(ast, {
+		imports: [lib],
+		parser: parser
+	});
+	
+	var result = sandbox.execute();
+	console.log(result.toNative());	
+	// 12.566370614359172
+```
+
 #### options.exclude
 Type: `Array<String>`
 Default: `undefined`

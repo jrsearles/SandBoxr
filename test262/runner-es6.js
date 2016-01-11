@@ -9,6 +9,8 @@ var yargs = require("yargs");
 
 var args = 	yargs.default("verbose", false)
 	.alias("v", "verbose")
+	.default("in", "**/*.js")
+	.alias("i", "in")
 	.argv;
 
 var infoBlock = /\/\*---([\s\S]*)---\*\//;
@@ -53,7 +55,7 @@ function getInfo (file) {
 	return info;
 }
 
-vfs.src("built-ins/symbol/**/*.js", {cwd: root})
+vfs.src(args.in, {cwd: root})
 	.pipe(through.obj(function (file, enc, cb) {
 		// gutil.log(file.contents.toString());
 		// cb();
@@ -77,7 +79,9 @@ vfs.src("built-ins/symbol/**/*.js", {cwd: root})
 		try {
 			ast = acorn.parse(info.src, {ecmaVersion: 6});
 		} catch (err) {
-			current.failed = true;
+			current.passed = String(info.negative || "").trim() === String(err.name).trim();
+
+			current.err = err;
 			cb(null, current);
 			return;
 		}
@@ -87,22 +91,27 @@ vfs.src("built-ins/symbol/**/*.js", {cwd: root})
 
 		try {
 			sandbox.execute();
-			current.passed = true;
+			current.passed = !info.negative;
 			cb(null, current);
 		} catch (err) {
 			if ("toNative" in err) {
 				err = err.toNative();
 			}
-			
-			// gutil.log(failed, filename, "(" + desc + ")", err);
-			current.failed = true;
+
+			current.passed = info.negative === err.name;
 			current.err = err;
 			cb(null, current);
 		}
 	}))
 	.pipe(through.obj(function (result, enc, cb) {
-		if (result.failed) {
+		if (!result.passed) {
 			gutil.log(failed, result.info.filename, result.info.description);
+			
+			if (result.info.negative) {
+				gutil.log("expected:", result.info.negative);
+				gutil.log("actual:", result.err && result.err.name);
+			}
+			
 			gutil.log("path:", result.file.path);
 			gutil.log(result.err);
 		} else if (verbose) {
@@ -114,10 +123,12 @@ vfs.src("built-ins/symbol/**/*.js", {cwd: root})
 		cb();
 	}))
 	.on("finish", function () {
+		var totalPassed = results.filter(function (o) { return o.passed; }).length;
+		
 		gutil.log("TOTALS ==============================");
-		gutil.log(passed, results.filter(function (o) { return o.passed; }).length);
-		gutil.log(skipped, results.filter(function (o) { return o.skipped; }).length);
-		gutil.log(failed, results.filter(function (o) { return o.failed; }).length);
+		gutil.log(passed, totalPassed);
+		// gutil.log(skipped, results.filter(function (o) { return o.skipped; }).length);
+		gutil.log(failed, results.length - totalPassed);
 	});
 	
 	// .pipe(through.obj(function (file, enc, done) {

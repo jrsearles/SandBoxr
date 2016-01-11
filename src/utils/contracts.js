@@ -81,12 +81,12 @@ export function	assertIsNotGeneric (obj, expectedClass, methodName) {
 	}
 }
 
-export function assertIsValidIdentifier (name, strict) {
-	if (isReserved(name)) {
+export function assertIsValidIdentifier (name, strict, ecmaVersion) {
+	if (isReserved(name, ecmaVersion)) {
 		throw SyntaxError(`Illegal use of reserved keyword: ${name}`);
 	}
 
-	if (strict && isStrictReserved(name)) {
+	if (strict && isStrictReserved(name, ecmaVersion)) {
 		throw SyntaxError(`Illegal use of strict mode reserved keyword: ${name}`);
 	}
 	

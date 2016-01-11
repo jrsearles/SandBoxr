@@ -16,8 +16,14 @@ export class PropertyReference extends Reference {
 	 * @returns {ObjectType} The value.
 	 */
 	getValue () {
-		let prop = this.base.getProperty(this.key);
-		return prop && prop.getValue() || UNDEFINED;
+		let propInfo = this.base.getProperty(this.key);
+		
+		let value = propInfo && propInfo.getValue();
+		if (value && value.isReference) {
+			value = value.getValue();
+		}
+		
+		return value || UNDEFINED;
 	}
 
 	/**

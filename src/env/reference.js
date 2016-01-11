@@ -40,7 +40,7 @@ export class Reference {
 		}
 
 		// check identifier before strict
-		assertIsValidIdentifier(this.key, this.strict);
+		assertIsValidIdentifier(this.key, this.strict, this.env.options.ecmaVersion);
 
 		if (this.strict) {
 			throw ReferenceError(`${this.key} is not defined`);
