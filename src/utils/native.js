@@ -72,14 +72,10 @@ function getEnv (obj) {
 	return obj[Symbol.for("env")];
 }
 
-function getOptions (obj) {
-	return getEnv(obj).options;
-}
-
 export function* toLength (obj) {
 	let lengthProperty = obj.getProperty("length");
 	if (lengthProperty) {
-		if (getOptions(obj).ecmaVersion === 5) {
+		if (getEnv(obj).ecmaVersion === 5) {
 			return yield toUInt32(lengthProperty.getValue());
 		}
 

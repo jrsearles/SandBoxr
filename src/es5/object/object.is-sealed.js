@@ -2,7 +2,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("isSealed", factory.createBuiltInFunction(function (obj) {
-		if (!confirmObject(obj, "Object.isSealed", env.options)) {
+		if (!confirmObject(obj, "Object.isSealed", env.ecmaVersion)) {
 			return factory.createPrimitive(true);
 		}
 
@@ -15,12 +15,6 @@ export default function ($target, env, factory) {
 					return factory.createPrimitive(false);
 				}
 			}
-			
-			// for (let prop in obj.properties) {
-			// 	if (obj.properties[prop].configurable) {
-			// 		return factory.createPrimitive(false);
-			// 	}
-			// }
 		}
 
 		return factory.createPrimitive(!extensible);

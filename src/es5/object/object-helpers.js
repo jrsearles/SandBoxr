@@ -86,12 +86,12 @@ export function* defineProperty (env, obj, key, descriptor, throwOnError = true)
 	return obj.defineProperty(key, options, throwOnError, env);
 }
 
-export function confirmObject (obj, methodName, options) {
+export function confirmObject (obj, methodName, ecmaVersion) {
 	if (isObject(obj)) {
 		return true;
 	}
 
-	if (options.ecmaVersion > 5) {
+	if (ecmaVersion > 5) {
 		return false;
 	}
 

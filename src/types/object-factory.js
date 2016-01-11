@@ -61,7 +61,7 @@ export class ObjectFactory {
 	constructor (env) {
 		this.env = env;
 		this.options = env.options;
-		this.ecmaVersion = env.options.ecmaVersion || 5;
+		this.ecmaVersion = env.ecmaVersion || 5;
 		this.initialized = false;
 	}
 

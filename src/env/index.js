@@ -34,6 +34,8 @@ export class Environment {
 		this.imports = Object.create(null);
 		
 		this.options = Object.assign({}, defaultOptions, options);
+		this.ecmaVersion = options.ecmaVersion;
+		
 		(options.ecmaVersion === 6 ? es6 : es5)(this);
 
 		// todo: improve this
@@ -133,7 +135,7 @@ export class Environment {
 		let attr = declareKinds[kind];
 		let scope = this.current.scope;
 		
-		assertIsValidIdentifier(key, this.isStrict(), this.options.ecmaVersion);
+		assertIsValidIdentifier(key, this.isStrict(), this.ecmaVersion);
 		
 		if (!attr.block) {
 			while (scope) {

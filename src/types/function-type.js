@@ -88,14 +88,14 @@ export class FunctionType extends ObjectType {
 	setLength (length) {
 		let env = this[Symbol.for("env")];
 		let value = env.objectFactory.createPrimitive(length);
-		let configurable = env.options.ecmaVersion > 5;
+		let configurable = env.ecmaVersion > 5;
 
 		this.defineProperty("length", {value, configurable});		
 	}
 
 	addPoison () {
 		let env = this[Symbol.for("env")];
-		if (env.options.ecmaVersion > 5) {
+		if (env.ecmaVersion > 5) {
 			return;
 		}
 

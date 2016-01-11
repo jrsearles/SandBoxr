@@ -10,7 +10,7 @@ function validateAssignment (left, strict, ecmaVersion) {
 
 const rules = {
 	AssignmentExpression (node, context) {
-		validateAssignment(node.left, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
+		validateAssignment(node.left, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
 	},
 
 	CatchClause (node, context) {
@@ -18,7 +18,7 @@ const rules = {
 	},
 	
 	Declarator (node, context) {
-		assertIsValidIdentifier(node.id.name, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
+		assertIsValidIdentifier(node.id.name, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
 	},
 
 	["Function"] (node, context) {
@@ -38,7 +38,7 @@ const rules = {
 	},
 
 	UpdateExpression (node, context) {
-		validateAssignment(node.argument, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
+		validateAssignment(node.argument, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
 	},
 
 	WithStatement (node, context) {

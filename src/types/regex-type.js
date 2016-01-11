@@ -14,7 +14,7 @@ export class RegexType extends ObjectType {
 		this.defineProperty("lastIndex", {value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true});
 
 		["source", "global", "ignoreCase", "multiline"].forEach(key => {
-			if (env.options.ecmaVersion > 5) {
+			if (env.ecmaVersion > 5) {
 				let getter = function () { return env.objectFactory.createPrimitive(this.source[key]); };
 				let getterFunc = env.objectFactory.createGetter(getter, key);
 

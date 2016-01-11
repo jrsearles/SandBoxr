@@ -2,7 +2,7 @@ import {confirmObject} from "./object-helpers";
 
 export default function ($target, env, factory) {
 	$target.define("isFrozen", factory.createBuiltInFunction(function (obj) {
-		if (!confirmObject(obj, "Object.isFrozen", env.options)) {
+		if (!confirmObject(obj, "Object.isFrozen", env.ecmaVersion)) {
 			return factory.createPrimitive(true);
 		}
 
@@ -18,12 +18,6 @@ export default function ($target, env, factory) {
 					return factory.createPrimitive(false);
 				}
 			}
-			
-			// for (let prop in obj.properties) {
-			// 	if (obj.properties[prop].writable || obj.properties[prop].configurable) {
-			// 		return factory.createPrimitive(false);
-			// 	}
-			// }
 		}
 
 		return factory.createPrimitive(!obj.extensible);

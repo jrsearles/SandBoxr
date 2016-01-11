@@ -1,9 +1,3 @@
-/**
- * SandBoxr JavaScript library v0.15.0
- * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr
- * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
- */
-
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.SandBoxr = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
@@ -4873,6 +4867,8 @@ var Environment = exports.Environment = function () {
 			this.imports = Object.create(null);
 
 			this.options = Object.assign({}, defaultOptions, options);
+			this.ecmaVersion = options.ecmaVersion;
+
 			(options.ecmaVersion === 6 ? _es4.default : _es2.default)(this);
 
 			// todo: improve this
@@ -4984,7 +4980,7 @@ var Environment = exports.Environment = function () {
 			var attr = declareKinds[kind];
 			var scope = this.current.scope;
 
-			(0, _contracts.assertIsValidIdentifier)(key, this.isStrict(), this.options.ecmaVersion);
+			(0, _contracts.assertIsValidIdentifier)(key, this.isStrict(), this.ecmaVersion);
 
 			if (!attr.block) {
 				while (scope) {
@@ -5415,7 +5411,7 @@ var Reference = exports.Reference = function () {
 			}
 
 			// check identifier before strict
-			(0, _contracts.assertIsValidIdentifier)(this.key, this.strict, this.env.options.ecmaVersion);
+			(0, _contracts.assertIsValidIdentifier)(this.key, this.strict, this.env.ecmaVersion);
 
 			if (this.strict) {
 				throw ReferenceError(this.key + " is not defined");
@@ -11222,12 +11218,12 @@ function defineProperty(env, obj, key, descriptor) {
 	}, _marked[0], this);
 }
 
-function confirmObject(obj, methodName, options) {
+function confirmObject(obj, methodName, ecmaVersion) {
 	if ((0, _checks.isObject)(obj)) {
 		return true;
 	}
 
-	if (options.ecmaVersion > 5) {
+	if (ecmaVersion > 5) {
 		return false;
 	}
 
@@ -11464,7 +11460,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("freeze", factory.createBuiltInFunction(function (obj) {
-		if ((0, _objectHelpers.confirmObject)(obj, "Object.freeze", env.options)) {
+		if ((0, _objectHelpers.confirmObject)(obj, "Object.freeze", env.ecmaVersion)) {
 			obj.freeze();
 		}
 
@@ -11488,7 +11484,7 @@ exports.default = function ($target, env, factory) {
 				switch (_context.prev = _context.next) {
 					case 0:
 						(0, _contracts.assertIsNotNullOrUndefined)(obj, "Object.getOwnPropertyDescriptor");
-						(0, _objectHelpers.confirmObject)(obj, "Object.getOwnPropertyDescriptor", env.options);
+						(0, _objectHelpers.confirmObject)(obj, "Object.getOwnPropertyDescriptor", env.ecmaVersion);
 
 						_context.next = 4;
 						return (0, _objectHelpers.getOwnPropertyDescriptor)(env, obj, key);
@@ -11540,7 +11536,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("getPrototypeOf", factory.createBuiltInFunction(function (obj) {
-		if (!(0, _objectHelpers.confirmObject)(obj, "Object.getPrototypeOf", env.options)) {
+		if (!(0, _objectHelpers.confirmObject)(obj, "Object.getPrototypeOf", env.ecmaVersion)) {
 			obj = (0, _native.toObject)(obj, true);
 		}
 
@@ -11599,7 +11595,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("isExtensible", factory.createBuiltInFunction(function (obj) {
-		if (!(0, _objectHelpers.confirmObject)(obj, "Object.isExtensible", env.options)) {
+		if (!(0, _objectHelpers.confirmObject)(obj, "Object.isExtensible", env.ecmaVersion)) {
 			return factory.createPrimitive(false);
 		}
 
@@ -11618,7 +11614,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("isFrozen", factory.createBuiltInFunction(function (obj) {
-		if (!(0, _objectHelpers.confirmObject)(obj, "Object.isFrozen", env.options)) {
+		if (!(0, _objectHelpers.confirmObject)(obj, "Object.isFrozen", env.ecmaVersion)) {
 			return factory.createPrimitive(true);
 		}
 
@@ -11634,12 +11630,6 @@ exports.default = function ($target, env, factory) {
 					return factory.createPrimitive(false);
 				}
 			}
-
-			// for (let prop in obj.properties) {
-			// 	if (obj.properties[prop].writable || obj.properties[prop].configurable) {
-			// 		return factory.createPrimitive(false);
-			// 	}
-			// }
 		}
 
 		return factory.createPrimitive(!obj.extensible);
@@ -11683,7 +11673,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("isSealed", factory.createBuiltInFunction(function (obj) {
-		if (!(0, _objectHelpers.confirmObject)(obj, "Object.isSealed", env.options)) {
+		if (!(0, _objectHelpers.confirmObject)(obj, "Object.isSealed", env.ecmaVersion)) {
 			return factory.createPrimitive(true);
 		}
 
@@ -11696,12 +11686,6 @@ exports.default = function ($target, env, factory) {
 					return factory.createPrimitive(false);
 				}
 			}
-
-			// for (let prop in obj.properties) {
-			// 	if (obj.properties[prop].configurable) {
-			// 		return factory.createPrimitive(false);
-			// 	}
-			// }
 		}
 
 		return factory.createPrimitive(!extensible);
@@ -11748,7 +11732,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("preventExtensions", factory.createBuiltInFunction(function (obj) {
-		if ((0, _objectHelpers.confirmObject)(obj, "Object.preventExtensions", env.options)) {
+		if ((0, _objectHelpers.confirmObject)(obj, "Object.preventExtensions", env.ecmaVersion)) {
 			obj.preventExtensions();
 		}
 
@@ -11804,7 +11788,7 @@ Object.defineProperty(exports, "__esModule", {
 
 exports.default = function ($target, env, factory) {
 	$target.define("seal", factory.createBuiltInFunction(function (obj) {
-		if ((0, _objectHelpers.confirmObject)(obj, "Object.seal", env.options)) {
+		if ((0, _objectHelpers.confirmObject)(obj, "Object.seal", env.ecmaVersion)) {
 			obj.seal();
 		}
 
@@ -18603,13 +18587,13 @@ function validateAssignment(left, strict, ecmaVersion) {
 
 var rules = (_rules = {
 	AssignmentExpression: function AssignmentExpression(node, context) {
-		validateAssignment(node.left, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
+		validateAssignment(node.left, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
 	},
 	CatchClause: function CatchClause(node, context) {
 		(0, _contracts.assertIsValidName)(node.param.name, node.isStrict() || context.env.isStrict());
 	},
 	Declarator: function Declarator(node, context) {
-		(0, _contracts.assertIsValidIdentifier)(node.id.name, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
+		(0, _contracts.assertIsValidIdentifier)(node.id.name, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
 	}
 }, _defineProperty(_rules, "Function", function Function(node, context) {
 	if (node.id) {
@@ -18624,7 +18608,7 @@ var rules = (_rules = {
 		}
 	}
 }), _defineProperty(_rules, "UpdateExpression", function UpdateExpression(node, context) {
-	validateAssignment(node.argument, node.isStrict() || context.env.isStrict(), context.env.options.ecmaVersion);
+	validateAssignment(node.argument, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
 }), _defineProperty(_rules, "WithStatement", function WithStatement(node, context) {
 	if (node.isStrict() || context.env.isStrict()) {
 		throw SyntaxError("Strict mode code may not include a with statement");
@@ -19217,7 +19201,7 @@ var FunctionType = exports.FunctionType = function (_ObjectType) {
 		value: function setLength(length) {
 			var env = this[Symbol.for("env")];
 			var value = env.objectFactory.createPrimitive(length);
-			var configurable = env.options.ecmaVersion > 5;
+			var configurable = env.ecmaVersion > 5;
 
 			this.defineProperty("length", { value: value, configurable: configurable });
 		}
@@ -19225,7 +19209,7 @@ var FunctionType = exports.FunctionType = function (_ObjectType) {
 		key: "addPoison",
 		value: function addPoison() {
 			var env = this[Symbol.for("env")];
-			if (env.options.ecmaVersion > 5) {
+			if (env.ecmaVersion > 5) {
 				return;
 			}
 
@@ -19783,7 +19767,7 @@ var ObjectFactory = exports.ObjectFactory = function () {
 
 		this.env = env;
 		this.options = env.options;
-		this.ecmaVersion = env.options.ecmaVersion || 5;
+		this.ecmaVersion = env.ecmaVersion || 5;
 		this.initialized = false;
 	}
 
@@ -21621,7 +21605,7 @@ var RegexType = exports.RegexType = function (_ObjectType) {
 			this.defineProperty("lastIndex", { value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true });
 
 			["source", "global", "ignoreCase", "multiline"].forEach(function (key) {
-				if (env.options.ecmaVersion > 5) {
+				if (env.ecmaVersion > 5) {
 					var getter = function getter() {
 						return env.objectFactory.createPrimitive(this.source[key]);
 					};
@@ -23067,10 +23051,6 @@ function getEnv(obj) {
 	return obj[Symbol.for("env")];
 }
 
-function getOptions(obj) {
-	return getEnv(obj).options;
-}
-
 function toLength(obj) {
 	var lengthProperty, length;
 	return regeneratorRuntime.wrap(function toLength$(_context3) {
@@ -23083,7 +23063,7 @@ function toLength(obj) {
 					break;
 				}
 
-				if (!(getOptions(obj).ecmaVersion === 5)) {
+				if (!(getEnv(obj).ecmaVersion === 5)) {
 					_context3.next = 6;
 					break;
 				}
@@ -24624,7 +24604,7 @@ function assignThis(env, fnMember, isNew, callee) {
 
 	if (fnMember instanceof _propertyReference.PropertyReference && (!fnMember.unqualified || fnMember.base !== env.global)) {
 		var thisArg = fnMember.base;
-		if (env.options.ecmaVersion === 5) {
+		if (env.ecmaVersion === 5) {
 			return (0, _native.toObject)(thisArg);
 		}
 
