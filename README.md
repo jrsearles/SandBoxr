@@ -73,10 +73,10 @@ Type: `Array<Object>`
 Default: `undefined`
 
 ##### Import Definition
-`name`: (String) The name of the code to import. This is how it will be referenced in `import` statements.
-`ast`: (Object) The parsed AST for the code to import.
+- `name`: (String) The name of the code to import. This is how it will be referenced in `import` statements.
+- `ast`: (Object) The parsed AST for the code to import. 
 OR
-`code`: (String) The text of the code to be imported. Requires that a parser is defined.
+- `code`: (String) The text of the code to be imported. Requires that a parser is defined.
 
 When the environment is initialized, any unnamed imports will be run in the order that they are defined against the global scope. Named imports are not evaluated until they are imported and are done so in their own lexical scope. Named imports can use `export` statements to indicate the items to be shared.
 
