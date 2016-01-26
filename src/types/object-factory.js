@@ -63,6 +63,7 @@ export class ObjectFactory {
 		this.options = env.options;
 		this.ecmaVersion = env.options.ecmaVersion || 5;
 		this.initialized = false;
+    this.instanceCache = new Map();
 	}
 
 	init () {
@@ -107,12 +108,20 @@ export class ObjectFactory {
 				break;
 
 			case "String":
-				instance = new StringType(value);
+        if (this.instanceCache.has(value)) {
+          return this.instanceCache.get(value);
+        }
+          
+        this.instanceCache.set(value, instance = new StringType(value))
 				break;
 
 			case "Number":
 			case "Boolean":
-				instance = new PrimitiveType(value);
+        if (this.instanceCache.has(value)) {
+          return this.instanceCache.get(value);
+        }
+        
+        this.instanceCache.set(value, instance = new PrimitiveType(value));
 				break;
 
 			case "Date":

@@ -17523,6 +17523,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var extendedVisitors = (0, _estree.makeVisitors)(_visitors.visitors);
+
 var ExecutionContext = exports.ExecutionContext = function () {
 	function ExecutionContext(env, obj, callee, newTarget) {
 		_classCallCheck(this, ExecutionContext);
@@ -19575,6 +19577,7 @@ var ObjectFactory = exports.ObjectFactory = function () {
 		this.options = env.options;
 		this.ecmaVersion = env.options.ecmaVersion || 5;
 		this.initialized = false;
+		this.instanceCache = new Set();
 	}
 
 	_createClass(ObjectFactory, [{
@@ -19627,12 +19630,20 @@ var ObjectFactory = exports.ObjectFactory = function () {
 					break;
 
 				case "String":
-					instance = new _stringType.StringType(value);
+					if (this.instanceCache.has(value)) {
+						return this.instanceCache.get(value);
+					}
+
+					this.instanceCache.set(value, instance = new _stringType.StringType(value));
 					break;
 
 				case "Number":
 				case "Boolean":
-					instance = new _primitiveType.PrimitiveType(value);
+					if (this.instanceCache.has(value)) {
+						return this.instanceCache.get(value);
+					}
+
+					this.instanceCache.set(value, instance = new _primitiveType.PrimitiveType(value));
 					break;
 
 				case "Date":

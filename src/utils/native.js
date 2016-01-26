@@ -1,4 +1,4 @@
-import {getMethod} from "../utils/helpers";
+import {getMethod, getNativeType} from "../utils/helpers";
 import {isNullOrUndefined, isFunction, isUndefined, isNull} from "./checks";
 
 const sign = Math.sign;
@@ -49,9 +49,15 @@ function* getValues (args) {
 }
 
 export function primitiveToObject (env, value) {
-	let newValue = env.objectFactory.createPrimitive(value);
-	newValue.isPrimitive = false;
-	newValue.type = "object";
+  let type = getNativeType(value);
+  let ctor = env.global.getValue(type);
+  let newValue = env.objectFactory.createObject(ctor);
+  newValue.className = type;
+  newValue.value = value;
+  
+	// let newValue = env.objectFactory.createPrimitive(value);
+	// newValue.isPrimitive = false;
+	// newValue.type = "object";
 	return newValue;
 }
 

@@ -341,6 +341,10 @@ export class ObjectType {
 	}
 
 	toNative () {
+    if (this.value !== undefined) {
+      return this.value;
+    }
+    
 		let unwrapped = {};
 		
 		for (let name in this.properties) {
