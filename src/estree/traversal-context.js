@@ -5,14 +5,14 @@ function isNode (obj) {
 	return obj && typeof obj === "object" && typeof obj.type === "string";
 }
 
-function assignChild (value, parent, onInit) {
+function assignChild (value, parent, rules) {
 	if (value) {
 		if (isNode(value)) {
-			return new TraversalContext(value, parent, onInit);
+			return new TraversalContext(value, parent, rules);
 		}
 		
 		if (Array.isArray(value)) {
-			return value.map(node => assignChild(node, parent, onInit));
+			return value.map(node => assignChild(node, parent, rules));
 		}
 	}
 	
@@ -47,7 +47,7 @@ function* getDirectives (body) {
 }
 
 export class TraversalContext {
-	constructor (node, parent, onInit) {
+	constructor (node, parent, rules) {
 		if (node instanceof TraversalContext) {
 			return node;
 		}
@@ -56,12 +56,10 @@ export class TraversalContext {
 		this._parent = parent;
 	
 		this.type = node.type;
-		this.init(onInit);
-		
-		onInit(this);
+		this.init(rules);
 	}
 	
-	init (onInit) {
+	init (rules) {
 		this._bindings = [];
 		
 		let currentScope = this._parent ? this._parent.scopeParent : this;
@@ -85,7 +83,8 @@ export class TraversalContext {
 			this.blockParent = currentBlock;
 		}
 		
-		Object.keys(this._node).forEach(key => this[key] = assignChild(this._node[key], this, onInit));	
+		Object.keys(this._node).forEach(key => this[key] = assignChild(this._node[key], this, rules));
+    rules(this);
 	}
 	
 	is (type) {

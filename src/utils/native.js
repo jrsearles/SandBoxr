@@ -1,4 +1,4 @@
-import {getMethod} from "../utils/helpers";
+import {getMethod, getNativeType} from "../utils/helpers";
 import {isNullOrUndefined, isFunction, isUndefined, isNull} from "./checks";
 
 const sign = Math.sign;
@@ -48,13 +48,6 @@ function* getValues (args) {
 	return values;
 }
 
-export function primitiveToObject (env, value) {
-	let newValue = env.objectFactory.createPrimitive(value);
-	newValue.isPrimitive = false;
-	newValue.type = "object";
-	return newValue;
-}
-
 export function	toObject (obj, throwOnError) {
 	// todo: is this ES6 only?
 	if (throwOnError && obj.isPrimitive && obj.value == null) {
@@ -62,7 +55,7 @@ export function	toObject (obj, throwOnError) {
 	}
 
 	if (obj.isPrimitive && obj.value != null && obj.type !== "object") {
-		return primitiveToObject(getEnv(obj), obj.value);
+    return obj.toObject();
 	}
 
 	return obj;

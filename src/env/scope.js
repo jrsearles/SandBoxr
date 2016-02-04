@@ -1,6 +1,6 @@
 import {UNDEFINED} from "../types/primitive-type";
 import {assertIsValidParameterName} from "../utils/contracts";
-import {each} from "../utils/async";
+// import {each} from "../utils/async";
 import {declare} from "../utils/assign";
 import {createDataProperty} from "../utils/helpers";
 
@@ -87,7 +87,8 @@ export class Scope {
 		let argIndex = 0;
 		let argLength = args.length;
 
-		yield each(params, function* (param, index) {
+    for (let i = 0, ln = params.length; i < ln; i++) {
+      let param = params[i];
 			if (param.isRestElement()) {
 				let rest = env.objectFactory.createArray();
 				let restIndex = 0;
@@ -100,7 +101,22 @@ export class Scope {
 			} else {
 				yield declare(env, param, args[argIndex++] || UNDEFINED);
 			}
-		});
+    }
+    
+		// yield each(params, function* (param, index) {
+		// 	if (param.isRestElement()) {
+		// 		let rest = env.objectFactory.createArray();
+		// 		let restIndex = 0;
+
+		// 		while (argIndex < argLength) {
+		// 			rest.setValue(restIndex++, args[argIndex++] || UNDEFINED);
+		// 		}
+
+		// 		yield declare(env, param.argument, rest);
+		// 	} else {
+		// 		yield declare(env, param, args[argIndex++] || UNDEFINED);
+		// 	}
+		// });
 
 		if (!callee.arrow) {
 			// preserve the passed in arguments, even if defaults are used instead
@@ -132,63 +148,63 @@ export class Scope {
 	 */
 	*loadArgs (params, args, callee) {
 		params = params || [];
+    
 		if (callee.arrow || params.some(p => !p.isIdentifier())) {
-			yield this.loadComplexArgs(params, args, callee);
-			return;
+			return yield this.loadComplexArgs(params, args, callee);
 		}
 
 		// todo: this method is getting far too complex
 		let {env, scope} = this;
 		let strictCallee = callee.node.isStrict();
-		let strict = env.isStrict() || strictCallee;
+		let strict = strictCallee || env.isStrict();
 
 		let argumentList = env.objectFactory.createArguments(args, callee, strict);
 		scope.createVariable("arguments");
 		scope.setValue("arguments", argumentList);
 
 		let argsLength = args.length;
-		
-		if (params) {
+		let paramsLength = params.length;
+    
+		if (paramsLength > 0) {
 			let shouldMap = !strictCallee;
 			let loadedParams = Object.create(null);
-			let i = params.length;
+			let paramIndex = paramsLength;
 			
-			while (i--) {
-				let param = params[i];
-				let value = args[i] || UNDEFINED;
+			while (paramIndex--) {
+				let param = params[paramIndex];
+				let value = args[paramIndex] || UNDEFINED;
 				let name = param.name;
 				let mapped = false;
 				
 				if (!loadedParams[name]) {
 					loadedParams[name] = true;
-					assertIsValidParameterName(name, strict);
+					// assertIsValidParameterName(name, strict);
 					
 					if (shouldMap) {
 						mapped = true;
 						
 						let descriptor = scope.createVariable(name);
-						if (i < argsLength) {
-							argumentList.mapProperty(i, descriptor);
+						if (paramIndex < argsLength) {
+							argumentList.mapProperty(paramIndex, descriptor);
 						}
 					}
 					
 					scope.setValue(name, value);
 				}
 
-				if (!mapped && i < argsLength) {
-					createDataProperty(argumentList, i, value);
+				if (!mapped && paramIndex < argsLength) {
+					createDataProperty(argumentList, paramIndex, value);
 				}
 			}
 		}
 
 		// just set value if additional, unnamed arguments are passed in
-		let i = params ? params.length : 0;
-		for (; i < argsLength; i++) {
+		for (let i = paramsLength; i < argsLength; i++) {
 			createDataProperty(argumentList, i, args[i]);
 		}
 
 		argumentList.defineProperty("length", {
-			value: env.objectFactory.createPrimitive(argsLength),
+			value: env.objectFactory.create("Number", argsLength),
 			configurable: true,
 			writable: true
 		});

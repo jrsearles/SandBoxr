@@ -62,6 +62,8 @@ export default function* UnaryExpression (node, context, next) {
 			break;
 
 		case "void":
+      result.getValue();
+      
 			newValue = objectFactory.createPrimitive(undefined);
 			break;
 

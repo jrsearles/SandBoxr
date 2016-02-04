@@ -1,5 +1,4 @@
 import {assertAreValidArguments, assertAreValidSetterArguments} from "../utils/contracts";
-import {each} from "../utils/async";
 import {toPropertyKey} from "../utils/native";
 
 function setDescriptor (env, obj, descriptor) {
@@ -38,8 +37,9 @@ function findOrCreateDescriptor (arr, key) {
 export default function* ObjectExpression (node, context, next) {
 	let obj = context.env.objectFactory.createObject();
 	let descriptors = [];
-
-	yield* each(node.properties, function* (property) {
+  
+  for (let i = 0, ln = node.properties.length; i < ln; i++) {
+    let property = node.properties[i];
 		let value = (yield next(property.value, context)).result.getValue();
 		let key;
 
@@ -62,7 +62,32 @@ export default function* ObjectExpression (node, context, next) {
 				descriptor.writable = true;
 				break;
 		}
-	});
+  }
+
+	// yield* each(node.properties, function* (property) {
+	// 	let value = (yield next(property.value, context)).result.getValue();
+	// 	let key;
+
+	// 	if (property.computed) {
+	// 		let keyValue = (yield next(property.key, context)).result.getValue();
+	// 		key = yield toPropertyKey(keyValue);
+	// 	} else {
+	// 		key = property.key.name || property.key.value;
+	// 	}
+
+	// 	let descriptor = findOrCreateDescriptor(descriptors, key);
+	// 	switch (property.kind) {
+	// 		case "get":
+	// 		case "set":
+	// 			descriptor[property.kind] = value;
+	// 			break;
+
+	// 		default:
+	// 			descriptor.value = value;
+	// 			descriptor.writable = true;
+	// 			break;
+	// 	}
+	// });
 
 	descriptors.forEach(desc => setDescriptor(context.env, obj, desc));
 	// for (let prop in descriptors) {

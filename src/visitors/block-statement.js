@@ -1,4 +1,4 @@
-import {each} from "../utils/async";
+// import {each} from "../utils/async";
 
 export default function* BlockStatement (node, context, next) {
 	context = context.create();
@@ -7,17 +7,17 @@ export default function* BlockStatement (node, context, next) {
 	return yield scope.use(function* () {
 		let result, priorResult;
 
-		yield* each(node.body, function* (child, i, body, abort) {
-			result = yield next(child, context);
+    for (let i = 0, ln = node.body.length; i < ln; i++) {
+			result = yield next(node.body[i], context);
 			
 			if (context.shouldBreak(result)) {
-				abort();
 				result = context.abrupt(result, priorResult);
+        break;
 			}
 	
 			priorResult = result;
-		});
-	
+    }
+    
 		return result;
 	});
 }

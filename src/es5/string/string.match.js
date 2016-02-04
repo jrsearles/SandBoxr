@@ -32,8 +32,8 @@ export default function ($target, env, factory) {
 				matches.setValue(index, factory.createPrimitive(value));
 			});
 
-			matches.setValue("index", factory.createPrimitive(match.index));
-			matches.setValue("input", factory.createPrimitive(match.input));
+			matches.setValue("index", factory.create("Number", match.index));
+			matches.setValue("input", factory.create("String", match.input));
 			return matches;
 		}
 

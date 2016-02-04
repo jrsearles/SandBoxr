@@ -31,8 +31,10 @@ export default function* CallExpression (node, context, next) {
 
 	let args = [];
 	
-	for (let arg of node.arguments) {
+  for (let i = 0, ln = node.arguments.length; i < ln; i++) {
+    let arg = node.arguments[i];
 		let value = (yield next(arg, context)).result.getValue();
+    
 		if (arg.isSpreadElement()) {
 			let it = iterate.getIterator(value);
 			for ({value} of it) {
@@ -41,7 +43,19 @@ export default function* CallExpression (node, context, next) {
 		} else {
 			args.push(value);
 		}
-	}
+  }
+  
+	// for (let arg of node.arguments) {
+	// 	let value = (yield next(arg, context)).result.getValue();
+	// 	if (arg.isSpreadElement()) {
+	// 		let it = iterate.getIterator(value);
+	// 		for ({value} of it) {
+	// 			args.push(value);
+	// 		}
+	// 	} else {
+	// 		args.push(value);
+	// 	}
+	// }
 
 	if (!fn || fn.className !== "Function") {
 		let stringValue = yield toString(fn);

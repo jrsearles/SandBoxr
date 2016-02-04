@@ -1,17 +1,31 @@
-function isObject (obj) {
-	return obj && typeof obj === "object";
-}
+// function isObject (obj) {
+// 	return obj && typeof obj === "object";
+// }
 
-function isFunction (obj) {
-	return typeof obj === "function";
-}
+// function isFunction (obj) {
+// 	return typeof obj === "function";
+// }
 
 export function isThenable (obj) {
-	return (isObject(obj) || isFunction(obj)) && typeof obj.then === "function";
+  if (!obj) {
+    return false;
+  }
+  
+  let type = typeof obj;
+  if (type !== "object" && type !== "function") {
+    return false;
+  }
+  
+  return typeof obj.then === "function";
+	// return (isObject(obj) || isFunction(obj)) && typeof obj.then === "function";
 }
 
 function isNextable (obj) {
-	return isObject(obj) && typeof obj.next === "function";
+  if (!obj) {
+    return false;
+  }
+  
+  return typeof obj === "object" && typeof obj.next === "function";
 }
 
 export function* map (arr, func) {
@@ -76,13 +90,13 @@ function tryCatch (it, priorValue, method) {
  */
 export function exhaust (it, value, stack = [], state = "next") {
 	while (it) {
-		if (!isNextable(it)) {
-			value = it;
-
-			if (!(it = stack.pop())) {
-				break;
-			}
-		}
+// 		if (!isNextable(it)) {
+// 			value = it;
+// 
+// 			if (!(it = stack.pop())) {
+// 				break;
+// 			}
+// 		}
 
 		let done;
 		({state, done, value} = tryCatch(it, value, state));
@@ -96,8 +110,8 @@ export function exhaust (it, value, stack = [], state = "next") {
 		}
 
 		if (value) {
-			if (isNextable(value)) {
-				stack.push(it);
+			if (typeof value.next === "function") {
+				stack[stack.length] = it;
 
 				it = value;
 				value = undefined;
@@ -105,7 +119,7 @@ export function exhaust (it, value, stack = [], state = "next") {
 				continue;
 			}
 
-			if (isThenable(value)) {
+			if (typeof value.then === "function") {
 				return value.then(res => exhaust(it, res, stack), err => exhaust(it, err, stack, "throw"));
 			}
 		}

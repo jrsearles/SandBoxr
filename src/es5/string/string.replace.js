@@ -38,6 +38,6 @@ export default function ($target, env, factory) {
 			replacer = yield toString(substrOrFn);
 		}
 
-		return factory.createPrimitive(stringValue.replace(matcher, replacer));
+		return factory.create("String", stringValue.replace(matcher, replacer));
 	}, 2, "String.prototype.replace"));
 }

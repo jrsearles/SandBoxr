@@ -63,6 +63,7 @@ export class ObjectFactory {
 		this.options = env.options;
 		this.ecmaVersion = env.ecmaVersion || 5;
 		this.initialized = false;
+    this.instanceCache = new Map();
 	}
 
 	init () {
@@ -107,12 +108,26 @@ export class ObjectFactory {
 				break;
 
 			case "String":
-				instance = new StringType(value);
+        if (this.instanceCache.has(value)) {
+          return this.instanceCache.get(value);
+        }
+        
+        this.instanceCache.set(value, instance = new StringType(value));
 				break;
 
 			case "Number":
+        if (value === 0 && 1 / value < 0) {
+          // negative zero - can't store as key in map
+          instance = new PrimitiveType(value);
+          break;
+        }
+        
 			case "Boolean":
-				instance = new PrimitiveType(value);
+        if (this.instanceCache.has(value)) {
+          return this.instanceCache.get(value);
+        }
+        
+        this.instanceCache.set(value, instance = new PrimitiveType(value));
 				break;
 
 			case "Date":
@@ -179,17 +194,17 @@ export class ObjectFactory {
 
 	/**
 	 * Creates an object.
-	 * @param {ObjectType} [proto] - The prototype to use with the new object. If no value is provided
+	 * @param {ObjectType} [ctor] - The prototype to use with the new object. If no value is provided
 	 * the Object prototype will be used. If `null` is passed in, no prototype will be assigned to the
 	 * new object.
 	 * @returns {ObjectType} The object instance.
 	 */
-	createObject (proto) {
+	createObject (ctor) {
 		let instance = new ObjectType();
 
-		if (proto !== null) {
-			if (proto) {
-				instance.setPrototype(proto.getValue("prototype"));
+		if (ctor !== null) {
+			if (ctor) {
+				instance.setPrototype(ctor.getValue("prototype"));
 			} else {
 				setProto("Object", instance, this);
 			}

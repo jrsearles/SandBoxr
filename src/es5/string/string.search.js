@@ -28,6 +28,6 @@ export default function ($target, env, factory) {
 			}
 		}
 
-		return factory.createPrimitive(stringValue.search(underlyingRegex));
+		return factory.create("Number", stringValue.search(underlyingRegex));
 	}, 1, "String.prototype.search"));
 }

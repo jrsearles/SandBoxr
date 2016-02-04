@@ -9,6 +9,6 @@ export default function ($target, env, factory) {
 		start = yield toInteger(start);
 		end = isNullOrUndefined(end) ? length : (yield toInteger(end));
 
-		return factory.createPrimitive(value.substring(start, end));
+		return factory.create("String", value.substring(start, end));
 	}, 2, "String.prototype.substring"));
 }

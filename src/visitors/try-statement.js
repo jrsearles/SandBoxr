@@ -1,4 +1,4 @@
-import {each} from "../utils/async";
+// import {each} from "../utils/async";
 import {declare} from "../utils/assign";
 
 function* tryCatch (node, context, next) {
@@ -12,7 +12,9 @@ function* tryCatch (node, context, next) {
 function* executeBlock (context, body, swallow, next) {
 	let result;
 
-	yield each(body, function* (node, i, all, abort) {
+  for (let i = 0, ln = body.length; i < ln; i++) {
+    let node = body[i];
+    
 		if (swallow) {
 			result = yield* tryCatch(node, context, next);
 		} else {
@@ -20,9 +22,21 @@ function* executeBlock (context, body, swallow, next) {
 		}
 
 		if (result.isAbrupt()) {
-			abort();
+			break;
 		}
-	});
+  }
+  
+	// yield each(body, function* (node, i, all, abort) {
+	// 	if (swallow) {
+	// 		result = yield* tryCatch(node, context, next);
+	// 	} else {
+	// 		result = yield next(node, context);
+	// 	}
+
+	// 	if (result.isAbrupt()) {
+	// 		abort();
+	// 	}
+	// });
 
 	return result;
 }

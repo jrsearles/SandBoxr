@@ -9,6 +9,6 @@ export default function ($target, env, factory) {
 		let stringValue = yield toString(this.object);
 		let values = [stringValue];
 		values = values.concat(yield map(args, function* (arg) { return yield toString(arg); }));
-		return factory.createPrimitive(values.join(""));
+		return factory.create("String", values.join(""));
 	}, 1, "String.prototype.concat"));
 }

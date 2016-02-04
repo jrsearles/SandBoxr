@@ -1,8 +1,11 @@
 import {UNDEFINED} from "./types/primitive-type";
 import {ExecutionResult} from "./execution-result";
 import {visitors} from "./visitors";
-import {step} from "./estree";
+import {step, makeVisitors, makeRules} from "./estree";
 import rules from "./syntax-rules";
+
+let extendedRules = makeRules(rules);
+let extendedVisitors = makeVisitors(visitors);
 
 export class ExecutionContext {
 	constructor (env, obj, callee, newTarget) {
@@ -21,7 +24,7 @@ export class ExecutionContext {
 		let executionResult;
 		
 		try {
-			executionResult = yield step(node, visitors, this, rules);
+			executionResult = yield step(node, extendedVisitors, this, extendedRules);
 		} catch (nativeError) {
 			executionResult = this.raise(nativeError);
 		}

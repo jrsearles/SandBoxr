@@ -1,6 +1,7 @@
 import {isFunction, isNullOrUndefined} from "./checks";
 
 const objectPattern = /\[object (\w+)\]/;
+const toString = Object.prototype.toString;
 
 export function getMethod (obj, key) {
 	let propInfo = obj.getProperty(key);
@@ -27,7 +28,19 @@ export function	getNativeType (obj) {
 		return "Null";
 	}
 
-	return objectPattern.exec(Object.prototype.toString.call(obj))[1];
+  switch (typeof obj) {
+    case "string":
+      return "String";
+    
+    case "number":
+      return "Number";
+      
+    case "boolean":
+      return "Boolean";
+      
+    default:
+      return objectPattern.exec(toString.call(obj))[1];    
+  }
 }
 
 export function createDataProperty (obj, key, value, throwOnError) {

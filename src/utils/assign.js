@@ -1,11 +1,15 @@
 import {UNDEFINED} from "../types/primitive-type";
-import {each} from "./async";
+// import {each} from "./async";
 import {toPropertyKey} from "./native";
 import iterate from "../iterators";
 
 export function* reset (env, leftNode, priorScope, newScope) {
 	if (leftNode.isVariableDeclaration()) {
-		yield each(leftNode.declarations, function* (decl) { yield reset(env, decl, priorScope, newScope); });
+    for (let i = 0, ln = leftNode.declarations.length; i < ln; i++) {
+      yield reset(env, leftNode.declarations[i], priorScope, newScope);
+    }
+    
+		// yield each(leftNode.declarations, function* (decl) { yield reset(env, decl, priorScope, newScope); });
 	} else if (leftNode.isLet() || leftNode.isConst()) {
 		let currentBinding = priorScope.getVariable(leftNode.id.name);
 		newScope.getVariable(leftNode.id.name).setValue(currentBinding.getValue());
@@ -20,9 +24,13 @@ export function* declare (env, leftNode, rightValue, kind) {
 	if (leftNode.isVariableDeclaration()) {
 		kind = leftNode.kind;
 		
-		for (let decl of leftNode.declarations) {
-			yield declare(env, decl, rightValue, kind);
-		}
+    for (let i = 0, ln = leftNode.declarations.length; i < ln; i++) {
+      yield declare(env, leftNode.declarations[i], rightValue, kind);
+    }
+    
+		// for (let decl of leftNode.declarations) {
+		// 	yield declare(env, decl, rightValue, kind);
+		// }
 	} else if (leftNode.isVariableDeclarator()) {
 		yield declare(env, leftNode.id, rightValue, kind);
 	} else if (leftNode.isIdentifier()) {
@@ -124,8 +132,10 @@ function* getObjectKey (env, keyNode) {
 }
 
 function* destructureObject (env, pattern, obj, cb) {
-	yield each(pattern.properties, function* (current) {
+  for (let i = 0, ln = pattern.properties.length; i < ln; i++) {
+    let current = pattern.properties[i];
 		let key;
+    
 		if (current.computed) {
 			key = yield toPropertyKey((yield env.createExecutionContext().execute(current.key)).result.getValue());
 		} else {
@@ -135,6 +145,20 @@ function* destructureObject (env, pattern, obj, cb) {
 		let propInfo = obj.getProperty(key);
 		let value = propInfo ? propInfo.getValue() : UNDEFINED;
 
-		yield cb(env, current.value, value);
-	});
+		yield cb(env, current.value, value);    
+  }
+  
+	// yield each(pattern.properties, function* (current) {
+	// 	let key;
+	// 	if (current.computed) {
+	// 		key = yield toPropertyKey((yield env.createExecutionContext().execute(current.key)).result.getValue());
+	// 	} else {
+	// 		key = yield getObjectKey(env, current.key);
+	// 	}
+		
+	// 	let propInfo = obj.getProperty(key);
+	// 	let value = propInfo ? propInfo.getValue() : UNDEFINED;
+
+	// 	yield cb(env, current.value, value);
+	// });
 }

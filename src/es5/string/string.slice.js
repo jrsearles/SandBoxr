@@ -11,6 +11,6 @@ export default function ($target, env, factory) {
 			endValue = yield toInteger(end);
 		}
 
-		return factory.createPrimitive(stringValue.slice(startValue, endValue));
+		return factory.create("String", stringValue.slice(startValue, endValue));
 	}, 2, "String.prototype.slice"));
 }

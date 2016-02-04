@@ -1,4 +1,4 @@
-import {toPrimitive, primitiveToObject} from "../../utils/native";
+import {toPrimitive} from "../../utils/native";
 import {assertIsNotGeneric} from "../../utils/contracts";
 
 import $toFixed from "./number.to-fixed";
@@ -12,14 +12,15 @@ export default function numberApi (env) {
 	proto.className = "Number";
 	proto.value = 0;
 
-	let numberClass = objectFactory.createFunction(function* (obj) {
-		let numberValue = Number(yield toPrimitive(obj, "number"));
-
+	let numberClass = objectFactory.createFunction(function* (value) {
+		let numberValue = Number(yield toPrimitive(value, "number"));
+    let obj = objectFactory.create("Number", numberValue);
+    
 		if (this.isNew) {
-			return primitiveToObject(env, numberValue);
+			return obj.toObject();
 		}
 
-		return objectFactory.create("Number", numberValue);
+		return obj;
 	}, proto, {configurable: false, enumerable: false, writable: false, name: "Number"});
 
 	["MAX_VALUE", "MIN_VALUE", "NaN", "NEGATIVE_INFINITY", "POSITIVE_INFINITY"].forEach(name => {

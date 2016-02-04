@@ -6,6 +6,6 @@ export default function ($target, env, factory) {
 		assertIsNotNullOrUndefined(this.object, "String.prototype.trim");
 
 		let stringValue = yield toString(this.object);
-		return factory.createPrimitive(stringValue.trim());
+		return factory.create("String", stringValue.trim());
 	}, 0, "String.prototype.trim"));
 }

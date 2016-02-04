@@ -37,8 +37,12 @@ export function makeVisitors (visitors) {
 	if (!visitors) {
 		return defaultVisitors;
 	}
+  
+  if ("__made" in visitors) {
+    return visitors;
+  }
 	
-	let target = Object.assign({}, defaultVisitors);
+	let target = Object.assign({__made: true}, defaultVisitors);
 	
 	Object.keys(visitors).forEach(key => {
 		// skip false values using noop
@@ -57,4 +61,24 @@ export function makeVisitors (visitors) {
 	});
 	
 	return target;
+}
+
+export function makeRules (rules) {
+  if (!rules) {
+    return noop;
+  }
+  
+  if (typeof rules === "function") {
+    return rules;
+  }
+  
+	let keys = Object.keys(rules);
+	
+	return function (node, state) {
+		keys.forEach(key => {
+			if (node.is(key)) {
+				rules[key](node, state);
+			}	
+		});
+	};
 }

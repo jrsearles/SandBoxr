@@ -1,5 +1,7 @@
 import {TraversalContext} from "./traversal-context";
-import {defaultVisitors, makeVisitors} from "./visitors";
+import {defaultVisitors, makeVisitors, makeRules} from "./visitors";
+
+let noop = () => {};
 
 export function* walker (visitors, node, state, next) {
 	// create a bound walk function to pass to visitors so they can continue walking their child nodes
@@ -28,21 +30,10 @@ export function walk (node, visitors, state) {
 	} while (!done);
 }
 
-function makeRules (rules, state) {
-	let keys = Object.keys(rules);
-	
-	return function (node) {
-		keys.forEach(key => {
-			if (node.is(key)) {
-				rules[key](node, state);
-			}	
-		});
-	};
-}
-
 export function step (root, visitors, state, rules) {
 	let v = makeVisitors(visitors);
-	let node = new TraversalContext(root, null, makeRules(rules, state));
+  let r = makeRules(rules);
+	let node = new TraversalContext(root, null, n => r(n, state));
 	
 	function next (current, state) {
 		if (typeof v[current.type] === "function") {
@@ -66,3 +57,5 @@ export function* iterate (node, filters) {
 		}
 	}
 }
+
+export {makeRules, makeVisitors};

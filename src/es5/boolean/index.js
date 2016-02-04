@@ -1,4 +1,4 @@
-import {toBoolean, primitiveToObject} from "../../utils/native";
+import {toBoolean} from "../../utils/native";
 
 import $toString from "./boolean.to-string";
 import $valueOf from "./boolean.value-of";
@@ -10,15 +10,16 @@ export default function booleanApi (env) {
 	proto.className = "Boolean";
 	proto.value = false;
 
-	let booleanClass = objectFactory.createFunction(function (obj) {
-		let booleanValue = toBoolean(obj);
+	let booleanClass = objectFactory.createFunction(function (value) {
+		let booleanValue = toBoolean(value);
+    let obj = objectFactory.create("Boolean", booleanValue);
 
 		// called as new
 		if (this.isNew) {
-			return primitiveToObject(env, booleanValue);
+			return obj.toObject();
 		}
 
-		return objectFactory.create("Boolean", booleanValue);
+		return obj;
 	}, proto, {configurable: false, enumerable: false, writable: false, name: "Boolean"});
 
 	$toString(proto, env, objectFactory);

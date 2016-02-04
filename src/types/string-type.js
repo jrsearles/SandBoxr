@@ -1,5 +1,4 @@
 import {PrimitiveType} from "./primitive-type";
-import {PropertyDescriptor} from "./property-descriptor";
 import {isInteger} from "../utils/native";
 
 const charAttrs = {writable: false, enumerable: true, configurable: false};
@@ -9,58 +8,65 @@ function lazyInit (instance, key) {
 	if (!nativeValue || !isInteger(key) || "0" in instance.properties) {
 		return;
 	}
+  
+  if (nativeValue.length === 1) {
+    instance.define("0", instance, charAttrs);
+    return;
+  }
 
 	for (let i = 0, ln = nativeValue.length; i < ln; i++) {
-		// we are not using the object factory to avoid circular loop
-		// todo: i think we can resolve that by having a string instance return itself for 1 length strings and 0 position
-		let c = new StringType(nativeValue[i]);
-		c[Symbol.for("env")] = instance[Symbol.for("env")];
-		c.setPrototype(instance.proto);
-		c.define("0", c, charAttrs);
-
+    let c = instance[Symbol.for("env")].objectFactory.create("String", nativeValue[i]);
 		instance.define(i, c, charAttrs);
 	}
 }
 
-export class StringType extends PrimitiveType {
-	constructor (value) {
-		super(value);
-	}
-
-	init (env) {
-		super.init(...arguments);
-		let length = this.value.length;
-
-		this.properties.length = new PropertyDescriptor(this, {
-			configurable: false,
-			enumerable: false,
-			writable: false,
-			value: env.objectFactory.createPrimitive(length)
-		}, "length");
-	}
-
-	getProperty (key) {
-		lazyInit(this, key);
-		return super.getProperty(...arguments);
-	}
-
-	getOwnProperty (key) {
-		lazyInit(this, key);
-		return super.getOwnProperty(...arguments);
-	}
-
-	getOwnPropertyKeys () {
-		lazyInit(this, 0);
-		return super.getOwnPropertyKeys(...arguments);
-	}
-
-	has (key) {
-		lazyInit(this, key);
-		return super.has(...arguments);
-	}
-
-	owns (key) {
-		lazyInit(this, key);
-		return super.owns(...arguments);
-	}
+export function StringType (value) {
+  PrimitiveType.call(this, value);
 }
+
+StringType.prototype = Object.create(PrimitiveType.prototype);
+StringType.prototype.constructor = StringType;
+
+StringType.prototype.init = function (env) {
+  PrimitiveType.prototype.init.apply(this, arguments);
+  
+  let length = this.value.length;
+  this.define("length", env.objectFactory.create("Number", length), {configurable: false, writable: false});
+
+  if (length === 1) {
+    this.define("0", this, {enumerable: true, configurable: false});
+  }
+};
+
+StringType.prototype.getProperty = function (key) {
+  lazyInit(this, key);
+  return PrimitiveType.prototype.getProperty.apply(this, arguments);
+};
+
+StringType.prototype.getOwnProperty = function (key) {
+  lazyInit(this, key);
+  return PrimitiveType.prototype.getOwnProperty.apply(this, arguments);
+};
+
+StringType.prototype.getOwnPropertyKeys = function () {
+  lazyInit(this, 0);
+  return PrimitiveType.prototype.getOwnPropertyKeys.apply(this, arguments);
+};
+
+StringType.prototype.has = function (key) {
+  lazyInit(this, key);
+  return PrimitiveType.prototype.has.apply(this, arguments);
+};
+
+StringType.prototype.owns = function (key) {
+  lazyInit(this, key);
+  return PrimitiveType.prototype.owns.apply(this, arguments);
+};
+
+StringType.prototype.toObject = function () {
+  let obj = PrimitiveType.prototype.toObject.call(this);
+  
+  // set all character properties
+  lazyInit(obj, 0);
+  return obj;
+};

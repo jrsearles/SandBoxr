@@ -1,14 +1,21 @@
-import {each} from "../utils/async";
+// import {each} from "../utils/async";
 
 function* executeStatements (context, statements, next) {
 	let result;
-
-	yield each(statements, function* (statement, i, all, abort) {
-		result = yield next(statement, context, next);
+  
+  for (let i = 0, ln = statements.length; i < ln; i++) {
+		result = yield next(statements[i], context, next);
 		if (result && result.isAbrupt()) {
-			abort();
+			break;
 		}
-	});
+  }
+
+	// yield each(statements, function* (statement, i, all, abort) {
+	// 	result = yield next(statement, context, next);
+	// 	if (result && result.isAbrupt()) {
+	// 		abort();
+	// 	}
+	// });
 
 	return result;
 }

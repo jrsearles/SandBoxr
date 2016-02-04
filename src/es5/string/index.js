@@ -1,4 +1,4 @@
-import {toString, toPrimitive, primitiveToObject} from "../../utils/native";
+import {toString, toPrimitive} from "../../utils/native";
 import {map} from "../../utils/async";
 
 import $fromCharCode from "./string.from-char-code";
@@ -37,13 +37,14 @@ export default function (env) {
 
 	let stringClass = objectFactory.createFunction(function* (value) {
 		let stringValue = yield getString(value, this.isNew);
-
+    let obj = objectFactory.create("String", stringValue);
+    
 		// called as new
 		if (this.isNew) {
-			return primitiveToObject(env, stringValue);
+			return obj.toObject();
 		}
 
-		return objectFactory.createPrimitive(stringValue);
+		return obj;
 	}, proto, {configurable: false, enumerable: false, writable: false, name: "String"});
 
 	$fromCharCode(stringClass, env, objectFactory);

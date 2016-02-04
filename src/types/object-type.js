@@ -52,26 +52,28 @@ function propertyKeyComparer (a, b) {
 	return a.uid - b.uid;
 }
 
-export class ObjectType {
-	constructor () {
-		this.isPrimitive = false;
-		this.type = "object";
-		this.className = "Object";
-		this.extensible = true;
-		this.properties = Object.create(null);
-		this.symbols = Object.create(null);
+export function ObjectType () {
+  this.isPrimitive = false;
+  this.type = "object";
+  this.className = "Object";
+  this.extensible = true;
+  this.properties = Object.create(null);
+  this.symbols = Object.create(null);
 
-		this.version = 0;
-		this.primitiveHint = "number";
-	}
+  this.version = 0;
+  this.primitiveHint = "number";
+}
 
+ObjectType.prototype = {
+  constructor: ObjectType,
+  
 	init (env, proto, descriptor, strict) {
 		this[Symbol.for("env")] = env;
-	}
+	},
 
 	getPrototype () {
 		return this.proto || null;
-	}
+	},
 
 	setPrototype (proto) {
 		if (this.proto === proto) {
@@ -96,7 +98,7 @@ export class ObjectType {
 		this.version++;
 
 		return true;
-	}
+	},
 
 	getProperty (key, receiver) {
 		receiver = receiver || this;
@@ -114,11 +116,11 @@ export class ObjectType {
 		}
 
 		return undefined;
-	}
+	},
 
 	getOwnProperty (key) {
 		return this[getPropertySource(key)][String(key)];
-	}
+	},
 
 	getOwnPropertyKeys (keyType) {
 		let keys = [];
@@ -140,16 +142,16 @@ export class ObjectType {
 		}
 
 		return keys;
-	}
+	},
 
 	isExtensible () {
 		return this.extensible;
-	}
+	},
 
 	getIterator () {
 		let env = this[Symbol.for("env")];
 		return env.objectFactory.createIterator(propertyIterator(env, this));
-	}
+	},
 
 	has (key) {
 		if (String(key) in this[getPropertySource(key)]) {
@@ -162,11 +164,11 @@ export class ObjectType {
 		}
 
 		return false;
-	}
+	},
 
 	owns (key) {
 		return !!this.getOwnProperty(key);
-	}
+	},
 
 	setValue (key, value, receiver) {
 		receiver = receiver || this;
@@ -219,7 +221,7 @@ export class ObjectType {
 			enumerable: true,
 			writable: true
 		}, false);
-	}
+	},
 
 	defineProperty (key, descriptor, throwOnError) {
 		if (this.isPrimitive) {
@@ -253,7 +255,7 @@ export class ObjectType {
 		this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, descriptor, key);
 		this.version++;
 		return true;
-	}
+	},
 
 	deleteProperty (key, throwOnError) {
 		if (this.isPrimitive) {
@@ -275,7 +277,7 @@ export class ObjectType {
 
 		this.version++;
 		return delete this[source][key];
-	}
+	},
 
 	define (key, value, {configurable = true, enumerable = false, writable = true, getter, get, setter, set} = {}) {
 		// this method is intended for external usage only - it provides a way to define
@@ -291,14 +293,14 @@ export class ObjectType {
 
 		this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, descriptor, key);
 		this.version++;
-	}
+	},
 
 	remove (key) {
 		// this method is intended for external usage only - it provides a way to remove
 		// properties even if they are not normally able to be deleted
 		delete this[getPropertySource(key)][String(key)];
 		this.version++;
-	}
+	},
 
 	getValue (key) {
 		if (arguments.length > 0) {
@@ -307,13 +309,13 @@ export class ObjectType {
 		}
 
 		return this;
-	}
+	},
 
 	each (func) {
 		this.getOwnPropertyKeys().forEach(key => {
 			func(this.getOwnProperty(key));
 		});
-	}
+	},
 
 	freeze () {
 		this.each(desc => {
@@ -325,12 +327,12 @@ export class ObjectType {
 		});
 
 		this.preventExtensions();
-	}
+	},
 
 	preventExtensions () {
 		this.extensible = false;
 		return true;
-	}
+	},
 
 	seal () {
 		this.each(desc => {
@@ -338,9 +340,13 @@ export class ObjectType {
 		});
 
 		this.preventExtensions();
-	}
+	},
 
 	toNative () {
+    if ("value" in this) {
+      return this.value;
+    }
+    
 		let unwrapped = {};
 		
 		for (let name in this.properties) {
@@ -350,5 +356,9 @@ export class ObjectType {
 		}
 
 		return unwrapped;
-	}
-}
+	},
+  
+  toObject () {
+    return this;
+  }
+};

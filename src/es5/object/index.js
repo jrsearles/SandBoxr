@@ -31,10 +31,7 @@ export default function objectApi (env) {
 					return objectFactory.createObject();
 				}
 
-				let objectWrapper = objectFactory.createPrimitive(value.value);
-				objectWrapper.type = "object";
-				objectWrapper.isPrimitive = false;
-				return objectWrapper;
+        return value.toObject();
 			}
 
 			if (value.isSymbol) {
