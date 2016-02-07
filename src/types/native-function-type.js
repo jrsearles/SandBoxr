@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {FunctionType} from "./function-type";
 import {PropertyDescriptor} from "./property-descriptor";
 import {UNDEFINED} from "./primitive-type";
@@ -10,8 +11,7 @@ export function NativeFunctionType (fn) {
   this.nativeFunction = fn;
 }
 
-NativeFunctionType.prototype = Object.create(FunctionType.prototype);
-NativeFunctionType.prototype.constructor = NativeFunctionType;
+inherits(NativeFunctionType, FunctionType);
 
 NativeFunctionType.prototype.init = function (env, proto, {configurable = false, enumerable = false, writable = true, isConstructor = false, homeObject} = {}) {
   this[Symbol.for("env")] = env;		

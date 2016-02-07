@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {PrimitiveType} from "./primitive-type";
 import {isInteger} from "../utils/native";
 
@@ -24,8 +25,7 @@ export function StringType (value) {
   PrimitiveType.call(this, value);
 }
 
-StringType.prototype = Object.create(PrimitiveType.prototype);
-StringType.prototype.constructor = StringType;
+inherits(StringType, PrimitiveType);
 
 StringType.prototype.init = function (env) {
   PrimitiveType.prototype.init.apply(this, arguments);

@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 import {PropertyDescriptor} from "./property-descriptor";
 import {UNDEFINED} from "./primitive-type";
@@ -58,8 +59,7 @@ export function FunctionType (node) {
   this.homeObject = null;
 }
 
-FunctionType.prototype = Object.create(ObjectType.prototype);
-FunctionType.prototype.constructor = FunctionType;
+inherits(FunctionType, ObjectType);
 
 FunctionType.prototype.init = function (env, proto, descriptor, strict) {
   ObjectType.prototype.init.apply(this, arguments);

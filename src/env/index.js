@@ -26,7 +26,11 @@ const declareKinds = {
 	"class": {configurable: false, writable: true, initialized: false, block: true}
 };
 
-export class Environment {
+export function Environment () {}
+
+Environment.prototype = {
+  constructor: Environment,
+  
 	init (options = defaultOptions) {
 		// clear state in case of re-init
 		this.current = null;
@@ -71,7 +75,7 @@ export class Environment {
 				}
 			});
 		}
-	}
+	},
 
 	/**
 	 * Gets a reference from the environment
@@ -89,27 +93,27 @@ export class Environment {
 		}
 
 		return new Reference(key, undefined, this);
-	}
+	},
 	
 	getSymbol (key) {
 		return SymbolType.getByKey(key);
-	}
+	},
 
 	getValue (key) {
 		return this.getReference(key).getValue();
-	}
+	},
 
 	setValue (key, value, strict) {
 		this.current.scope.setValue(key, value, strict);
-	}
+	},
 
 	has (key) {
 		return this.current.scope.has(key);
-	}
+	},
 
 	deleteVariable (key) {
 		this.current.scope.deleteVariable(key);
-	}
+	},
 
 	getVariable (key) {
 		let scope = this.current && this.current.scope;
@@ -122,7 +126,7 @@ export class Environment {
 		}
     
 		return null;
-	}
+	},
 	
 	/**
 	 * Declares a variable within the current scope.
@@ -148,7 +152,7 @@ export class Environment {
 		}
 		
 		return scope.createVariable(key, attr);
-	}
+	},
 
 	/**
 	 * Indicates whether the current lexical scope is in strict mode.
@@ -169,7 +173,7 @@ export class Environment {
 		}
 
 		return false;
-	}
+	},
 
 	/**
 	 * Gets the current `this` object for the environment.
@@ -186,11 +190,11 @@ export class Environment {
 		}
 
 		return this.global;
-	}
+	},
 
 	createExecutionContext (obj, callee, newTarget) {
 		return new ExecutionContext(this, obj, callee, newTarget);
-	}
+	},
 
 	/**
 	 * Creates a new declarative scope.
@@ -199,7 +203,7 @@ export class Environment {
 	 */
 	createScope (thisArg) {
 		return this.setScope(new DeclarativeEnvironment(this.current, thisArg, this, this.isStrict()));
-	}
+	},
 
 	/**
 	 * Creates a new scope based on the provided object. This is used for the `with`
@@ -210,7 +214,7 @@ export class Environment {
 	 */
 	createObjectScope (obj, thisArg) {
 		return this.setScope(new ObjectEnvironment(this.current, obj, thisArg, this, this.isStrict()));
-	}
+	},
 
 	createExecutionScope (fn, thisArg) {
 		let parentScope = this.current.scope;
@@ -225,7 +229,7 @@ export class Environment {
 		let scope = this.createScope(thisArg);
 		scope.setParent(parentScope);
 		return scope;
-	}
+	},
 	
 	createBlockScope (node) {
 		let scope = this.current.scope;
@@ -236,7 +240,7 @@ export class Environment {
 		this.current = new BlockScope(this, scope, node);
 		this.current.init(node);
 		return this.current;
-	}
+	},
 
 	/**
 	 * Sets the current scope.
@@ -246,4 +250,4 @@ export class Environment {
 	setScope (lexicalEnvironment) {
 		return this.current = new Scope(this, lexicalEnvironment);
 	}
-}
+};

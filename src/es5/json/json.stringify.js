@@ -1,3 +1,4 @@
+import {repeat} from "core-js/library/fn/string/virtual"
 import {UNDEFINED} from "../../types/primitive-type";
 import {isUndefined, isNullOrUndefined} from "../../utils/checks";
 import {toString, toNumber, toArray} from "../../utils/native";
@@ -66,11 +67,11 @@ export default function ($target, env, factory) {
 			return values.join(",");
 		}
 
-		let indent = "\n" + gap.repeat(depth);
+		let indent = "\n" + repeat.call(gap, depth);
 		let joinedValues = values.join(indent + ",");
 
 		// remove indent on closing
-		return indent + joinedValues + "\n" + gap.repeat(depth - 1);
+		return indent + joinedValues + "\n" + repeat.call(gap, depth - 1);
 	}
 
 	function* serializeObject (stack, obj, replacer, gap, depth) {
@@ -166,7 +167,7 @@ export default function ($target, env, factory) {
 				count = Math.max(Math.min(10, count), 0);
 
 				if (count > 0) {
-					return " ".repeat(count);
+					return repeat.call(" ", count);
 				}
 
 				return "";

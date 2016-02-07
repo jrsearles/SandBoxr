@@ -46,19 +46,21 @@ function* getDirectives (body) {
 	}
 }
 
-export class TraversalContext {
-	constructor (node, parent, rules) {
-		if (node instanceof TraversalContext) {
-			return node;
-		}
-		
-		this._node = node;
-		this._parent = parent;
-	
-		this.type = node.type;
-		this.init(rules);
-	}
-	
+export function TraversalContext (node, parent, rules) {
+  if (node instanceof TraversalContext) {
+    return node;
+  }
+  
+  this._node = node;
+  this._parent = parent;
+
+  this.type = node.type;
+  this.init(rules);
+}
+
+let proto = TraversalContext.prototype = {
+  constructor: TraversalContext,
+  
 	init (rules) {
 		this._bindings = [];
 		
@@ -85,7 +87,7 @@ export class TraversalContext {
 		
 		Object.keys(this._node).forEach(key => this[key] = assignChild(this._node[key], this, rules));
     rules(this);
-	}
+	},
 	
 	is (type) {
 		if (type === this.type) {
@@ -98,11 +100,11 @@ export class TraversalContext {
 		}
 		
 		return false;
-	}
+	},
 	
 	has (key) {
 		return this._node[key] != null;
-	}
+	},
 	
 	getDirectives () {
 		if (!this._directives) {
@@ -119,23 +121,23 @@ export class TraversalContext {
 		}
 		
 		return this._directives;
-	}
+	},
 	
 	getBindings () {
 		return this._bindings || [];
-	}
+	},
 	
 	hasBindings () {
 		return this.getBindings().length > 0;
-	}
+	},
 	
 	getParent () {
 		return this._parent;
-	}
+	},
 	
 	isBlockScope () {
 		return this.isLet() || this.isConst() || this.isClassDeclaration();
-	}
+	},
 	
 	isStrict () {
 		if ("_strict" in this) {
@@ -159,20 +161,20 @@ export class TraversalContext {
 
 // add helper methods
 Object.keys(interfaces).forEach(key => {
-	TraversalContext.prototype[`is${key}`] = typeof interfaces[key] === "function" ? interfaces[key] : function () {
+	proto[`is${key}`] = typeof interfaces[key] === "function" ? interfaces[key] : function () {
 		return interfaces[key].indexOf(this.type) >= 0;
 	};
 });
 
 Object.keys(types).forEach(key => {
-	TraversalContext.prototype[`is${key}`] = function () {
+	proto[`is${key}`] = function () {
 		return this.type === key;
 	};
 });
 
 ["Var", "Const", "Let"].forEach(key => {
 	const lowerCaseKey = key.toLowerCase();
-	TraversalContext.prototype[`is${key}`] = function () {
+	proto[`is${key}`] = function () {
 		return this._parent._node.kind === lowerCaseKey;
 	};
 });

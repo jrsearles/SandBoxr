@@ -62,7 +62,7 @@ function getInfo (file) {
 	return info;
 }
 
-vfs.src("ch15/15.13/**/*.js", {cwd: root})
+vfs.src("ch08/**/*.js", {cwd: root})
 	.pipe(through.obj(function (file, enc, cb) {
 		// gutil.log(file.contents.toString());
 		// cb();

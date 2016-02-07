@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function ErrorType (source) {
@@ -7,8 +8,7 @@ export function ErrorType (source) {
   this.className = "Error";
 }
 
-ErrorType.prototype = Object.create(ObjectType.prototype);
-ErrorType.prototype.constructor = ErrorType;
+inherits(ErrorType, ObjectType);
 
 ErrorType.prototype.toNative = function () {
   return this.source;

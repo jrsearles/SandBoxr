@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 const GLOBAL_SYMBOL_REGISTRY = Object.create(null);
@@ -15,8 +16,7 @@ export function SymbolType (description) {
   this.isSymbol = true;
 }
 
-SymbolType.prototype = Object.create(ObjectType.prototype);
-SymbolType.prototype.constructor = SymbolType;
+inherits(SymbolType, ObjectType);
 
 SymbolType.prototype.defineProperty = function (key, descriptor) {
   return false;

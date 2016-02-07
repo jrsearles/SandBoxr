@@ -3,16 +3,18 @@ import {exhaust as x} from "../utils/async";
 import {UNDEFINED} from "../types/primitive-type";
 import {getMethod} from "../utils/helpers";
 
-export default class IterableIterator {
-	constructor (it) {
-		this.currentIndex = 0;
-		this.iterator = it;
-		this.advancer = it.getValue("next");
-	}
-	
+export default function IterableIterator (it) {
+  this.currentIndex = 0;
+  this.iterator = it;
+  this.advancer = it.getValue("next");
+}
+
+IterableIterator.prototype = {
+  constructor: IterableIterator,
+  
 	[Symbol.iterator] () {
 		return this;
-	}
+	},
 
 	next () {
 		let result = x(this.advancer.call(this.iterator));
@@ -25,7 +27,7 @@ export default class IterableIterator {
 		}
 
 		return {done, value};
-	}
+	},
 
 	*each (func) {
 		let done = false;
@@ -43,7 +45,7 @@ export default class IterableIterator {
 				throw err;
 			}
 		}
-	}
+	},
 
 	["return"] () {
 		let returnFunc = getMethod(this.iterator, "return");
@@ -52,10 +54,9 @@ export default class IterableIterator {
 		}
 
 		return UNDEFINED;
-	}
+	},
+};
 
-	static create (it) {
-		return new IterableIterator(it);
-	}
-}
-
+IterableIterator.create = function (it) {
+  return new IterableIterator(it);
+};

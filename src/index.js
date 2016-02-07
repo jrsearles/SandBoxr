@@ -2,18 +2,20 @@ import {Environment} from "./env";
 import {exhaust as x, isThenable} from "./utils/async";
 import {ErrorType} from "./types/error-type";
 
-export class Sandbox {
-	/**
-	 * Creates a new Sandbox
-	 * @class
-	 * @param {AST} ast - The abstract syntax tree to execute.
-	 * @param {Object} [options] The options to use with the sandbox.
-	 */
-	constructor (ast, options) {
-		this.ast = ast;
-		this.options = options || {};
-	}
+/**
+ * Creates a new Sandbox
+ * @class
+ * @param {AST} ast - The abstract syntax tree to execute.
+ * @param {Object} [options] The options to use with the sandbox.
+ */
+export function Sandbox (ast, options) {
+  this.ast = ast;
+  this.options = options || {};
+}
 
+Sandbox.prototype = {
+  constructor: Sandbox,
+  
 	/**
 	 * Executes the abstract syntax tree (AST) against the provided environment (or the default
 	 * environment if not provided)
@@ -43,7 +45,7 @@ export class Sandbox {
 		}
 
 		return executionResult.result;
-	}
+	},
 
 	/**
 	 * Executes the abstract syntax tree (AST) against the provided environment (or the default
@@ -55,4 +57,4 @@ export class Sandbox {
 		// always return a promise
 		return Promise.resolve(this.execute(env));
 	}
-}
+};

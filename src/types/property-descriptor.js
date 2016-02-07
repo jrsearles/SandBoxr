@@ -11,32 +11,34 @@ const defaultDescriptor = {
 	value: undefined
 };
 
-export class PropertyDescriptor {
-	constructor (base, config = defaultDescriptor, key) {
-		this.base = base;
-		this.configurable = config.configurable || false;
-		this.enumerable = config.enumerable || false;
-		this.initialized = config.initialized !== false;
-		this.key = key;
-		this.uid = ++uid;
-		
-		if ("get" in config || "set" in config) {
-			this.dataProperty = false;
-			this.get = config.get;
-			this.getter = config.getter;
-			this.set = config.set;
-			this.setter = config.setter;
-		} else {
-			this.writable = config.writable || false;
-			this.dataProperty = true;
-			this.value = config.value;
-		}
-	}
+export function PropertyDescriptor (base, config = defaultDescriptor, key) {
+  this.base = base;
+  this.configurable = config.configurable || false;
+  this.enumerable = config.enumerable || false;
+  this.initialized = config.initialized !== false;
+  this.key = key;
+  this.uid = ++uid;
+  
+  if ("get" in config || "set" in config) {
+    this.dataProperty = false;
+    this.get = config.get;
+    this.getter = config.getter;
+    this.set = config.set;
+    this.setter = config.setter;
+  } else {
+    this.writable = config.writable || false;
+    this.dataProperty = true;
+    this.value = config.value;
+  }
+}
 
+PropertyDescriptor.prototype = {
+  constructor: PropertyDescriptor,
+  
 	bind (obj) {
 		this.base = obj;
 		return this;
-	}
+	},
 
 	update (descriptor) {
 		for (let prop in descriptor) {
@@ -54,7 +56,7 @@ export class PropertyDescriptor {
 			this.dataProperty = true;
 			this.get = this.getter = this.set = this.setter = undefined;
 		}
-	}
+	},
 
 	canUpdate (descriptor) {
 		if (this.configurable) {
@@ -102,7 +104,7 @@ export class PropertyDescriptor {
 		}
 
 		return true;
-	}
+	},
 
 	getValue () {
 		if (!this.initialized) {
@@ -118,11 +120,11 @@ export class PropertyDescriptor {
 		}
 
 		return undefined;
-	}
+	},
 
 	canSetValue (value) {
 		return this.writable || !!this.setter || !this.initialized;
-	}
+	},
 
 	setValue (value) {
 		if (!this.canSetValue()) {
@@ -136,14 +138,14 @@ export class PropertyDescriptor {
 		} else if (this.setter) {
 			x(this.setter.call(this.base, value));
 		}
-	}
+	},
 
 	hasValue () {
 		return !!this.value || !!this.getter;
-	}
+	},
 	
 	init (value) {
 		this.initialized = true;
 		this.value = value;
-	}
-}
+	},
+};

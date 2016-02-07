@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 import {toNumber, toUInt32, isInteger, isValidArrayLength} from "../utils/native";
 import {assertIsValidArrayLength} from "../utils/contracts";
@@ -9,8 +10,7 @@ export function ArrayType () {
   this.className = "Array";
 }
 
-ArrayType.prototype = Object.create(ObjectType.prototype);
-ArrayType.prototype.constructor = ArrayType;
+inherits(ArrayType, ObjectType);
 
 ArrayType.prototype.init = function (env) {
   ObjectType.prototype.init.apply(this, arguments);

@@ -2,43 +2,45 @@ import {Reference} from "./reference";
 import {PropertyDescriptor} from "../types/property-descriptor";
 import {UNDEFINED} from "../types/primitive-type";
 
-export class DeclarativeEnvironment {
-	constructor (parent, thisArg, env, strict, block) {
-		this.properties = Object.create(null);
-		this.parent = parent && parent.scope;
-		this.thisBinding = thisArg;
-		this.env = env;
-		this.strict = strict;
-		this.block = !!block;
-		
-		this.meta = Object.create(null);
-	}
-	
+export function DeclarativeEnvironment (parent, thisArg, env, strict, block) {
+  this.properties = Object.create(null);
+  this.parent = parent && parent.scope;
+  this.thisBinding = thisArg;
+  this.env = env;
+  this.strict = strict;
+  this.block = !!block;
+  
+  this.meta = Object.create(null);
+}
+
+DeclarativeEnvironment.prototype = {
+  constructor: DeclarativeEnvironment,
+  
 	createChildScope () {
 		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
-	}
+	},
 
 	setParent (parent) {
 		this.parent = parent.scope || parent;
-	}
+	},
 
 	getReference (key) {
 		let ref = new Reference(key, this, this.env);
 		ref.unqualified = true;
 		return ref;
-	}
+	},
 
 	has (key) {
 		return key in this.properties;
-	}
+	},
 
 	owns (key) {
 		return this.has(key);
-	}
+	},
 	
 	getVariable (key) {
 		return this.properties[key];
-	}
+	},
 
 	deleteVariable (key) {
 		if (!this.has(key)) {
@@ -51,7 +53,7 @@ export class DeclarativeEnvironment {
 
 		delete this.properties[key];
 		return true;
-	}
+	},
 
 	createVariable (key, {configurable = false, writable = true, initialized = true} = {}) {
 		if (this.has(key)) {
@@ -59,7 +61,7 @@ export class DeclarativeEnvironment {
 		}
 
 		return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized}, key);
-	}
+	},
 
 	setValue (key, value, throwOnError) {
 		let propInfo = this.properties[key];
@@ -77,7 +79,7 @@ export class DeclarativeEnvironment {
 		} else {
 			return this.parent.setValue(...arguments);
 		}
-	}
+	},
 
 	getValue (key, throwOnError) {
 		let propInfo = this.properties[key];
@@ -90,9 +92,9 @@ export class DeclarativeEnvironment {
 		}
 		
 		return UNDEFINED;
-	}
+	},
 
 	getThisBinding () {
 		return this.thisBinding;
 	}
-}
+};

@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function RegexType (value) {
@@ -7,8 +8,7 @@ export function RegexType (value) {
   this.className = "RegExp";
 }
 
-RegexType.prototype = Object.create(ObjectType.prototype);
-RegexType.prototype.constructor = RegexType;
+inherits(RegexType, ObjectType);
 
 RegexType.prototype.init = function (env) {
   ObjectType.prototype.init.apply(this, arguments);

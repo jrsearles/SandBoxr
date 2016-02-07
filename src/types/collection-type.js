@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function CollectionType (className) {
@@ -7,5 +8,4 @@ export function CollectionType (className) {
   this.data = [];
 }
 
-CollectionType.prototype = Object.create(ObjectType.prototype);
-CollectionType.prototype.constructor = CollectionType;
+inherits(CollectionType, ObjectType);

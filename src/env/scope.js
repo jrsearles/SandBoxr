@@ -1,21 +1,22 @@
 import {UNDEFINED} from "../types/primitive-type";
 import {assertIsValidParameterName} from "../utils/contracts";
-// import {each} from "../utils/async";
 import {declare} from "../utils/assign";
 import {createDataProperty} from "../utils/helpers";
 
-export class Scope {
-	constructor (env, scope) {
-		env.globalScope = env.globalScope || this;
+export function Scope (env, scope) {
+  env.globalScope = env.globalScope || this;
 
-		this.scope = scope;
-		this.env = env;
-		this.parentScope = (env.current || env.globalScope).scope;
-	}
+  this.scope = scope;
+  this.env = env;
+  this.parentScope = (env.current || env.globalScope).scope;
+}
 
+Scope.prototype = {
+  constructor: Scope,
+  
 	setMeta (key, value) {
 		this.scope.meta[key] = value;
-	}
+	},
 	
 	getMeta (key) {
 		let scope = this.scope;
@@ -28,11 +29,11 @@ export class Scope {
 		}
 		
 		return null;
-	}
+	},
 	
 	setParent (parentScope) {
 		this.parentScope = parentScope;	
-	}
+	},
 	
 	/**
 	 * Initializes the scope by validating the function body and hoisting variables.
@@ -75,7 +76,7 @@ export class Scope {
 				newVar.init(value);
 			}
 		});
-	}
+	},
 
 	*loadComplexArgs (params, args, callee) {
 		let env = this.env;
@@ -103,21 +104,6 @@ export class Scope {
 			}
     }
     
-		// yield each(params, function* (param, index) {
-		// 	if (param.isRestElement()) {
-		// 		let rest = env.objectFactory.createArray();
-		// 		let restIndex = 0;
-
-		// 		while (argIndex < argLength) {
-		// 			rest.setValue(restIndex++, args[argIndex++] || UNDEFINED);
-		// 		}
-
-		// 		yield declare(env, param.argument, rest);
-		// 	} else {
-		// 		yield declare(env, param, args[argIndex++] || UNDEFINED);
-		// 	}
-		// });
-
 		if (!callee.arrow) {
 			// preserve the passed in arguments, even if defaults are used instead
 			let argumentList = env.objectFactory.createArguments(args, callee, strict);
@@ -137,7 +123,7 @@ export class Scope {
 
 		// return scope back to main scope
 		this.env.setScope(this.scope);
-	}
+	},
 
 	/**
 	 * Loads the arguments into the scope and creates the special `arguments` object.
@@ -208,14 +194,14 @@ export class Scope {
 			configurable: true,
 			writable: true
 		});
-	}
+	},
 
 	createParameterScope () {
 		let temp = this.env.createScope();
 		temp.scope.setParent(this.scope.parent);
 		this.scope.setParent(temp);
 		return temp.scope;
-	}
+	},
 
 	/**
 	 * uses the passed in function and exits the scope when the function completes,
@@ -232,7 +218,7 @@ export class Scope {
 			this.exit();
 			throw err;
 		}
-	}
+	},
 
 	/**
 	 * Exits the scope, returning the environment to it's previous state.
@@ -242,4 +228,4 @@ export class Scope {
 	exit () {
 		this.env.setScope(this.parentScope);
 	}
-}
+};

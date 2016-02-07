@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 import {getNativeType as getType} from "../utils/helpers";
 
@@ -11,8 +12,7 @@ export function PrimitiveType (value) {
   this.className = getType(value);
 }
 
-PrimitiveType.prototype = Object.create(ObjectType.prototype);
-PrimitiveType.prototype.constructor = PrimitiveType;
+inherits(PrimitiveType, ObjectType);
 
 PrimitiveType.prototype.getProperty = function (name) {
   // can't read properties of null/undefined

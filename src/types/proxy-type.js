@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 import {UNDEFINED} from "./primitive-type";
 import {isUndefined, isObject, isNull} from "../utils/checks";
@@ -99,8 +100,7 @@ export function ProxyType (target, handler) {
   this.isProxy = true;
 }
 
-ProxyType.prototype = Object.create(ObjectType.prototype);
-ProxyType.prototype.constructor = ProxyType;
+inherits(ProxyType, ObjectType);
 
 ProxyType.prototype.call = function* (thisArg, args) {
   assertIsNotRevoked(this, "apply");

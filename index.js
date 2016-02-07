@@ -1,4 +1,3 @@
-import "babel-polyfill";
 import {Environment} from "./src/env";
 import {Sandbox} from "./src";
 

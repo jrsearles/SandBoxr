@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function DateType (value) {
@@ -13,8 +14,7 @@ export function DateType (value) {
   this.primitiveHint = "string";
 }
 
-DateType.prototype = Object.create(ObjectType.prototype);
-DateType.prototype.constructor = DateType;
+inherits(DateType, ObjectType);
 
 DateType.prototype.Native = function () {
   return this.value;

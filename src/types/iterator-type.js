@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function IteratorType (iterable, kind = "key+value") {
@@ -9,8 +10,7 @@ export function IteratorType (iterable, kind = "key+value") {
   this.kind = kind;
 }
 
-IteratorType.prototype = Object.create(ObjectType.prototype);
-IteratorType.prototype.constructor = IteratorType;
+inherits(IteratorType, ObjectType);
 
 IteratorType.prototype.init = function (env, proto) {
   ObjectType.prototype.init.apply(this, arguments);

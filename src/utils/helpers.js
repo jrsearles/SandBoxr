@@ -4,8 +4,7 @@ const objectPattern = /\[object (\w+)\]/;
 const toString = Object.prototype.toString;
 
 export function getMethod (obj, key) {
-	let propInfo = obj.getProperty(key);
-	let method = propInfo && propInfo.getValue();
+	let method = obj.getValue(key);
 	
 	if (isNullOrUndefined(method)) {
 		return null;

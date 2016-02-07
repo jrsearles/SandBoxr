@@ -57,19 +57,21 @@ function createDataPropertyDescriptor (value, {configurable = true, enumerable =
 	return {value, configurable, enumerable, writable};
 }
 
-export class ObjectFactory {
-	constructor (env) {
-		this.env = env;
-		this.options = env.options;
-		this.ecmaVersion = env.ecmaVersion || 5;
-		this.initialized = false;
-    this.instanceCache = new Map();
-	}
+export function ObjectFactory (env) {
+  this.env = env;
+  this.options = env.options;
+  this.ecmaVersion = env.ecmaVersion || 5;
+  this.initialized = false;
+  this.instanceCache = new Map();
+}
 
+ObjectFactory.prototype = {
+  constructor: ObjectFactory,
+  
 	init () {
 		setOrphans(this.env);
 		this.initialized = true;
-	}
+	},
 
 	/**
 	 * Creates a primitive object based on the provided native value.
@@ -78,7 +80,7 @@ export class ObjectFactory {
 	 */
 	createPrimitive (value) {
 		return this.create(getType(value), value);
-	}
+	},
 
 	/**
 	 * Creates an object based on the type specified. For a primitive type the second
@@ -173,7 +175,7 @@ export class ObjectFactory {
 		instance.init(this.env);
 		setProto(typeName, instance, this);
 		return instance;
-	}
+	},
 
 	/**
 	 * Creates an array object.
@@ -190,7 +192,7 @@ export class ObjectFactory {
 		}
 
 		return instance;
-	}
+	},
 
 	/**
 	 * Creates an object.
@@ -212,7 +214,7 @@ export class ObjectFactory {
 
 		instance.init(this.env);
 		return instance;
-	}
+	},
 
 	createProxy (target, handler) {
 		assertIsObject(target, "Proxy");
@@ -229,7 +231,7 @@ export class ObjectFactory {
 		let instance = new ProxyType(target, handler);
 		instance.init(this.env);
 		return instance;
-	}
+	},
 
 	createArguments (args, callee, strict) {
 		let instance = new ArgumentType();
@@ -257,20 +259,20 @@ export class ObjectFactory {
 		}
 
 		return instance;
-	}
+	},
 
 	createIterator (iterable, proto) {
 		let instance = new IteratorType(iterable);
 		instance.init(this.env, proto);
 		return instance;
-	}
+	},
 
 	createIteratorResult ({value, done = false}) {
 		let instance = this.createObject();
 		instance.defineProperty("done", {value: this.createPrimitive(done)});
 		instance.defineProperty("value", {value: value || UNDEFINED});
 		return instance;
-	}
+	},
 	
 	*createArrayFromSpecies (obj, length) {
 		let ctor = this.env.global.getValue("Array");
@@ -289,7 +291,7 @@ export class ObjectFactory {
 		
 		let lengthValue = this.createPrimitive(length);
 		return yield ctor.construct(null, [lengthValue]);
-	}
+	},
 
 	*createFromSpeciesOrDefault (obj, defaultCtor, args) {
 		args = args || [];
@@ -306,7 +308,7 @@ export class ObjectFactory {
 		}
 		
 		return yield defaultCtor.construct(null, args);
-	}
+	},
 
 	/**
 	 * Creates a function instance.
@@ -334,19 +336,19 @@ export class ObjectFactory {
 		
 		setProto("Function", instance, this);
 		return instance;
-	}
+	},
 
 	createClass (fnOrNode, proto, {name, homeObject} = {}) {
 		return this.createFunction(fnOrNode, proto, {configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name, homeObject});
-	}
+	},
 
 	createGetter (func, key) {
 		return this.createBuiltInFunction(func, 0, `get ${key}`);
-	}
+	},
 
 	createSetter (func, key) {
 		return this.createBuiltInFunction(func, 1, `set ${key}`);
-	}
+	},
 
 	/**
 	 * Creates a function with no prototype that cannot be instantiated.
@@ -378,7 +380,7 @@ export class ObjectFactory {
 		instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
 
 		return instance;
-	}
+	},
 
 	createThrower (message, thrower) {
 		this.throwers = this.throwers || Object.create(null);
@@ -402,4 +404,4 @@ export class ObjectFactory {
 			configurable: false
 		};
 	}
-}
+};

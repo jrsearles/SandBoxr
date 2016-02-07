@@ -13,18 +13,20 @@ const isValidIndex = function (keys, start, end) {
 	};
 };
 
-export default class SparseIterator {
-	constructor (obj, start, end, desc) {
-		this.object = obj;
-		this.start = start;
-		this.end = end;
-		this.asc = !desc;
-		this.version = 0;
-	}
+export default function SparseIterator (obj, start, end, desc) {
+  this.object = obj;
+  this.start = start;
+  this.end = end;
+  this.asc = !desc;
+  this.version = 0;
+}
 
+SparseIterator.prototype = {
+  constructor: SparseIterator,
+  
 	[Symbol.iterator] () {
 		return this;
-	}
+	},
 
 	reset () {
 		this.version = 0;
@@ -50,7 +52,7 @@ export default class SparseIterator {
 		}
 
 		this.keys.sort(this.asc ? ASCENDING : DESCENDING);
-	}
+	},
 
 	next () {
 		if (!this.version || this.shouldReset()) {
@@ -70,7 +72,7 @@ export default class SparseIterator {
 		return {
 			done: true
 		};
-	}
+	},
 
 	shouldReset () {
 		let currentVersion = this.prototypes.reduce((v, o) => o.version + v, 0);
@@ -85,9 +87,9 @@ export default class SparseIterator {
 		}
 
 		return false;
-	}
+	},
+};
 
-	static create (arr, start, end, desc) {
-		return new SparseIterator(arr, start, end, desc);
-	}
-}
+SparseIterator.create = function (arr, start, end, desc) {
+  return new SparseIterator(arr, start, end, desc);
+};

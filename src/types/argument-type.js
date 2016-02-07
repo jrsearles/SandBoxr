@@ -1,3 +1,4 @@
+import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function ArgumentType (callee) {
@@ -8,8 +9,7 @@ export function ArgumentType (callee) {
   this.callee = callee;
 }
 
-ArgumentType.prototype = Object.create(ObjectType.prototype);
-ArgumentType.prototype.constructor = ArgumentType;
+inherits(ArgumentType, ObjectType);
 
 ArgumentType.prototype.mapProperty = function (index, binding) {
   index = String(index);

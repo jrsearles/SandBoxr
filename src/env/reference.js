@@ -1,16 +1,18 @@
 import {assertIsValidIdentifier} from "../utils/contracts";
 
-export class Reference {
-	constructor (key, base, env) {
-		this.isReference = true;
-		this.unqualified = false;
+export function Reference (key, base, env) {
+  this.isReference = true;
+  this.unqualified = false;
 
-		this.key = key;
-		this.base = base;
-		this.env = env;
-		this.strict = env.isStrict();
-	}
+  this.key = key;
+  this.base = base;
+  this.env = env;
+  this.strict = env.isStrict();
+}
 
+Reference.prototype = {
+  constructor: Reference,
+  
 	/**
 	 * Returns the value of the reference. If the reference is unresolved,
 	 * a ReferenceError will be thrown.
@@ -22,7 +24,7 @@ export class Reference {
 		}
 
 		return this.base.getValue(this.key, this.strict);
-	}
+	},
 
 	/**
 	 * Sets the value of the underlying property or value.
@@ -54,11 +56,11 @@ export class Reference {
 		},
 		false,
 		this.env);
-	}
+	},
 
 	isStrict () {
 		return this.strict || this.env.isStrict();
-	}
+	},
 
 	/**
 	 * Deletes the underlying reference.
@@ -70,7 +72,7 @@ export class Reference {
 		}
 
 		return true;
-	}
+	},
 
 	/**
 	 * Indicates whether the reference is resolved or not.
@@ -79,4 +81,4 @@ export class Reference {
 	isUnresolved () {
 		return !this.base;
 	}
-}
+};

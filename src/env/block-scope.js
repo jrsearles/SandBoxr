@@ -1,32 +1,33 @@
+import {inherits} from "util";
 import {Scope} from "./scope";
 import {reset} from "../utils/assign";
 
-export class BlockScope extends Scope {
-	constructor (env, scope, node) {
-		super(env, scope);
-		this.node = node;
-	}
-	
-	*use (inner) {
-		if (this.node.hasBindings()) {
-			return yield super.use(inner);
-		}
-		
-		return yield inner();
-	}
-	
-	*reset (initNode) {
-		if (this.node.hasBindings()) {
-			super.exit();
-			let nextScope = this.env.createBlockScope(this.node);
-			
-			if (initNode) {
-				yield reset(this.env, initNode, this.scope, nextScope.scope);
-			}
-			
-			return nextScope;
-		}
-		
-		return this;
-	}
+export function BlockScope (env, scope, node) {
+  Scope.call(this, env, scope);
+  this.node = node;
 }
+
+inherits(BlockScope, Scope);
+
+BlockScope.prototype.use = function* (inner) {
+  if (this.node.hasBindings()) {
+    return yield Scope.prototype.use.call(this, inner);
+  }
+  
+  return yield inner();
+};
+
+BlockScope.prototype.reset = function* (initNode) {
+  if (this.node.hasBindings()) {
+    this.exit();
+    let nextScope = this.env.createBlockScope(this.node);
+    
+    if (initNode) {
+      yield reset(this.env, initNode, this.scope, nextScope.scope);
+    }
+    
+    return nextScope;
+  }
+  
+  return this;
+};
