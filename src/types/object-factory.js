@@ -23,10 +23,7 @@ function setOrphans (scope) {
   for (let typeName in orphans) {
     let parent = scope.getValue(typeName);
     if (parent) {
-      orphans[typeName].forEach(function (child) {
-        child.setPrototype(parent.getValue("prototype"));
-      });
-
+      orphans[typeName].forEach(child => child.setPrototype(parent.getValue("prototype")));
       delete orphans[typeName];
     }
   }
@@ -169,7 +166,7 @@ ObjectFactory.prototype = {
         break;
 
       default:
-        throw Error("Not a primitive: " + value);
+        throw Error(`Not a primitive: ${value}`);
     }
 
     instance.init(this.env);

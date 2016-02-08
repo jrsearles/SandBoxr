@@ -1,4 +1,4 @@
-import {getMethod, getNativeType} from "../utils/helpers";
+import {getMethod} from "../utils/helpers";
 import {isNullOrUndefined, isFunction, isUndefined, isNull} from "./checks";
 
 const sign = Math.sign;

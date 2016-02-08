@@ -2,10 +2,6 @@ import {toString, toBoolean, toObject, toPropertyKey} from "../../utils/native";
 import {isObject} from "../../utils/checks";
 import {UNDEFINED} from "../../types/primitive-type";
 
-function getOptions (obj) {
-  return obj[Symbol.for("env")].options;
-}
-
 export function* defineProperty (env, obj, key, descriptor, throwOnError = true) {
   if (!isObject(descriptor)) {
     let stringValue = yield toString(descriptor);

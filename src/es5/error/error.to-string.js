@@ -10,7 +10,7 @@ export default function ($target, env, factory) {
     let message = isUndefined(messageValue) ? "" : yield toString(messageValue);
     
     if (name && message) {
-      return factory.createPrimitive(name + ": " + message);
+      return factory.createPrimitive(`${name}: ${message}`);
     }
 
     return factory.createPrimitive(name || message);

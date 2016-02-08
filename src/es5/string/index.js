@@ -66,7 +66,7 @@ export default function (env) {
       let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
 
       return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
-    }, String.prototype[name].length, "String.prototype." + name));
+    }, String.prototype[name].length, `String.prototype.${name}`));
   });
 
   globalObject.define("String", stringClass);

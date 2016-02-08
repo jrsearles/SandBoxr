@@ -67,11 +67,11 @@ export default function ($target, env, factory) {
       return values.join(",");
     }
 
-    let indent = "\n" + repeat.call(gap, depth);
-    let joinedValues = values.join(indent + ",");
+    let indent = `\n${repeat.call(gap, depth)}`;
+    let joinedValues = values.join(`${indent},`);
 
     // remove indent on closing
-    return indent + joinedValues + "\n" + repeat.call(gap, depth - 1);
+    return `${indent}${joinedValues}\n${repeat.call(gap, depth - 1)}`;
   }
 
   function* serializeObject (stack, obj, replacer, gap, depth) {
@@ -90,16 +90,7 @@ export default function ($target, env, factory) {
       }
     }
 
-    // for (let prop in obj.properties) {
-    //   if (obj.properties[prop].enumerable) {
-    //     value = yield replacer(obj, prop, obj.getValue(prop));
-    //     if (!isNullOrUndefined(value) && !ignored[value.className]) {
-    //       values.push(serializePrimitive(prop) + colon + (yield serialize(stack, value, replacer, gap, depth)));
-    //     }
-    //   }
-    // }
-
-    return "{" + formatValues(values, gap, depth, gap, depth) + "}";
+    return `{${formatValues(values, gap, depth, gap, depth)}}`;
   }
 
   function* serializeArray (stack, arr, replacer, gap, depth) {
@@ -120,7 +111,7 @@ export default function ($target, env, factory) {
       }
     }
 
-    return "[" + formatValues(values, gap, depth) + "]";
+    return `[${formatValues(values, gap, depth)}]`;
   }
 
   function* createReplacer (replacer) {

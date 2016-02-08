@@ -9,7 +9,7 @@ export const version = "0.15.2";
 	* @returns {Object} The environment instance.
 	*/
 export function createEnvironment (options) {
-	return new Environment(options);
+  return new Environment(options);
 }
 
 /**
@@ -19,5 +19,5 @@ export function createEnvironment (options) {
 	* @returns {SandBoxr} A new sandbox.
 	*/
 export function create (ast, options) {
-	return new Sandbox(ast, options);
+  return new Sandbox(ast, options);
 }

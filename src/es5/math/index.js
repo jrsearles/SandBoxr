@@ -14,7 +14,7 @@ export default function mathApi (env) {
   });
 
   methods.forEach(name => {
-    mathClass.define(name, toNativeFunction(env, Math[name], "Math." + name));
+    mathClass.define(name, toNativeFunction(env, Math[name], `Math.${name}`));
   });
 
   globalObject.define("Math", mathClass);

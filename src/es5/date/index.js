@@ -71,11 +71,11 @@ export default function dateApi (env) {
   $valueOf(proto, env, objectFactory);
 
   staticMethods.forEach(name => {
-    dateClass.define(name, toNativeFunction(env, Date[name], "Date." + name));
+    dateClass.define(name, toNativeFunction(env, Date[name], `Date.${name}`));
   });
 
   protoMethods.forEach(name => {
-    proto.define(name, toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
+    proto.define(name, toNativeFunction(env, Date.prototype[name], `Date.prototype.${name}`));
   });
 
   setters.forEach(name => {
@@ -84,7 +84,7 @@ export default function dateApi (env) {
       Date.prototype[name].apply(this.object.value, args);
     }
 
-    proto.define(name, objectFactory.createBuiltInFunction(setter, Date.prototype[name].length, "Date.prototype." + name));
+    proto.define(name, objectFactory.createBuiltInFunction(setter, Date.prototype[name].length, `Date.prototype.${name}`));
   });
 
   globalObject.define("Date", dateClass);

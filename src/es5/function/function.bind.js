@@ -28,7 +28,7 @@ export default function ($target, env, factory) {
     let nameValue = fn.getValue("name");
     let name = isUndefined(nameValue) ? "" : yield toString(nameValue);
 
-    let boundFunc = factory.createFunction(nativeFunc, null, {name: "bound " + name});
+    let boundFunc = factory.createFunction(nativeFunc, null, {name: `bound ${name}`});
     boundFunc.canConstruct = fn.canConstruct;
     boundFunc.bindScope(this.env.current);
     boundFunc.bindThis(thisArg);

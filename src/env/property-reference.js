@@ -4,6 +4,10 @@ import {UNDEFINED} from "../types/primitive-type";
 
 /**
  * An object which represents a reference to an object's property.
+ * @param {String} key - the identifier for the property
+ * @param {ObjectType} object - the base object for the property.
+ * @param {Environment} env - the current environment.
+ * @returns {PropertyReference} The property reference.
  */
 export function PropertyReference (key, object, env) {
   Reference.call(this, key, object, env);

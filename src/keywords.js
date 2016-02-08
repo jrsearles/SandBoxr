@@ -62,7 +62,7 @@ keywords.es6 = keywords.es5.slice().concat([
 keywords.es6strict = keywords.es5strict.slice().concat(["static", "implements"]);
 
 export function isReserved (name, ecmaVersion = 5) {
-  let v = "es" + ecmaVersion;
+  let v = `es${ecmaVersion}`;
   if (v in keywords) {
     return keywords[v].indexOf(name) >= 0;
   }

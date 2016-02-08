@@ -32,7 +32,7 @@ SymbolType.prototype.toNative = function () {
 
 SymbolType.prototype.toString = function () {
   // this method is here so symbols can be coerced into strings for property lookups
-  return "@@" + this.uid;
+  return `@@${this.uid}`;
 };
 
 SymbolType.prototype.toSymbolString = function () {
