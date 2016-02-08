@@ -63,9 +63,9 @@ export function* step (it, prev) {
 
   if (result.done) {
     return value;
-  } else {
-    yield step(it, value);
   }
+  
+  yield step(it, value);
 }
 
 function tryCatch (it, priorValue, method) {
@@ -90,14 +90,6 @@ function tryCatch (it, priorValue, method) {
  */
 export function exhaust (it, value, stack = [], state = "next") {
   while (it) {
-//     if (!isNextable(it)) {
-//       value = it;
-// 
-//       if (!(it = stack.pop())) {
-//         break;
-//       }
-//     }
-
     let done;
     ({state, done, value} = tryCatch(it, value, state));
 

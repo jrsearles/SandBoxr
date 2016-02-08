@@ -53,7 +53,7 @@ export default function ($target, env, factory) {
     try {
       ast = parser(code.value);
     } catch (err) {
-      if (err instanceof SyntaxError && /assigning to rvalue/i.test(err.message)) {
+      if (err instanceof SyntaxError && (/assigning to rvalue/i).test(err.message)) {
         // hack because acorn throws syntax error
         throw ReferenceError("Invalid left-hand side in assignment");
       }

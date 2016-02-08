@@ -9,7 +9,7 @@ export default function* ForOfStatement (node, context, next) {
     return context.empty();
   }
 
-  context = context.createLoop();
+  let loopContext = context.createLoop();
   
   let it = iterate.getIterator(obj);  // obj.getIterator(context.env);
   // let advance = it.getValue("next");
@@ -17,18 +17,18 @@ export default function* ForOfStatement (node, context, next) {
   let result, priorResult;
 
   while (!done) {
-    let scope = context.env.createBlockScope(node);
+    let scope = loopContext.env.createBlockScope(node);
     let current;
     
     ({done, value: current} = it.next());
     
     if (!done) {
-      yield declare(context.env, node.left, current.value);
+      yield declare(loopContext.env, node.left, current.value);
       
-      result = yield next(node.body, context);
-      if (context.shouldBreak(result)) {
+      result = yield next(node.body, loopContext);
+      if (loopContext.shouldBreak(result)) {
         done = true;
-        result = context.abrupt(result, priorResult);
+        result = loopContext.abrupt(result, priorResult);
       }
     }
     
@@ -40,5 +40,5 @@ export default function* ForOfStatement (node, context, next) {
     priorResult = result;
   }
 
-  return result || context.empty();
+  return result || loopContext.empty();
 }

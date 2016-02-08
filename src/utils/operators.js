@@ -176,13 +176,14 @@ const ops = {
   *[">="] (a, b) { return neg(yield this.relationalCompare(a, b, true)); },
 
   *["in"] (a, b) {
-    a = yield toPropertyKey(a);
+    let key = yield toPropertyKey(a);
+    
     if (b.isPrimitive) {
       let bString = yield toString(b);
-      throw TypeError(`Cannot use 'in' operator to search for '${a}' in ${bString}`);
+      throw TypeError(`Cannot use 'in' operator to search for '${key}' in ${bString}`);
     }
 
-    return b.has(a);
+    return b.has(key);
   },
 
   ["instanceof"] (a, b) {

@@ -9,30 +9,30 @@ function* shouldContinue (node, context, next) {
 }
 
 export default function* ForStatement (node, context, next) {
-  context = context.createLoop();
+  let loopContext = context.createLoop();
   
-  let scope = context.env.createBlockScope(node);
+  let scope = loopContext.env.createBlockScope(node);
   if (node.init) {
-    yield next(node.init, context);
+    yield next(node.init, loopContext);
   }
 
   let result, priorResult;
   
-  while (yield shouldContinue(node.test, context, next)) {
-    result = yield next(node.body, context);
+  while (yield shouldContinue(node.test, loopContext, next)) {
+    result = yield next(node.body, loopContext);
 
-    if (context.shouldBreak(result)) {
-      return context.abrupt(result, priorResult);
+    if (loopContext.shouldBreak(result)) {
+      return loopContext.abrupt(result, priorResult);
     }
 
     priorResult = result;
     scope = yield scope.reset(node.init);
     
     if (node.update) {
-      yield next(node.update, context);
+      yield next(node.update, loopContext);
     }
   }
 
   scope.exit();
-  return result || context.empty();
+  return result || loopContext.empty();
 }

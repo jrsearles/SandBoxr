@@ -118,6 +118,7 @@ export function* ClassDeclaration (node, context, next) {
     }
     
     let name = typeof key === "object" && key.isSymbol ? key.toSymbolString() : key;
+    let entry;
     
     switch (kind) {
       case "constructor":
@@ -126,13 +127,13 @@ export function* ClassDeclaration (node, context, next) {
 
       case "get":
       case "set":
-        let entry = findOrCreate(props, key, method.static);
+        entry = findOrCreate(props, key, method.static);
         entry[kind] = objectFactory.createFunction(method.value, null, {strict: true, name: `${kind} ${name}`, homeObject});
         break;
 
       default:
         if (method.static) {
-          let entry = findOrCreate(props, key, true);
+          entry = findOrCreate(props, key, true);
           entry.value = objectFactory.createFunction(method.value, null, {strict: true, name, homeObject});
           break;
         }

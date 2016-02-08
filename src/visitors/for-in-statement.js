@@ -9,7 +9,7 @@ export default function* ForInStatement (node, context, next) {
     return context.empty();
   }
 
-  context = context.createLoop();
+  let loopContext = context.createLoop();
   
   let it = obj.getIterator(context.env);
   let advance = it.getValue("next");
@@ -17,18 +17,18 @@ export default function* ForInStatement (node, context, next) {
   let result, priorResult;
 
   while (!done) {
-    let scope = context.env.createBlockScope(node);
+    let scope = loopContext.env.createBlockScope(node);
     let itResult = yield advance.call(it);
     done = toBoolean(itResult.getValue("done"));
 
     if (!done && itResult.has("value")) {
-      yield declare(context.env, node.left, itResult.getValue("value"));
+      yield declare(loopContext.env, node.left, itResult.getValue("value"));
       // left.setValue(itResult.getValue("value"));
       
-      result = yield next(node.body, context);
-      if (context.shouldBreak(result)) {
+      result = yield next(node.body, loopContext);
+      if (loopContext.shouldBreak(result)) {
         scope.exit();
-        return context.abrupt(result, priorResult);
+        return loopContext.abrupt(result, priorResult);
       }
     }
 
@@ -36,5 +36,5 @@ export default function* ForInStatement (node, context, next) {
     priorResult = result;
   }
   
-  return result || context.empty();
+  return result || loopContext.empty();
 }

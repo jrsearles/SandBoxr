@@ -34,12 +34,10 @@ export default function (globalObject, env, factory) {
     if (match) {
       let matches = factory.createArray();
 
-      match.forEach(function (value, index) {
-        matches.setValue(index, factory.createPrimitive(value));
-      });
-
+      match.forEach((v, i) => matches.setValue(i, factory.createPrimitive(v)));
       matches.setValue("index", factory.createPrimitive(match.index));
       matches.setValue("input", factory.createPrimitive(match.input));
+      
       return matches;
     }
 

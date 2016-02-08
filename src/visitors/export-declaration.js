@@ -1,8 +1,6 @@
 import {PropertyReference} from "../env/property-reference";
 
-function exportSpecified (target, key, env, source, alias) {
-  alias = alias || key;
-  
+function exportSpecified (target, key, env, source, alias = key) {
   let ref;
   if (source) {
     // todo: add 'getReference' function to objects to make this simpler

@@ -1,5 +1,4 @@
 import {UNDEFINED} from "../types/primitive-type";
-// import {each} from "./async";
 import {toPropertyKey} from "./native";
 import iterate from "../iterators";
 
@@ -14,7 +13,7 @@ export function* reset (env, leftNode, priorScope, newScope) {
     let currentBinding = priorScope.getVariable(leftNode.id.name);
     newScope.getVariable(leftNode.id.name).setValue(currentBinding.getValue());
   } else {
-    yield destructure(env, leftNode, null, (env, left) => reset(env, left, priorScope, newScope));
+    yield destructure(env, leftNode, null, (e, left) => reset(e, left, priorScope, newScope));
   }
 }
 

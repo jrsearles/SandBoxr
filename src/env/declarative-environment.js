@@ -76,9 +76,9 @@ DeclarativeEnvironment.prototype = {
 
       propInfo.setValue(value);
       return true;
-    } else {
-      return this.parent.setValue(...arguments);
     }
+    
+    return this.parent.setValue(...arguments);
   },
 
   getValue (key, throwOnError) {

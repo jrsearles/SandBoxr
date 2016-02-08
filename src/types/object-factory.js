@@ -14,7 +14,7 @@ import {CollectionType} from "./collection-type";
 import {ProxyType} from "./proxy-type";
 import {assertIsObject} from "../utils/contracts";
 import {getNativeType as getType} from "../utils/helpers";
-import {isNullOrUndefined, isConstructor} from "../utils/checks";
+import {isNullOrUndefined, isConstructor as isCtor} from "../utils/checks";
 
 let orphans = Object.create(null);
 const functionNameMatcher = /((?:get |set )?\[Symbol\.\w+\]|[^.]+)$/;
@@ -279,7 +279,7 @@ ObjectFactory.prototype = {
         let objCtor = obj.getValue("constructor");
         if (objCtor !== ctor) {
           let speciesCtor = objCtor.getValue(speciesKey);
-          if (isConstructor(speciesCtor)) {
+          if (isCtor(speciesCtor)) {
             ctor = speciesCtor;
           }
         }

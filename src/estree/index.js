@@ -33,9 +33,9 @@ export function step (root, visitors, state, rules) {
   let r = makeRules(rules);
   let node = new TraversalContext(root, null, n => r(n, state));
   
-  function next (current, state) {
+  function next (current, arg) {
     if (typeof v[current.type] === "function") {
-      return v[current.type](current, state, next);
+      return v[current.type](current, arg, next);
     }
   };
   
