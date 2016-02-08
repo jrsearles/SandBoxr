@@ -4,7 +4,7 @@ env:
   browser: true
 
 rules:
-  #indent: [2, 2, { "SwitchCase": 1 }]
+  indent: [2, 2, { "SwitchCase": 1 }]
   brace-style: [2, "1tbs", { "allowSingleLine": true }]
   comma-spacing: [2, {"before": false, "after": true}]
   comma-style: [2, "last"]

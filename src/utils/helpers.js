@@ -4,28 +4,28 @@ const objectPattern = /\[object (\w+)\]/;
 const toString = Object.prototype.toString;
 
 export function getMethod (obj, key) {
-	let method = obj.getValue(key);
-	
-	if (isNullOrUndefined(method)) {
-		return null;
-	}
-	
-	if (!isFunction(method)) {
-		throw TypeError(`${key} is not a method`);
-	}
+  let method = obj.getValue(key);
+  
+  if (isNullOrUndefined(method)) {
+    return null;
+  }
+  
+  if (!isFunction(method)) {
+    throw TypeError(`${key} is not a method`);
+  }
 
-	return method;
+  return method;
 }
 
-export function	getNativeType (obj) {
-	// manually check for null/undefined or IE9 will coerce them to the global
-	if (obj === undefined) {
-		return "Undefined";
-	}
+export function  getNativeType (obj) {
+  // manually check for null/undefined or IE9 will coerce them to the global
+  if (obj === undefined) {
+    return "Undefined";
+  }
 
-	if (obj === null) {
-		return "Null";
-	}
+  if (obj === null) {
+    return "Null";
+  }
 
   switch (typeof obj) {
     case "string":
@@ -43,5 +43,5 @@ export function	getNativeType (obj) {
 }
 
 export function createDataProperty (obj, key, value, throwOnError) {
-	obj.defineProperty(key, {value, configurable: true, enumerable: true, writable: true}, throwOnError);
+  obj.defineProperty(key, {value, configurable: true, enumerable: true, writable: true}, throwOnError);
 }

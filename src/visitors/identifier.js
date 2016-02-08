@@ -1,3 +1,3 @@
 export default function Identifier (node, context) {
-	return context.result(context.env.getReference(node.name));
+  return context.result(context.env.getReference(node.name));
 }

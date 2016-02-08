@@ -6,15 +6,15 @@ import $parseFloat from "./number.parse-float";
 import $parseInt from "./number.parse-int";
 
 export default function (globalObject, env, factory) {
-	let numberClass = globalObject.getValue("Number");
+  let numberClass = globalObject.getValue("Number");
 
-	$isFinite(numberClass, env, factory);
-	$isInteger(numberClass, env, factory);
-	$isNaN(numberClass, env, factory);
-	$isSafeInteger(numberClass, env, factory);
-	$parseFloat(numberClass, env, factory);
-	$parseInt(numberClass, env, factory);
+  $isFinite(numberClass, env, factory);
+  $isInteger(numberClass, env, factory);
+  $isNaN(numberClass, env, factory);
+  $isSafeInteger(numberClass, env, factory);
+  $parseFloat(numberClass, env, factory);
+  $parseInt(numberClass, env, factory);
 
-	let epsilonValue = factory.createPrimitive(Number.EPSILON || 2.220446049250313e-16);
-	numberClass.define("EPSILON", epsilonValue, {configurable: false, writable: false});
+  let epsilonValue = factory.createPrimitive(Number.EPSILON || 2.220446049250313e-16);
+  numberClass.define("EPSILON", epsilonValue, {configurable: false, writable: false});
 }

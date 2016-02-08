@@ -36,7 +36,7 @@ PrimitiveType.prototype.toObject = function () {
   newValue.value = this.value;
   
   this.init.call(newValue, env);
-	return newValue;
+  return newValue;
 };
 
 export const UNDEFINED = new PrimitiveType(undefined);

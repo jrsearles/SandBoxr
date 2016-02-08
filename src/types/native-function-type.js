@@ -14,7 +14,7 @@ export function NativeFunctionType (fn) {
 inherits(NativeFunctionType, FunctionType);
 
 NativeFunctionType.prototype.init = function (env, proto, {configurable = false, enumerable = false, writable = true, isConstructor = false, homeObject} = {}) {
-  this[Symbol.for("env")] = env;		
+  this[Symbol.for("env")] = env;    
   this.isConstructor = isConstructor;
   this.homeObject = homeObject;
   

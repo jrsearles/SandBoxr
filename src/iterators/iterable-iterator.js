@@ -12,49 +12,49 @@ export default function IterableIterator (it) {
 IterableIterator.prototype = {
   constructor: IterableIterator,
   
-	[Symbol.iterator] () {
-		return this;
-	},
+  [Symbol.iterator] () {
+    return this;
+  },
 
-	next () {
-		let result = x(this.advancer.call(this.iterator));
-		let value = {key: this.currentIndex++, value: UNDEFINED};
+  next () {
+    let result = x(this.advancer.call(this.iterator));
+    let value = {key: this.currentIndex++, value: UNDEFINED};
 
-		let done = toBoolean(result.getValue("done"));
-		let valueProperty = result.getProperty("value");
-		if (valueProperty) {
-			value.value = valueProperty.getValue();
-		}
+    let done = toBoolean(result.getValue("done"));
+    let valueProperty = result.getProperty("value");
+    if (valueProperty) {
+      value.value = valueProperty.getValue();
+    }
 
-		return {done, value};
-	},
+    return {done, value};
+  },
 
-	*each (func) {
-		let done = false;
+  *each (func) {
+    let done = false;
 
-		while (!done) {
-			try {
-				let current;
-				({done, value: current} = this.next());
+    while (!done) {
+      try {
+        let current;
+        ({done, value: current} = this.next());
 
-				if (!done) {
-					yield func(current.value || UNDEFINED);
-				}
-			} catch (err) {
-				this.return();
-				throw err;
-			}
-		}
-	},
+        if (!done) {
+          yield func(current.value || UNDEFINED);
+        }
+      } catch (err) {
+        this.return();
+        throw err;
+      }
+    }
+  },
 
-	["return"] () {
-		let returnFunc = getMethod(this.iterator, "return");
-		if (returnFunc) {
-			return x(returnFunc.call(this.iterator));
-		}
+  ["return"] () {
+    let returnFunc = getMethod(this.iterator, "return");
+    if (returnFunc) {
+      return x(returnFunc.call(this.iterator));
+    }
 
-		return UNDEFINED;
-	},
+    return UNDEFINED;
+  },
 };
 
 IterableIterator.create = function (it) {

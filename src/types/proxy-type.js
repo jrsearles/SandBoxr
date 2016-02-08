@@ -10,83 +10,83 @@ import {PropertyDescriptor} from "./property-descriptor";
 const envSymbol = Symbol.for("env");
 
 function getProxyMethod (proxy, key) {
-	let handler = proxy.handler.getProperty(key);
-	if (!handler) {
-		return null;
-	}
+  let handler = proxy.handler.getProperty(key);
+  if (!handler) {
+    return null;
+  }
 
-	let method = handler.getValue();
-	if (isUndefined(method)) {
-		return null;
-	}
+  let method = handler.getValue();
+  if (isUndefined(method)) {
+    return null;
+  }
 
-	assertIsFunction(method, key);
-	return method;
+  assertIsFunction(method, key);
+  return method;
 }
 
 function getValueOrDefault (obj, key, defaultValue = UNDEFINED, transformer = v => v) {
-	let propInfo = obj.getProperty(key);
-	if (propInfo) {
-		return transformer(propInfo.getValue());
-	}
+  let propInfo = obj.getProperty(key);
+  if (propInfo) {
+    return transformer(propInfo.getValue());
+  }
 
-	return defaultValue;
+  return defaultValue;
 }
 
 function normalizeKey (env, key) {
-	if (typeof key !== "object") {
-		return env.objectFactory.createPrimitive(String(key));
-	}
+  if (typeof key !== "object") {
+    return env.objectFactory.createPrimitive(String(key));
+  }
 
-	return key;
+  return key;
 }
 
 function denormalizeKey (key) {
-	if (key.isSymbol) {
-		return key;
-	}
+  if (key.isSymbol) {
+    return key;
+  }
 
-	return key.toNative();
+  return key.toNative();
 }
 
 function toPropertyDescriptor (env, descriptor) {
-	let result = env.objectFactory.createObject();
-	if (descriptor.get || descriptor.set) {
-		result.setValue("get", descriptor.get || UNDEFINED);
-		result.setValue("set", descriptor.set || UNDEFINED);
-	} else {
-		result.setValue("value", descriptor.value);
-		result.setValue("writable", env.objectFactory.createPrimitive(descriptor.writable));
-	}
+  let result = env.objectFactory.createObject();
+  if (descriptor.get || descriptor.set) {
+    result.setValue("get", descriptor.get || UNDEFINED);
+    result.setValue("set", descriptor.set || UNDEFINED);
+  } else {
+    result.setValue("value", descriptor.value);
+    result.setValue("writable", env.objectFactory.createPrimitive(descriptor.writable));
+  }
 
-	result.setValue("enumerable", env.objectFactory.createPrimitive(descriptor.enumerable));
-	result.setValue("configurable", env.objectFactory.createPrimitive(descriptor.configurable));
-	return result;
+  result.setValue("enumerable", env.objectFactory.createPrimitive(descriptor.enumerable));
+  result.setValue("configurable", env.objectFactory.createPrimitive(descriptor.configurable));
+  return result;
 }
 
 function toCall (proxy, methodName) {
-	let proxyMethod = getProxyMethod(proxy, "apply");
-	if (isUndefined(proxyMethod)) {
-		return proxy.target.getValue(methodName);
-	}
+  let proxyMethod = getProxyMethod(proxy, "apply");
+  if (isUndefined(proxyMethod)) {
+    return proxy.target.getValue(methodName);
+  }
 
-	return proxy[envSymbol].objectFactory.createBuiltInFunction(function* (thisArg, ...args) {
-		if (methodName === "apply" && args.length > 0) {
-			args = toArray(args[0]);
-		}
+  return proxy[envSymbol].objectFactory.createBuiltInFunction(function* (thisArg, ...args) {
+    if (methodName === "apply" && args.length > 0) {
+      args = toArray(args[0]);
+    }
 
-		return yield proxy.call(thisArg, args);
-	}, 1, `Function.prototype.${methodName}`);
+    return yield proxy.call(thisArg, args);
+  }, 1, `Function.prototype.${methodName}`);
 }
 
 function assertIsNotRevoked (proxy, methodName) {
-	if (proxy.revoked) {
-		throw TypeError(`Method ${methodName} called on a revoked Proxy object`);
-	}
+  if (proxy.revoked) {
+    throw TypeError(`Method ${methodName} called on a revoked Proxy object`);
+  }
 }
 
 function throwProxyInvariantError (methodName) {
-	throw TypeError(`Invariant check failed for proxy ${methodName} trap`);
+  throw TypeError(`Invariant check failed for proxy ${methodName} trap`);
 }
 
 export function ProxyType (target, handler) {
@@ -129,7 +129,7 @@ ProxyType.prototype.construct = function* (thisArg, args) {
   }
 
   return newObj;
-}
+};
 
 ProxyType.prototype.has = function (key) {
   assertIsNotRevoked(this, "has");
@@ -368,7 +368,7 @@ ProxyType.prototype.defineProperty = function (key, descriptor, throwOnError) {
       if (!propInfo.canUpdate(descriptor)) {
         throwProxyInvariantError("defineProperty");
       }
-    }	else if (!this.target.isExtensible() || descriptor.configurable === false) {
+    }  else if (!this.target.isExtensible() || descriptor.configurable === false) {
       throwProxyInvariantError("defineProperty");
     }
   }

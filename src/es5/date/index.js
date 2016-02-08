@@ -12,80 +12,80 @@ const protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMillis
 const setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 
 export default function dateApi (env) {
-	const {global: globalObject, objectFactory} = env;
+  const {global: globalObject, objectFactory} = env;
 
-	let proto = objectFactory.createObject();
-	proto.className = "Date";
-	proto.value = new Date(0);
+  let proto = objectFactory.createObject();
+  proto.className = "Date";
+  proto.value = new Date(0);
 
-	let dateClass = objectFactory.createFunction(function* (p1, p2, p3, p4, p5, p6, p7) {
-		let dateValue, args;
+  let dateClass = objectFactory.createFunction(function* (p1, p2, p3, p4, p5, p6, p7) {
+    let dateValue, args;
 
-		if (arguments.length === 0) {
-			args = [];
-		} else if (arguments.length === 1) {
-			if (p1.isPrimitive) {
-				args = [p1.value];
-			} else {
-				let primitiveValue = yield toPrimitive(p1);
-				if (typeof primitiveValue !== "string") {
-					primitiveValue = yield toNumber(p1);
-				}
+    if (arguments.length === 0) {
+      args = [];
+    } else if (arguments.length === 1) {
+      if (p1.isPrimitive) {
+        args = [p1.value];
+      } else {
+        let primitiveValue = yield toPrimitive(p1);
+        if (typeof primitiveValue !== "string") {
+          primitiveValue = yield toNumber(p1);
+        }
 
-				args = [primitiveValue];
-			}
-		} else {
-			args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg, "number"); });
-		}
+        args = [primitiveValue];
+      }
+    } else {
+      args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg, "number"); });
+    }
 
-		if (this.isNew) {
-			switch (args.length) {
-				case 0:
-					dateValue = new Date();
-					break;
+    if (this.isNew) {
+      switch (args.length) {
+        case 0:
+          dateValue = new Date();
+          break;
 
-				case 1:
-					dateValue = new Date(args[0]);
-					break;
+        case 1:
+          dateValue = new Date(args[0]);
+          break;
 
-				default:
-					let i = args.length;
-					while (i < 7) {
-						// default day to 1, all others to 0
-						args[i++] = i === 3 ? 1 : 0;
-					}
+        default:
+          let i = args.length;
+          while (i < 7) {
+            // default day to 1, all others to 0
+            args[i++] = i === 3 ? 1 : 0;
+          }
 
-					dateValue = new Date(...args);
-					break;
-			}
+          dateValue = new Date(...args);
+          break;
+      }
 
-			return objectFactory.create("Date", dateValue);
-		}
+      return objectFactory.create("Date", dateValue);
+    }
 
-		dateValue = Date(...args);
-		return objectFactory.createPrimitive(dateValue);
-	}, proto, {configurable: false, enumerable: false, writable: false, name: "Date"});
+    dateValue = Date(...args);
+    return objectFactory.createPrimitive(dateValue);
+  }, proto, {configurable: false, enumerable: false, writable: false, name: "Date"});
 
-	$parse(dateClass, env, objectFactory);
-	$utc(dateClass, env, objectFactory);
-	$valueOf(proto, env, objectFactory);
+  $parse(dateClass, env, objectFactory);
+  $utc(dateClass, env, objectFactory);
+  $valueOf(proto, env, objectFactory);
 
-	staticMethods.forEach(name => {
-		dateClass.define(name, toNativeFunction(env, Date[name], "Date." + name));
-	});
+  staticMethods.forEach(name => {
+    dateClass.define(name, toNativeFunction(env, Date[name], "Date." + name));
+  });
 
-	protoMethods.forEach(name => {
-		proto.define(name, toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
-	});
+  protoMethods.forEach(name => {
+    proto.define(name, toNativeFunction(env, Date.prototype[name], "Date.prototype." + name));
+  });
 
-	setters.forEach(name => {
-		function* setter () {
-			let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
-			Date.prototype[name].apply(this.object.value, args);
-		}
+  setters.forEach(name => {
+    function* setter () {
+      let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
+      Date.prototype[name].apply(this.object.value, args);
+    }
 
-		proto.define(name, objectFactory.createBuiltInFunction(setter, Date.prototype[name].length, "Date.prototype." + name));
-	});
+    proto.define(name, objectFactory.createBuiltInFunction(setter, Date.prototype[name].length, "Date.prototype." + name));
+  });
 
-	globalObject.define("Date", dateClass);
+  globalObject.define("Date", dateClass);
 }

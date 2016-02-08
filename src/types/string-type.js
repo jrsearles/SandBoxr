@@ -5,20 +5,20 @@ import {isInteger} from "../utils/native";
 const charAttrs = {writable: false, enumerable: true, configurable: false};
 
 function lazyInit (instance, key) {
-	let nativeValue = instance.value;
-	if (!nativeValue || !isInteger(key) || "0" in instance.properties) {
-		return;
-	}
+  let nativeValue = instance.value;
+  if (!nativeValue || !isInteger(key) || "0" in instance.properties) {
+    return;
+  }
   
   if (nativeValue.length === 1) {
     instance.define("0", instance, charAttrs);
     return;
   }
 
-	for (let i = 0, ln = nativeValue.length; i < ln; i++) {
+  for (let i = 0, ln = nativeValue.length; i < ln; i++) {
     let c = instance[Symbol.for("env")].objectFactory.create("String", nativeValue[i]);
-		instance.define(i, c, charAttrs);
-	}
+    instance.define(i, c, charAttrs);
+  }
 }
 
 export function StringType (value) {

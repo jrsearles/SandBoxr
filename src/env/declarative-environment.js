@@ -16,85 +16,85 @@ export function DeclarativeEnvironment (parent, thisArg, env, strict, block) {
 DeclarativeEnvironment.prototype = {
   constructor: DeclarativeEnvironment,
   
-	createChildScope () {
-		return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
-	},
+  createChildScope () {
+    return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
+  },
 
-	setParent (parent) {
-		this.parent = parent.scope || parent;
-	},
+  setParent (parent) {
+    this.parent = parent.scope || parent;
+  },
 
-	getReference (key) {
-		let ref = new Reference(key, this, this.env);
-		ref.unqualified = true;
-		return ref;
-	},
+  getReference (key) {
+    let ref = new Reference(key, this, this.env);
+    ref.unqualified = true;
+    return ref;
+  },
 
-	has (key) {
-		return key in this.properties;
-	},
+  has (key) {
+    return key in this.properties;
+  },
 
-	owns (key) {
-		return this.has(key);
-	},
-	
-	getVariable (key) {
-		return this.properties[key];
-	},
+  owns (key) {
+    return this.has(key);
+  },
+  
+  getVariable (key) {
+    return this.properties[key];
+  },
 
-	deleteVariable (key) {
-		if (!this.has(key)) {
-			return true;
-		}
+  deleteVariable (key) {
+    if (!this.has(key)) {
+      return true;
+    }
 
-		if (!this.properties[key].configurable) {
-			return false;
-		}
+    if (!this.properties[key].configurable) {
+      return false;
+    }
 
-		delete this.properties[key];
-		return true;
-	},
+    delete this.properties[key];
+    return true;
+  },
 
-	createVariable (key, {configurable = false, writable = true, initialized = true} = {}) {
-		if (this.has(key)) {
-			return this.properties[key];
-		}
+  createVariable (key, {configurable = false, writable = true, initialized = true} = {}) {
+    if (this.has(key)) {
+      return this.properties[key];
+    }
 
-		return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized}, key);
-	},
+    return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized}, key);
+  },
 
-	setValue (key, value, throwOnError) {
-		let propInfo = this.properties[key];
-		if (propInfo) {
-			if (!propInfo.initialized) {
-				throw ReferenceError(`${key} cannot be set before it has been declared`);
-			}
-			
-			if (propInfo.initialized && !propInfo.writable) {
-				throw TypeError(`Cannot write to immutable binding: ${key}`);
-			}
+  setValue (key, value, throwOnError) {
+    let propInfo = this.properties[key];
+    if (propInfo) {
+      if (!propInfo.initialized) {
+        throw ReferenceError(`${key} cannot be set before it has been declared`);
+      }
+      
+      if (propInfo.initialized && !propInfo.writable) {
+        throw TypeError(`Cannot write to immutable binding: ${key}`);
+      }
 
-			propInfo.setValue(value);
-			return true;
-		} else {
-			return this.parent.setValue(...arguments);
-		}
-	},
+      propInfo.setValue(value);
+      return true;
+    } else {
+      return this.parent.setValue(...arguments);
+    }
+  },
 
-	getValue (key, throwOnError) {
-		let propInfo = this.properties[key];
-		if (propInfo && propInfo.value) {
-			return propInfo.value;
-		}
-		
-		if (throwOnError || (propInfo && !propInfo.initialized)) {
-			throw ReferenceError(`${key} is not defined`);
-		}
-		
-		return UNDEFINED;
-	},
+  getValue (key, throwOnError) {
+    let propInfo = this.properties[key];
+    if (propInfo && propInfo.value) {
+      return propInfo.value;
+    }
+    
+    if (throwOnError || (propInfo && !propInfo.initialized)) {
+      throw ReferenceError(`${key} is not defined`);
+    }
+    
+    return UNDEFINED;
+  },
 
-	getThisBinding () {
-		return this.thisBinding;
-	}
+  getThisBinding () {
+    return this.thisBinding;
+  }
 };

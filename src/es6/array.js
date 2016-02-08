@@ -7,15 +7,15 @@ import $iterator from "./array.iterator";
 import $of from "./array.of";
 
 export default function ($global, env, factory) {
-	let arrayClass = $global.getValue("Array");
-	let proto = arrayClass.getValue("prototype");
+  let arrayClass = $global.getValue("Array");
+  let proto = arrayClass.getValue("prototype");
 
-	$from(arrayClass, env, factory);
-	$of(arrayClass, env, factory);
+  $from(arrayClass, env, factory);
+  $of(arrayClass, env, factory);
 
-	$copyWithin(proto, env, factory);
-	$fill(proto, env, factory);
-	$find(proto, env, factory);
-	$findIndex(proto, env, factory);
-	$iterator(proto, env, factory);
+  $copyWithin(proto, env, factory);
+  $fill(proto, env, factory);
+  $find(proto, env, factory);
+  $findIndex(proto, env, factory);
+  $iterator(proto, env, factory);
 }

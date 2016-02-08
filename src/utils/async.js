@@ -1,9 +1,9 @@
 // function isObject (obj) {
-// 	return obj && typeof obj === "object";
+//   return obj && typeof obj === "object";
 // }
 
 // function isFunction (obj) {
-// 	return typeof obj === "function";
+//   return typeof obj === "function";
 // }
 
 export function isThenable (obj) {
@@ -17,7 +17,7 @@ export function isThenable (obj) {
   }
   
   return typeof obj.then === "function";
-	// return (isObject(obj) || isFunction(obj)) && typeof obj.then === "function";
+  // return (isObject(obj) || isFunction(obj)) && typeof obj.then === "function";
 }
 
 function isNextable (obj) {
@@ -29,52 +29,52 @@ function isNextable (obj) {
 }
 
 export function* map (arr, func) {
-	let mapped = [];
+  let mapped = [];
 
-	yield* each(arr, function* () {
-		mapped.push(yield* func(...arguments));
-	});
+  yield* each(arr, function* () {
+    mapped.push(yield* func(...arguments));
+  });
 
-	return mapped;
+  return mapped;
 }
 
 export function* each (arr, func) {
-	if (arr.length === 0) {
-		return;
-	}
-	
-	let aborted = false;
-	let aborter = function () { aborted = true; };
+  if (arr.length === 0) {
+    return;
+  }
+  
+  let aborted = false;
+  let aborter = function () { aborted = true; };
 
-	for (let i = 0, ln = arr.length; !aborted && i < ln; i++) {
-		yield* func(arr[i], i, arr, aborter);
-	}
+  for (let i = 0, ln = arr.length; !aborted && i < ln; i++) {
+    yield* func(arr[i], i, arr, aborter);
+  }
 }
 
 export function* step (it, prev) {
-	let result = it.next(prev);
-	let value = result.value;
+  let result = it.next(prev);
+  let value = result.value;
 
-	if (isNextable(value)) {
-		yield* step(value);
-	} else if (isThenable(value)) {
-		yield value.then(res => it);
-	}
+  if (isNextable(value)) {
+    yield* step(value);
+  } else if (isThenable(value)) {
+    yield value.then(res => it);
+  }
 
-	if (result.done) {
-		return value;
-	} else {
-		yield step(it, value);
-	}
+  if (result.done) {
+    return value;
+  } else {
+    yield step(it, value);
+  }
 }
 
 function tryCatch (it, priorValue, method) {
-	try {
-		let {done, value} = it[method](priorValue);
-		return {state: "next", done, value};
-	} catch (err) {
-		return {state: "throw", done: false, value: err};
-	}
+  try {
+    let {done, value} = it[method](priorValue);
+    return {state: "next", done, value};
+  } catch (err) {
+    return {state: "throw", done: false, value: err};
+  }
 }
 
 /**
@@ -89,45 +89,45 @@ function tryCatch (it, priorValue, method) {
  * at any point in the iteration a Promise is returned.
  */
 export function exhaust (it, value, stack = [], state = "next") {
-	while (it) {
-// 		if (!isNextable(it)) {
-// 			value = it;
+  while (it) {
+//     if (!isNextable(it)) {
+//       value = it;
 // 
-// 			if (!(it = stack.pop())) {
-// 				break;
-// 			}
-// 		}
+//       if (!(it = stack.pop())) {
+//         break;
+//       }
+//     }
 
-		let done;
-		({state, done, value} = tryCatch(it, value, state));
+    let done;
+    ({state, done, value} = tryCatch(it, value, state));
 
-		if (state === "throw") {
-			if (it = stack.pop()) {
-				continue;
-			}
+    if (state === "throw") {
+      if (it = stack.pop()) {
+        continue;
+      }
 
-			throw value;
-		}
+      throw value;
+    }
 
-		if (value) {
-			if (typeof value.next === "function") {
-				stack[stack.length] = it;
+    if (value) {
+      if (typeof value.next === "function") {
+        stack[stack.length] = it;
 
-				it = value;
-				value = undefined;
+        it = value;
+        value = undefined;
 
-				continue;
-			}
+        continue;
+      }
 
-			if (typeof value.then === "function") {
-				return value.then(res => exhaust(it, res, stack), err => exhaust(it, err, stack, "throw"));
-			}
-		}
+      if (typeof value.then === "function") {
+        return value.then(res => exhaust(it, res, stack), err => exhaust(it, err, stack, "throw"));
+      }
+    }
 
-		if (done) {
-			it = stack.pop();
-		}
-	}
+    if (done) {
+      it = stack.pop();
+    }
+  }
 
-	return value;
+  return value;
 }

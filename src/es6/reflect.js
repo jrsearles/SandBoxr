@@ -14,22 +14,22 @@ import $set from "./reflect.set";
 import $setPrototypeOf from "./reflect.set-prototype-of";
 
 export default function (globalObject, env, factory) {
-	let reflectClass = factory.createObject();
+  let reflectClass = factory.createObject();
 
-	$apply(reflectClass, env, factory);
-	$construct(reflectClass, env, factory);
-	$defineProperty(reflectClass, env, factory);
-	$deleteProperty(reflectClass, env, factory);
-	$enumerate(reflectClass, env, factory);
-	$get(reflectClass, env, factory);
-	$getOwnPropertyDescriptor(reflectClass, env, factory);
-	$getPrototypeOf(reflectClass, env, factory);
-	$has(reflectClass, env, factory);
-	$isExtensible(reflectClass, env, factory);
-	$ownKeys(reflectClass, env, factory);
-	$preventExtensions(reflectClass, env, factory);
-	$set(reflectClass, env, factory);
-	$setPrototypeOf(reflectClass, env, factory);
+  $apply(reflectClass, env, factory);
+  $construct(reflectClass, env, factory);
+  $defineProperty(reflectClass, env, factory);
+  $deleteProperty(reflectClass, env, factory);
+  $enumerate(reflectClass, env, factory);
+  $get(reflectClass, env, factory);
+  $getOwnPropertyDescriptor(reflectClass, env, factory);
+  $getPrototypeOf(reflectClass, env, factory);
+  $has(reflectClass, env, factory);
+  $isExtensible(reflectClass, env, factory);
+  $ownKeys(reflectClass, env, factory);
+  $preventExtensions(reflectClass, env, factory);
+  $set(reflectClass, env, factory);
+  $setPrototypeOf(reflectClass, env, factory);
 
-	globalObject.define("Reflect", reflectClass);
+  globalObject.define("Reflect", reflectClass);
 }

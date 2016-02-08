@@ -13,7 +13,7 @@ export function ExecutionResult (value, name, obj) {
 ExecutionResult.prototype = {
   constructor: ExecutionResult,
   
-	isAbrupt () {
-		return this.cancel || this.exit || this.raised || this.skip;
-	}
+  isAbrupt () {
+    return this.cancel || this.exit || this.raised || this.skip;
+  }
 };

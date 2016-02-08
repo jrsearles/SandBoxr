@@ -14,60 +14,60 @@ import $trim from "./string.trim";
 import $valueOf from "./string.value-of";
 
 export default function (env) {
-	const {global: globalObject, objectFactory} = env;
+  const {global: globalObject, objectFactory} = env;
 
-	function* getString (value, isNew) {
-		if (!value) {
-			return "";
-		}
+  function* getString (value, isNew) {
+    if (!value) {
+      return "";
+    }
 
-		if (!isNew && value.isSymbol) {
-			return `Symbol(${value.description})`;
-		}
+    if (!isNew && value.isSymbol) {
+      return `Symbol(${value.description})`;
+    }
 
-		return yield toString(value.getValue());
-	}
+    return yield toString(value.getValue());
+  }
 
-	let proto = objectFactory.createObject();
+  let proto = objectFactory.createObject();
 
-	// prototype can be coerced into an empty string
-	proto.value = "";
-	proto.className = "String";
-	proto.defineProperty("length", {value: objectFactory.createPrimitive(0)});
+  // prototype can be coerced into an empty string
+  proto.value = "";
+  proto.className = "String";
+  proto.defineProperty("length", {value: objectFactory.createPrimitive(0)});
 
-	let stringClass = objectFactory.createFunction(function* (value) {
-		let stringValue = yield getString(value, this.isNew);
+  let stringClass = objectFactory.createFunction(function* (value) {
+    let stringValue = yield getString(value, this.isNew);
     let obj = objectFactory.create("String", stringValue);
     
-		// called as new
-		if (this.isNew) {
-			return obj.toObject();
-		}
+    // called as new
+    if (this.isNew) {
+      return obj.toObject();
+    }
 
-		return obj;
-	}, proto, {configurable: false, enumerable: false, writable: false, name: "String"});
+    return obj;
+  }, proto, {configurable: false, enumerable: false, writable: false, name: "String"});
 
-	$fromCharCode(stringClass, env, objectFactory);
+  $fromCharCode(stringClass, env, objectFactory);
 
-	$concat(proto, env, objectFactory);
-	$match(proto, env, objectFactory);
-	$replace(proto, env, objectFactory);
-	$search(proto, env, objectFactory);
-	$slice(proto, env, objectFactory);
-	$split(proto, env, objectFactory);
-	$substring(proto, env, objectFactory);
-	$toString(proto, env, objectFactory);
-	$trim(proto, env, objectFactory);
-	$valueOf(proto, env, objectFactory);
+  $concat(proto, env, objectFactory);
+  $match(proto, env, objectFactory);
+  $replace(proto, env, objectFactory);
+  $search(proto, env, objectFactory);
+  $slice(proto, env, objectFactory);
+  $split(proto, env, objectFactory);
+  $substring(proto, env, objectFactory);
+  $toString(proto, env, objectFactory);
+  $trim(proto, env, objectFactory);
+  $valueOf(proto, env, objectFactory);
 
-	["charAt", "charCodeAt", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"].forEach(name => {
-		proto.define(name, objectFactory.createBuiltInFunction(function* () {
-			let stringValue = yield toString(this.object);
-			let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
+  ["charAt", "charCodeAt", "indexOf", "lastIndexOf", "localeCompare", "substr", "toLocaleLowerCase", "toLocaleUpperCase", "toLowerCase", "toUpperCase"].forEach(name => {
+    proto.define(name, objectFactory.createBuiltInFunction(function* () {
+      let stringValue = yield toString(this.object);
+      let args = yield* map(arguments, function* (arg) { return yield toPrimitive(arg); });
 
-			return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
-		}, String.prototype[name].length, "String.prototype." + name));
-	});
+      return objectFactory.createPrimitive(String.prototype[name].apply(stringValue, args));
+    }, String.prototype[name].length, "String.prototype." + name));
+  });
 
-	globalObject.define("String", stringClass);
+  globalObject.define("String", stringClass);
 }

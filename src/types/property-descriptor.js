@@ -5,10 +5,10 @@ let hasOwn = Object.prototype.hasOwnProperty;
 let uid = 0;
 
 const defaultDescriptor = {
-	configurable: false,
-	enumerable: false,
-	writable: false,
-	value: undefined
+  configurable: false,
+  enumerable: false,
+  writable: false,
+  value: undefined
 };
 
 export function PropertyDescriptor (base, config = defaultDescriptor, key) {
@@ -35,117 +35,117 @@ export function PropertyDescriptor (base, config = defaultDescriptor, key) {
 PropertyDescriptor.prototype = {
   constructor: PropertyDescriptor,
   
-	bind (obj) {
-		this.base = obj;
-		return this;
-	},
+  bind (obj) {
+    this.base = obj;
+    return this;
+  },
 
-	update (descriptor) {
-		for (let prop in descriptor) {
-			if (hasOwn.call(descriptor, prop)) {
-				this[prop] = descriptor[prop];
-			}
-		}
+  update (descriptor) {
+    for (let prop in descriptor) {
+      if (hasOwn.call(descriptor, prop)) {
+        this[prop] = descriptor[prop];
+      }
+    }
 
-		if ("get" in descriptor || "set" in descriptor) {
-			this.writable = undefined;
-			this.dataProperty = false;
-			this.value = undefined;
-		} else if ("value" in descriptor) {
-			this.writable = this.writable === undefined ? false : this.writable;
-			this.dataProperty = true;
-			this.get = this.getter = this.set = this.setter = undefined;
-		}
-	},
+    if ("get" in descriptor || "set" in descriptor) {
+      this.writable = undefined;
+      this.dataProperty = false;
+      this.value = undefined;
+    } else if ("value" in descriptor) {
+      this.writable = this.writable === undefined ? false : this.writable;
+      this.dataProperty = true;
+      this.get = this.getter = this.set = this.setter = undefined;
+    }
+  },
 
-	canUpdate (descriptor) {
-		if (this.configurable) {
-			return true;
-		}
+  canUpdate (descriptor) {
+    if (this.configurable) {
+      return true;
+    }
 
-		if ("configurable" in descriptor && this.configurable !== descriptor.configurable) {
-			return false;
-		}
+    if ("configurable" in descriptor && this.configurable !== descriptor.configurable) {
+      return false;
+    }
 
-		if ("enumerable" in descriptor && this.enumerable !== descriptor.enumerable) {
-			return false;
-		}
+    if ("enumerable" in descriptor && this.enumerable !== descriptor.enumerable) {
+      return false;
+    }
 
-		if (("get" in descriptor || "set" in descriptor) && this.dataProperty) {
-			return false;
-		}
+    if (("get" in descriptor || "set" in descriptor) && this.dataProperty) {
+      return false;
+    }
 
-		if ("value" in descriptor && !this.dataProperty) {
-			return false;
-		}
+    if ("value" in descriptor && !this.dataProperty) {
+      return false;
+    }
 
-		if (this.dataProperty) {
-			if (!this.initialized) {
-				return true;
-			}
-			
-			if (!this.writable) {
-				if (descriptor.writable) {
-					return false;
-				}
+    if (this.dataProperty) {
+      if (!this.initialized) {
+        return true;
+      }
+      
+      if (!this.writable) {
+        if (descriptor.writable) {
+          return false;
+        }
 
-				return !("value" in descriptor) || ops.areSame(this.value, descriptor.value);
-			}
+        return !("value" in descriptor) || ops.areSame(this.value, descriptor.value);
+      }
 
-			return true;
-		}
+      return true;
+    }
 
-		if ("get" in descriptor && this.get !== descriptor.get) {
-			return false;
-		}
+    if ("get" in descriptor && this.get !== descriptor.get) {
+      return false;
+    }
 
-		if ("set" in descriptor && this.set !== descriptor.set) {
-			return false;
-		}
+    if ("set" in descriptor && this.set !== descriptor.set) {
+      return false;
+    }
 
-		return true;
-	},
+    return true;
+  },
 
-	getValue () {
-		if (!this.initialized) {
-			throw ReferenceError(`${this.key} has not been initialized`);
-		}
-		
-		if (this.dataProperty) {
-			return this.value;
-		}
+  getValue () {
+    if (!this.initialized) {
+      throw ReferenceError(`${this.key} has not been initialized`);
+    }
+    
+    if (this.dataProperty) {
+      return this.value;
+    }
 
-		if (this.getter) {
-			return x(this.getter.call(this.base));
-		}
+    if (this.getter) {
+      return x(this.getter.call(this.base));
+    }
 
-		return undefined;
-	},
+    return undefined;
+  },
 
-	canSetValue (value) {
-		return this.writable || !!this.setter || !this.initialized;
-	},
+  canSetValue (value) {
+    return this.writable || !!this.setter || !this.initialized;
+  },
 
-	setValue (value) {
-		if (!this.canSetValue()) {
-			return;
-		}
+  setValue (value) {
+    if (!this.canSetValue()) {
+      return;
+    }
 
-		this.initialized = true;
-		
-		if (this.dataProperty) {
-			this.value = value;
-		} else if (this.setter) {
-			x(this.setter.call(this.base, value));
-		}
-	},
+    this.initialized = true;
+    
+    if (this.dataProperty) {
+      this.value = value;
+    } else if (this.setter) {
+      x(this.setter.call(this.base, value));
+    }
+  },
 
-	hasValue () {
-		return !!this.value || !!this.getter;
-	},
-	
-	init (value) {
-		this.initialized = true;
-		this.value = value;
-	},
+  hasValue () {
+    return !!this.value || !!this.getter;
+  },
+  
+  init (value) {
+    this.initialized = true;
+    this.value = value;
+  },
 };

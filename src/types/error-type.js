@@ -2,7 +2,7 @@ import {inherits} from "util";
 import {ObjectType} from "./object-type";
 
 export function ErrorType (source) {
-	ObjectType.call(this);
+  ObjectType.call(this);
   
   this.source = source;
   this.className = "Error";

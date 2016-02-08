@@ -21,54 +21,54 @@ import $toString from "./object.to-string";
 import $valueOf from "./object.value-of";
 
 export default function objectApi (env) {
-	const {global: globalObject, objectFactory} = env;
+  const {global: globalObject, objectFactory} = env;
 
-	let proto = new ObjectType();
-	let objectClass = objectFactory.createFunction(function (value) {
-		if (value) {
-			if (value.isPrimitive) {
-				if (value.value == null) {
-					return objectFactory.createObject();
-				}
+  let proto = new ObjectType();
+  let objectClass = objectFactory.createFunction(function (value) {
+    if (value) {
+      if (value.isPrimitive) {
+        if (value.value == null) {
+          return objectFactory.createObject();
+        }
 
         return value.toObject();
-			}
+      }
 
-			if (value.isSymbol) {
-				// should return a new symbol instance
-				let instance = objectFactory.create("Symbol", value.description);
-				instance.type = "object";
-				return instance;
-			}
+      if (value.isSymbol) {
+        // should return a new symbol instance
+        let instance = objectFactory.create("Symbol", value.description);
+        instance.type = "object";
+        return instance;
+      }
 
-			// if an object is passed in just return
-			return value;
-		}
+      // if an object is passed in just return
+      return value;
+    }
 
-		return objectFactory.createObject();
-	}, proto, {configurable: false, enumerable: false, writable: false, name: "Object"});
+    return objectFactory.createObject();
+  }, proto, {configurable: false, enumerable: false, writable: false, name: "Object"});
 
-	$hasOwnProperty(proto, env, objectFactory);
-	$isPrototypeOf(proto, env, objectFactory);
-	$toString(proto, env, objectFactory);
-	$valueOf(proto, env, objectFactory);
+  $hasOwnProperty(proto, env, objectFactory);
+  $isPrototypeOf(proto, env, objectFactory);
+  $toString(proto, env, objectFactory);
+  $valueOf(proto, env, objectFactory);
 
-	$create(objectClass, env, objectFactory);
-	$defineProperty(objectClass, env, objectFactory);
-	$defineProperties(objectClass, env, objectFactory);
-	$freeze(objectClass, env, objectFactory);
-	$getOwnPropertyDescriptor(objectClass, env, objectFactory);
-	$getOwnPropertyNames(objectClass, env, objectFactory);
-	$getPrototypeOf(objectClass, env, objectFactory);
-	$isExtensible(objectClass, env, objectFactory);
-	$isFrozen(objectClass, env, objectFactory);
-	$isSealed(objectClass, env, objectFactory);
-	$keys(objectClass, env, objectFactory);
-	$preventExtensions(objectClass, env, objectFactory);
-	$propertyIsEnumerable(proto, env, objectFactory);
-	$seal(objectClass, env, objectFactory);
+  $create(objectClass, env, objectFactory);
+  $defineProperty(objectClass, env, objectFactory);
+  $defineProperties(objectClass, env, objectFactory);
+  $freeze(objectClass, env, objectFactory);
+  $getOwnPropertyDescriptor(objectClass, env, objectFactory);
+  $getOwnPropertyNames(objectClass, env, objectFactory);
+  $getPrototypeOf(objectClass, env, objectFactory);
+  $isExtensible(objectClass, env, objectFactory);
+  $isFrozen(objectClass, env, objectFactory);
+  $isSealed(objectClass, env, objectFactory);
+  $keys(objectClass, env, objectFactory);
+  $preventExtensions(objectClass, env, objectFactory);
+  $propertyIsEnumerable(proto, env, objectFactory);
+  $seal(objectClass, env, objectFactory);
 
-	// function is an object - make sure that it is in the prototype chain
-	globalObject.getValue("Function").getPrototype().setPrototype(proto);
-	globalObject.define("Object", objectClass);
+  // function is an object - make sure that it is in the prototype chain
+  globalObject.getValue("Function").getPrototype().setPrototype(proto);
+  globalObject.define("Object", objectClass);
 }

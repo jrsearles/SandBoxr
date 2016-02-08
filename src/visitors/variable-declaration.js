@@ -5,9 +5,9 @@ export default function* VariableDeclaration (node, context, next) {
     yield next(node.declarations[i], context);
   }
   
-	// yield each(node.declarations, function* (decl) {
-	// 	yield next(decl, context);
-	// });
+  // yield each(node.declarations, function* (decl) {
+  //   yield next(decl, context);
+  // });
 
-	return context.empty();
+  return context.empty();
 }

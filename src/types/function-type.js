@@ -5,44 +5,44 @@ import {UNDEFINED} from "./primitive-type";
 import {isNullOrUndefined, isObject} from "../utils/checks";
 
 function getParameterLength (params) {
-	for (let i = 0, ln = params.length; i < ln; i++) {
-		// parameter length should only include the first "Formal" parameters
-		if (params[i].isRestElement() || params[i].isAssignmentPattern()) {
-			return i;
-		}
-	}
+  for (let i = 0, ln = params.length; i < ln; i++) {
+    // parameter length should only include the first "Formal" parameters
+    if (params[i].isRestElement() || params[i].isAssignmentPattern()) {
+      return i;
+    }
+  }
 
-	return params.length;
+  return params.length;
 }
 
 function* execute (func, thisArg, args, callee, newTarget) {
-	let env = func[Symbol.for("env")];
-	let scope = env.createExecutionScope(func, thisArg, newTarget);
+  let env = func[Symbol.for("env")];
+  let scope = env.createExecutionScope(func, thisArg, newTarget);
 
-	callee = callee || func;
-	yield scope.loadArgs(func.node.params, args || [], func);
-	scope.init(func.node);
-	
-	if (newTarget) {
-		scope.setMeta("newTarget", newTarget);
-	}
-	
-	if (func.homeObject) {
-		scope.setMeta("super", func.homeObject);
-	}
-	
-	if (func.node.id) {
-		env.createVariable(func.node.id.name).setValue(func);
-	}
+  callee = callee || func;
+  yield scope.loadArgs(func.node.params, args || [], func);
+  scope.init(func.node);
+  
+  if (newTarget) {
+    scope.setMeta("newTarget", newTarget);
+  }
+  
+  if (func.homeObject) {
+    scope.setMeta("super", func.homeObject);
+  }
+  
+  if (func.node.id) {
+    env.createVariable(func.node.id.name).setValue(func);
+  }
 
-	return yield* scope.use(function* () {
-		let context = env.createExecutionContext(thisArg, callee, newTarget);
-		return yield context.execute(func.node.body, callee);
-	});	
+  return yield* scope.use(function* () {
+    let context = env.createExecutionContext(thisArg, callee, newTarget);
+    return yield context.execute(func.node.body, callee);
+  });  
 }
 
 export function FunctionType (node) {
-	ObjectType.call(this);
+  ObjectType.call(this);
   
   this.type = "function";
   this.className = "Function";
@@ -93,7 +93,7 @@ FunctionType.prototype.setLength = function (length) {
   let value = env.objectFactory.createPrimitive(length);
   let configurable = env.ecmaVersion > 5;
 
-  this.defineProperty("length", {value, configurable});		
+  this.defineProperty("length", {value, configurable});    
 };
 
 FunctionType.prototype.addPoison = function () {
