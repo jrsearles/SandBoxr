@@ -1,4 +1,4 @@
-import {isNumber} from "../utils/checks";
+import { isNumber } from "../utils/checks";
 
 export default function (target, env, factory) {
   target.define("isNaN", factory.createBuiltInFunction(function (value) {

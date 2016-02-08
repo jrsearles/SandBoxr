@@ -1,4 +1,4 @@
-import {toBoolean} from "../utils/native";
+import { toBoolean } from "../utils/native";
 
 function* shouldContinue (node, context, next) {
   if (!node) {

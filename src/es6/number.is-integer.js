@@ -1,5 +1,5 @@
-import {isNumber} from "../utils/checks";
-import {toInteger} from "../utils/native";
+import { isNumber } from "../utils/checks";
+import { toInteger } from "../utils/native";
 
 export default function (target, env, factory) {
   target.define("isInteger", factory.createBuiltInFunction(function* (value) {

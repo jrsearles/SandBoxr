@@ -1,5 +1,5 @@
-import {confirmObject} from "./object-helpers";
-import {getMethod} from "../../utils/helpers";
+import { confirmObject } from "./object-helpers";
+import { getMethod } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("toString", factory.createBuiltInFunction(function () {

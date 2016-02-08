@@ -1,9 +1,9 @@
-import {repeat} from "core-js/library/fn/string/virtual";
-import {UNDEFINED} from "../../types/primitive-type";
-import {isUndefined, isNullOrUndefined} from "../../utils/checks";
-import {toString, toNumber, toArray} from "../../utils/native";
-import {map} from "../../utils/async";
-import {getMethod} from "../../utils/helpers";
+import { repeat } from "core-js/library/fn/string/virtual";
+import { UNDEFINED } from "../../types/primitive-type";
+import { isUndefined, isNullOrUndefined } from "../../utils/checks";
+import { toString, toNumber, toArray } from "../../utils/native";
+import { map } from "../../utils/async";
+import { getMethod } from "../../utils/helpers";
 
 const primitives = {
   "String": true,

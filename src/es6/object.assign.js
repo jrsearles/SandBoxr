@@ -1,5 +1,5 @@
-import {toObject} from "../utils/native";
-import {isNullOrUndefined} from "../utils/checks";
+import { toObject } from "../utils/native";
+import { isNullOrUndefined } from "../utils/checks";
 
 export default function (objectClass, env, factory) {
   objectClass.define("assign", factory.createBuiltInFunction(function (target, ...sources) {

@@ -1,5 +1,5 @@
-import {toInteger, toString} from "../utils/native";
-import {assertIsNotNullOrUndefined} from "../utils/contracts";
+import { toInteger, toString } from "../utils/native";
+import { assertIsNotNullOrUndefined } from "../utils/contracts";
 
 export default function (target, env, factory) {
   target.define("repeat", factory.createBuiltInFunction(function* (count) {

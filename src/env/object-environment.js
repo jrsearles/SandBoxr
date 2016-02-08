@@ -1,5 +1,5 @@
-import {PropertyReference} from "./property-reference";
-import {DeclarativeEnvironment} from "./declarative-environment";
+import { PropertyReference } from "./property-reference";
+import { DeclarativeEnvironment } from "./declarative-environment";
 
 export function ObjectEnvironment (parent, obj, thisArg, env, strict) {
   this.parent = parent && parent.scope;
@@ -16,7 +16,7 @@ ObjectEnvironment.prototype = {
   constructor: ObjectEnvironment,
   
   createChildScope () {
-    return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
+    return new DeclarativeEnvironment({ scope: this }, this.thisBinding, this.env, this.strict, true);
   },
 
   getReference (key, unqualified) {
@@ -41,13 +41,13 @@ ObjectEnvironment.prototype = {
     return this.object.deleteProperty(key, false);
   },
 
-  createVariable (key, {configurable = true, writable = true, initialized = true} = {}) {
+  createVariable (key, { configurable = true, writable = true, initialized = true } = {}) {
     if (!this.owns(key)) {
       if (this.parent) {
         return this.parent.createVariable(...arguments);
       }
 
-      this.object.defineProperty(key, {value: undefined, enumerable: true, configurable, writable, initialized}, this.env.isStrict());
+      this.object.defineProperty(key, { value: undefined, enumerable: true, configurable, writable, initialized }, this.env.isStrict());
     }
     
     return this.object.getProperty(key);

@@ -1,4 +1,4 @@
-import {ObjectType} from "../../types/object-type";
+import { ObjectType } from "../../types/object-type";
 
 import $create from "./object.create";
 import $defineProperties from "./object.define-properties";
@@ -21,7 +21,7 @@ import $toString from "./object.to-string";
 import $valueOf from "./object.value-of";
 
 export default function objectApi (env) {
-  const {global: globalObject, objectFactory} = env;
+  const { global: globalObject, objectFactory } = env;
 
   let proto = new ObjectType();
   let objectClass = objectFactory.createFunction(function (value) {
@@ -46,7 +46,7 @@ export default function objectApi (env) {
     }
 
     return objectFactory.createObject();
-  }, proto, {configurable: false, enumerable: false, writable: false, name: "Object"});
+  }, proto, { configurable: false, enumerable: false, writable: false, name: "Object" });
 
   $hasOwnProperty(proto, env, objectFactory);
   $isPrototypeOf(proto, env, objectFactory);

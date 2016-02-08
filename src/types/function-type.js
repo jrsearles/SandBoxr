@@ -1,8 +1,8 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
-import {PropertyDescriptor} from "./property-descriptor";
-import {UNDEFINED} from "./primitive-type";
-import {isNullOrUndefined, isObject} from "../utils/checks";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
+import { PropertyDescriptor } from "./property-descriptor";
+import { UNDEFINED } from "./primitive-type";
+import { isNullOrUndefined, isObject } from "../utils/checks";
 
 function getParameterLength (params) {
   for (let i = 0, ln = params.length; i < ln; i++) {
@@ -64,7 +64,7 @@ inherits(FunctionType, ObjectType);
 FunctionType.prototype.init = function (env, proto, descriptor, strict) {
   ObjectType.prototype.init.apply(this, arguments);
   
-  let {isConstructor = false, homeObject, kind = "base"} = descriptor || {};
+  let { isConstructor = false, homeObject, kind = "base" } = descriptor || {};
   this.isConstructor = isConstructor;
   this.homeObject = homeObject;
   this.kind = kind;
@@ -79,10 +79,10 @@ FunctionType.prototype.init = function (env, proto, descriptor, strict) {
   if (proto !== null) {
     // functions have a prototype
     proto = proto || env.objectFactory.createObject();
-    this.defineProperty("prototype", {value: proto, writable: true});
+    this.defineProperty("prototype", { value: proto, writable: true });
 
     // set the contructor property as an instance of itself
-    proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this}, "constructor");
+    proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this }, "constructor");
   }
 
   this.addPoison();
@@ -93,7 +93,7 @@ FunctionType.prototype.setLength = function (length) {
   let value = env.objectFactory.createPrimitive(length);
   let configurable = env.ecmaVersion > 5;
 
-  this.defineProperty("length", {value, configurable});    
+  this.defineProperty("length", { value, configurable });    
 };
 
 FunctionType.prototype.addPoison = function () {

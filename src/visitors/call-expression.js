@@ -1,6 +1,6 @@
-import {PropertyReference} from "../env/property-reference";
-import {toString, toObject} from "../utils/native";
-import {UNDEFINED} from "../types/primitive-type";
+import { PropertyReference } from "../env/property-reference";
+import { toString, toObject } from "../utils/native";
+import { UNDEFINED } from "../types/primitive-type";
 import iterate from "../iterators/";
 
 function assignThis (env, fnMember, isNew, callee) {  
@@ -37,7 +37,7 @@ export default function* CallExpression (node, context, next) {
     
     if (arg.isSpreadElement()) {
       let it = iterate.getIterator(value);
-      for ({value} of it) {
+      for ({ value } of it) {
         args.push(value);
       }
     } else {

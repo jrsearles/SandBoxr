@@ -1,7 +1,7 @@
-import {UNDEFINED} from "../../types/primitive-type";
-import {toLength, toInteger} from "../../utils/native";
+import { UNDEFINED } from "../../types/primitive-type";
+import { toLength, toInteger } from "../../utils/native";
 import iterate from "../../iterators";
-import {getStartIndex} from "./array-helpers";
+import { getStartIndex } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("indexOf", factory.createBuiltInFunction(function* (searchElement, fromIndex) {
@@ -16,7 +16,7 @@ export default function ($target, env, factory) {
 
     index = getStartIndex(index, length);
 
-    for (let {key, value} of iterate.forward(this.object, index, length)) {
+    for (let { key, value } of iterate.forward(this.object, index, length)) {
       if (env.ops.strictEquals(searchElement, value || UNDEFINED)) {
         return factory.createPrimitive(key);
       }

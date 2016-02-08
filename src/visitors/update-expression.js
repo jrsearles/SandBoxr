@@ -1,5 +1,5 @@
-import {toNumber} from "../utils/native";
-import {assertIsValidAssignment} from "../utils/contracts";
+import { toNumber } from "../utils/native";
+import { assertIsValidAssignment } from "../utils/contracts";
 
 export default function* UpdateExpression (node, context, next) {
   const objectFactory = context.env.objectFactory;

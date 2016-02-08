@@ -1,5 +1,5 @@
-import {assertIsNotGeneric} from "../../utils/contracts";
-import {toNumber} from "../../utils/native";
+import { assertIsNotGeneric } from "../../utils/contracts";
+import { toNumber } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("toFixed", factory.createBuiltInFunction(function* (fractionDigits) {

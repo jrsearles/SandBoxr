@@ -1,6 +1,6 @@
-import {UNDEFINED} from "../../types/primitive-type";
-import {isNullOrUndefined} from "../../utils/checks";
-import {toObject} from "../../utils/native";
+import { UNDEFINED } from "../../types/primitive-type";
+import { isNullOrUndefined } from "../../utils/checks";
+import { toObject } from "../../utils/native";
 
 export function defineThis (env, fn, thisArg) {
   if (fn.builtIn || fn.isProxy || fn.isStrict()) {

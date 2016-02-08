@@ -1,4 +1,4 @@
-import {assertIsMap} from "../utils/contracts";
+import { assertIsMap } from "../utils/contracts";
 
 export default function ($target, env, factory) {
   function createIteratorValue (entry, kind) {
@@ -29,13 +29,13 @@ export default function ($target, env, factory) {
       }
 
       done = !value;
-      yield factory.createIteratorResult({value, done});
+      yield factory.createIteratorResult({ value, done });
     }
   }
 
   let proto = factory.createObject();
   proto.setPrototype(env.global.getValue("%IteratorPrototype%"));
-  proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Map Iterator"), {writable: false});
+  proto.define(env.getSymbol("toStringTag"), factory.createPrimitive("Map Iterator"), { writable: false });
 
   proto.define("next", factory.createBuiltInFunction(function () {
     let result = this.object.advance();
@@ -43,7 +43,7 @@ export default function ($target, env, factory) {
       return result.value;
     }
 
-    return factory.createIteratorResult({done: result.done});
+    return factory.createIteratorResult({ done: result.done });
   }, 0, "MapIterator.prototype.next"));
 
   $target.define("keys", factory.createBuiltInFunction(function () {

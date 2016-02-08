@@ -1,10 +1,10 @@
-import {toString} from "../utils/native";
-import {SymbolType} from "../types/symbol-type";
-import {assertIsNotGeneric} from "../utils/contracts";
-import {isUndefined} from "../utils/checks";
+import { toString } from "../utils/native";
+import { SymbolType } from "../types/symbol-type";
+import { assertIsNotGeneric } from "../utils/contracts";
+import { isUndefined } from "../utils/checks";
 
 export default function (globalObject, env, factory) {
-  let frozen = {configurable: false, enumerable: false, writable: false};
+  let frozen = { configurable: false, enumerable: false, writable: false };
   let proto = factory.createObject();
   
   let symbolClass = factory.createFunction(function* (desc) {
@@ -14,7 +14,7 @@ export default function (globalObject, env, factory) {
     
     let descString = isUndefined(desc) ? "" : yield toString(desc);
     return factory.create("Symbol", descString);
-  }, proto, {name: "Symbol"});
+  }, proto, { name: "Symbol" });
 
   symbolClass.define("for", factory.createBuiltInFunction(function* (key) {
     let keyString = yield toString(key);
@@ -51,7 +51,7 @@ export default function (globalObject, env, factory) {
   });
 
   let toStringTagSymbol = SymbolType.getByKey("toStringTag");
-  proto.define(toStringTagSymbol, factory.createPrimitive("Symbol"), {writable: false});
+  proto.define(toStringTagSymbol, factory.createPrimitive("Symbol"), { writable: false });
 
   let toPrimitiveKey = SymbolType.getByKey("toPrimitive");
   proto.define(toPrimitiveKey, factory.createBuiltInFunction(function () {
@@ -60,7 +60,7 @@ export default function (globalObject, env, factory) {
     }
     
     return this.object;
-  }, 1, "[Symbol.toPrimitive]"), {writable: false});
+  }, 1, "[Symbol.toPrimitive]"), { writable: false });
   
   globalObject.define("Symbol", symbolClass);
 }

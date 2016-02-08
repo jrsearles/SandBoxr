@@ -1,5 +1,5 @@
-import {getMethod} from "../utils/helpers";
-import {isNullOrUndefined, isFunction, isUndefined, isNull} from "./checks";
+import { getMethod } from "../utils/helpers";
+import { isNullOrUndefined, isFunction, isUndefined, isNull } from "./checks";
 
 const sign = Math.sign;
 const floor = Math.floor;

@@ -1,5 +1,5 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
 
 export function ArgumentType (callee) {
   ObjectType.call(this);
@@ -13,7 +13,7 @@ inherits(ArgumentType, ObjectType);
 
 ArgumentType.prototype.mapProperty = function (index, binding) {
   index = String(index);
-  ObjectType.prototype.defineProperty.call(this, index, {configurable: true, enumerable: true, writable: true, value: undefined}, true);
+  ObjectType.prototype.defineProperty.call(this, index, { configurable: true, enumerable: true, writable: true, value: undefined }, true);
   this.parameterMap[index] = binding;
 };
 

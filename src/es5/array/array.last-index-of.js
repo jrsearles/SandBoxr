@@ -1,5 +1,5 @@
-import {UNDEFINED} from "../../types/primitive-type";
-import {toLength, toInteger} from "../../utils/native";
+import { UNDEFINED } from "../../types/primitive-type";
+import { toLength, toInteger } from "../../utils/native";
 import iterate from "../../iterators";
 
 export default function ($target, env, factory) {
@@ -12,7 +12,7 @@ export default function ($target, env, factory) {
       index = length - Math.abs(index);
     }
 
-    for (let {key, value} of iterate.reverse(this.object, index)) {
+    for (let { key, value } of iterate.reverse(this.object, index)) {
       if (env.ops.strictEquals(searchElement, value || UNDEFINED)) {
         return factory.createPrimitive(key);
       }

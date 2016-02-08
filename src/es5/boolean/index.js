@@ -1,10 +1,10 @@
-import {toBoolean} from "../../utils/native";
+import { toBoolean } from "../../utils/native";
 
 import $toString from "./boolean.to-string";
 import $valueOf from "./boolean.value-of";
 
 export default function booleanApi (env) {
-  const {global: globalObject, objectFactory} = env;
+  const { global: globalObject, objectFactory } = env;
 
   let proto = objectFactory.createObject();
   proto.className = "Boolean";
@@ -20,7 +20,7 @@ export default function booleanApi (env) {
     }
 
     return obj;
-  }, proto, {configurable: false, enumerable: false, writable: false, name: "Boolean"});
+  }, proto, { configurable: false, enumerable: false, writable: false, name: "Boolean" });
 
   $toString(proto, env, objectFactory);
   $valueOf(proto, env, objectFactory);

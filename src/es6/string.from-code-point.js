@@ -1,5 +1,5 @@
-import {map} from "../utils/async";
-import {toNumber} from "../utils/native";
+import { map } from "../utils/async";
+import { toNumber } from "../utils/native";
 
 export default function (target, env, factory) {
   target.define("fromCodePoint", factory.createBuiltInFunction(function* (...codePoints) {

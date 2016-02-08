@@ -1,4 +1,4 @@
-import {UNDEFINED} from "../types/primitive-type";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function (target, env, factory) {
   target.define("is", factory.createBuiltInFunction(function (a, b) {

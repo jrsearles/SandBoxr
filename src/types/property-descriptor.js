@@ -1,5 +1,5 @@
-import {default as ops} from "../utils/operators";
-import {exhaust as x} from "../utils/async";
+import { default as ops } from "../utils/operators";
+import { exhaust as x } from "../utils/async";
 
 let hasOwn = Object.prototype.hasOwnProperty;
 let uid = 0;

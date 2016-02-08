@@ -1,4 +1,4 @@
-import {UNDEFINED} from "../types/primitive-type";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function* BinaryExpression (node, context, next) {
   let left = (yield next(node.left, context)).result;

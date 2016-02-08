@@ -1,4 +1,4 @@
-import {isNullOrUndefined} from "../utils/checks";
+import { isNullOrUndefined } from "../utils/checks";
 
 export default function* WithStatement (node, context, next) {
   if (context.env.isStrict()) {

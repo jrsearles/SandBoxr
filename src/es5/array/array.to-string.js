@@ -1,5 +1,5 @@
-import {assertIsNotNullOrUndefined} from "../../utils/contracts";
-import {isFunction} from "../../utils/checks";
+import { assertIsNotNullOrUndefined } from "../../utils/contracts";
+import { isFunction } from "../../utils/checks";
 
 export default function ($target, env, factory) {
   $target.define("toString", factory.createBuiltInFunction(function* () {

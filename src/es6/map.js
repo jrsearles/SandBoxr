@@ -1,6 +1,6 @@
-import {assertIsObject, assertIsFunction} from "../utils/contracts";
-import {isNullOrUndefined} from "../utils/checks";
-import {UNDEFINED} from "../types/primitive-type";
+import { assertIsObject, assertIsFunction } from "../utils/contracts";
+import { isNullOrUndefined } from "../utils/checks";
+import { UNDEFINED } from "../types/primitive-type";
 import iterate from "../iterators/";
 
 import $clear from "./map.clear";
@@ -39,7 +39,7 @@ export default function ($global, env, factory) {
     }
 
     return instance;
-  }, proto, {name: "Map", writable: false});
+  }, proto, { name: "Map", writable: false });
 
   $clear(proto, env, factory);
   $delete(proto, env, factory);

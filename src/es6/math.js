@@ -1,4 +1,4 @@
-import {toNativeFunction} from "../utils/native";
+import { toNativeFunction } from "../utils/native";
 
 export default function ($global, env, factory) {
   let mathClass = $global.getValue("Math");

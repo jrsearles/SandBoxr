@@ -1,4 +1,4 @@
-import {isConstructor} from "../utils/checks";
+import { isConstructor } from "../utils/checks";
 
 export default function ($target, env, factory) {
   $target.define("of", factory.createBuiltInFunction(function* (...items) {
@@ -12,7 +12,7 @@ export default function ($target, env, factory) {
     let i = 0;
 
     while (i < length) {
-      arr.defineProperty(i, {value: items[i], configurable: true, enumerable: true, writable: true}, true);
+      arr.defineProperty(i, { value: items[i], configurable: true, enumerable: true, writable: true }, true);
       i++;
     }
 

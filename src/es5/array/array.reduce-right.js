@@ -1,7 +1,7 @@
-import {toLength, toObject} from "../../utils/native";
-import {assertIsFunction, assertIsNotNullOrUndefined} from "../../utils/contracts";
+import { toLength, toObject } from "../../utils/native";
+import { assertIsFunction, assertIsNotNullOrUndefined } from "../../utils/contracts";
 import iterate from "../../iterators/";
-import {executeAccumulator} from "./array-helpers";
+import { executeAccumulator } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("reduceRight", factory.createBuiltInFunction(function* (callback, initialValue) {

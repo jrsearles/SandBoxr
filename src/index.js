@@ -1,6 +1,6 @@
-import {Environment} from "./env";
-import {exhaust as x, isThenable} from "./utils/async";
-import {ErrorType} from "./types/error-type";
+import { Environment } from "./env";
+import { exhaust as x, isThenable } from "./utils/async";
+import { ErrorType } from "./types/error-type";
 
 /**
  * Creates a new Sandbox

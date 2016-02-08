@@ -1,5 +1,5 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
 
 const GLOBAL_SYMBOL_REGISTRY = Object.create(null);
 let uid = 0;

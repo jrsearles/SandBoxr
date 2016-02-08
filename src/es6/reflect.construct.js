@@ -1,6 +1,6 @@
-import {assertIsFunction, assertIsObject} from "../utils/contracts";
-import {toArray} from "../utils/native";
-import {isUndefined, isConstructor} from "../utils/checks";
+import { assertIsFunction, assertIsObject } from "../utils/contracts";
+import { toArray } from "../utils/native";
+import { isUndefined, isConstructor } from "../utils/checks";
 
 export default function ($target, env, factory) {
   $target.define("construct", factory.createBuiltInFunction(function* (target, argsArray, newTarget) {

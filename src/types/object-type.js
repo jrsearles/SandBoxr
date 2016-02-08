@@ -1,5 +1,5 @@
-import {default as ops} from "../utils/operators";
-import {PropertyDescriptor} from "./property-descriptor";
+import { default as ops } from "../utils/operators";
+import { PropertyDescriptor } from "./property-descriptor";
 const integerMatcher = /^\d+$/;
 
 function isSymbol (key) {
@@ -23,7 +23,7 @@ function* propertyIterator (env, obj) {
       if (desc) {
         if (desc.enumerable && !(key in visited)) {
           let value = objectFactory.createPrimitive(key);
-          yield objectFactory.createIteratorResult({value});
+          yield objectFactory.createIteratorResult({ value });
         }
 
         visited[key] = true;
@@ -33,7 +33,7 @@ function* propertyIterator (env, obj) {
     current = current.getPrototype();
   }
 
-  return objectFactory.createIteratorResult({done: true});
+  return objectFactory.createIteratorResult({ done: true });
 }
 
 function propertyKeyComparer (a, b) {
@@ -198,7 +198,7 @@ ObjectType.prototype = {
         return true;
       }
 
-      if (!descriptor.canUpdate({value})) {
+      if (!descriptor.canUpdate({ value })) {
         return false;
       }
 
@@ -279,16 +279,16 @@ ObjectType.prototype = {
     return delete this[source][key];
   },
 
-  define (key, value, {configurable = true, enumerable = false, writable = true, getter, get, setter, set} = {}) {
+  define (key, value, { configurable = true, enumerable = false, writable = true, getter, get, setter, set } = {}) {
     // this method is intended for external usage only - it provides a way to define
     // methods and properties and overwrite any existing properties even if they are
     // not configurable
 
     let descriptor;
     if (getter || setter) {
-      descriptor = {getter, get, setter, set, configurable, enumerable};
+      descriptor = { getter, get, setter, set, configurable, enumerable };
     }  else {
-      descriptor = {value, configurable, enumerable, writable};
+      descriptor = { value, configurable, enumerable, writable };
     }
 
     this[getPropertySource(key)][String(key)] = new PropertyDescriptor(this, descriptor, key);
@@ -320,9 +320,9 @@ ObjectType.prototype = {
   freeze () {
     this.each(desc => {
       if (desc.dataProperty) {
-        this.defineProperty(desc.key, {writable: false, configurable: false});
+        this.defineProperty(desc.key, { writable: false, configurable: false });
       } else {
-        this.defineProperty(desc.key, {configurable: false});
+        this.defineProperty(desc.key, { configurable: false });
       }
     });
 
@@ -336,7 +336,7 @@ ObjectType.prototype = {
 
   seal () {
     this.each(desc => {
-      this.defineProperty(desc.key, {configurable: false}, true);
+      this.defineProperty(desc.key, { configurable: false }, true);
     });
 
     this.preventExtensions();

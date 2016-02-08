@@ -1,7 +1,7 @@
-import {UNDEFINED} from "./types/primitive-type";
-import {ExecutionResult} from "./execution-result";
-import {visitors} from "./visitors";
-import {step, makeVisitors, makeRules} from "./estree";
+import { UNDEFINED } from "./types/primitive-type";
+import { ExecutionResult } from "./execution-result";
+import { visitors } from "./visitors";
+import { step, makeVisitors, makeRules } from "./estree";
 import rules from "./syntax-rules";
 
 let extendedRules = makeRules(rules);

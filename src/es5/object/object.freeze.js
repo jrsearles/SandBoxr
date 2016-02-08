@@ -1,4 +1,4 @@
-import {confirmObject} from "./object-helpers";
+import { confirmObject } from "./object-helpers";
 
 export default function ($target, env, factory) {
   $target.define("freeze", factory.createBuiltInFunction(function (obj) {

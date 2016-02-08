@@ -1,5 +1,5 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
 
 export function RegexType (value) {
   ObjectType.call(this);
@@ -14,7 +14,7 @@ RegexType.prototype.init = function (env) {
   ObjectType.prototype.init.apply(this, arguments);
 
   // lastIndex is settable, all others are read-only attributes
-  this.defineProperty("lastIndex", {value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true});
+  this.defineProperty("lastIndex", { value: env.objectFactory.createPrimitive(this.source.lastIndex), writable: true });
 
   ["source", "global", "ignoreCase", "multiline"].forEach(key => {
     if (env.ecmaVersion > 5) {
@@ -27,7 +27,7 @@ RegexType.prototype.init = function (env) {
         configurable: true
       });
     } else {
-      this.defineProperty(key, {value: env.objectFactory.createPrimitive(this.source[key])});
+      this.defineProperty(key, { value: env.objectFactory.createPrimitive(this.source[key]) });
     }
   });
 };

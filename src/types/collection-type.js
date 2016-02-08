@@ -1,5 +1,5 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
 
 export function CollectionType (className) {
   ObjectType.call(this);

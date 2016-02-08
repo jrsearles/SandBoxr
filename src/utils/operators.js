@@ -1,4 +1,4 @@
-import {toPrimitive, toNumber, toInt32, toString, toPropertyKey} from "./native";
+import { toPrimitive, toNumber, toInt32, toString, toPropertyKey } from "./native";
 
 function neg (value) {
   if (value === undefined) {

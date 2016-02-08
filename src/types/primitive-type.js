@@ -1,6 +1,6 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
-import {getNativeType as getType} from "../utils/helpers";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
+import { getNativeType as getType } from "../utils/helpers";
 
 export function PrimitiveType (value) {
   ObjectType.call(this);

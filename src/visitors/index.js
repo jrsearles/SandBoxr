@@ -14,7 +14,7 @@ import ForStatement from "./for-statement";
 import ForInStatement from "./for-in-statement";
 import ForOfStatement from "./for-of-statement";
 import FunctionDeclaration from "./function-declaration";
-import {FunctionExpression, ClassDeclaration} from "./function-expression";
+import { FunctionExpression, ClassDeclaration } from "./function-expression";
 import Identifier from "./identifier";
 import ImportDeclaration from "./import-declaration";
 import LabeledStatement from "./labeled-statement";

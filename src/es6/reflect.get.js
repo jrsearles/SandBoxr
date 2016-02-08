@@ -1,6 +1,6 @@
-import {assertIsObject} from "../utils/contracts";
-import {toPropertyKey} from "../utils/native";
-import {UNDEFINED} from "../types/primitive-type";
+import { assertIsObject } from "../utils/contracts";
+import { toPropertyKey } from "../utils/native";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function ($target, env, factory) {
   $target.define("get", factory.createBuiltInFunction(function* (target, propertyKey, receiver) {

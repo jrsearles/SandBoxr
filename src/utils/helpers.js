@@ -1,4 +1,4 @@
-import {isFunction, isNullOrUndefined} from "./checks";
+import { isFunction, isNullOrUndefined } from "./checks";
 
 const objectPattern = /\[object (\w+)\]/;
 const toString = Object.prototype.toString;
@@ -43,5 +43,5 @@ export function  getNativeType (obj) {
 }
 
 export function createDataProperty (obj, key, value, throwOnError) {
-  obj.defineProperty(key, {value, configurable: true, enumerable: true, writable: true}, throwOnError);
+  obj.defineProperty(key, { value, configurable: true, enumerable: true, writable: true }, throwOnError);
 }

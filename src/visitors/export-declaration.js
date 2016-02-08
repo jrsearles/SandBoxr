@@ -1,4 +1,4 @@
-import {PropertyReference} from "../env/property-reference";
+import { PropertyReference } from "../env/property-reference";
 
 function exportSpecified (target, key, env, source, alias = key) {
   let ref;

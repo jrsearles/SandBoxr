@@ -1,5 +1,5 @@
-import {toString} from "../../utils/native";
-import {map} from "../../utils/async";
+import { toString } from "../../utils/native";
+import { map } from "../../utils/async";
 
 const methods = ["log", "info", "error", "warn"];
 

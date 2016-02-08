@@ -1,5 +1,5 @@
-import {assertAreValidArguments, assertAreValidSetterArguments} from "../utils/contracts";
-import {toPropertyKey} from "../utils/native";
+import { assertAreValidArguments, assertAreValidSetterArguments } from "../utils/contracts";
+import { toPropertyKey } from "../utils/native";
 
 function setDescriptor (env, obj, descriptor) {
   let strict = env.isStrict();
@@ -29,7 +29,7 @@ function findOrCreateDescriptor (arr, key) {
     }
   }
   
-  let descriptor = {configurable: true, enumerable: true, key};
+  let descriptor = { configurable: true, enumerable: true, key };
   arr.push(descriptor);
   return descriptor;
 }

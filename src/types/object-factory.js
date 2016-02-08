@@ -1,20 +1,20 @@
-import {ObjectType} from "./object-type";
-import {PrimitiveType, UNDEFINED, NULL} from "./primitive-type";
-import {FunctionType} from "./function-type";
-import {NativeFunctionType} from "./native-function-type";
-import {RegexType} from "./regex-type";
-import {ArrayType} from "./array-type";
-import {StringType} from "./string-type";
-import {DateType} from "./date-type";
-import {ErrorType} from "./error-type";
-import {ArgumentType} from "./argument-type";
-import {IteratorType} from "./iterator-type";
-import {SymbolType} from "./symbol-type";
-import {CollectionType} from "./collection-type";
-import {ProxyType} from "./proxy-type";
-import {assertIsObject} from "../utils/contracts";
-import {getNativeType as getType} from "../utils/helpers";
-import {isNullOrUndefined, isConstructor as isCtor} from "../utils/checks";
+import { ObjectType } from "./object-type";
+import { PrimitiveType, UNDEFINED, NULL } from "./primitive-type";
+import { FunctionType } from "./function-type";
+import { NativeFunctionType } from "./native-function-type";
+import { RegexType } from "./regex-type";
+import { ArrayType } from "./array-type";
+import { StringType } from "./string-type";
+import { DateType } from "./date-type";
+import { ErrorType } from "./error-type";
+import { ArgumentType } from "./argument-type";
+import { IteratorType } from "./iterator-type";
+import { SymbolType } from "./symbol-type";
+import { CollectionType } from "./collection-type";
+import { ProxyType } from "./proxy-type";
+import { assertIsObject } from "../utils/contracts";
+import { getNativeType as getType } from "../utils/helpers";
+import { isNullOrUndefined, isConstructor as isCtor } from "../utils/checks";
 
 let orphans = Object.create(null);
 const functionNameMatcher = /((?:get |set )?\[Symbol\.\w+\]|[^.]+)$/;
@@ -49,9 +49,9 @@ function setProto (typeName, instance, factory) {
   instance.setPrototype(proto);
 }
 
-const defaultDescriptor = {configurable: true, enumerable: true, writable: true};
-function createDataPropertyDescriptor (value, {configurable = true, enumerable = true, writable = true} = defaultDescriptor) {
-  return {value, configurable, enumerable, writable};
+const defaultDescriptor = { configurable: true, enumerable: true, writable: true };
+function createDataPropertyDescriptor (value, { configurable = true, enumerable = true, writable = true } = defaultDescriptor) {
+  return { value, configurable, enumerable, writable };
 }
 
 export function ObjectFactory (env) {
@@ -159,7 +159,7 @@ ObjectFactory.prototype = {
           typeName = value.name || typeName;
           if (value.message) {
             let message = this.createPrimitive(value.message);
-            instance.defineProperty("message", createDataPropertyDescriptor(message, {enumerable: false}));
+            instance.defineProperty("message", createDataPropertyDescriptor(message, { enumerable: false }));
           }
         }
 
@@ -264,10 +264,10 @@ ObjectFactory.prototype = {
     return instance;
   },
 
-  createIteratorResult ({value, done = false}) {
+  createIteratorResult ({ value, done = false }) {
     let instance = this.createObject();
-    instance.defineProperty("done", {value: this.createPrimitive(done)});
-    instance.defineProperty("value", {value: value || UNDEFINED});
+    instance.defineProperty("done", { value: this.createPrimitive(done) });
+    instance.defineProperty("value", { value: value || UNDEFINED });
     return instance;
   },
   
@@ -315,7 +315,7 @@ ObjectFactory.prototype = {
    * @param {Object} [options] - Property values to be used for the prototype.
    * @returns {FunctionType} The function instance.
    */
-  createFunction (fnOrNode, proto, {configurable = false, enumerable = false, writable = true, strict = false, isConstructor = false, name, homeObject, kind} = {}) {
+  createFunction (fnOrNode, proto, { configurable = false, enumerable = false, writable = true, strict = false, isConstructor = false, name, homeObject, kind } = {}) {
     let instance;
 
     if (typeof fnOrNode === "function") {
@@ -324,19 +324,19 @@ ObjectFactory.prototype = {
       instance = new FunctionType(fnOrNode);
     }
 
-    instance.init(this.env, proto, {configurable, enumerable, writable, isConstructor, strict, homeObject, kind}, strict);
+    instance.init(this.env, proto, { configurable, enumerable, writable, isConstructor, strict, homeObject, kind }, strict);
     instance.name = name || "";
     
     if (name) {
-      instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
+      instance.defineProperty("name", { value: this.createPrimitive(name), configurable: true }, true);
     }
     
     setProto("Function", instance, this);
     return instance;
   },
 
-  createClass (fnOrNode, proto, {name, homeObject} = {}) {
-    return this.createFunction(fnOrNode, proto, {configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name, homeObject});
+  createClass (fnOrNode, proto, { name, homeObject } = {}) {
+    return this.createFunction(fnOrNode, proto, { configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name, homeObject });
   },
 
   createGetter (func, key) {
@@ -374,7 +374,7 @@ ObjectFactory.prototype = {
     let match = functionNameMatcher.exec(funcName);
     let name = match && match[1] || funcName;
 
-    instance.defineProperty("name", {value: this.createPrimitive(name), configurable: true}, true);
+    instance.defineProperty("name", { value: this.createPrimitive(name), configurable: true }, true);
 
     return instance;
   },

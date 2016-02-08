@@ -1,6 +1,6 @@
-import {toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/checks";
-import {getMethod} from "../../utils/helpers";
+import { toString } from "../../utils/native";
+import { isNullOrUndefined } from "../../utils/checks";
+import { getMethod } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("search", factory.createBuiltInFunction(function* (regexp) {

@@ -1,4 +1,4 @@
-import {isInteger} from "../utils/native";
+import { isInteger } from "../utils/native";
 
 const ASCENDING = (a, b) => a - b;
 const DESCENDING = (a, b) => b - a;
@@ -64,7 +64,7 @@ SparseIterator.prototype = {
       let value = this.props[key]();
 
       return {
-        value: {key, value},
+        value: { key, value },
         done: false
       };
     }

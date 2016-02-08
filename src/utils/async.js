@@ -70,10 +70,10 @@ export function* step (it, prev) {
 
 function tryCatch (it, priorValue, method) {
   try {
-    let {done, value} = it[method](priorValue);
-    return {state: "next", done, value};
+    let { done, value } = it[method](priorValue);
+    return { state: "next", done, value };
   } catch (err) {
-    return {state: "throw", done: false, value: err};
+    return { state: "throw", done: false, value: err };
   }
 }
 
@@ -91,7 +91,7 @@ function tryCatch (it, priorValue, method) {
 export function exhaust (it, value, stack = [], state = "next") {
   while (it) {
     let done;
-    ({state, done, value} = tryCatch(it, value, state));
+    ({ state, done, value } = tryCatch(it, value, state));
 
     if (state === "throw") {
       if (it = stack.pop()) {

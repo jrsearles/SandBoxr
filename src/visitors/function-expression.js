@@ -1,5 +1,5 @@
-import {toPropertyKey} from "../utils/native";
-import {NULL} from "../types/primitive-type";
+import { toPropertyKey } from "../utils/native";
+import { NULL } from "../types/primitive-type";
 
 function* getName (node, context, next) {
   if (node.name) {
@@ -69,7 +69,7 @@ export function* FunctionExpression (node, context, next) {
     proto = objectFactory.createObject();
   }
   
-  let func = objectFactory.createFunction(node, proto, {strict, name});
+  let func = objectFactory.createFunction(node, proto, { strict, name });
   func.bindScope(context.env.current);
   
   if (node.isArrowFunctionExpression()) {
@@ -88,7 +88,7 @@ function findOrCreate (arr, key, isStatic) {
     }
   }
   
-  let entry = {enumerable: false, configurable: true, key, isStatic};
+  let entry = { enumerable: false, configurable: true, key, isStatic };
   arr.push(entry);
   return entry;
 }
@@ -128,17 +128,17 @@ export function* ClassDeclaration (node, context, next) {
       case "get":
       case "set":
         entry = findOrCreate(props, key, method.static);
-        entry[kind] = objectFactory.createFunction(method.value, null, {strict: true, name: `${kind} ${name}`, homeObject});
+        entry[kind] = objectFactory.createFunction(method.value, null, { strict: true, name: `${kind} ${name}`, homeObject });
         break;
 
       default:
         if (method.static) {
           entry = findOrCreate(props, key, true);
-          entry.value = objectFactory.createFunction(method.value, null, {strict: true, name, homeObject});
+          entry.value = objectFactory.createFunction(method.value, null, { strict: true, name, homeObject });
           break;
         }
         
-        let fn = objectFactory.createFunction(method.value, null, {strict: true, name, homeObject});
+        let fn = objectFactory.createFunction(method.value, null, { strict: true, name, homeObject });
         proto.define(key, fn);
         break;
     }
@@ -156,7 +156,7 @@ export function* ClassDeclaration (node, context, next) {
   };
 
   let name = yield getName(node, context, next);
-  let def = objectFactory.createClass(ctor, proto, {name, homeObject: parent});
+  let def = objectFactory.createClass(ctor, proto, { name, homeObject: parent });
 
   props.forEach(entry => {
     let target = entry.isStatic ? def : proto;

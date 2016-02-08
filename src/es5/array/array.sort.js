@@ -1,7 +1,7 @@
-import {toLength, toArray, toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/checks";
-import {exhaust as x} from "../../utils/async";
-import {UNDEFINED} from "../../types/primitive-type";
+import { toLength, toArray, toString } from "../../utils/native";
+import { isNullOrUndefined } from "../../utils/checks";
+import { exhaust as x } from "../../utils/async";
+import { UNDEFINED } from "../../types/primitive-type";
 
 export default function ($target, env, factory) {
   function defaultComparer (a, b) {

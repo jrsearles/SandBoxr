@@ -1,6 +1,6 @@
-import {Reference} from "../env/reference";
-import {PropertyReference} from "../env/property-reference";
-import {toNumber, toBoolean, toInt32} from "../utils/native";
+import { Reference } from "../env/reference";
+import { PropertyReference } from "../env/property-reference";
+import { toNumber, toBoolean, toInt32 } from "../utils/native";
 
 export default function* UnaryExpression (node, context, next) {
   const objectFactory = context.env.objectFactory;

@@ -1,4 +1,4 @@
-import {defineThis} from "./function-helpers";
+import { defineThis } from "./function-helpers";
 
 export default function ($target, env, factory) {
   $target.define("call", factory.createBuiltInFunction(function* (thisArg, ...args) {

@@ -1,4 +1,4 @@
-import {types} from "./types";
+import { types } from "./types";
 
 const noop = () => {};
 
@@ -42,7 +42,7 @@ export function makeVisitors (visitors) {
     return visitors;
   }
   
-  let target = Object.assign({__made: true}, defaultVisitors);
+  let target = Object.assign({ __made: true }, defaultVisitors);
   
   Object.keys(visitors).forEach(key => {
     // skip false values using noop

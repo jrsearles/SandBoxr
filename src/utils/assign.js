@@ -1,5 +1,5 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {toPropertyKey} from "./native";
+import { UNDEFINED } from "../types/primitive-type";
+import { toPropertyKey } from "./native";
 import iterate from "../iterators";
 
 export function* reset (env, leftNode, priorScope, newScope) {
@@ -94,7 +94,7 @@ function* destructureArray (env, pattern, arr, cb) {
     let value, current;
     
     if (!done) {
-      ({done, value: current} = it.next());
+      ({ done, value: current } = it.next());
       value = !done && current.value;
     }
     
@@ -106,7 +106,7 @@ function* destructureArray (env, pattern, arr, cb) {
       let rest = value ? [value] : [];
       
       while (!done) {
-        ({done, value: current} = it.next());
+        ({ done, value: current } = it.next());
         if (!done) {
           rest.push(current.value);
         }

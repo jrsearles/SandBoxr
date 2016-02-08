@@ -1,5 +1,5 @@
 // import {each} from "../utils/async";
-import {declare} from "../utils/assign";
+import { declare } from "../utils/assign";
 
 function* tryCatch (node, context, next) {
   try {

@@ -1,5 +1,5 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {assertIsMap, assertIsFunction} from "../utils/contracts";
+import { UNDEFINED } from "../types/primitive-type";
+import { assertIsMap, assertIsFunction } from "../utils/contracts";
 
 export default function ($target, env, factory) {
   $target.define("forEach", factory.createBuiltInFunction(function* (callback, thisArg) {

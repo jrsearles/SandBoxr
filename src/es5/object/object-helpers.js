@@ -1,6 +1,6 @@
-import {toString, toBoolean, toObject, toPropertyKey} from "../../utils/native";
-import {isObject} from "../../utils/checks";
-import {UNDEFINED} from "../../types/primitive-type";
+import { toString, toBoolean, toObject, toPropertyKey } from "../../utils/native";
+import { isObject } from "../../utils/checks";
+import { UNDEFINED } from "../../types/primitive-type";
 
 export function* defineProperty (env, obj, key, descriptor, throwOnError = true) {
   if (!isObject(descriptor)) {

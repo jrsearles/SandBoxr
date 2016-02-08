@@ -1,5 +1,5 @@
-import {types} from "./types";
-import {interfaces} from "./interfaces";
+import { types } from "./types";
+import { interfaces } from "./interfaces";
 
 function isNode (obj) {
   return obj && typeof obj === "object" && typeof obj.type === "string";
@@ -113,7 +113,7 @@ let proto = TraversalContext.prototype = {
       let done, value;
       
       do {
-        ({done, value} = it.next());
+        ({ done, value } = it.next());
         if (!done && value) {
           this._directives.push(value);
         }

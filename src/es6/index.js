@@ -44,7 +44,7 @@ export default function (env) {
 
     let speciesGetter = function () { return ctor; };
     let speciesGetterFunc = objectFactory.createGetter(speciesGetter, "[Symbol.species]");
-    ctor.define(speciesKey, null, {getter: speciesGetter, get: speciesGetterFunc});    
+    ctor.define(speciesKey, null, { getter: speciesGetter, get: speciesGetterFunc });    
   });
   
   ["JSON", "Math", "Map", "Set"].forEach(typeName => {
@@ -53,11 +53,11 @@ export default function (env) {
       obj = obj.getValue("prototype");
     }
     
-    obj.define(stringTagKey, objectFactory.createPrimitive(typeName), {writable: false});
+    obj.define(stringTagKey, objectFactory.createPrimitive(typeName), { writable: false });
   });
 
   // update length attributes on built-ins
-  let lengthAttr = {configurable: true, enumerable: false, writable: false};
+  let lengthAttr = { configurable: true, enumerable: false, writable: false };
   $global.getValue("Function").define("length", objectFactory.createPrimitive(1), lengthAttr);
   $global.getValue("Number").define("length", objectFactory.createPrimitive(1), lengthAttr);
   $global.getValue("Boolean").define("length", objectFactory.createPrimitive(1), lengthAttr);

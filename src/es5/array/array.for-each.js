@@ -1,7 +1,7 @@
-import {toLength, toObject} from "../../utils/native";
-import {assertIsFunction} from "../../utils/contracts";
+import { toLength, toObject } from "../../utils/native";
+import { assertIsFunction } from "../../utils/contracts";
 import iterate from "../../iterators/";
-import {executeCallback} from "./array-helpers";
+import { executeCallback } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("forEach", factory.createBuiltInFunction(function* (callback, thisArg) {

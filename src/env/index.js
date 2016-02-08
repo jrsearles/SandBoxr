@@ -1,16 +1,16 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {ExecutionContext} from "../execution-context";
-import {DeclarativeEnvironment} from "./declarative-environment";
-import {ObjectEnvironment} from "./object-environment";
-import {Reference} from "./reference";
+import { UNDEFINED } from "../types/primitive-type";
+import { ExecutionContext } from "../execution-context";
+import { DeclarativeEnvironment } from "./declarative-environment";
+import { ObjectEnvironment } from "./object-environment";
+import { Reference } from "./reference";
 import es5 from "../es5";
 import es6 from "../es6";
-import {default as operators} from "../utils/operators";
-import {assertIsValidIdentifier} from "../utils/contracts";
-import {Scope} from "./scope";
-import {BlockScope} from "./block-scope";
-import {SymbolType} from "../types/symbol-type";
-import {exhaust as x} from "../utils/async";
+import { default as operators } from "../utils/operators";
+import { assertIsValidIdentifier } from "../utils/contracts";
+import { Scope } from "./scope";
+import { BlockScope } from "./block-scope";
+import { SymbolType } from "../types/symbol-type";
+import { exhaust as x } from "../utils/async";
 
 const defaultOptions = {
   allowDebugger: false,
@@ -19,11 +19,11 @@ const defaultOptions = {
 };
 
 const declareKinds = {
-  "var": {configurable: false, writable: true, initialized: true, block: false},
-  "let": {configurable: false, writable: true, initialized: false, block: true},
-  "const": {configurable: false, writable: false, initialized: false, block: true},
-  "function": {configurable: false, writable: true, initialized: true, block: false},
-  "class": {configurable: false, writable: true, initialized: false, block: true}
+  "var": { configurable: false, writable: true, initialized: true, block: false },
+  "let": { configurable: false, writable: true, initialized: false, block: true },
+  "const": { configurable: false, writable: false, initialized: false, block: true },
+  "function": { configurable: false, writable: true, initialized: true, block: false },
+  "class": { configurable: false, writable: true, initialized: false, block: true }
 };
 
 export function Environment () {}

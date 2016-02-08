@@ -1,7 +1,7 @@
-import {toLength, toObject, toBoolean} from "../../utils/native";
-import {assertIsFunction, assertIsNotNullOrUndefined} from "../../utils/contracts";
+import { toLength, toObject, toBoolean } from "../../utils/native";
+import { assertIsFunction, assertIsNotNullOrUndefined } from "../../utils/contracts";
 import iterate from "../../iterators/";
-import {executeCallback} from "./array-helpers";
+import { executeCallback } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("every", factory.createBuiltInFunction(function* (callback, thisArg) {

@@ -1,5 +1,5 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {declare} from "../utils/assign";
+import { UNDEFINED } from "../types/primitive-type";
+import { declare } from "../utils/assign";
 
 export default function* VariableDeclarator (node, context, next) {
   let rightValue;

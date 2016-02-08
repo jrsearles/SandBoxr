@@ -1,14 +1,14 @@
 function* ascIterator (stringValue, start, length) {
   for (let key = start; key < length; key++) {
     let value = stringValue.getValue(key);
-    yield {value, key};
+    yield { value, key };
   }
 }
 
 function* descIterator (stringValue, start) {
   for (let key = start; key >= 0; key--) {
     let value = stringValue.getValue(key);
-    yield {value, key};
+    yield { value, key };
   }
 }
 

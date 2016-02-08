@@ -1,9 +1,9 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
-import {toNumber, toUInt32, isInteger, isValidArrayLength} from "../utils/native";
-import {assertIsValidArrayLength} from "../utils/contracts";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
+import { toNumber, toUInt32, isInteger, isValidArrayLength } from "../utils/native";
+import { assertIsValidArrayLength } from "../utils/contracts";
 import iterate from "../iterators";
-import {exhaust as x} from "../utils/async";
+import { exhaust as x } from "../utils/async";
 
 export function ArrayType () {
   ObjectType.call(this);
@@ -14,19 +14,19 @@ inherits(ArrayType, ObjectType);
 
 ArrayType.prototype.init = function (env) {
   ObjectType.prototype.init.apply(this, arguments);
-  this.defineProperty("length", {value: env.objectFactory.createPrimitive(0), writable: true});
+  this.defineProperty("length", { value: env.objectFactory.createPrimitive(0), writable: true });
 };
 
 ArrayType.prototype.setValue = function (name, value) {
   if (name === "length") {
-    return this.setLength({value}, false);
+    return this.setLength({ value }, false);
   }
 
   return ObjectType.prototype.setValue.apply(this, arguments);
 };
 
 ArrayType.prototype.setIndex = function (key, value, descriptor, throwOnError) {
-  descriptor = descriptor || {value, configurable: true, enumerable: true, writable: true};
+  descriptor = descriptor || { value, configurable: true, enumerable: true, writable: true };
 
   let index = Number(key);
   let lengthProperty = this.getProperty("length");
@@ -44,7 +44,7 @@ ArrayType.prototype.setIndex = function (key, value, descriptor, throwOnError) {
 
   if (index >= lengthValue) {
     let newLength = this[Symbol.for("env")].objectFactory.createPrimitive(index + 1);
-    this.defineProperty("length", {value: newLength});
+    this.defineProperty("length", { value: newLength });
   }
 
   return true;
@@ -90,10 +90,10 @@ ArrayType.prototype.setLength = function (descriptor, throwOnError) {
   let succeeded = true;
 
   if (i > newLength.toNative()) {
-    for (let {key} of iterate.reverse(this, i - 1, newLength.toNative())) {
+    for (let { key } of iterate.reverse(this, i - 1, newLength.toNative())) {
       if (!this.deleteProperty(key, false)) {
         newLength = env.objectFactory.createPrimitive(key + 1);
-        this.defineProperty("length", {value: newLength});
+        this.defineProperty("length", { value: newLength });
         succeeded = false;
         break;
       }
@@ -101,7 +101,7 @@ ArrayType.prototype.setLength = function (descriptor, throwOnError) {
   }
 
   if (notWritable) {
-    this.defineProperty("length", {writable: false});
+    this.defineProperty("length", { writable: false });
   }
 
   if (!succeeded && throwOnError) {

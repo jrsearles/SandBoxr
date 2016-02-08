@@ -1,5 +1,5 @@
-import {assertIsMap} from "../utils/contracts";
-import {findIndex} from "./collection-helpers";
+import { assertIsMap } from "../utils/contracts";
+import { findIndex } from "./collection-helpers";
 
 export default function ($target, env, factory) {
   $target.define("has", factory.createBuiltInFunction(function (key) {

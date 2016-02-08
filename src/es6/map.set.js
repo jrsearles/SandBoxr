@@ -1,6 +1,6 @@
-import {assertIsMap} from "../utils/contracts";
-import {isNegativeZero} from "../utils/checks";
-import {findIndex} from "./collection-helpers";
+import { assertIsMap } from "../utils/contracts";
+import { isNegativeZero } from "../utils/checks";
+import { findIndex } from "./collection-helpers";
 
 export default function ($target, env, factory) {
   $target.define("set", factory.createBuiltInFunction(function (key, value) {
@@ -16,7 +16,7 @@ export default function ($target, env, factory) {
       key = factory.createPrimitive(+0);
     }
 
-    this.object.data.push({key, value});
+    this.object.data.push({ key, value });
     return this.object;
   }, 2, "Map.prototype.set"));
 }

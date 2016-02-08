@@ -1,5 +1,5 @@
-import {assertIsSet} from "../utils/contracts";
-import {UNDEFINED} from "../types/primitive-type";
+import { assertIsSet } from "../utils/contracts";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function ($target, env, factory) {
   $target.define("forEach", factory.createBuiltInFunction(function* (callback, thisArg) {

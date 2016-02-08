@@ -1,4 +1,4 @@
-import {toObject, toLength, toString} from "../utils/native";
+import { toObject, toLength, toString } from "../utils/native";
 
 export default function (target, env, factory) {
   target.define("raw", factory.createBuiltInFunction(function* (template) {

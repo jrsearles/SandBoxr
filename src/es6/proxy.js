@@ -5,7 +5,7 @@ export default function (globalObject, env, factory) {
     }
 
     return factory.createProxy(target, handler);
-  }, null, {name: "Proxy"});
+  }, null, { name: "Proxy" });
 
   proxyClass.define("revocable", factory.createBuiltInFunction(function (target, handler) {
     let proxy = factory.createProxy(target, handler);
@@ -19,6 +19,6 @@ export default function (globalObject, env, factory) {
     return obj;
   }, 2, "Proxy.revocable"));
 
-  proxyClass.define("length", factory.createPrimitive(2), {writable: false});
+  proxyClass.define("length", factory.createPrimitive(2), { writable: false });
   globalObject.define("Proxy", proxyClass);
 }

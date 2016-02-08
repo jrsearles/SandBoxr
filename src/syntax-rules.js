@@ -1,5 +1,5 @@
-import {assertIsValidName, assertIsValidIdentifier, assertAreValidArguments} from "./utils/contracts";
-import {isOctalLiteral} from "./utils/native";
+import { assertIsValidName, assertIsValidIdentifier, assertAreValidArguments } from "./utils/contracts";
+import { isOctalLiteral } from "./utils/native";
 
 function validateAssignment (left, strict, ecmaVersion) {
   if (strict && left.isIdentifier()) {

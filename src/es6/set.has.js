@@ -1,4 +1,4 @@
-import {assertIsSet} from "../utils/contracts";
+import { assertIsSet } from "../utils/contracts";
 
 export default function ($target, env, factory) {
   $target.define("has", factory.createBuiltInFunction(function (value) {

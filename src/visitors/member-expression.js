@@ -1,5 +1,5 @@
-import {PropertyReference} from "../env/property-reference";
-import {toString} from "../utils/native";
+import { PropertyReference } from "../env/property-reference";
+import { toString } from "../utils/native";
 
 export default function* MemberExpression (node, context, next) {
   let obj = (yield next(node.object, context)).result.getValue();

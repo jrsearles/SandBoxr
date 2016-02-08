@@ -1,6 +1,6 @@
-import {inherits} from "util";
-import {Scope} from "./scope";
-import {reset} from "../utils/assign";
+import { inherits } from "util";
+import { Scope } from "./scope";
+import { reset } from "../utils/assign";
 
 export function BlockScope (env, scope, node) {
   Scope.call(this, env, scope);

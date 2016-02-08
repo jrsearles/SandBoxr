@@ -1,5 +1,5 @@
-import {assertIsFunction, assertIsObject} from "../utils/contracts";
-import {toArray} from "../utils/native";
+import { assertIsFunction, assertIsObject } from "../utils/contracts";
+import { toArray } from "../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("apply", factory.createBuiltInFunction(function* (target, thisArg, argsArray) {

@@ -1,5 +1,5 @@
-import {assertIsObject, assertArgIsNotNullOrUndefined} from "../../utils/contracts";
-import {defineProperty} from "./object-helpers";
+import { assertIsObject, assertArgIsNotNullOrUndefined } from "../../utils/contracts";
+import { defineProperty } from "./object-helpers";
 
 export default function ($target, env, factory) {
   $target.define("defineProperties", factory.createBuiltInFunction(function* (obj, descriptors) {

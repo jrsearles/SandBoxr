@@ -1,4 +1,4 @@
-import {assign} from "../utils/assign";
+import { assign } from "../utils/assign";
 
 export default function* AssignmentExpression (node, context, next) {
   let rightValue;

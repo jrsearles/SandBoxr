@@ -1,5 +1,5 @@
-import {toArray} from "../../utils/native";
-import {defineThis} from "./function-helpers";
+import { toArray } from "../../utils/native";
+import { defineThis } from "./function-helpers";
 
 export default function ($target, env, factory) {
   $target.define("apply", factory.createBuiltInFunction(function* (thisArg, argsArray) {

@@ -1,6 +1,6 @@
-import {inherits} from "util";
-import {FunctionType} from "./function-type";
-import {PropertyDescriptor} from "./property-descriptor";
+import { inherits } from "util";
+import { FunctionType } from "./function-type";
+import { PropertyDescriptor } from "./property-descriptor";
 
 export function NativeFunctionType (fn) {
   FunctionType.call(this);
@@ -12,7 +12,7 @@ export function NativeFunctionType (fn) {
 
 inherits(NativeFunctionType, FunctionType);
 
-NativeFunctionType.prototype.init = function (env, proto, {configurable = false, enumerable = false, writable = true, isConstructor = false, homeObject} = {}) {
+NativeFunctionType.prototype.init = function (env, proto, { configurable = false, enumerable = false, writable = true, isConstructor = false, homeObject } = {}) {
   this[Symbol.for("env")] = env;    
   this.isConstructor = isConstructor;
   this.homeObject = homeObject;
@@ -30,7 +30,7 @@ NativeFunctionType.prototype.init = function (env, proto, {configurable = false,
 
   if (proto !== null) {
     proto = proto || env.objectFactory.createObject();
-    proto.properties.constructor = new PropertyDescriptor(this, {configurable: true, enumerable: false, writable: true, value: this}, "constructor");
+    proto.properties.constructor = new PropertyDescriptor(this, { configurable: true, enumerable: false, writable: true, value: this }, "constructor");
 
     let protoDescriptor = {
       value: proto,

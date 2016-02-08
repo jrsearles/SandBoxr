@@ -1,8 +1,8 @@
-import {NativeFunctionType} from "../../types/native-function-type";
-import {UNDEFINED} from "../../types/primitive-type";
-import {isNull, isUndefined, isStrictNode} from "../../utils/checks";
-import {toString} from "../../utils/native";
-import {map} from "../../utils/async";
+import { NativeFunctionType } from "../../types/native-function-type";
+import { UNDEFINED } from "../../types/primitive-type";
+import { isNull, isUndefined, isStrictNode } from "../../utils/checks";
+import { toString } from "../../utils/native";
+import { map } from "../../utils/async";
 
 import $apply from "./function.apply";
 import $bind from "./function.bind";
@@ -10,7 +10,7 @@ import $call from "./function.call";
 import $toString from "./function.to-string";
 
 export default function functionApi (env) {
-  const {global: globalObject, objectFactory, options} = env;
+  const { global: globalObject, objectFactory, options } = env;
 
   let funcClass;
 
@@ -66,10 +66,10 @@ export default function functionApi (env) {
 
       wrappedFunc.nativeLength = callee.params.length;
       wrappedFunc.strict = strict;
-      funcInstance = objectFactory.createFunction(wrappedFunc, undefined, {strict, name: "anonymous"});
+      funcInstance = objectFactory.createFunction(wrappedFunc, undefined, { strict, name: "anonymous" });
       funcInstance.bindScope(env.globalScope);
     } else {
-      funcInstance = objectFactory.createFunction(function () {}, undefined, {name: "anonymous"});
+      funcInstance = objectFactory.createFunction(function () {}, undefined, { name: "anonymous" });
     }
 
     funcInstance.setValue("constructor", funcClass);
@@ -88,13 +88,13 @@ export default function functionApi (env) {
   proto[Symbol.for("env")] = env;
 
   funcCtor.nativeLength = 1;
-  funcClass = objectFactory.createFunction(funcCtor, proto, {configurable: false, enumerable: false, writable: false, name: "Function"});
+  funcClass = objectFactory.createFunction(funcCtor, proto, { configurable: false, enumerable: false, writable: false, name: "Function" });
   funcClass.setValue("constructor", funcClass);
 
   globalObject.define("Function", funcClass);
 
-  proto.define("length", objectFactory.createPrimitive(0), {writable: false});
-  proto.define("name", objectFactory.createPrimitive(""), {writable: false});
+  proto.define("length", objectFactory.createPrimitive(0), { writable: false });
+  proto.define("name", objectFactory.createPrimitive(""), { writable: false });
 
   // function itself is a function
   funcClass.setPrototype(proto);

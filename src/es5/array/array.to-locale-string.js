@@ -1,5 +1,5 @@
-import {toLength, toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/checks";
+import { toLength, toString } from "../../utils/native";
+import { isNullOrUndefined } from "../../utils/checks";
 
 export default function ($target, env, factory) {
   $target.define("toLocaleString", factory.createBuiltInFunction(function* () {

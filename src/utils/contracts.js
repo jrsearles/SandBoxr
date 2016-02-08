@@ -1,7 +1,7 @@
-import {isReserved, isStrictReserved} from "../keywords";
-import {SymbolType} from "../types/symbol-type";
-import {toBoolean, isValidArrayLength} from "./native";
-import {isObject, isFunction, isUndefined, isNullOrUndefined} from "./checks";
+import { isReserved, isStrictReserved } from "../keywords";
+import { SymbolType } from "../types/symbol-type";
+import { toBoolean, isValidArrayLength } from "./native";
+import { isObject, isFunction, isUndefined, isNullOrUndefined } from "./checks";
 
 // const objectPattern = /\[object (\w+)\]/;
 // const integerPattern = /^-?\d+$/;

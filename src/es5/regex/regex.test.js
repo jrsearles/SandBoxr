@@ -1,4 +1,4 @@
-import {toString, toInt32} from "../../utils/native";
+import { toString, toInt32 } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("test", factory.createBuiltInFunction(function* (str) {

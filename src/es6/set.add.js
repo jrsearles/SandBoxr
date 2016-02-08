@@ -1,5 +1,5 @@
-import {assertIsSet} from "../utils/contracts";
-import {isNegativeZero} from "../utils/checks";
+import { assertIsSet } from "../utils/contracts";
+import { isNegativeZero } from "../utils/checks";
 
 export default function ($target, env, factory) {
   $target.define("add", factory.createBuiltInFunction(function (value) {

@@ -1,5 +1,5 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
 
 export function ErrorType (source) {
   ObjectType.call(this);

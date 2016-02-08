@@ -1,6 +1,6 @@
-import {toString, toUInt32} from "../../utils/native";
-import {isUndefined, isNullOrUndefined} from "../../utils/checks";
-import {getMethod} from "../../utils/helpers";
+import { toString, toUInt32 } from "../../utils/native";
+import { isUndefined, isNullOrUndefined } from "../../utils/checks";
+import { getMethod } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("split", factory.createBuiltInFunction(function* (separator, limit) {

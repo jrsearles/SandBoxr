@@ -1,4 +1,4 @@
-import {UNDEFINED} from "../types/primitive-type";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function MetaProperty (node, context) {
   if (node.meta.name === "new" && node.property.name === "target") {

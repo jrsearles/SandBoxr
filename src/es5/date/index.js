@@ -1,5 +1,5 @@
-import {toPrimitive, toNumber, toNativeFunction} from "../../utils/native";
-import {map} from "../../utils/async";
+import { toPrimitive, toNumber, toNativeFunction } from "../../utils/native";
+import { map } from "../../utils/async";
 
 import $parse from "./date.parse";
 import $utc from "./date.utc";
@@ -12,7 +12,7 @@ const protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMillis
 const setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 
 export default function dateApi (env) {
-  const {global: globalObject, objectFactory} = env;
+  const { global: globalObject, objectFactory } = env;
 
   let proto = objectFactory.createObject();
   proto.className = "Date";
@@ -64,7 +64,7 @@ export default function dateApi (env) {
 
     dateValue = Date(...args);
     return objectFactory.createPrimitive(dateValue);
-  }, proto, {configurable: false, enumerable: false, writable: false, name: "Date"});
+  }, proto, { configurable: false, enumerable: false, writable: false, name: "Date" });
 
   $parse(dateClass, env, objectFactory);
   $utc(dateClass, env, objectFactory);

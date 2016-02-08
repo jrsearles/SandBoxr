@@ -1,5 +1,5 @@
-import {map} from "../utils/async";
-import {toString} from "../utils/native";
+import { map } from "../utils/async";
+import { toString } from "../utils/native";
 
 export default function* TemplateLiteral (node, context, next) {
   let values = yield map(node.expressions, function* (expr) {

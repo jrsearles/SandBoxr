@@ -1,6 +1,6 @@
-import {toLength, toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/checks";
-import {UNDEFINED} from "../../types/primitive-type";
+import { toLength, toString } from "../../utils/native";
+import { isNullOrUndefined } from "../../utils/checks";
+import { UNDEFINED } from "../../types/primitive-type";
 
 export default function ($target, env, factory) {
   $target.define("join", factory.createBuiltInFunction(function* join (separator) {

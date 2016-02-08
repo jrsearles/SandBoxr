@@ -1,6 +1,6 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {assertIsNotNullOrUndefined} from "../utils/contracts";
-import {toString} from "../utils/native";
+import { UNDEFINED } from "../types/primitive-type";
+import { assertIsNotNullOrUndefined } from "../utils/contracts";
+import { toString } from "../utils/native";
 
 export default function (target, env, factory) {
   let iteratorProto = factory.createObject();
@@ -43,7 +43,7 @@ export default function (target, env, factory) {
         value = factory.createPrimitive(char);
       }
 
-      yield factory.createIteratorResult({value, done});
+      yield factory.createIteratorResult({ value, done });
     }
   }
 
@@ -56,5 +56,5 @@ export default function (target, env, factory) {
   }, 0, "[Symbol.iterator]"));
   
   let stringTagKey = env.getSymbol("toStringTag");
-  iteratorProto.define(stringTagKey, factory.createPrimitive("String Iterator"), {writable: false});
+  iteratorProto.define(stringTagKey, factory.createPrimitive("String Iterator"), { writable: false });
 }

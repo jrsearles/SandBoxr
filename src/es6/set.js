@@ -1,5 +1,5 @@
-import {assertIsFunction, assertIsObject} from "../utils/contracts";
-import {isNullOrUndefined} from "../utils/checks";
+import { assertIsFunction, assertIsObject } from "../utils/contracts";
+import { isNullOrUndefined } from "../utils/checks";
 
 import iterate from "../iterators";
 
@@ -34,7 +34,7 @@ export default function ($global, env, factory) {
     }
 
     return instance;
-  }, proto, {name: "Set"});
+  }, proto, { name: "Set" });
 
   $add(proto, env, factory);
   $clear(proto, env, factory);

@@ -1,9 +1,9 @@
-import {assertIsNotNullOrUndefined} from "../../utils/contracts";
-import {isNullOrUndefined} from "../../utils/checks";
-import {UNDEFINED} from "../../types/primitive-type";
-import {toString} from "../../utils/native";
-import {exhaust as x} from "../../utils/async";
-import {getMethod} from "../../utils/helpers";
+import { assertIsNotNullOrUndefined } from "../../utils/contracts";
+import { isNullOrUndefined } from "../../utils/checks";
+import { UNDEFINED } from "../../types/primitive-type";
+import { toString } from "../../utils/native";
+import { exhaust as x } from "../../utils/async";
+import { getMethod } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("replace", factory.createBuiltInFunction(function* (regexOrSubstr, substrOrFn) {

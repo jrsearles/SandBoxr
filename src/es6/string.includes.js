@@ -1,6 +1,6 @@
-import {assertIsNotNullOrUndefined, isRegExp} from "../utils/contracts";
-import {isUndefined} from "../utils/checks";
-import {toString, toInteger} from "../utils/native";
+import { assertIsNotNullOrUndefined, isRegExp } from "../utils/contracts";
+import { isUndefined } from "../utils/checks";
+import { toString, toInteger } from "../utils/native";
 
 export default function (target, env, factory) {
   function stringIncludes (source, search, start, end) {

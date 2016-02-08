@@ -1,6 +1,6 @@
-import {toObject, toLength} from "../../utils/native";
-import {isSpreadable} from "./array-helpers";
-import {createDataProperty} from "../../utils/helpers";
+import { toObject, toLength } from "../../utils/native";
+import { isSpreadable } from "./array-helpers";
+import { createDataProperty } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("concat", factory.createBuiltInFunction(function* (...arrays) {

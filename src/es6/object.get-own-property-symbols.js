@@ -1,4 +1,4 @@
-import {assertIsNotNullOrUndefined} from "../utils/contracts";
+import { assertIsNotNullOrUndefined } from "../utils/contracts";
 
 export default function (target, env, factory) {
   target.define("getOwnPropertySymbols", factory.createBuiltInFunction(function (obj) {

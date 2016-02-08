@@ -1,8 +1,8 @@
-import {inherits} from "util";
-import {PrimitiveType} from "./primitive-type";
-import {isInteger} from "../utils/native";
+import { inherits } from "util";
+import { PrimitiveType } from "./primitive-type";
+import { isInteger } from "../utils/native";
 
-const charAttrs = {writable: false, enumerable: true, configurable: false};
+const charAttrs = { writable: false, enumerable: true, configurable: false };
 
 function lazyInit (instance, key) {
   let nativeValue = instance.value;
@@ -31,10 +31,10 @@ StringType.prototype.init = function (env) {
   PrimitiveType.prototype.init.apply(this, arguments);
   
   let length = this.value.length;
-  this.define("length", env.objectFactory.create("Number", length), {configurable: false, writable: false});
+  this.define("length", env.objectFactory.create("Number", length), { configurable: false, writable: false });
 
   if (length === 1) {
-    this.define("0", this, {enumerable: true, configurable: false});
+    this.define("0", this, { enumerable: true, configurable: false });
   }
 };
 

@@ -1,4 +1,4 @@
-import {assertIsObject} from "../utils/contracts";
+import { assertIsObject } from "../utils/contracts";
 
 export default function ($target, env, factory) {
   $target.define("ownKeys", factory.createBuiltInFunction(function (target) {

@@ -1,7 +1,7 @@
-import {toObject, toLength, toBoolean} from "../utils/native";
-import {assertIsFunction} from "../utils/contracts";
-import {UNDEFINED} from "../types/primitive-type";
-import {executeCallback} from "./array-helpers";
+import { toObject, toLength, toBoolean } from "../utils/native";
+import { assertIsFunction } from "../utils/contracts";
+import { UNDEFINED } from "../types/primitive-type";
+import { executeCallback } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("find", factory.createBuiltInFunction(function* (predicate, thisArg) {
@@ -16,7 +16,7 @@ export default function ($target, env, factory) {
     while (i < length) {
       let propInfo = arr.getProperty(i);
       let value = propInfo ? propInfo.getValue() : UNDEFINED;
-      let passed = toBoolean(yield executeCallback(env, predicate, {key: i, value}, thisArg, arr));
+      let passed = toBoolean(yield executeCallback(env, predicate, { key: i, value }, thisArg, arr));
       if (passed) {
         return value;
       }

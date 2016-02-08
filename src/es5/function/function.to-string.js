@@ -1,4 +1,4 @@
-import {assertIsNotGeneric} from "../../utils/contracts";
+import { assertIsNotGeneric } from "../../utils/contracts";
 
 export default function ($target, env, factory) {
   $target.define("toString", factory.createBuiltInFunction(function () {

@@ -1,5 +1,5 @@
-import {assertIsNotNullOrUndefined} from "../../utils/contracts";
-import {toString} from "../../utils/native";
+import { assertIsNotNullOrUndefined } from "../../utils/contracts";
+import { toString } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("trim", factory.createBuiltInFunction(function* () {

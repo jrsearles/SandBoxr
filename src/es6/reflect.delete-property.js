@@ -1,5 +1,5 @@
-import {assertIsObject} from "../utils/contracts";
-import {toPropertyKey} from "../utils/native";
+import { assertIsObject } from "../utils/contracts";
+import { toPropertyKey } from "../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("deleteProperty", factory.createBuiltInFunction(function* (target, propertyKey) {

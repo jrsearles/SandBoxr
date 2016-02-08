@@ -1,6 +1,6 @@
-import {Reference} from "../env/reference";
-import {isStrictNode} from "../utils/checks";
-import {UNDEFINED} from "../types/primitive-type";
+import { Reference } from "../env/reference";
+import { isStrictNode } from "../utils/checks";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function ($target, env, factory) {
   let parser = env.options.parser;

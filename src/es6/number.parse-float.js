@@ -1,4 +1,4 @@
-import {toString} from "../utils/native";
+import { toString } from "../utils/native";
 
 export default function (target, env, factory) {
   target.define("parseFloat", factory.createBuiltInFunction(function* (value) {

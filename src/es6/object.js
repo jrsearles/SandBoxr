@@ -1,4 +1,4 @@
-import {assertIsNotNullOrUndefined} from "../utils/contracts";
+import { assertIsNotNullOrUndefined } from "../utils/contracts";
 
 import $is from "./object.is";
 import $assign from "./object.assign";

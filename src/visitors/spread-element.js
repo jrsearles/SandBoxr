@@ -1,5 +1,5 @@
-import {SymbolType} from "../types/symbol-type";
-import {toString} from "../utils/native";
+import { SymbolType } from "../types/symbol-type";
+import { toString } from "../utils/native";
 
 export default function* SpreadElement (node, context, next) {
   let args = yield next(node.argument, context);

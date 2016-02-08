@@ -1,5 +1,5 @@
-import {UNDEFINED, NULL} from "../types/primitive-type";
-import {ObjectFactory} from "../types/object-factory";
+import { UNDEFINED, NULL } from "../types/primitive-type";
+import { ObjectFactory } from "../types/object-factory";
 import numberAPI from "./number/";
 import stringAPI from "./string/";
 import functionAPI from "./function/";
@@ -14,7 +14,7 @@ import jsonAPI from "./json/";
 import consoleAPI from "./console/";
 import globalAPI from "./globals";
 
-const frozen = {configurable: false, enumerable: false, writable: false};
+const frozen = { configurable: false, enumerable: false, writable: false };
 
 export default function ecma51 (env) {
   const objectFactory = env.objectFactory = new ObjectFactory(env);

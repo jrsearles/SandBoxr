@@ -1,5 +1,5 @@
-import {assertIsNotNullOrUndefined} from "../../utils/contracts";
-import {toPropertyKey} from "../../utils/native";
+import { assertIsNotNullOrUndefined } from "../../utils/contracts";
+import { toPropertyKey } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("propertyIsEnumerable", factory.createBuiltInFunction(function* (key) {

@@ -1,4 +1,4 @@
-import {toBoolean} from "../utils/native";
+import { toBoolean } from "../utils/native";
 
 export default function* DoWhileStatement (node, context, next) {
   let loopContext = context.createLoop();

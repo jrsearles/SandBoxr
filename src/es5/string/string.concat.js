@@ -1,6 +1,6 @@
-import {toString} from "../../utils/native";
-import {assertIsNotNullOrUndefined} from "../../utils/contracts";
-import {map} from "../../utils/async";
+import { toString } from "../../utils/native";
+import { assertIsNotNullOrUndefined } from "../../utils/contracts";
+import { map } from "../../utils/async";
 
 export default function ($target, env, factory) {
   $target.define("concat", factory.createBuiltInFunction(function* (...args) {

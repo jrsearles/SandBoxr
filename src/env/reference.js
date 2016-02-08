@@ -1,4 +1,4 @@
-import {assertIsValidIdentifier} from "../utils/contracts";
+import { assertIsValidIdentifier } from "../utils/contracts";
 
 export function Reference (key, base, env) {
   this.isReference = true;

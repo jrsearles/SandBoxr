@@ -16,5 +16,5 @@ export default function (globalObject, env, factory) {
   $parseInt(numberClass, env, factory);
 
   let epsilonValue = factory.createPrimitive(Number.EPSILON || 2.220446049250313e-16);
-  numberClass.define("EPSILON", epsilonValue, {configurable: false, writable: false});
+  numberClass.define("EPSILON", epsilonValue, { configurable: false, writable: false });
 }

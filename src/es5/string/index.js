@@ -1,5 +1,5 @@
-import {toString, toPrimitive} from "../../utils/native";
-import {map} from "../../utils/async";
+import { toString, toPrimitive } from "../../utils/native";
+import { map } from "../../utils/async";
 
 import $fromCharCode from "./string.from-char-code";
 import $concat from "./string.concat";
@@ -14,7 +14,7 @@ import $trim from "./string.trim";
 import $valueOf from "./string.value-of";
 
 export default function (env) {
-  const {global: globalObject, objectFactory} = env;
+  const { global: globalObject, objectFactory } = env;
 
   function* getString (value, isNew) {
     if (!value) {
@@ -33,7 +33,7 @@ export default function (env) {
   // prototype can be coerced into an empty string
   proto.value = "";
   proto.className = "String";
-  proto.defineProperty("length", {value: objectFactory.createPrimitive(0)});
+  proto.defineProperty("length", { value: objectFactory.createPrimitive(0) });
 
   let stringClass = objectFactory.createFunction(function* (value) {
     let stringValue = yield getString(value, this.isNew);
@@ -45,7 +45,7 @@ export default function (env) {
     }
 
     return obj;
-  }, proto, {configurable: false, enumerable: false, writable: false, name: "String"});
+  }, proto, { configurable: false, enumerable: false, writable: false, name: "String" });
 
   $fromCharCode(stringClass, env, objectFactory);
 

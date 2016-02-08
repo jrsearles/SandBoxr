@@ -1,4 +1,4 @@
-import {toNumber} from "../utils/native";
+import { toNumber } from "../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("isNaN", factory.createBuiltInFunction(function* (value) {

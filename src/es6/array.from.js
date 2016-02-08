@@ -1,8 +1,8 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {assertIsFunction} from "../utils/contracts";
-import {isUndefined, isConstructor} from "../utils/checks";
-import {toLength} from "../utils/native";
-import {createDataProperty} from "../utils/helpers";
+import { UNDEFINED } from "../types/primitive-type";
+import { assertIsFunction } from "../utils/contracts";
+import { isUndefined, isConstructor } from "../utils/checks";
+import { toLength } from "../utils/native";
+import { createDataProperty } from "../utils/helpers";
 import iterate from "../iterators/";
 
 export default function ($target, env, factory) {
@@ -45,7 +45,7 @@ export default function ($target, env, factory) {
     while (!done) {
       try {
         let current;
-        ({done, value: current} = it.next());
+        ({ done, value: current } = it.next());
 
         if (!done) {
           let value = yield mapper(current.value || UNDEFINED, current.key);

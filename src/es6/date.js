@@ -1,5 +1,5 @@
-import {toPrimitiveOrdinary, toString} from "../utils/native";
-import {assertIsObject} from "../utils/contracts";
+import { toPrimitiveOrdinary, toString } from "../utils/native";
+import { assertIsObject } from "../utils/contracts";
 
 export default function (globalObject, env, factory) {
   let dateClass = globalObject.getValue("Date");

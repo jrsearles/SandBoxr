@@ -1,4 +1,4 @@
-import {toPrimitive} from "../../utils/native";
+import { toPrimitive } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("parse", factory.createBuiltInFunction(function* (value) {

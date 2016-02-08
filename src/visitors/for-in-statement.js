@@ -1,6 +1,6 @@
-import {toBoolean} from "../utils/native";
-import {isNullOrUndefined} from "../utils/checks";
-import {declare} from "../utils/assign";
+import { toBoolean } from "../utils/native";
+import { isNullOrUndefined } from "../utils/checks";
+import { declare } from "../utils/assign";
 
 export default function* ForInStatement (node, context, next) {
   let obj = (yield next(node.right, context)).result.getValue();

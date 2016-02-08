@@ -1,7 +1,7 @@
-import {UNDEFINED} from "../../types/primitive-type";
-import {isUndefined} from "../../utils/checks";
-import {toString} from "../../utils/native";
-import {getNativeType as getType} from "../../utils/helpers";
+import { UNDEFINED } from "../../types/primitive-type";
+import { isUndefined } from "../../utils/checks";
+import { toString } from "../../utils/native";
+import { getNativeType as getType } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   function createReviver (reviver) {
@@ -48,7 +48,7 @@ export default function ($target, env, factory) {
           if (value.hasOwnProperty(prop)) {
             propValue = yield reviver(obj, prop, yield deserialize(value[prop], reviver));
             if (!isUndefined(propValue)) {
-              obj.defineProperty(prop, {value: propValue, configurable: true, enumerable: true, writable: true});
+              obj.defineProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
             }
           }
         }

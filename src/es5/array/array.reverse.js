@@ -1,4 +1,4 @@
-import {toLength} from "../../utils/native";
+import { toLength } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("reverse", factory.createBuiltInFunction(function* () {

@@ -1,10 +1,10 @@
-import {map} from "../utils/async";
+import { map } from "../utils/async";
 
 let templateObjectCache = Object.create(null);
 
 function buildTemplateObject (env, node) {
   // per spec, template objects are cached
-  let key = JSON.stringify(node.quasis.map(q => { return {cooked: q.value.cooked, raw: q.value.raw}; }));
+  let key = JSON.stringify(node.quasis.map(q => { return { cooked: q.value.cooked, raw: q.value.raw }; }));
   if (key in templateObjectCache) {
     return templateObjectCache[key];
   }
@@ -20,7 +20,7 @@ function buildTemplateObject (env, node) {
   }
 
   raw.freeze();
-  tag.defineProperty("raw", {value: raw});
+  tag.defineProperty("raw", { value: raw });
   tag.freeze();
 
   return templateObjectCache[key] = tag;

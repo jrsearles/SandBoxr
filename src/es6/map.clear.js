@@ -1,4 +1,4 @@
-import {assertIsMap} from "../utils/contracts";
+import { assertIsMap } from "../utils/contracts";
 
 export default function ($target, env, factory) {
   $target.define("clear", factory.createBuiltInFunction(function () {

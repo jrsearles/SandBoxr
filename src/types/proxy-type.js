@@ -1,11 +1,11 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
-import {UNDEFINED} from "./primitive-type";
-import {isUndefined, isObject, isNull} from "../utils/checks";
-import {assertIsFunction} from "../utils/contracts";
-import {exhaust as x} from "../utils/async";
-import {toBoolean, toArray} from "../utils/native";
-import {PropertyDescriptor} from "./property-descriptor";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
+import { UNDEFINED } from "./primitive-type";
+import { isUndefined, isObject, isNull } from "../utils/checks";
+import { assertIsFunction } from "../utils/contracts";
+import { exhaust as x } from "../utils/async";
+import { toBoolean, toArray } from "../utils/native";
+import { PropertyDescriptor } from "./property-descriptor";
 
 const envSymbol = Symbol.for("env");
 
@@ -166,7 +166,7 @@ ProxyType.prototype.getProperty = function (key, target) {
 
   // special case for function types
   if (this.type === "function" && (key === "call" || key === "apply")) {
-    return new PropertyDescriptor(this, {value: toCall(this, key)}, key);
+    return new PropertyDescriptor(this, { value: toCall(this, key) }, key);
   }
 
   let proxyMethod = getProxyMethod(this, "get");
@@ -188,7 +188,7 @@ ProxyType.prototype.getProperty = function (key, target) {
     }
   }
 
-  return new PropertyDescriptor(this, {value}, key);
+  return new PropertyDescriptor(this, { value }, key);
 };
 
 ProxyType.prototype.getOwnProperty = function (key) {
@@ -234,9 +234,9 @@ ProxyType.prototype.getOwnProperty = function (key) {
 
   let proxyDescriptor;
   if (getter || setter) {
-    proxyDescriptor = {getter, setter, get: undefined, set: undefined, enumerable, configurable};
+    proxyDescriptor = { getter, setter, get: undefined, set: undefined, enumerable, configurable };
   } else {
-    proxyDescriptor = {value, enumerable, configurable, writable};
+    proxyDescriptor = { value, enumerable, configurable, writable };
   }
 
   if (hasDescriptor && !propInfo.canUpdate(proxyDescriptor)) {

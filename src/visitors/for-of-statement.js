@@ -1,5 +1,5 @@
-import {isNullOrUndefined} from "../utils/checks";
-import {declare} from "../utils/assign";
+import { isNullOrUndefined } from "../utils/checks";
+import { declare } from "../utils/assign";
 import iterate from "../iterators/";
 
 export default function* ForOfStatement (node, context, next) {
@@ -20,7 +20,7 @@ export default function* ForOfStatement (node, context, next) {
     let scope = loopContext.env.createBlockScope(node);
     let current;
     
-    ({done, value: current} = it.next());
+    ({ done, value: current } = it.next());
     
     if (!done) {
       yield declare(loopContext.env, node.left, current.value);

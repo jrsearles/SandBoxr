@@ -1,5 +1,5 @@
-import {assertIsNotGeneric} from "../../utils/contracts";
-import {toPrimitive} from "../../utils/native";
+import { assertIsNotGeneric } from "../../utils/contracts";
+import { toPrimitive } from "../../utils/native";
 
 export default function ($target, env, factory) {
   $target.define("toString", factory.createBuiltInFunction(function* (radix) {

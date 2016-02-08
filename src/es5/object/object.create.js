@@ -1,5 +1,5 @@
-import {toString} from "../../utils/native";
-import {defineProperty} from "./object-helpers";
+import { toString } from "../../utils/native";
+import { defineProperty } from "./object-helpers";
 
 export default function ($target, env, factory) {
   $target.define("create", factory.createBuiltInFunction(function* (parent, descriptors) {

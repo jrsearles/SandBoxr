@@ -1,8 +1,8 @@
-import {toLength, toObject} from "../../utils/native";
-import {assertIsFunction, assertIsNotNullOrUndefined} from "../../utils/contracts";
+import { toLength, toObject } from "../../utils/native";
+import { assertIsFunction, assertIsNotNullOrUndefined } from "../../utils/contracts";
 import iterate from "../../iterators/";
-import {executeCallback} from "./array-helpers";
-import {createDataProperty} from "../../utils/helpers";
+import { executeCallback } from "./array-helpers";
+import { createDataProperty } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("map", factory.createBuiltInFunction(function* (callback, thisArg) {

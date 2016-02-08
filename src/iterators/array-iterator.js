@@ -15,7 +15,7 @@ function* yieldIndex (source, key) {
   let prop = source.getProperty(key);
   if (prop) {
     let value = prop.getValue();
-    yield {value, key};
+    yield { value, key };
   }
 }
 

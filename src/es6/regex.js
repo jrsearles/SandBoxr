@@ -1,7 +1,7 @@
-import {exhaust as x} from "../utils/async";
-import {UNDEFINED, NULL} from "../types/primitive-type";
-import {toString, toUInt32, toBoolean} from "../utils/native";
-import {isFunction, isUndefined} from "../utils/checks";
+import { exhaust as x } from "../utils/async";
+import { UNDEFINED, NULL } from "../types/primitive-type";
+import { toString, toUInt32, toBoolean } from "../utils/native";
+import { isFunction, isUndefined } from "../utils/checks";
 
 export default function (globalObject, env, factory) {
   let regexClass = globalObject.getValue("RegExp");
@@ -97,5 +97,5 @@ export default function (globalObject, env, factory) {
     return factory.createPrimitive(thisFlags); 
   };
   
-  proto.defineProperty("flags", {configurable: true, get: factory.createGetter(flagsGetter, "flags"), getter: flagsGetter});
+  proto.defineProperty("flags", { configurable: true, get: factory.createGetter(flagsGetter, "flags"), getter: flagsGetter });
 }

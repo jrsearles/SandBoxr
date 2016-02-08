@@ -1,4 +1,4 @@
-import {toBoolean} from "../utils/native";
+import { toBoolean } from "../utils/native";
 
 export default function* LogicalExpression (node, context, next) {
   let left = yield next(node.left, context);

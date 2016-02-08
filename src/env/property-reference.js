@@ -1,6 +1,6 @@
-import {inherits} from "util";
-import {Reference} from "./reference";
-import {UNDEFINED} from "../types/primitive-type";
+import { inherits } from "util";
+import { Reference } from "./reference";
+import { UNDEFINED } from "../types/primitive-type";
 
 /**
  * An object which represents a reference to an object's property.

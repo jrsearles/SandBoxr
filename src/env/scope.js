@@ -1,7 +1,7 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {assertIsValidParameterName} from "../utils/contracts";
-import {declare} from "../utils/assign";
-import {createDataProperty} from "../utils/helpers";
+import { UNDEFINED } from "../types/primitive-type";
+import { assertIsValidParameterName } from "../utils/contracts";
+import { declare } from "../utils/assign";
+import { createDataProperty } from "../utils/helpers";
 
 export function Scope (env, scope) {
   env.globalScope = env.globalScope || this;
@@ -63,7 +63,7 @@ Scope.prototype = {
         kind = "function";
         
         let strictFunc = strict || decl.isStrict(); 
-        value = env.objectFactory.createFunction(decl, undefined, {strict: strictFunc, name: key});
+        value = env.objectFactory.createFunction(decl, undefined, { strict: strictFunc, name: key });
         // value.bindScope(this);
       } else if (decl.isClass()) {
         kind = "class";
@@ -140,7 +140,7 @@ Scope.prototype = {
     }
 
     // todo: this method is getting far too complex
-    let {env, scope} = this;
+    let { env, scope } = this;
     let strictCallee = callee.node.isStrict();
     let strict = strictCallee || env.isStrict();
 

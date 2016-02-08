@@ -1,12 +1,12 @@
-import {toString} from "../../utils/native";
-import {isNullOrUndefined} from "../../utils/checks";
+import { toString } from "../../utils/native";
+import { isNullOrUndefined } from "../../utils/checks";
 
 import $toString from "./error.to-string";
 
 const errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
 export default function errorApi (env) {
-  const {global: globalObject, objectFactory} = env;
+  const { global: globalObject, objectFactory } = env;
 
   let proto = objectFactory.createObject();
   proto.className = "Error";
@@ -20,7 +20,7 @@ export default function errorApi (env) {
     }
 
     return objectFactory.create("Error", new Error(messageString));
-  }, proto, {configurable: false, enumerable: false, writable: false, name: "Error"});
+  }, proto, { configurable: false, enumerable: false, writable: false, name: "Error" });
 
   $toString(proto, env, objectFactory);
   globalObject.define("Error", errorClass);
@@ -36,7 +36,7 @@ export default function errorApi (env) {
       let messageString = yield toString(message);
       let nativeError = new global[errorType](messageString);
       return objectFactory.create(errorType, nativeError);
-    }, typeProto, {configurable: false, enumerable: false, writable: false, name: errorType});
+    }, typeProto, { configurable: false, enumerable: false, writable: false, name: errorType });
 
     globalObject.define(errorType, errClass);
   });

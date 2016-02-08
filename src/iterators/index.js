@@ -2,10 +2,10 @@ import StringIterator from "./string-iterator";
 import SparseIterator from "./sparse-iterator";
 import ArrayIterator from "./array-iterator";
 import IterableIterator from "./iterable-iterator";
-import {SymbolType} from "../types/symbol-type";
-import {toLength} from "../utils/native";
-import {exhaust as x} from "../utils/async";
-import {isNullOrUndefined} from "../utils/checks";
+import { SymbolType } from "../types/symbol-type";
+import { toLength } from "../utils/native";
+import { exhaust as x } from "../utils/async";
+import { isNullOrUndefined } from "../utils/checks";
 
 const SPARE_ARRAY_DENSITY = 0.8;
 

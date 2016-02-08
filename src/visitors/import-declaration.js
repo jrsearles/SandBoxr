@@ -1,4 +1,4 @@
-import {declare} from "../utils/assign";
+import { declare } from "../utils/assign";
 
 export default function* ImportDeclaration (node, context, next) {
   let moduleName = node.source.value;
@@ -16,7 +16,7 @@ export default function* ImportDeclaration (node, context, next) {
   });
   
   for (let specifier of node.specifiers) {
-    let {imported, local} = specifier;
+    let { imported, local } = specifier;
     let value = source;
     
     if (!specifier.isImportNamespaceSpecifier()) {

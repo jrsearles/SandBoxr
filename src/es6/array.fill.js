@@ -1,7 +1,7 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {toObject, toLength, toInteger} from "../utils/native";
-import {isUndefined} from "../utils/checks";
-import {normalizeIndex} from "./array-helpers";
+import { UNDEFINED } from "../types/primitive-type";
+import { toObject, toLength, toInteger } from "../utils/native";
+import { isUndefined } from "../utils/checks";
+import { normalizeIndex } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("fill", factory.createBuiltInFunction(function* (value, start, end) {

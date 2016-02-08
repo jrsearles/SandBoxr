@@ -1,4 +1,4 @@
-import {UNDEFINED} from "../types/primitive-type";
+import { UNDEFINED } from "../types/primitive-type";
 
 export default function* ReturnStatement (node, context, next) {
   let arg = UNDEFINED;

@@ -1,4 +1,4 @@
-import {toBoolean} from "../utils/native";
+import { toBoolean } from "../utils/native";
 
 export default function* IfStatement (node, context, next) {
   let testValue = (yield next(node.test, context)).result.getValue();

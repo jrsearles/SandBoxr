@@ -1,6 +1,6 @@
-import {assertIsObject} from "../../utils/contracts";
-import {toPropertyKey} from "../../utils/native";
-import {defineProperty} from "./object-helpers";
+import { assertIsObject } from "../../utils/contracts";
+import { toPropertyKey } from "../../utils/native";
+import { defineProperty } from "./object-helpers";
 
 export default function ($target, env, factory) {
   $target.define("defineProperty", factory.createBuiltInFunction(function* (obj, propertyKey, descriptor) {

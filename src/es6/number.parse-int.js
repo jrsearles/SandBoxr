@@ -1,4 +1,4 @@
-import {toPrimitive} from "../utils/native";
+import { toPrimitive } from "../utils/native";
 
 export default function (target, env, factory) {
   target.define("parseInt", factory.createBuiltInFunction(function* (value, radix) {

@@ -1,6 +1,6 @@
-import {assertIsNotNullOrUndefined} from "../utils/contracts";
-import {isUndefined} from "../utils/checks";
-import {toString} from "../utils/native";
+import { assertIsNotNullOrUndefined } from "../utils/contracts";
+import { isUndefined } from "../utils/checks";
+import { toString } from "../utils/native";
 
 export default function (target, env, factory) {
   target.define("normalize", factory.createBuiltInFunction(function* (form) {

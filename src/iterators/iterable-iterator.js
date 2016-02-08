@@ -1,7 +1,7 @@
-import {toBoolean} from "../utils/native";
-import {exhaust as x} from "../utils/async";
-import {UNDEFINED} from "../types/primitive-type";
-import {getMethod} from "../utils/helpers";
+import { toBoolean } from "../utils/native";
+import { exhaust as x } from "../utils/async";
+import { UNDEFINED } from "../types/primitive-type";
+import { getMethod } from "../utils/helpers";
 
 export default function IterableIterator (it) {
   this.currentIndex = 0;
@@ -18,7 +18,7 @@ IterableIterator.prototype = {
 
   next () {
     let result = x(this.advancer.call(this.iterator));
-    let value = {key: this.currentIndex++, value: UNDEFINED};
+    let value = { key: this.currentIndex++, value: UNDEFINED };
 
     let done = toBoolean(result.getValue("done"));
     let valueProperty = result.getProperty("value");
@@ -26,7 +26,7 @@ IterableIterator.prototype = {
       value.value = valueProperty.getValue();
     }
 
-    return {done, value};
+    return { done, value };
   },
 
   *each (func) {
@@ -35,7 +35,7 @@ IterableIterator.prototype = {
     while (!done) {
       try {
         let current;
-        ({done, value: current} = this.next());
+        ({ done, value: current } = this.next());
 
         if (!done) {
           yield func(current.value || UNDEFINED);

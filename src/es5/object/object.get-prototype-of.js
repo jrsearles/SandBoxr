@@ -1,6 +1,6 @@
-import {toObject} from "../../utils/native";
-import {NULL} from "../../types/primitive-type";
-import {confirmObject} from "./object-helpers";
+import { toObject } from "../../utils/native";
+import { NULL } from "../../types/primitive-type";
+import { confirmObject } from "./object-helpers";
 
 export default function ($target, env, factory) {
   $target.define("getPrototypeOf", factory.createBuiltInFunction(function (obj) {

@@ -1,5 +1,5 @@
-import {toLength, toInteger} from "../../utils/native";
-import {createDataProperty} from "../../utils/helpers";
+import { toLength, toInteger } from "../../utils/native";
+import { createDataProperty } from "../../utils/helpers";
 
 export default function ($target, env, factory) {
   $target.define("splice", factory.createBuiltInFunction(function* (start, deleteCount, ...elements) {

@@ -1,6 +1,6 @@
-import {isUndefined} from "../utils/checks";
-import {toInteger, toObject, toLength} from "../utils/native";
-import {normalizeIndex} from "./array-helpers";
+import { isUndefined } from "../utils/checks";
+import { toInteger, toObject, toLength } from "../utils/native";
+import { normalizeIndex } from "./array-helpers";
 
 export default function ($target, env, factory) {
   $target.define("copyWithin", factory.createBuiltInFunction(function* (target, start, end) {

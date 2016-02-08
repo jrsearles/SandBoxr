@@ -1,6 +1,6 @@
-import {UNDEFINED} from "../types/primitive-type";
-import {exhaust as x} from "../utils/async";
-import {toLength, toObject} from "../utils/native";
+import { UNDEFINED } from "../types/primitive-type";
+import { exhaust as x } from "../utils/async";
+import { toLength, toObject } from "../utils/native";
 
 export default function ($target, env, factory) {
   let iteratorProto = factory.createObject();
@@ -13,7 +13,7 @@ export default function ($target, env, factory) {
       return result.value;
     }
 
-    return factory.createIteratorResult({done: result.done});
+    return factory.createIteratorResult({ done: result.done });
   }, 0, "ArrayIterator.prototype.next"));
 
   function createIteratorValue (arr, index, kind) {
@@ -53,7 +53,7 @@ export default function ($target, env, factory) {
         value = createIteratorValue(arr, index, kind);
       }
 
-      yield factory.createIteratorResult({value, done});
+      yield factory.createIteratorResult({ value, done });
       index++;
     }
   }
@@ -71,7 +71,7 @@ export default function ($target, env, factory) {
   }, 0, "Array.prototype.entries"));
 
   let stringTagKey = env.getSymbol("toStringTag");
-  iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), {writable: false});
+  iteratorProto.define(stringTagKey, factory.createPrimitive("Array Iterator"), { writable: false });
 
   let iteratorFunc = factory.createBuiltInFunction(function () {
     let arr = toObject(this.object, true);

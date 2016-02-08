@@ -1,7 +1,7 @@
-import {toBoolean} from "../../utils/native";
-import {isObject, isUndefined} from "../../utils/checks";
-import {SymbolType} from "../../types/symbol-type";
-import {UNDEFINED} from "../../types/primitive-type";
+import { toBoolean } from "../../utils/native";
+import { isObject, isUndefined } from "../../utils/checks";
+import { SymbolType } from "../../types/symbol-type";
+import { UNDEFINED } from "../../types/primitive-type";
 
 export function getStartIndex (index, length) {
   if (index < 0) {

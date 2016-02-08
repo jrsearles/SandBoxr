@@ -1,5 +1,5 @@
-import {assertIsObject} from "../utils/contracts";
-import {NULL} from "../types/primitive-type";
+import { assertIsObject } from "../utils/contracts";
+import { NULL } from "../types/primitive-type";
 
 export default function ($target, env, factory) {
   $target.define("setPrototypeOf", factory.createBuiltInFunction(function (target, proto) {

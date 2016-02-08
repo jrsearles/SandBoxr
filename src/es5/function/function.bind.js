@@ -1,6 +1,6 @@
-import {defineThis} from "./function-helpers";
-import {toString, toInteger} from "../../utils/native";
-import {isUndefined} from "../../utils/checks";
+import { defineThis } from "./function-helpers";
+import { toString, toInteger } from "../../utils/native";
+import { isUndefined } from "../../utils/checks";
 
 export default function ($target, env, factory) {
   $target.define("bind", factory.createBuiltInFunction(function* (thisArg, ...args) {
@@ -28,7 +28,7 @@ export default function ($target, env, factory) {
     let nameValue = fn.getValue("name");
     let name = isUndefined(nameValue) ? "" : yield toString(nameValue);
 
-    let boundFunc = factory.createFunction(nativeFunc, null, {name: `bound ${name}`});
+    let boundFunc = factory.createFunction(nativeFunc, null, { name: `bound ${name}` });
     boundFunc.canConstruct = fn.canConstruct;
     boundFunc.bindScope(this.env.current);
     boundFunc.bindThis(thisArg);

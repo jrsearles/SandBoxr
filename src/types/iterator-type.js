@@ -1,5 +1,5 @@
-import {inherits} from "util";
-import {ObjectType} from "./object-type";
+import { inherits } from "util";
+import { ObjectType } from "./object-type";
 
 export function IteratorType (iterable, kind = "key+value") {
   ObjectType.call(this);
@@ -27,7 +27,7 @@ IteratorType.prototype.init = function (env, proto) {
         return result.value;
       }
       
-      return factory.createIteratorResult({done: true});
+      return factory.createIteratorResult({ done: true });
     }));
   }
 

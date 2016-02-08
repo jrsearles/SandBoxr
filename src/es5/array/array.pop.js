@@ -1,5 +1,5 @@
-import {toLength} from "../../utils/native";
-import {UNDEFINED} from "../../types/primitive-type";
+import { toLength } from "../../utils/native";
+import { UNDEFINED } from "../../types/primitive-type";
 
 export default function ($target, env, factory) {
   $target.define("pop", factory.createBuiltInFunction(function* () {

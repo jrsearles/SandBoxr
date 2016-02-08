@@ -1,6 +1,6 @@
-import {Reference} from "./reference";
-import {PropertyDescriptor} from "../types/property-descriptor";
-import {UNDEFINED} from "../types/primitive-type";
+import { Reference } from "./reference";
+import { PropertyDescriptor } from "../types/property-descriptor";
+import { UNDEFINED } from "../types/primitive-type";
 
 export function DeclarativeEnvironment (parent, thisArg, env, strict, block) {
   this.properties = Object.create(null);
@@ -17,7 +17,7 @@ DeclarativeEnvironment.prototype = {
   constructor: DeclarativeEnvironment,
   
   createChildScope () {
-    return new DeclarativeEnvironment({scope: this}, this.thisBinding, this.env, this.strict, true);
+    return new DeclarativeEnvironment({ scope: this }, this.thisBinding, this.env, this.strict, true);
   },
 
   setParent (parent) {
@@ -55,12 +55,12 @@ DeclarativeEnvironment.prototype = {
     return true;
   },
 
-  createVariable (key, {configurable = false, writable = true, initialized = true} = {}) {
+  createVariable (key, { configurable = false, writable = true, initialized = true } = {}) {
     if (this.has(key)) {
       return this.properties[key];
     }
 
-    return this.properties[key] = new PropertyDescriptor(this, {value: undefined, enumerable: true, configurable, writable, initialized}, key);
+    return this.properties[key] = new PropertyDescriptor(this, { value: undefined, enumerable: true, configurable, writable, initialized }, key);
   },
 
   setValue (key, value, throwOnError) {

@@ -1,4 +1,4 @@
-import {assertIsValidArrayLength} from "../../utils/contracts";
+import { assertIsValidArrayLength } from "../../utils/contracts";
 
 import $isArray from "./array.is-array";
 import $concat from "./array.concat";
@@ -24,11 +24,11 @@ import $toString from "./array.to-string";
 import $unshift from "./array.unshift";
 
 export default function (env) {
-  const {global: globalObject, objectFactory} = env;
+  const { global: globalObject, objectFactory } = env;
 
   let proto = objectFactory.createObject();
   proto.className = "Array";
-  proto.define("length", objectFactory.createPrimitive(0), {configurable: false, enumerable: false, writable: true});
+  proto.define("length", objectFactory.createPrimitive(0), { configurable: false, enumerable: false, writable: true });
 
   let arrayClass = objectFactory.createFunction(function (length) {
     if (arguments.length === 1 && length.type === "number") {
@@ -40,7 +40,7 @@ export default function (env) {
     }
 
     return objectFactory.createArray(arguments);
-  }, proto, {configurable: false, enumerable: false, writable: false, name: "Array"});
+  }, proto, { configurable: false, enumerable: false, writable: false, name: "Array" });
 
   $isArray(arrayClass, env, objectFactory);
   $push(proto, env, objectFactory);

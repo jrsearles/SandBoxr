@@ -1,4 +1,4 @@
-import {UNDEFINED} from "../types/primitive-type";
+import { UNDEFINED } from "../types/primitive-type";
 
 export function normalizeIndex (index, length) {
   if (index < 0) {

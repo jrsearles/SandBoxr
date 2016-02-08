@@ -14,7 +14,7 @@ export default function* ArrayExpression (node, context, next) {
         
         if (element.isSpreadElement()) {
           let it = iterate.getIterator(value);
-          for ({value} of it) {
+          for ({ value } of it) {
             arr.setIndex(i + spreadOffset, value);
             spreadOffset++;
           }
