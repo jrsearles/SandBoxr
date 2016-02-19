@@ -1,4 +1,4 @@
-import { codePointAt } from "core-js/library/fn/string/virtual";
+import { default as codePointAt } from "babel-runtime/core-js/string/code-point-at";
 import { UNDEFINED } from "../types/primitive-type";
 import { toInteger, toString } from "../utils/native";
 import { assertIsNotNullOrUndefined } from "../utils/contracts";
@@ -13,6 +13,6 @@ export default function (target, env, factory) {
       return UNDEFINED;
     }
 
-    return factory.createPrimitive(codePointAt.call(stringValue, position));
+    return factory.createPrimitive(codePointAt(stringValue, position));
   }, 1, "String.prototype.codePointAt"));
 }

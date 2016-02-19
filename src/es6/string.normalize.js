@@ -17,6 +17,7 @@ export default function (target, env, factory) {
       }
     }
 
+    // todo: add polyfill for normalize (https://github.com/walling/unorm/)
     return factory.createPrimitive(stringValue.normalize(formValue));
   }, 0, "String.prototype.normalize"));
 }

@@ -16,7 +16,7 @@ export function DateType (value) {
 
 inherits(DateType, ObjectType);
 
-DateType.prototype.Native = function () {
+DateType.prototype.toNative = function () {
   return this.value;
 };
 

@@ -44,18 +44,6 @@ export default function* CallExpression (node, context, next) {
       args.push(value);
     }
   }
-  
-  // for (let arg of node.arguments) {
-  //   let value = (yield next(arg, context)).result.getValue();
-  //   if (arg.isSpreadElement()) {
-  //     let it = iterate.getIterator(value);
-  //     for ({value} of it) {
-  //       args.push(value);
-  //     }
-  //   } else {
-  //     args.push(value);
-  //   }
-  // }
 
   if (!fn || fn.className !== "Function") {
     let stringValue = yield toString(fn);

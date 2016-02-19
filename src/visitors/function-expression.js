@@ -26,7 +26,7 @@ function* getName (node, context, next) {
       let computedKey = yield next(parent.key, context);
       key = yield toPropertyKey(computedKey.result.getValue());
       
-      if (typeof key === "object" && key.isSymbol) {
+      if (typeof key !== "string" && key.isSymbol) {
         key = key.toSymbolString();
       }
     } else {
@@ -117,7 +117,7 @@ export function* ClassDeclaration (node, context, next) {
       key = yield toPropertyKey(computedKey.result.getValue());
     }
     
-    let name = typeof key === "object" && key.isSymbol ? key.toSymbolString() : key;
+    let name = typeof key !== "string" && key.isSymbol ? key.toSymbolString() : key;
     let entry;
     
     switch (kind) {

@@ -90,9 +90,6 @@ export default function* ObjectExpression (node, context, next) {
   // });
 
   descriptors.forEach(desc => setDescriptor(context.env, obj, desc));
-  // for (let prop in descriptors) {
-  //   setDescriptor(context.env, obj, descriptors[prop]);
-  // }
 
   return context.result(obj);
 }

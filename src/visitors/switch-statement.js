@@ -1,5 +1,3 @@
-// import {each} from "../utils/async";
-
 function* executeStatements (context, statements, next) {
   let result;
   
@@ -9,13 +7,6 @@ function* executeStatements (context, statements, next) {
       break;
     }
   }
-
-  // yield each(statements, function* (statement, i, all, abort) {
-  //   result = yield next(statement, context, next);
-  //   if (result && result.isAbrupt()) {
-  //     abort();
-  //   }
-  // });
 
   return result;
 }

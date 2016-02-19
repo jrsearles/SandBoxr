@@ -1,5 +1,5 @@
-import {Environment} from "./src/env";
-import {Sandbox} from "./src";
+import { Environment } from "./src/env";
+import { Sandbox } from "./src";
 
 export const version = "0.15.2";
 
