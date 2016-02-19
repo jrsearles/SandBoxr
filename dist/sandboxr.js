@@ -24354,10 +24354,6 @@ var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.FunctionExpression = FunctionExpression;
 exports.ClassDeclaration = ClassDeclaration;
 
@@ -24437,7 +24433,7 @@ function getName(node, context, next) {
           key = _context.sent;
 
 
-          if ((typeof key === "undefined" ? "undefined" : (0, _typeof3.default)(key)) === "object" && key.isSymbol) {
+          if (typeof key !== "string" && key.isSymbol) {
             key = key.toSymbolString();
           }
           _context.next = 26;
@@ -24652,7 +24648,7 @@ function ClassDeclaration(node, context, next) {
           _key = _context6.sent;
 
         case 32:
-          _name = (typeof _key === "undefined" ? "undefined" : (0, _typeof3.default)(_key)) === "object" && _key.isSymbol ? _key.toSymbolString() : _key;
+          _name = typeof _key !== "string" && _key.isSymbol ? _key.toSymbolString() : _key;
           entry = undefined;
           _context6.t0 = kind;
           _context6.next = _context6.t0 === "constructor" ? 37 : _context6.t0 === "get" ? 39 : _context6.t0 === "set" ? 39 : 42;
@@ -24761,7 +24757,7 @@ function ClassDeclaration(node, context, next) {
   }, _marked[2], this);
 }
 
-},{"../types/primitive-type":368,"../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],396:[function(require,module,exports){
+},{"../types/primitive-type":368,"../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],396:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25572,9 +25568,6 @@ function ObjectExpression(node, context, next) {
           descriptors.forEach(function (desc) {
             return setDescriptor(context.env, obj, desc);
           });
-          // for (let prop in descriptors) {
-          //   setDescriptor(context.env, obj, descriptors[prop]);
-          // }
 
           return _context3.abrupt("return", context.result(obj));
 
@@ -25780,8 +25773,6 @@ exports.default = SwitchStatement;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var _marked = [executeStatements, SwitchStatement].map(_regenerator2.default.mark);
-
-// import {each} from "../utils/async";
 
 function executeStatements(context, statements, next) {
   var result, i, ln;
