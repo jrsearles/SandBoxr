@@ -13,20 +13,6 @@ var header = require("gulp-header");
 
 require("./tasks/test262");
 
-// import browserify from "browserify";
-// import babelify from "babelify";
-// import gulp from "gulp";
-// import source from "vinyl-source-stream";
-// import buffer from "vinyl-buffer";
-// import eslint from "gulp-eslint";
-// import mocha from "gulp-mocha";
-// import uglify from "gulp-uglify";
-// import rename from "gulp-rename";
-// // import header from "gulp-header";
-// // import sourcemaps from "gulp-sourcemaps";
-// import gutil from "gulp-util";
-// import "./tasks/test262";
-
 var banner = [
   "/**",
   " * SandBoxr JavaScript library v<%= pkg.version %>",
@@ -36,9 +22,11 @@ var banner = [
   "", ""
 ].join("\n");
 
-gulp.task("test", function () {
+gulp.task("test", ["build"], function () {
+  require("babel-core/register");
+  
   return gulp.src("./test/**/*.js")
-		.pipe(mocha({ compilers: ["js:babel-core/register"] }));
+		.pipe(mocha());
 });
 
 gulp.task("lint", function () {
@@ -63,14 +51,12 @@ gulp.task("build", function () {
 	.pipe(gulp.dest("./dist"));
 });
 
-gulp.task("min", function () {
+gulp.task("release", ["build"], function () {
   return gulp.src("./dist/sandboxr.js")
     .pipe(rename("sandboxr.min.js"))
     .pipe(uglify({ preserveComments: "license" }))
     .pipe(gulp.dest("./dist/"));
 });
-
-// gulp.task("release", ["test262", "build"]);
 
 gulp.task("watch", function () {
   gulp.watch(["./src/**/*", "./test/**/*.js"], ["lint", "test"]);

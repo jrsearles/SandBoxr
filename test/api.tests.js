@@ -1,207 +1,207 @@
-import {expect} from "chai";
+import { expect } from "chai";
 import * as parser from "./ast-parser";
-import * as SandBoxr from "../index";
+import * as SandBoxr from "../dist/sandboxr";
 
 describe("API", () => {
-	it("should allow a variable to be defined", () => {
-		let env = SandBoxr.createEnvironment();
-		env.init();
+  it("should allow a variable to be defined", () => {
+    let env = SandBoxr.createEnvironment();
+    env.init();
 
-		let a = env.createVariable("a");
-		a.setValue(env.objectFactory.createPrimitive(99));
+    let a = env.createVariable("a");
+    a.setValue(env.objectFactory.createPrimitive(99));
 
-		let ast = parser.parse("a === 99;");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
-	});
+    let ast = parser.parse("a === 99;");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute(env);
 
-	it("should allow an object to be defined", () => {
-		let env = SandBoxr.createEnvironment();
-		env.init();
+    expect(result.value).to.be.true;
+  });
 
-		let obj = env.objectFactory.createObject();
-		obj.defineProperty("foo", {value: env.objectFactory.createPrimitive(99)});
+  it("should allow an object to be defined", () => {
+    let env = SandBoxr.createEnvironment();
+    env.init();
 
-		let a = env.createVariable("a");
-		a.setValue(obj);
+    let obj = env.objectFactory.createObject();
+    obj.defineProperty("foo", { value: env.objectFactory.createPrimitive(99) });
 
-		let ast = parser.parse("a.foo === 99;");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
-	});
+    let a = env.createVariable("a");
+    a.setValue(obj);
 
-	it("should allow function to be removed", () => {
-		let env = SandBoxr.createEnvironment();
-		env.init();
+    let ast = parser.parse("a.foo === 99;");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute(env);
 
-		env.getValue("String").getValue("prototype").remove("trim");
+    expect(result.value).to.be.true;
+  });
 
-		let ast = parser.parse("typeof String.prototype.trim === 'undefined';");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
-	});
+  it("should allow function to be removed", () => {
+    let env = SandBoxr.createEnvironment();
+    env.init();
 
-	it("should allow functions to be added", () => {
-		let env = SandBoxr.createEnvironment();
-		env.init();
+    env.getValue("String").getValue("prototype").remove("trim");
 
-		env.getValue("String").define("concat", env.objectFactory.createFunction(function () {
-			let stringValue = "";
-			for (let i = 0, ln = arguments.length; i < ln; i++) {
-				stringValue += arguments[i].value;
-			}
+    let ast = parser.parse("typeof String.prototype.trim === 'undefined';");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute(env);
 
-			return env.objectFactory.createPrimitive(stringValue);
-		}, null));
+    expect(result.value).to.be.true;
+  });
 
-		let ast = parser.parse("String.concat('foo','bar')==='foobar';");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
-	});
+  it("should allow functions to be added", () => {
+    let env = SandBoxr.createEnvironment();
+    env.init();
 
-	it("should keep variables and values if environment is reused", () => {
-		let env = SandBoxr.createEnvironment();
-		env.init();
+    env.getValue("String").define("concat", env.objectFactory.createFunction(function () {
+      let stringValue = "";
+      for (let i = 0, ln = arguments.length; i < ln; i++) {
+        stringValue += arguments[i].value;
+      }
 
-		let a = env.createVariable("a");
-		a.setValue(env.objectFactory.createPrimitive(99));
+      return env.objectFactory.createPrimitive(stringValue);
+    }, null));
 
-		let ast = parser.parse("a++;");
-		let sandbox = SandBoxr.create(ast);
+    let ast = parser.parse("String.concat('foo','bar')==='foobar';");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute(env);
 
-		sandbox.execute(env);
-			
-		ast = parser.parse("a===100;");
-		sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
-			
-		expect(result.value).to.be.true;
-	});
+    expect(result.value).to.be.true;
+  });
 
-	it("should lose variables and values if environment is reinitialized", () => {
-		let env = SandBoxr.createEnvironment();
-		env.init();
+  it("should keep variables and values if environment is reused", () => {
+    let env = SandBoxr.createEnvironment();
+    env.init();
 
-		let a = env.createVariable("a");
-		a.setValue(env.objectFactory.createPrimitive(99));
+    let a = env.createVariable("a");
+    a.setValue(env.objectFactory.createPrimitive(99));
 
-		let ast = parser.parse("a++;");
-		let sandbox = SandBoxr.create(ast);
-		sandbox.execute(env);
-		
-		env.init();
-		ast = parser.parse("typeof a === 'undefined';");
-		sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute(env);
-		
-		expect(result.value).to.be.true;
-	});
+    let ast = parser.parse("a++;");
+    let sandbox = SandBoxr.create(ast);
 
-	it("should allow an object to be converted to a native object", () => {
-		let ast = parser.parse("({foo:true});");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute();
-		
-		expect(result.toNative().foo).to.be.true;
-	});
+    sandbox.execute(env);
+      
+    ast = parser.parse("a===100;");
+    sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute(env);
+      
+    expect(result.value).to.be.true;
+  });
 
-	it("should allow a primitive to be toNativeped", () => {
-		let ast = parser.parse("(1);");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute();
-		
-		expect(result.toNative()).to.equal(1);
-	});
+  it("should lose variables and values if environment is reinitialized", () => {
+    let env = SandBoxr.createEnvironment();
+    env.init();
 
-	it("should allow an array to be toNativeped", () => {
-		let ast = parser.parse("([1,2,3]);");
-		let sandbox = SandBoxr.create(ast);
-		let result = sandbox.execute();
-		
-		expect(result.toNative()[2]).to.equal(3);
-	});
+    let a = env.createVariable("a");
+    a.setValue(env.objectFactory.createPrimitive(99));
 
-	describe("Exclusions", () => {
-		it("should be able to exclude api's", () => {
-			let ast = parser.parse("typeof JSON === 'undefined'");
-			let sandbox = SandBoxr.create(ast, {exclude: ["JSON"]});
-			let result = sandbox.execute();
-			
-			expect(result.value).to.be.true;
-		});
+    let ast = parser.parse("a++;");
+    let sandbox = SandBoxr.create(ast);
+    sandbox.execute(env);
 
-		it("should be able to exclude methods from prototype", () => {
-			let ast = parser.parse("typeof String.prototype.trim === 'undefined'");
-			let sandbox = SandBoxr.create(ast, {exclude: ["String.prototype.trim"]});
-			let result = sandbox.execute();
-			
-			expect(result.value).to.be.true;
-		});
+    env.init();
+    ast = parser.parse("typeof a === 'undefined';");
+    sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute(env);
 
-		it("should not throw if api does not exist", () => {
-			let ast = parser.parse("(1)");
-			SandBoxr.create(ast, {exclude: "String.foo.bar"});
-		});
-	});
+    expect(result.value).to.be.true;
+  });
 
-	describe("Operators", () => {
-		it("should be able to replace an operators", () => {
-			let env = SandBoxr.createEnvironment();
-			env.init({
-				operators: {
-					coerciveEquals (a, b) {
-						if (a.isPrimitive && b.isPrimitive) {
-							return a.value === b.value;
-						}
+  it("should allow an object to be converted to a native object", () => {
+    let ast = parser.parse("({foo:true});");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute();
 
-						if (a.isPrimitive || b.isPrimitive) {
-							return false;
-						}
+    expect(result.toNative().foo).to.be.true;
+  });
 
-						return a === b;
-					}
-				}
-			});
+  it("should allow a primitive to be toNativeped", () => {
+    let ast = parser.parse("(1);");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute();
 
-			let ast = parser.parse("0 == '0'");
-			let sandbox = SandBoxr.create(ast);
+    expect(result.toNative()).to.equal(1);
+  });
 
-			let result = sandbox.execute(env);
-			expect(result.value).to.be.false;
+  it("should allow an array to be toNativeped", () => {
+    let ast = parser.parse("([1,2,3]);");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute();
 
-			ast = parser.parse("0 != '0'");
-			sandbox = SandBoxr.create(ast);
+    expect(result.toNative()[2]).to.equal(3);
+  });
 
-			result = sandbox.execute(env);
-			expect(result.value).to.be.true;	
-		});
-	});
+  describe("Exclusions", () => {
+    it("should be able to exclude api's", () => {
+      let ast = parser.parse("typeof JSON === 'undefined'");
+      let sandbox = SandBoxr.create(ast, { exclude: ["JSON"]});
+      let result = sandbox.execute();
+
+      expect(result.value).to.be.true;
+    });
+
+    it("should be able to exclude methods from prototype", () => {
+      let ast = parser.parse("typeof String.prototype.trim === 'undefined'");
+      let sandbox = SandBoxr.create(ast, { exclude: ["String.prototype.trim"]});
+      let result = sandbox.execute();
+
+      expect(result.value).to.be.true;
+    });
+
+    it("should not throw if api does not exist", () => {
+      let ast = parser.parse("(1)");
+      SandBoxr.create(ast, { exclude: "String.foo.bar" });
+    });
+  });
+
+  describe("Operators", () => {
+    it("should be able to replace an operators", () => {
+      let env = SandBoxr.createEnvironment();
+      env.init({
+        operators: {
+          coerciveEquals (a, b) {
+            if (a.isPrimitive && b.isPrimitive) {
+              return a.value === b.value;
+            }
+
+            if (a.isPrimitive || b.isPrimitive) {
+              return false;
+            }
+
+            return a === b;
+          }
+        }
+      });
+
+      let ast = parser.parse("0 == '0'");
+      let sandbox = SandBoxr.create(ast);
+
+      let result = sandbox.execute(env);
+      expect(result.value).to.be.false;
+
+      ast = parser.parse("0 != '0'");
+      sandbox = SandBoxr.create(ast);
+
+      result = sandbox.execute(env);
+      expect(result.value).to.be.true;	
+    });
+  });
 	
-	describe("Imports", () => {
-		it("should allow an ast to be imported", () => {
-			let importAst = parser.parse("var a = 2");
-			
-			let ast = parser.parse("a==2;");
-			let sandbox = SandBoxr.create(ast, {imports:[{ast:importAst}]});
-			
-			let result = sandbox.execute();
-			expect(result.value).to.be.true;
-		});
+  describe("Imports", () => {
+    it("should allow an ast to be imported", () => {
+      let importAst = parser.parse("var a = 2");
+
+      let ast = parser.parse("a==2;");
+      let sandbox = SandBoxr.create(ast, { imports: [{ ast:importAst }]});
+
+      let result = sandbox.execute();
+      expect(result.value).to.be.true;
+    });
 		
-		it("should allow text code to be passed if a parser is defined", () => {
-			let ast = parser.parse("a==2;");
-			let sandbox = SandBoxr.create(ast, {parser: parser.parse, imports: [{code: "var a = 2;"}]});
-			
-			let result = sandbox.execute();
-			expect(result.value).to.be.true;
-		});
-	});
+    it("should allow text code to be passed if a parser is defined", () => {
+      let ast = parser.parse("a==2;");
+      let sandbox = SandBoxr.create(ast, { parser: parser.parse, imports: [{ code: "var a = 2;" }]});
+
+      let result = sandbox.execute();
+      expect(result.value).to.be.true;
+    });
+  });
 });
