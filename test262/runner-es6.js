@@ -20,15 +20,22 @@ var failed = gutil.colors.bold.red("failed:");
 var passed = gutil.colors.green("passed:");
 var skipped = gutil.colors.blue("skipped:");
 
-var harness = acorn.parse(fs.readFileSync(path.join(__dirname, "harness-es6.js")), {ecmaVersion: 6});
+var harness = acorn.parse(fs.readFileSync(path.join(__dirname, "harness-es6.js")), { ecmaVersion: 6 });
 
 var root = path.join(__dirname, "../../test262/test/");
 var results = [];
 var verbose = args.verbose;
 
-// var files = (["/**/*.js"]).map(function (file) { return path.join(root, file); });
-
-// gutil.log(files);
+// array -8
+// weakmap -10
+// object -25
+// set -7
+// number -1
+// date -16
+// symbol -4
+// string -9
+// boolean +
+// reflect +
 
 function getInfo (file) {
 	var info = {
@@ -55,29 +62,29 @@ function getInfo (file) {
 	return info;
 }
 
-vfs.src(args.in, {cwd: root})
+vfs.src(args.in, { cwd: root, verbose: true })
 	.pipe(through.obj(function (file, enc, cb) {
-		// gutil.log(file.contents.toString());
-		// cb();
-
 		var info = getInfo(file);
 		var useStrict = info.flags && info.flags.indexOf("onlyStrict") !== -1;
-		
-		// gutil.log(src);
-		
-		// var desc = descMatcher.exec(src);
-		// desc = desc && desc[1];
-		
-		var current = {file: file, info: info};
+		var current = { file: file, info: info };
 
+    if (!("es5id" in info || "es6id" in info)) {
+      if (verbose) { 
+        gutil.log("skipping:", info.filename, "-", info.description);
+      }
+      
+      current.skipped = true;
+      cb(null, current);
+      return;
+    }
+    
 		if (verbose) {
 			gutil.log("starting:", info.filename, "-", info.description);
-			// gutil.log("starting:", filename, "-", desc);
 		}
 
 		var ast;
 		try {
-			ast = acorn.parse(info.src, {ecmaVersion: 6});
+			ast = acorn.parse(info.src, { ecmaVersion: 6 });
 		} catch (err) {
 			current.passed = String(info.negative || "").trim() === String(err.name).trim();
 
@@ -86,8 +93,8 @@ vfs.src(args.in, {cwd: root})
 			return;
 		}
 
-		var parser = function (text) { return acorn.parse(text, {ecmaVersion: 6}); };
-		var sandbox = SandBoxr.create(ast, {ecmaVersion: 6, parser: parser, useStrict: useStrict, imports: [{ast: harness}]});
+		var parser = function (text) { return acorn.parse(text, { ecmaVersion: 6 }); };
+		var sandbox = SandBoxr.create(ast, { ecmaVersion: 6, parser: parser, useStrict: useStrict, imports: [{ ast: harness }]});
 
 		try {
 			sandbox.execute();
@@ -104,7 +111,7 @@ vfs.src(args.in, {cwd: root})
 		}
 	}))
 	.pipe(through.obj(function (result, enc, cb) {
-		if (!result.passed) {
+		if (!result.passed && !result.skipped) {
 			gutil.log(failed, result.info.filename, result.info.description);
 			
 			if (result.info.negative) {
@@ -124,11 +131,12 @@ vfs.src(args.in, {cwd: root})
 	}))
 	.on("finish", function () {
 		var totalPassed = results.filter(function (o) { return o.passed; }).length;
-		
+		var totalSkipped = results.filter(function (o) { return o.skipped; }).length;
+    
 		gutil.log("TOTALS ==============================");
 		gutil.log(passed, totalPassed);
-		// gutil.log(skipped, results.filter(function (o) { return o.skipped; }).length);
-		gutil.log(failed, results.length - totalPassed);
+		gutil.log(skipped, totalSkipped);
+		gutil.log(failed, results.length - totalPassed - totalSkipped);
 	});
 	
 	// .pipe(through.obj(function (file, enc, done) {

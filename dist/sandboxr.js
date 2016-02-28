@@ -3676,27 +3676,27 @@ function DeclarativeEnvironment(parent, thisArg, env, strict, block) {
 DeclarativeEnvironment.prototype = {
   constructor: DeclarativeEnvironment,
 
-  createChildScope: function createChildScope() {
+  createChildScope: function () {
     return new DeclarativeEnvironment({ scope: this }, this.thisBinding, this.env, this.strict, true);
   },
-  setParent: function setParent(parent) {
+  setParent: function (parent) {
     this.parent = parent.scope || parent;
   },
-  getReference: function getReference(key) {
+  getReference: function (key) {
     var ref = new _reference.Reference(key, this, this.env);
     ref.unqualified = true;
     return ref;
   },
-  has: function has(key) {
+  has: function (key) {
     return key in this.properties;
   },
-  owns: function owns(key) {
+  owns: function (key) {
     return this.has(key);
   },
-  getVariable: function getVariable(key) {
+  getVariable: function (key) {
     return this.properties[key];
   },
-  deleteVariable: function deleteVariable(key) {
+  deleteVariable: function (key) {
     if (!this.has(key)) {
       return true;
     }
@@ -3708,7 +3708,7 @@ DeclarativeEnvironment.prototype = {
     delete this.properties[key];
     return true;
   },
-  createVariable: function createVariable(key) {
+  createVariable: function (key) {
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var _ref$configurable = _ref.configurable;
@@ -3724,7 +3724,7 @@ DeclarativeEnvironment.prototype = {
 
     return this.properties[key] = new _propertyDescriptor.PropertyDescriptor(this, { value: undefined, enumerable: true, configurable: configurable, writable: writable, initialized: initialized }, key);
   },
-  setValue: function setValue(key, value, throwOnError) {
+  setValue: function (key, value, throwOnError) {
     var _parent;
 
     var propInfo = this.properties[key];
@@ -3743,7 +3743,7 @@ DeclarativeEnvironment.prototype = {
 
     return (_parent = this.parent).setValue.apply(_parent, arguments);
   },
-  getValue: function getValue(key, throwOnError) {
+  getValue: function (key, throwOnError) {
     var propInfo = this.properties[key];
     if (propInfo && propInfo.value) {
       return propInfo.value;
@@ -3755,7 +3755,7 @@ DeclarativeEnvironment.prototype = {
 
     return _primitiveType.UNDEFINED;
   },
-  getThisBinding: function getThisBinding() {
+  getThisBinding: function () {
     return this.thisBinding;
   }
 };
@@ -3828,7 +3828,7 @@ function Environment() {}
 Environment.prototype = {
   constructor: Environment,
 
-  init: function init() {
+  init: function () {
     var _this = this;
 
     var options = arguments.length <= 0 || arguments[0] === undefined ? defaultOptions : arguments[0];
@@ -3884,7 +3884,7 @@ Environment.prototype = {
    * @param {String} key - The key of the property
    * @returns {Reference} The reference.
    */
-  getReference: function getReference(key) {
+  getReference: function (key) {
     var scope = this.current && this.current.scope;
     while (scope) {
       if (scope.owns(key)) {
@@ -3896,22 +3896,22 @@ Environment.prototype = {
 
     return new _reference.Reference(key, undefined, this);
   },
-  getSymbol: function getSymbol(key) {
+  getSymbol: function (key) {
     return _symbolType.SymbolType.getByKey(key);
   },
-  getValue: function getValue(key) {
+  getValue: function (key) {
     return this.getReference(key).getValue();
   },
-  setValue: function setValue(key, value, strict) {
+  setValue: function (key, value, strict) {
     this.current.scope.setValue(key, value, strict);
   },
-  has: function has(key) {
+  has: function (key) {
     return this.current.scope.has(key);
   },
-  deleteVariable: function deleteVariable(key) {
+  deleteVariable: function (key) {
     this.current.scope.deleteVariable(key);
   },
-  getVariable: function getVariable(key) {
+  getVariable: function (key) {
     var scope = this.current && this.current.scope;
     while (scope) {
       if (scope.owns(key)) {
@@ -3931,7 +3931,7 @@ Environment.prototype = {
    * @param {String} [kind] - the type of variable to declare. Available options are "var", "let", and "const". "var" is the default.
    * @returns {PropertyDescriptor} The property descriptor for the new variabble.
    */
-  createVariable: function createVariable(key, kind) {
+  createVariable: function (key, kind) {
     kind = kind ? kind.toLowerCase() : "var";
     var attr = declareKinds[kind];
     var scope = this.current.scope;
@@ -3956,7 +3956,7 @@ Environment.prototype = {
    * Indicates whether the current lexical scope is in strict mode.
    * @returns {Boolean} true if in strict mode; false otherwise.
    */
-  isStrict: function isStrict() {
+  isStrict: function () {
     if (this.options.useStrict) {
       return true;
     }
@@ -3978,7 +3978,7 @@ Environment.prototype = {
    * Gets the current `this` object for the environment.
    * @returns {ObjectType} The `this` object for the current scope.
    */
-  getThisBinding: function getThisBinding() {
+  getThisBinding: function () {
     var thisArg = this.current.scope.getThisBinding();
     if (thisArg) {
       return thisArg;
@@ -3990,7 +3990,7 @@ Environment.prototype = {
 
     return this.global;
   },
-  createExecutionContext: function createExecutionContext(obj, callee, newTarget) {
+  createExecutionContext: function (obj, callee, newTarget) {
     return new _executionContext.ExecutionContext(this, obj, callee, newTarget);
   },
 
@@ -4000,7 +4000,7 @@ Environment.prototype = {
    * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
    * @returns {Scope} The new scope.
    */
-  createScope: function createScope(thisArg) {
+  createScope: function (thisArg) {
     return this.setScope(new _declarativeEnvironment.DeclarativeEnvironment(this.current, thisArg, this, this.isStrict()));
   },
 
@@ -4012,10 +4012,10 @@ Environment.prototype = {
    * @param {ObjectType} [thisArg] - The `this` binding for the new scope.
    * @returns {Scope} The new scope.
    */
-  createObjectScope: function createObjectScope(obj, thisArg) {
+  createObjectScope: function (obj, thisArg) {
     return this.setScope(new _objectEnvironment.ObjectEnvironment(this.current, obj, thisArg, this, this.isStrict()));
   },
-  createExecutionScope: function createExecutionScope(fn, thisArg) {
+  createExecutionScope: function (fn, thisArg) {
     var parentScope = this.current.scope;
 
     // if a parent scope is defined we need to limit this scope to that scope
@@ -4029,7 +4029,7 @@ Environment.prototype = {
     scope.setParent(parentScope);
     return scope;
   },
-  createBlockScope: function createBlockScope(node) {
+  createBlockScope: function (node) {
     var scope = this.current.scope;
     if (node.hasBindings() && !node.isProgram()) {
       scope = scope.createChildScope();
@@ -4046,7 +4046,7 @@ Environment.prototype = {
    * @param {Environment} lexicalEnvironment - Sets the current environment.
    * @returns {Scope} The created scope.
    */
-  setScope: function setScope(lexicalEnvironment) {
+  setScope: function (lexicalEnvironment) {
     return this.current = new _scope.Scope(this, lexicalEnvironment);
   }
 };
@@ -4082,27 +4082,27 @@ function ObjectEnvironment(parent, obj, thisArg, env, strict) {
 ObjectEnvironment.prototype = {
   constructor: ObjectEnvironment,
 
-  createChildScope: function createChildScope() {
+  createChildScope: function () {
     return new _declarativeEnvironment.DeclarativeEnvironment({ scope: this }, this.thisBinding, this.env, this.strict, true);
   },
-  getReference: function getReference(key, unqualified) {
+  getReference: function (key, unqualified) {
     var ref = new _propertyReference.PropertyReference(key, this.object, this.env);
     ref.unqualified = unqualified;
     return ref;
   },
-  has: function has(key) {
+  has: function (key) {
     return this.parent ? this.parent.has(key) : this.owns(key);
   },
-  owns: function owns(key) {
+  owns: function (key) {
     return this.object.has(key);
   },
-  getVariable: function getVariable(key) {
+  getVariable: function (key) {
     return this.object.getProperty(key);
   },
-  deleteVariable: function deleteVariable(key) {
+  deleteVariable: function (key) {
     return this.object.deleteProperty(key, false);
   },
-  createVariable: function createVariable(key) {
+  createVariable: function (key) {
     var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var _ref$configurable = _ref.configurable;
@@ -4124,7 +4124,7 @@ ObjectEnvironment.prototype = {
 
     return this.object.getProperty(key);
   },
-  setValue: function setValue(key, value, throwOnError) {
+  setValue: function (key, value, throwOnError) {
     if (this.parent && !this.object.has(key)) {
       var _parent2;
 
@@ -4133,7 +4133,7 @@ ObjectEnvironment.prototype = {
       this.object.setValue(key, value, throwOnError);
     }
   },
-  getValue: function getValue(key, throwOnError) {
+  getValue: function (key, throwOnError) {
     if (!this.owns(key)) {
       if (throwOnError) {
         throw ReferenceError(key + " is not defined.");
@@ -4144,7 +4144,7 @@ ObjectEnvironment.prototype = {
 
     return this.object.getValue(key);
   },
-  getThisBinding: function getThisBinding() {
+  getThisBinding: function () {
     return this.thisBinding;
   }
 };
@@ -4267,7 +4267,7 @@ Reference.prototype = (_Reference$prototype = {
    * a ReferenceError will be thrown.
    * @returns {ObjectType} The value.
    */
-  getValue: function getValue() {
+  getValue: function () {
     if (!this.base) {
       throw ReferenceError(this.key + " is not defined");
     }
@@ -4282,7 +4282,7 @@ Reference.prototype = (_Reference$prototype = {
    * @param {Boolean} throwOnError - Causes errors to be thrown.
    * @returns {Boolean} The result of the value assignment.
    */
-  setValue: function setValue(value, throwOnError) {
+  setValue: function (value, throwOnError) {
     if (this.base) {
       if (!this.base.setValue(this.key, value) && this.strict) {
         throw TypeError();
@@ -4305,16 +4305,16 @@ Reference.prototype = (_Reference$prototype = {
       writable: true
     }, false, this.env);
   },
-  isStrict: function isStrict() {
+  isStrict: function () {
     return this.strict || this.env.isStrict();
   }
-}, _Reference$prototype["delete"] = function _delete() {
+}, _Reference$prototype["delete"] = function () {
   if (this.base) {
     return this.base.deleteVariable(this.key);
   }
 
   return true;
-}, _Reference$prototype.isUnresolved = function isUnresolved() {
+}, _Reference$prototype.isUnresolved = function () {
   return !this.base;
 }, _Reference$prototype);
 
@@ -4354,10 +4354,10 @@ function Scope(env, scope) {
 Scope.prototype = {
   constructor: Scope,
 
-  setMeta: function setMeta(key, value) {
+  setMeta: function (key, value) {
     this.scope.meta[key] = value;
   },
-  getMeta: function getMeta(key) {
+  getMeta: function (key) {
     var scope = this.scope;
     while (scope) {
       if (scope.meta[key]) {
@@ -4369,7 +4369,7 @@ Scope.prototype = {
 
     return null;
   },
-  setParent: function setParent(parentScope) {
+  setParent: function (parentScope) {
     this.parentScope = parentScope;
   },
 
@@ -4379,7 +4379,7 @@ Scope.prototype = {
    * @param {AST} node - The node to be executed.
    * @returns {void}
    */
-  init: function init(node) {
+  init: function (node) {
     if (!node) {
       return;
     }
@@ -4416,9 +4416,9 @@ Scope.prototype = {
       }
     });
   },
-  loadComplexArgs: _regenerator2.default.mark(function loadComplexArgs(params, args, callee) {
+  loadComplexArgs: _regenerator2.default.mark(function _callee(params, args, callee) {
     var env, strict, scope, argIndex, argLength, i, ln, param, rest, restIndex;
-    return _regenerator2.default.wrap(function loadComplexArgs$(_context) {
+    return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -4498,7 +4498,7 @@ Scope.prototype = {
             return _context.stop();
         }
       }
-    }, loadComplexArgs, this);
+    }, _callee, this);
   }),
 
 
@@ -4509,13 +4509,13 @@ Scope.prototype = {
    * @param {FunctionType} callee - The function
    * @returns {void}
    */
-  loadArgs: _regenerator2.default.mark(function loadArgs(params, args, callee) {
+  loadArgs: _regenerator2.default.mark(function _callee2(params, args, callee) {
     var
 
     // todo: this method is getting far too complex
     env, scope, strictCallee, strict, argumentList, argsLength, paramsLength, shouldMap, loadedParams, paramIndex, _param, value, name, mapped, descriptor, _i;
 
-    return _regenerator2.default.wrap(function loadArgs$(_context2) {
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -4600,9 +4600,9 @@ Scope.prototype = {
             return _context2.stop();
         }
       }
-    }, loadArgs, this);
+    }, _callee2, this);
   }),
-  createParameterScope: function createParameterScope() {
+  createParameterScope: function () {
     var temp = this.env.createScope();
     temp.scope.setParent(this.scope.parent);
     this.scope.setParent(temp);
@@ -4616,9 +4616,9 @@ Scope.prototype = {
    * @param {Function} inner - The function to execute.
    * @returns {Iterator} The function results
    */
-  use: _regenerator2.default.mark(function use(inner) {
+  use: _regenerator2.default.mark(function _callee3(inner) {
     var result;
-    return _regenerator2.default.wrap(function use$(_context3) {
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
@@ -4644,7 +4644,7 @@ Scope.prototype = {
             return _context3.stop();
         }
       }
-    }, use, this, [[0, 8]]);
+    }, _callee3, this, [[0, 8]]);
   }),
 
 
@@ -4653,7 +4653,7 @@ Scope.prototype = {
    * (Typically you would call `use` which handles exiting the scope itself.)
    * @returns {void}
    */
-  exit: function exit() {
+  exit: function () {
     this.env.setScope(this.parentScope);
   }
 };
@@ -7817,13 +7817,13 @@ var _regenerator = require("babel-runtime/regenerator");
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
 exports.default = function ($target, env, factory) {
-  $target.define("bind", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee(thisArg) {
+  $target.define("bind", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee2(thisArg) {
     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
     }
 
     var fn, length, lengthValue, nativeFunc, nameValue, name, boundFunc, thrower;
-    return _regenerator2.default.wrap(function _callee$(_context2) {
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -7854,13 +7854,13 @@ exports.default = function ($target, env, factory) {
 
             thisArg = (0, _functionHelpers.defineThis)(env, fn, thisArg);
 
-            nativeFunc = _regenerator2.default.mark(function nativeFunc() {
+            nativeFunc = _regenerator2.default.mark(function _callee() {
               for (var _len2 = arguments.length, additionalArgs = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
                 additionalArgs[_key2] = arguments[_key2];
               }
 
               var mergedArgs;
-              return _regenerator2.default.wrap(function nativeFunc$(_context) {
+              return _regenerator2.default.wrap(function _callee$(_context) {
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
@@ -7875,7 +7875,7 @@ exports.default = function ($target, env, factory) {
                       return _context.stop();
                   }
                 }
-              }, nativeFunc, this);
+              }, _callee, this);
             });
 
 
@@ -7927,7 +7927,7 @@ exports.default = function ($target, env, factory) {
             return _context2.stop();
         }
       }
-    }, _callee, this);
+    }, _callee2, this);
   }), 1, "Function.prototype.bind"));
 };
 
@@ -8049,7 +8049,7 @@ function functionApi(env) {
 
   var funcClass = undefined;
 
-  var funcCtor = _regenerator2.default.mark(function funcCtor() {
+  var funcCtor = _regenerator2.default.mark(function _callee4() {
     var _this = this;
 
     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -8057,7 +8057,7 @@ function functionApi(env) {
     }
 
     var funcInstance;
-    return _regenerator2.default.wrap(function funcCtor$(_context4) {
+    return _regenerator2.default.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
@@ -8068,9 +8068,9 @@ function functionApi(env) {
               break;
             }
 
-            return _context4.delegateYield(_regenerator2.default.mark(function _callee2() {
+            return _context4.delegateYield(_regenerator2.default.mark(function _callee3() {
               var body, params, bodyString, ast, callee, userNode, strict, wrappedFunc;
-              return _regenerator2.default.wrap(function _callee2$(_context3) {
+              return _regenerator2.default.wrap(function _callee3$(_context3) {
                 while (1) {
                   switch (_context3.prev = _context3.next) {
                     case 0:
@@ -8138,12 +8138,12 @@ function functionApi(env) {
                       callee = ast.body[0].expression.callee.object;
                       userNode = callee.body.body;
                       strict = (0, _checks.isStrictNode)(userNode);
-                      wrappedFunc = _regenerator2.default.mark(function wrappedFunc() {
+                      wrappedFunc = _regenerator2.default.mark(function _callee2() {
                         var thisArg,
                             $args,
                             executionResult,
                             _args2 = arguments;
-                        return _regenerator2.default.wrap(function wrappedFunc$(_context2) {
+                        return _regenerator2.default.wrap(function _callee2$(_context2) {
                           while (1) {
                             switch (_context2.prev = _context2.next) {
                               case 0:
@@ -8186,7 +8186,7 @@ function functionApi(env) {
                                 return _context2.stop();
                             }
                           }
-                        }, wrappedFunc, this);
+                        }, _callee2, this);
                       });
 
 
@@ -8200,7 +8200,7 @@ function functionApi(env) {
                       return _context3.stop();
                   }
                 }
-              }, _callee2, _this);
+              }, _callee3, _this);
             })(), "t0", 3);
 
           case 3:
@@ -8220,7 +8220,7 @@ function functionApi(env) {
             return _context4.stop();
         }
       }
-    }, funcCtor, this);
+    }, _callee4, this);
   });
 
   // the prototype of a function is actually callable and evaluates as a function
@@ -8251,7 +8251,7 @@ function functionApi(env) {
   (0, _function6.default)(proto, env, objectFactory);
   (0, _function8.default)(proto, env, objectFactory);
 
-  var thrower = function thrower() {
+  var thrower = function () {
     if (this.isStrict()) {
       throw TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
     }
@@ -8916,10 +8916,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.__esModule = true;
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 var _getIterator2 = require("babel-runtime/core-js/get-iterator");
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
@@ -9302,7 +9298,7 @@ exports.default = function ($target, env, factory) {
                     case 4:
                       keys = _context6.t0;
                       return _context6.abrupt("return", {
-                        v: function v(holder, key, value) {
+                        v: function (holder, key, value) {
                           // allow empty key - this will be from the root
                           if (!key || keys.indexOf(key) >= 0) {
                             return value;
@@ -9323,7 +9319,7 @@ exports.default = function ($target, env, factory) {
           case 5:
             _ret = _context7.t0;
 
-            if (!((typeof _ret === "undefined" ? "undefined" : (0, _typeof3.default)(_ret)) === "object")) {
+            if (!(typeof _ret === "object")) {
               _context7.next = 8;
               break;
             }
@@ -9479,7 +9475,7 @@ var ignored = {
   "Symbol": true
 };
 
-},{"../../types/primitive-type":368,"../../utils/async":375,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/json/stringify":3,"babel-runtime/core-js/string/repeat":32,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],231:[function(require,module,exports){
+},{"../../types/primitive-type":368,"../../utils/async":375,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/json/stringify":3,"babel-runtime/core-js/string/repeat":32,"babel-runtime/regenerator":37}],231:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11379,10 +11375,6 @@ var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.default = function ($target, env, factory) {
   $target.define("match", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee(regex) {
     var matchKey, matcher, stringValue, actualRegex, match, _ret;
@@ -11469,7 +11461,7 @@ exports.default = function ($target, env, factory) {
               };
             }();
 
-            if (!((typeof _ret === "undefined" ? "undefined" : (0, _typeof3.default)(_ret)) === "object")) {
+            if (!(typeof _ret === "object")) {
               _context.next = 27;
               break;
             }
@@ -11498,7 +11490,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],264:[function(require,module,exports){
+},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],264:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11568,7 +11560,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            replacer = function replacer() {
+            replacer = function () {
               var thisArg = substrOrFn.isStrict() || substrOrFn.isStrict() ? _primitiveType.UNDEFINED : env.global;
 
               for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -12478,10 +12470,10 @@ exports.default = function ($target, env, factory) {
     }, _marked[0], this);
   }
 
-  $target.define("from", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee(items, mapFn, thisArg) {
+  $target.define("from", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee2(items, mapFn, thisArg) {
     var mapper, arr, it, length, done, current, _it$next, value;
 
-    return _regenerator2.default.wrap(function _callee$(_context3) {
+    return _regenerator2.default.wrap(function _callee2$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
@@ -12490,13 +12482,13 @@ exports.default = function ($target, env, factory) {
             mapper = undefined;
 
             if ((0, _checks.isUndefined)(mapFn)) {
-              mapper = function mapper(v) {
+              mapper = function (v) {
                 return v;
               };
             } else {
               (0, _contracts.assertIsFunction)(mapFn, "mapFn");
-              mapper = _regenerator2.default.mark(function mapper(v, i) {
-                return _regenerator2.default.wrap(function mapper$(_context2) {
+              mapper = _regenerator2.default.mark(function _callee(v, i) {
+                return _regenerator2.default.wrap(function _callee$(_context2) {
                   while (1) {
                     switch (_context2.prev = _context2.next) {
                       case 0:
@@ -12511,7 +12503,7 @@ exports.default = function ($target, env, factory) {
                         return _context2.stop();
                     }
                   }
-                }, mapper, this);
+                }, _callee, this);
               });
             }
 
@@ -12579,7 +12571,7 @@ exports.default = function ($target, env, factory) {
             return _context3.stop();
         }
       }
-    }, _callee, this, [[10, 23]]);
+    }, _callee2, this, [[10, 23]]);
   }), 1, "Array.from"));
 };
 
@@ -12984,7 +12976,7 @@ exports.default = function (env) {
   ["RegExp", "Array", "Map", "Set"].forEach(function (typeName) {
     var ctor = $global.getValue(typeName);
 
-    var speciesGetter = function speciesGetter() {
+    var speciesGetter = function () {
       return ctor;
     };
     var speciesGetterFunc = objectFactory.createGetter(speciesGetter, "[Symbol.species]");
@@ -13015,7 +13007,7 @@ exports.default = function (env) {
 
   var funcProto = $global.getValue("Function").getValue("prototype");
 
-  var thrower = function thrower() {
+  var thrower = function () {
     throw TypeError("'caller', 'callee', and 'arguments' properties may not be accessed on strict mode functions or the arguments objects for calls to them");
   };
 
@@ -13553,7 +13545,7 @@ var _collectionHelpers = require("./collection-helpers");
 exports.__esModule = true;
 
 exports.default = function ($target, env, factory) {
-  var getter = function getter() {
+  var getter = function () {
     (0, _contracts.assertIsMap)(this, "Map.prototype.size");
     return factory.createPrimitive(this.data.filter(function (v) {
       return v;
@@ -14764,10 +14756,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.__esModule = true;
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
@@ -14795,7 +14783,7 @@ exports.default = function (globalObject, env, factory) {
               break;
             }
 
-            replacer = function replacer() {
+            replacer = function () {
               var thisArg = replaceValue.strict || env.isStrict() ? _primitiveType.UNDEFINED : env.global;
 
               for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -14863,7 +14851,7 @@ exports.default = function (globalObject, env, factory) {
               };
             }();
 
-            if (!((typeof _ret === "undefined" ? "undefined" : (0, _typeof3.default)(_ret)) === "object")) {
+            if (!(typeof _ret === "object")) {
               _context2.next = 8;
               break;
             }
@@ -14955,7 +14943,7 @@ exports.default = function (globalObject, env, factory) {
 
   ["source", "global", "ignoreCase", "multiline"].forEach(function (key) {
     var source = RegExp.prototype;
-    var getter = function getter() {
+    var getter = function () {
       return factory.createPrimitive(source[key]);
     };
     var getterFunc = factory.createGetter(getter, key);
@@ -14976,7 +14964,7 @@ exports.default = function (globalObject, env, factory) {
 
   var flags = ["global", "ignoreCase", "multiline", "unicode", "sticky"];
 
-  var flagsGetter = function flagsGetter() {
+  var flagsGetter = function () {
     var _this = this;
 
     var thisFlags = "";
@@ -15002,7 +14990,7 @@ var _checks = require("../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/async":375,"../utils/checks":376,"../utils/native":379,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],326:[function(require,module,exports){
+},{"../types/primitive-type":368,"../utils/async":375,"../utils/checks":376,"../utils/native":379,"babel-runtime/regenerator":37}],326:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15391,7 +15379,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.__esModule = true;
 
 exports.default = function ($target, env, factory) {
-  var getter = function getter() {
+  var getter = function () {
     (0, _contracts.assertIsSet)(this, "Set.prototype.size");
     return factory.createPrimitive(this.data.filter(function (v) {
       return v;
@@ -16454,7 +16442,7 @@ var interfaces = exports.interfaces = {
   "Statement": ["ExpressionStatement", "BlockStatement", "EmptyStatement", "DebuggerStatement", "WithStatement", "ReturnStatement", "LabeledStatement", "BreakStatement", "ContinueStatement", "IfStatement", "SwitchStatement", "SwitchCase"],
   "Loop": ["WhileStatement", "DoWhileStatement", "ForStatement", "ForInStatement", "ForOfStatement  "],
   "Expression": ["ThisExpression", "ArrayExpression", "ObjectExpression", "Property", "FunctionExpression", "UnaryExpression", "UpdateExpression", "BinaryExpression", "AssignmentExpression", "LogicalExpression", "MemberExpression", "ConditionalExpression", "CallExpression", "NewExpression", "SequenceExpression", "TemplateLiteral", "TaggedTemplateExpression", "ClassExpression"],
-  "Directive": function Directive() {
+  "Directive": function () {
     return this.type === "ExpressionStatement" && this.expression.type === "Literal" && typeof this.expression.value === "string";
   },
 
@@ -16474,10 +16462,6 @@ var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.TraversalContext = TraversalContext;
 
 var _types = require("./types");
@@ -16486,10 +16470,10 @@ var _interfaces = require("./interfaces");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _marked = [_getDirectives].map(_regenerator2.default.mark);
+var _marked = [getDirectives].map(_regenerator2.default.mark);
 
 function isNode(obj) {
-  return obj && (typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) === "object" && typeof obj.type === "string";
+  return obj && typeof obj === "object" && typeof obj.type === "string";
 }
 
 function assignChild(value, parent, rules) {
@@ -16512,7 +16496,7 @@ function isDirective(node) {
   return node.type === "ExpressionStatement" && node.expression.type === "Literal" && typeof node.expression.value === "string";
 }
 
-function _getDirectives(body) {
+function getDirectives(body) {
   var i, length, expr, value;
   return _regenerator2.default.wrap(function getDirectives$(_context) {
     while (1) {
@@ -16523,7 +16507,7 @@ function _getDirectives(body) {
             break;
           }
 
-          return _context.delegateYield(_getDirectives(body.body), "t0", 2);
+          return _context.delegateYield(getDirectives(body.body), "t0", 2);
 
         case 2:
           if (!Array.isArray(body)) {
@@ -16578,7 +16562,7 @@ function TraversalContext(node, parent, rules) {
 var proto = TraversalContext.prototype = {
   constructor: TraversalContext,
 
-  init: function init(rules) {
+  init: function (rules) {
     var _this = this;
 
     this._bindings = [];
@@ -16609,7 +16593,7 @@ var proto = TraversalContext.prototype = {
     });
     rules(this);
   },
-  is: function is(type) {
+  is: function (type) {
     if (type === this.type) {
       return true;
     }
@@ -16621,13 +16605,13 @@ var proto = TraversalContext.prototype = {
 
     return false;
   },
-  has: function has(key) {
+  has: function (key) {
     return this._node[key] != null;
   },
-  getDirectives: function getDirectives() {
+  getDirectives: function () {
     if (!this._directives) {
       this._directives = [];
-      var it = _getDirectives(this._node.body);
+      var it = getDirectives(this._node.body);
       var done = undefined,
           _value = undefined;
 
@@ -16645,19 +16629,19 @@ var proto = TraversalContext.prototype = {
 
     return this._directives;
   },
-  getBindings: function getBindings() {
+  getBindings: function () {
     return this._bindings || [];
   },
-  hasBindings: function hasBindings() {
+  hasBindings: function () {
     return this.getBindings().length > 0;
   },
-  getParent: function getParent() {
+  getParent: function () {
     return this._parent;
   },
-  isBlockScope: function isBlockScope() {
+  isBlockScope: function () {
     return this.isLet() || this.isConst() || this.isClassDeclaration();
   },
-  isStrict: function isStrict() {
+  isStrict: function () {
     if ("_strict" in this) {
       return this._strict;
     }
@@ -16699,7 +16683,7 @@ var proto = TraversalContext.prototype = {
   };
 });
 
-},{"./interfaces":344,"./types":346,"babel-runtime/core-js/object/keys":27,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],346:[function(require,module,exports){
+},{"./interfaces":344,"./types":346,"babel-runtime/core-js/object/keys":27,"babel-runtime/regenerator":37}],346:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16787,7 +16771,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var _marked = [defaultVisitor].map(_regenerator2.default.mark);
 
-var noop = function noop() {};
+var noop = function () {};
 
 function makeVisitorFromKeys(keys) {
   return _regenerator2.default.mark(function visitor(node, state, w) {
@@ -16975,9 +16959,9 @@ function ExecutionContext(env, obj, callee, newTarget) {
 ExecutionContext.prototype = {
   constructor: ExecutionContext,
 
-  execute: _regenerator2.default.mark(function execute(node, callee) {
+  execute: _regenerator2.default.mark(function _callee(node, callee) {
     var executionResult;
-    return _regenerator2.default.wrap(function execute$(_context) {
+    return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -17013,62 +16997,62 @@ ExecutionContext.prototype = {
             return _context.stop();
         }
       }
-    }, execute, this, [[1, 7]]);
+    }, _callee, this, [[1, 7]]);
   }),
-  create: function create() {
+  create: function () {
     var context = new ExecutionContext(this.env, this.object, this.callee, this.newTarget);
     context.value = this.value;
     return context;
   },
-  createLabel: function createLabel(label) {
+  createLabel: function (label) {
     var context = this.create();
     context.label = label;
     return context;
   },
-  createLoop: function createLoop() {
+  createLoop: function () {
     var context = this.create();
     context.label = this.label;
     context.loop = true;
     return context;
   },
-  cancel: function cancel(label) {
+  cancel: function (label) {
     var result = this.result(this.value, label);
     result.cancel = true;
     return result;
   },
-  skip: function skip(label) {
+  skip: function (label) {
     var result = this.result(this.value, label);
     result.skip = true;
     return result;
   },
-  raise: function raise(err) {
+  raise: function (err) {
     var wrappedError = this.env.objectFactory.create("Error", err);
     var result = this.result(wrappedError);
     result.raised = result.exit = true;
     return result;
   },
-  exit: function exit(value) {
+  exit: function (value) {
     this.callee = null;
 
     var result = this.result(value);
     result.exit = true;
     return result;
   },
-  result: function result(value, name, obj) {
+  result: function (value, name, obj) {
     this.value = value;
     return new _executionResult.ExecutionResult(value, name, obj);
   },
-  empty: function empty() {
+  empty: function () {
     return this.result(_primitiveType.UNDEFINED);
   },
-  abrupt: function abrupt(result, priorResult) {
+  abrupt: function (result, priorResult) {
     if (priorResult && !result.raised && !result.exit) {
       result.result = priorResult.result;
     }
 
     return result || this.empty();
   },
-  shouldBreak: function shouldBreak(result) {
+  shouldBreak: function (result) {
     if (!result) {
       return false;
     }
@@ -17118,7 +17102,7 @@ function ExecutionResult(value, name, obj) {
 ExecutionResult.prototype = {
   constructor: ExecutionResult,
 
-  isAbrupt: function isAbrupt() {
+  isAbrupt: function () {
     return this.cancel || this.exit || this.raised || this.skip;
   }
 };
@@ -17163,7 +17147,7 @@ Sandbox.prototype = {
    * @returns {ObjectType|Promise} Returns a resolved value syncronously if possible, otherwise
    * returns a promise which will resolve to the result.
    */
-  execute: function execute(env) {
+  execute: function (env) {
     if (!env) {
       env = new _env.Environment();
       env.init(this.options);
@@ -17196,7 +17180,7 @@ Sandbox.prototype = {
    * @param {Environment} [env] - The environment to execute the AST against.
    * @returns {Promise} A promise that resolves with the result of the execution
    */
-  resolve: function resolve(env) {
+  resolve: function (env) {
     // always return a promise
     return _promise2.default.resolve(this.execute(env));
   }
@@ -17300,7 +17284,7 @@ function yieldIndex(source, key) {
 }
 
 var ArrayIterator = {
-  create: function create(obj, lo, hi, desc) {
+  create: function (obj, lo, hi, desc) {
     return (desc ? descIterator : ascIterator)(obj, lo, hi);
   }
 };
@@ -17353,7 +17337,7 @@ function arrayIsSparse(arr, length) {
 }
 
 var iterate = {
-  getIterator: function getIterator(obj) {
+  getIterator: function (obj) {
     var iteratorKey = _symbolType.SymbolType.getByKey("iterator");
     var iterator = obj.getProperty(iteratorKey);
     var fn = iterator && iterator.getValue();
@@ -17366,7 +17350,7 @@ var iterate = {
     var length = (0, _async.exhaust)((0, _native.toLength)(obj));
     return this.forward(obj, 0, length);
   },
-  forward: function forward(obj, lo, hi) {
+  forward: function (obj, lo, hi) {
     // string will never be dense
     if (obj.className === "String") {
       return _stringIterator2.default.create(obj, lo);
@@ -17378,7 +17362,7 @@ var iterate = {
 
     return _arrayIterator2.default.create(obj, lo, hi);
   },
-  reverse: function reverse(obj, hi) {
+  reverse: function (obj, hi) {
     var lo = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
 
     if (obj.className === "String") {
@@ -17433,7 +17417,7 @@ IterableIterator.prototype = (_IterableIterator$pro = {
 
 }, _IterableIterator$pro[_iterator2.default] = function () {
   return this;
-}, _IterableIterator$pro.next = function next() {
+}, _IterableIterator$pro.next = function () {
   var result = (0, _async.exhaust)(this.advancer.call(this.iterator));
   var value = { key: this.currentIndex++, value: _primitiveType.UNDEFINED };
 
@@ -17444,10 +17428,10 @@ IterableIterator.prototype = (_IterableIterator$pro = {
   }
 
   return { done: done, value: value };
-}, _IterableIterator$pro.each = _regenerator2.default.mark(function each(func) {
+}, _IterableIterator$pro.each = _regenerator2.default.mark(function _callee(func) {
   var done, current, _next;
 
-  return _regenerator2.default.wrap(function each$(_context) {
+  return _regenerator2.default.wrap(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
@@ -17493,8 +17477,8 @@ IterableIterator.prototype = (_IterableIterator$pro = {
           return _context.stop();
       }
     }
-  }, each, this, [[2, 12]]);
-}), _IterableIterator$pro["return"] = function _return() {
+  }, _callee, this, [[2, 12]]);
+}), _IterableIterator$pro["return"] = function () {
   var returnFunc = (0, _helpers.getMethod)(this.iterator, "return");
   if (returnFunc) {
     return (0, _async.exhaust)(returnFunc.call(this.iterator));
@@ -17528,18 +17512,18 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ASCENDING = function ASCENDING(a, b) {
+var ASCENDING = function (a, b) {
   return a - b;
 };
-var DESCENDING = function DESCENDING(a, b) {
+var DESCENDING = function (a, b) {
   return b - a;
 };
 
-var isInRange = function isInRange(value, start, end) {
+var isInRange = function (value, start, end) {
   return value >= start && value <= end;
 };
 
-var isValidIndex = function isValidIndex(keys, start, end) {
+var isValidIndex = function (keys, start, end) {
   return function (key) {
     return !(key in keys) && (0, _native.isInteger)(key) && isInRange(key, start, end);
   };
@@ -17558,7 +17542,7 @@ SparseIterator.prototype = (_SparseIterator$proto = {
 
 }, _SparseIterator$proto[_iterator2.default] = function () {
   return this;
-}, _SparseIterator$proto.reset = function reset() {
+}, _SparseIterator$proto.reset = function () {
   var _this = this;
 
   this.version = 0;
@@ -17582,7 +17566,7 @@ SparseIterator.prototype = (_SparseIterator$proto = {
   }
 
   this.keys.sort(this.asc ? ASCENDING : DESCENDING);
-}, _SparseIterator$proto.next = function next() {
+}, _SparseIterator$proto.next = function () {
   if (!this.version || this.shouldReset()) {
     this.reset();
   }
@@ -17600,7 +17584,7 @@ SparseIterator.prototype = (_SparseIterator$proto = {
   return {
     done: true
   };
-}, _SparseIterator$proto.shouldReset = function shouldReset() {
+}, _SparseIterator$proto.shouldReset = function () {
   var currentVersion = this.prototypes.reduce(function (v, o) {
     return o.version + v;
   }, 0);
@@ -17698,7 +17682,7 @@ function descIterator(stringValue, start) {
 }
 
 var StringIterator = {
-  create: function create(value, start, desc) {
+  create: function (value, start, desc) {
     var length = value.toNative().length;
     return (desc ? descIterator : ascIterator)(value, start, length);
   }
@@ -17763,30 +17747,30 @@ function validateAssignment(left, strict, ecmaVersion) {
 }
 
 var rules = (_rules = {
-  AssignmentExpression: function AssignmentExpression(node, context) {
+  AssignmentExpression: function (node, context) {
     validateAssignment(node.left, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
   },
-  CatchClause: function CatchClause(node, context) {
+  CatchClause: function (node, context) {
     (0, _contracts.assertIsValidName)(node.param.name, node.isStrict() || context.env.isStrict());
   },
-  Declarator: function Declarator(node, context) {
+  Declarator: function (node, context) {
     (0, _contracts.assertIsValidIdentifier)(node.id.name, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
   }
-}, _rules["Function"] = function Function(node, context) {
+}, _rules["Function"] = function (node, context) {
   if (node.id) {
     (0, _contracts.assertIsValidName)(node.id.name, node.isStrict() || context.env.isStrict());
   }
 
   (0, _contracts.assertAreValidArguments)(node.params, node.isStrict() || context.env.isStrict());
-}, _rules.Literal = function Literal(node, context) {
+}, _rules.Literal = function (node, context) {
   if (node.raw && (node.isStrict() || context.env.isStrict())) {
     if ((0, _native.isOctalLiteral)(node.raw, node.value)) {
       throw SyntaxError("Octal literals are not allowed in strict mode.");
     }
   }
-}, _rules.UpdateExpression = function UpdateExpression(node, context) {
+}, _rules.UpdateExpression = function (node, context) {
   validateAssignment(node.argument, node.isStrict() || context.env.isStrict(), context.env.ecmaVersion);
-}, _rules.WithStatement = function WithStatement(node, context) {
+}, _rules.WithStatement = function (node, context) {
   if (node.isStrict() || context.env.isStrict()) {
     throw SyntaxError("Strict mode code may not include a with statement");
   }
@@ -18297,7 +18281,7 @@ FunctionType.prototype.addPoison = function () {
   }
 
   if (this.isStrict()) {
-    var thrower = function thrower() {
+    var thrower = function () {
       throw TypeError();
     };
 
@@ -18756,7 +18740,7 @@ var orphans = (0, _create2.default)(null);
 var functionNameMatcher = /((?:get |set )?\[Symbol\.\w+\]|[^.]+)$/;
 
 function setOrphans(scope) {
-  var _loop = function _loop(typeName) {
+  var _loop = function (typeName) {
     var parent = scope.getValue(typeName);
     if (parent) {
       orphans[typeName].forEach(function (child) {
@@ -18816,7 +18800,7 @@ function ObjectFactory(env) {
 ObjectFactory.prototype = {
   constructor: ObjectFactory,
 
-  init: function init() {
+  init: function () {
     setOrphans(this.env);
     this.initialized = true;
   },
@@ -18827,7 +18811,7 @@ ObjectFactory.prototype = {
    * @param {any} value - The primitive value.
    * @returns {ObjectType} The primitive instance.
    */
-  createPrimitive: function createPrimitive(value) {
+  createPrimitive: function (value) {
     return this.create((0, _helpers.getNativeType)(value), value);
   },
 
@@ -18839,7 +18823,7 @@ ObjectFactory.prototype = {
    * @param {any} [value] - The primitive value.
    * @returns {ObjectType} The new instance.
    */
-  create: function create(typeName, value) {
+  create: function (typeName, value) {
     // the value is already wrapped in an object
     // this can happen if an exception is rethrown
     if (value && value instanceof _objectType.ObjectType) {
@@ -18933,7 +18917,7 @@ ObjectFactory.prototype = {
    * @param {ObjectType[]} [elements] - If provided, the elements will be added to the new array.
    * @returns {ArrayType} The array instance.
    */
-  createArray: function createArray(elements) {
+  createArray: function (elements) {
     var instance = this.create("Array");
 
     if (elements) {
@@ -18953,7 +18937,7 @@ ObjectFactory.prototype = {
    * new object.
    * @returns {ObjectType} The object instance.
    */
-  createObject: function createObject(ctor) {
+  createObject: function (ctor) {
     var instance = new _objectType.ObjectType();
 
     if (ctor !== null) {
@@ -18967,7 +18951,7 @@ ObjectFactory.prototype = {
     instance.init(this.env);
     return instance;
   },
-  createProxy: function createProxy(target, handler) {
+  createProxy: function (target, handler) {
     (0, _contracts.assertIsObject)(target, "Proxy");
     (0, _contracts.assertIsObject)(handler, "Proxy");
 
@@ -18983,7 +18967,7 @@ ObjectFactory.prototype = {
     instance.init(this.env);
     return instance;
   },
-  createArguments: function createArguments(args, callee, strict) {
+  createArguments: function (args, callee, strict) {
     var instance = new _argumentType.ArgumentType();
     var objectClass = this.env.global.getValue("Object");
 
@@ -19010,12 +18994,12 @@ ObjectFactory.prototype = {
 
     return instance;
   },
-  createIterator: function createIterator(iterable, proto) {
+  createIterator: function (iterable, proto) {
     var instance = new _iteratorType.IteratorType(iterable);
     instance.init(this.env, proto);
     return instance;
   },
-  createIteratorResult: function createIteratorResult(_ref2) {
+  createIteratorResult: function (_ref2) {
     var value = _ref2.value;
     var _ref2$done = _ref2.done;
     var done = _ref2$done === undefined ? false : _ref2$done;
@@ -19025,9 +19009,9 @@ ObjectFactory.prototype = {
     instance.defineProperty("value", { value: value || _primitiveType.UNDEFINED });
     return instance;
   },
-  createArrayFromSpecies: _regenerator2.default.mark(function createArrayFromSpecies(obj, length) {
+  createArrayFromSpecies: _regenerator2.default.mark(function _callee(obj, length) {
     var ctor, speciesKey, objCtor, speciesCtor, lengthValue;
-    return _regenerator2.default.wrap(function createArrayFromSpecies$(_context) {
+    return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -19061,11 +19045,11 @@ ObjectFactory.prototype = {
             return _context.stop();
         }
       }
-    }, createArrayFromSpecies, this);
+    }, _callee, this);
   }),
-  createFromSpeciesOrDefault: _regenerator2.default.mark(function createFromSpeciesOrDefault(obj, defaultCtor, args) {
+  createFromSpeciesOrDefault: _regenerator2.default.mark(function _callee2(obj, defaultCtor, args) {
     var speciesKey, ctor, species;
-    return _regenerator2.default.wrap(function createFromSpeciesOrDefault$(_context2) {
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -19110,7 +19094,7 @@ ObjectFactory.prototype = {
             return _context2.stop();
         }
       }
-    }, createFromSpeciesOrDefault, this);
+    }, _callee2, this);
   }),
 
 
@@ -19122,7 +19106,7 @@ ObjectFactory.prototype = {
    * @param {Object} [options] - Property values to be used for the prototype.
    * @returns {FunctionType} The function instance.
    */
-  createFunction: function createFunction(fnOrNode, proto) {
+  createFunction: function (fnOrNode, proto) {
     var _ref3 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
     var _ref3$configurable = _ref3.configurable;
@@ -19157,7 +19141,7 @@ ObjectFactory.prototype = {
     setProto("Function", instance, this);
     return instance;
   },
-  createClass: function createClass(fnOrNode, proto) {
+  createClass: function (fnOrNode, proto) {
     var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
     var name = _ref4.name;
@@ -19165,10 +19149,10 @@ ObjectFactory.prototype = {
 
     return this.createFunction(fnOrNode, proto, { configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name: name, homeObject: homeObject });
   },
-  createGetter: function createGetter(func, key) {
+  createGetter: function (func, key) {
     return this.createBuiltInFunction(func, 0, "get " + key);
   },
-  createSetter: function createSetter(func, key) {
+  createSetter: function (func, key) {
     return this.createBuiltInFunction(func, 1, "set " + key);
   },
 
@@ -19180,7 +19164,7 @@ ObjectFactory.prototype = {
    * @param {String} funcName - The name of the function.
    * @returns {NativeFunctionType} The function instance.
    */
-  createBuiltInFunction: function createBuiltInFunction(func, length, funcName) {
+  createBuiltInFunction: function (func, length, funcName) {
     // todo: change this to route to standard createFunction method with appropriate presets
     var instance = new _nativeFunctionType.NativeFunctionType(function () {
       if (this.isNew) {
@@ -19204,7 +19188,7 @@ ObjectFactory.prototype = {
 
     return instance;
   },
-  createThrower: function createThrower(message, thrower) {
+  createThrower: function (message, thrower) {
     this.throwers = this.throwers || (0, _create2.default)(null);
     if (message in this.throwers) {
       return this.throwers[message];
@@ -19253,10 +19237,6 @@ var _create = require("babel-runtime/core-js/object/create");
 
 var _create2 = _interopRequireDefault(_create);
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.ObjectType = ObjectType;
 
 var _operators = require("../utils/operators");
@@ -19272,7 +19252,7 @@ var _marked = [propertyIterator].map(_regenerator2.default.mark);
 var integerMatcher = /^\d+$/;
 
 function isSymbol(key) {
-  return key && (typeof key === "undefined" ? "undefined" : (0, _typeof3.default)(key)) === "object" && key.isSymbol;
+  return key && typeof key === "object" && key.isSymbol;
 }
 
 function getPropertySource(key) {
@@ -19404,13 +19384,13 @@ function ObjectType() {
 ObjectType.prototype = {
   constructor: ObjectType,
 
-  init: function init(env, proto, descriptor, strict) {
+  init: function (env, proto, descriptor, strict) {
     this[(0, _for2.default)("env")] = env;
   },
-  getPrototype: function getPrototype() {
+  getPrototype: function () {
     return this.proto || null;
   },
-  setPrototype: function setPrototype(proto) {
+  setPrototype: function (proto) {
     if (this.proto === proto) {
       return true;
     }
@@ -19434,7 +19414,7 @@ ObjectType.prototype = {
 
     return true;
   },
-  getProperty: function getProperty(key, receiver) {
+  getProperty: function (key, receiver) {
     receiver = receiver || this;
 
     var localKey = String(key);
@@ -19451,10 +19431,10 @@ ObjectType.prototype = {
 
     return undefined;
   },
-  getOwnProperty: function getOwnProperty(key) {
+  getOwnProperty: function (key) {
     return this[getPropertySource(key)][String(key)];
   },
-  getOwnPropertyKeys: function getOwnPropertyKeys(keyType) {
+  getOwnPropertyKeys: function (keyType) {
     var _this = this;
 
     var keys = [];
@@ -19478,14 +19458,14 @@ ObjectType.prototype = {
 
     return keys;
   },
-  isExtensible: function isExtensible() {
+  isExtensible: function () {
     return this.extensible;
   },
-  getIterator: function getIterator() {
+  getIterator: function () {
     var env = this[(0, _for2.default)("env")];
     return env.objectFactory.createIterator(propertyIterator(env, this));
   },
-  has: function has(key) {
+  has: function (key) {
     if (String(key) in this[getPropertySource(key)]) {
       return true;
     }
@@ -19497,10 +19477,10 @@ ObjectType.prototype = {
 
     return false;
   },
-  owns: function owns(key) {
+  owns: function (key) {
     return !!this.getOwnProperty(key);
   },
-  setValue: function setValue(key, value, receiver) {
+  setValue: function (key, value, receiver) {
     receiver = receiver || this;
 
     var descriptor = this.getProperty(key);
@@ -19552,7 +19532,7 @@ ObjectType.prototype = {
       writable: true
     }, false);
   },
-  defineProperty: function defineProperty(key, descriptor, throwOnError) {
+  defineProperty: function (key, descriptor, throwOnError) {
     if (this.isPrimitive) {
       if (throwOnError) {
         throw TypeError("Cannot define property: " + key + ", object is not extensible");
@@ -19585,7 +19565,7 @@ ObjectType.prototype = {
     this.version++;
     return true;
   },
-  deleteProperty: function deleteProperty(key, throwOnError) {
+  deleteProperty: function (key, throwOnError) {
     if (this.isPrimitive) {
       return false;
     }
@@ -19606,7 +19586,7 @@ ObjectType.prototype = {
     this.version++;
     return delete this[source][key];
   },
-  define: function define(key, value) {
+  define: function (key, value) {
     var _ref2 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
     var _ref2$configurable = _ref2.configurable;
@@ -19634,13 +19614,13 @@ ObjectType.prototype = {
     this[getPropertySource(key)][String(key)] = new _propertyDescriptor.PropertyDescriptor(this, descriptor, key);
     this.version++;
   },
-  remove: function remove(key) {
+  remove: function (key) {
     // this method is intended for external usage only - it provides a way to remove
     // properties even if they are not normally able to be deleted
     delete this[getPropertySource(key)][String(key)];
     this.version++;
   },
-  getValue: function getValue(key) {
+  getValue: function (key) {
     if (arguments.length > 0) {
       var property = this.getProperty(key);
       return property && property.getValue();
@@ -19648,14 +19628,14 @@ ObjectType.prototype = {
 
     return this;
   },
-  each: function each(func) {
+  each: function (func) {
     var _this2 = this;
 
     this.getOwnPropertyKeys().forEach(function (key) {
       func(_this2.getOwnProperty(key));
     });
   },
-  freeze: function freeze() {
+  freeze: function () {
     var _this3 = this;
 
     this.each(function (desc) {
@@ -19668,11 +19648,11 @@ ObjectType.prototype = {
 
     this.preventExtensions();
   },
-  preventExtensions: function preventExtensions() {
+  preventExtensions: function () {
     this.extensible = false;
     return true;
   },
-  seal: function seal() {
+  seal: function () {
     var _this4 = this;
 
     this.each(function (desc) {
@@ -19681,7 +19661,7 @@ ObjectType.prototype = {
 
     this.preventExtensions();
   },
-  toNative: function toNative() {
+  toNative: function () {
     if ("value" in this) {
       return this.value;
     }
@@ -19696,12 +19676,12 @@ ObjectType.prototype = {
 
     return unwrapped;
   },
-  toObject: function toObject() {
+  toObject: function () {
     return this;
   }
 };
 
-},{"../utils/operators":380,"./property-descriptor":369,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/object/keys":27,"babel-runtime/core-js/symbol/for":34,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],368:[function(require,module,exports){
+},{"../utils/operators":380,"./property-descriptor":369,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/object/keys":27,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37}],368:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -19710,10 +19690,6 @@ exports.NULL = exports.UNDEFINED = undefined;
 var _for = require("babel-runtime/core-js/symbol/for");
 
 var _for2 = _interopRequireDefault(_for);
-
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
 
 exports.PrimitiveType = PrimitiveType;
 
@@ -19730,7 +19706,7 @@ function PrimitiveType(value) {
 
   this.isPrimitive = true;
   this.value = value;
-  this.type = typeof value === "undefined" ? "undefined" : (0, _typeof3.default)(value);
+  this.type = typeof value;
 
   this.className = (0, _helpers.getNativeType)(value);
 }
@@ -19765,7 +19741,7 @@ PrimitiveType.prototype.toObject = function () {
 var UNDEFINED = exports.UNDEFINED = new PrimitiveType(undefined);
 var NULL = exports.NULL = new PrimitiveType(null);
 
-},{"../utils/helpers":378,"./object-type":367,"babel-runtime/core-js/symbol/for":34,"babel-runtime/helpers/typeof":36,"util":174}],369:[function(require,module,exports){
+},{"../utils/helpers":378,"./object-type":367,"babel-runtime/core-js/symbol/for":34,"util":174}],369:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -19816,11 +19792,11 @@ function PropertyDescriptor(base) {
 PropertyDescriptor.prototype = {
   constructor: PropertyDescriptor,
 
-  bind: function bind(obj) {
+  bind: function (obj) {
     this.base = obj;
     return this;
   },
-  update: function update(descriptor) {
+  update: function (descriptor) {
     for (var prop in descriptor) {
       if (hasOwn.call(descriptor, prop)) {
         this[prop] = descriptor[prop];
@@ -19837,7 +19813,7 @@ PropertyDescriptor.prototype = {
       this.get = this.getter = this.set = this.setter = undefined;
     }
   },
-  canUpdate: function canUpdate(descriptor) {
+  canUpdate: function (descriptor) {
     if (this.configurable) {
       return true;
     }
@@ -19884,7 +19860,7 @@ PropertyDescriptor.prototype = {
 
     return true;
   },
-  getValue: function getValue() {
+  getValue: function () {
     if (!this.initialized) {
       throw ReferenceError(this.key + " has not been initialized");
     }
@@ -19899,10 +19875,10 @@ PropertyDescriptor.prototype = {
 
     return undefined;
   },
-  canSetValue: function canSetValue(value) {
+  canSetValue: function (value) {
     return this.writable || !!this.setter || !this.initialized;
   },
-  setValue: function setValue(value) {
+  setValue: function (value) {
     if (!this.canSetValue()) {
       return;
     }
@@ -19915,10 +19891,10 @@ PropertyDescriptor.prototype = {
       (0, _async.exhaust)(this.setter.call(this.base, value));
     }
   },
-  hasValue: function hasValue() {
+  hasValue: function () {
     return !!this.value || !!this.getter;
   },
-  init: function init(value) {
+  init: function (value) {
     this.initialized = true;
     this.value = value;
   }
@@ -19932,10 +19908,6 @@ exports.__esModule = true;
 var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
 
 var _for = require("babel-runtime/core-js/symbol/for");
 
@@ -19993,7 +19965,7 @@ function getValueOrDefault(obj, key) {
 }
 
 function normalizeKey(env, key) {
-  if ((typeof key === "undefined" ? "undefined" : (0, _typeof3.default)(key)) !== "object") {
+  if (typeof key !== "object") {
     return env.objectFactory.createPrimitive(String(key));
   }
 
@@ -20506,7 +20478,7 @@ ProxyType.prototype.revoke = function () {
   this.revoked = true;
 };
 
-},{"../utils/async":375,"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"./object-type":367,"./primitive-type":368,"./property-descriptor":369,"babel-runtime/core-js/symbol/for":34,"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37,"util":174}],371:[function(require,module,exports){
+},{"../utils/async":375,"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"./object-type":367,"./primitive-type":368,"./property-descriptor":369,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37,"util":174}],371:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -20535,7 +20507,7 @@ RegexType.prototype.init = function (env) {
 
   ["source", "global", "ignoreCase", "multiline"].forEach(function (key) {
     if (env.ecmaVersion > 5) {
-      var getter = function getter() {
+      var getter = function () {
         return env.objectFactory.createPrimitive(this.source[key]);
       };
       var getterFunc = env.objectFactory.createGetter(getter, key);
@@ -21185,10 +21157,6 @@ var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.isThenable = isThenable;
 exports.map = map;
 exports.each = each;
@@ -21212,7 +21180,7 @@ function isThenable(obj) {
     return false;
   }
 
-  var type = typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj);
+  var type = typeof obj;
   if (type !== "object" && type !== "function") {
     return false;
   }
@@ -21226,7 +21194,7 @@ function isNextable(obj) {
     return false;
   }
 
-  return (typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) === "object" && typeof obj.next === "function";
+  return typeof obj === "object" && typeof obj.next === "function";
 }
 
 function map(arr, func) {
@@ -21285,7 +21253,7 @@ function each(arr, func) {
         case 2:
           aborted = false;
 
-          aborter = function aborter() {
+          aborter = function () {
             aborted = true;
           };
 
@@ -21392,6 +21360,17 @@ function exhaust(it, value) {
   var state = arguments.length <= 3 || arguments[3] === undefined ? "next" : arguments[3];
 
   while (it) {
+    if (typeof it[state] !== "function") {
+      value = it;
+
+      if (stack.length > 0) {
+        it = stack.pop();
+        continue;
+      }
+
+      break;
+    }
+
     var done = undefined;
 
     var _tryCatch = tryCatch(it, value, state);
@@ -21436,7 +21415,7 @@ function exhaust(it, value) {
   return value;
 }
 
-},{"babel-runtime/helpers/typeof":36,"babel-runtime/regenerator":37}],376:[function(require,module,exports){
+},{"babel-runtime/regenerator":37}],376:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -21724,18 +21703,11 @@ function isRegExp(obj) {
 "use strict";
 
 exports.__esModule = true;
-
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
 exports.getMethod = getMethod;
 exports.getNativeType = getNativeType;
 exports.createDataProperty = createDataProperty;
 
 var _checks = require("./checks");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var objectPattern = /\[object (\w+)\]/;
 var toString = Object.prototype.toString;
@@ -21764,7 +21736,7 @@ function getNativeType(obj) {
     return "Null";
   }
 
-  switch (typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) {
+  switch (typeof obj) {
     case "string":
       return "String";
 
@@ -21783,7 +21755,7 @@ function createDataProperty(obj, key, value, throwOnError) {
   obj.defineProperty(key, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
 }
 
-},{"./checks":376,"babel-runtime/helpers/typeof":36}],379:[function(require,module,exports){
+},{"./checks":376}],379:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -22509,7 +22481,7 @@ function pos(value) {
 var ops = (_ops = {
   // algorithms
 
-  areSame: function areSame(a, b) {
+  areSame: function (a, b) {
     if (a.type !== b.type) {
       return false;
     }
@@ -22535,7 +22507,7 @@ var ops = (_ops = {
 
     return a === b;
   },
-  areSameOrZero: function areSameOrZero(a, b) {
+  areSameOrZero: function (a, b) {
     if (a.type !== b.type) {
       return false;
     }
@@ -22556,9 +22528,9 @@ var ops = (_ops = {
 
     return a === b;
   },
-  coerciveEquals: _regenerator2.default.mark(function coerciveEquals(a, b) {
+  coerciveEquals: _regenerator2.default.mark(function _callee(a, b) {
     var primitiveA, primitiveB;
-    return _regenerator2.default.wrap(function coerciveEquals$(_context) {
+    return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -22632,11 +22604,11 @@ var ops = (_ops = {
             return _context.stop();
         }
       }
-    }, coerciveEquals, this);
+    }, _callee, this);
   }),
 
   /* eslint-enable eqeqeq */
-  strictEquals: function strictEquals(a, b) {
+  strictEquals: function (a, b) {
     if (a.isPrimitive && b.isPrimitive) {
       return a.value === b.value;
     }
@@ -22647,9 +22619,9 @@ var ops = (_ops = {
 
     return a === b;
   },
-  relationalCompare: _regenerator2.default.mark(function relationalCompare(a, b, leftFirst) {
+  relationalCompare: _regenerator2.default.mark(function _callee2(a, b, leftFirst) {
     var primitiveA, primitiveB;
-    return _regenerator2.default.wrap(function relationalCompare$(_context2) {
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -22713,10 +22685,10 @@ var ops = (_ops = {
             return _context2.stop();
         }
       }
-    }, relationalCompare, this);
+    }, _callee2, this);
   })
-}, _ops["=="] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context3) {
+}, _ops["=="] = _regenerator2.default.mark(function _callee3(a, b) {
+  return _regenerator2.default.wrap(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
@@ -22731,9 +22703,9 @@ var ops = (_ops = {
           return _context3.stop();
       }
     }
-  }, _, this);
-}), _ops["!="] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context4) {
+  }, _callee3, this);
+}), _ops["!="] = _regenerator2.default.mark(function _callee4(a, b) {
+  return _regenerator2.default.wrap(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
         case 0:
@@ -22748,9 +22720,9 @@ var ops = (_ops = {
           return _context4.stop();
       }
     }
-  }, _, this);
-}), _ops["==="] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context5) {
+  }, _callee4, this);
+}), _ops["==="] = _regenerator2.default.mark(function _callee5(a, b) {
+  return _regenerator2.default.wrap(function _callee5$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
         case 0:
@@ -22765,9 +22737,9 @@ var ops = (_ops = {
           return _context5.stop();
       }
     }
-  }, _, this);
-}), _ops["!=="] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context6) {
+  }, _callee5, this);
+}), _ops["!=="] = _regenerator2.default.mark(function _callee6(a, b) {
+  return _regenerator2.default.wrap(function _callee6$(_context6) {
     while (1) {
       switch (_context6.prev = _context6.next) {
         case 0:
@@ -22782,10 +22754,10 @@ var ops = (_ops = {
           return _context6.stop();
       }
     }
-  }, _, this);
-}), _ops["+"] = _regenerator2.default.mark(function _(a, b) {
+  }, _callee6, this);
+}), _ops["+"] = _regenerator2.default.mark(function _callee7(a, b) {
   var aa, bb, convertType;
-  return _regenerator2.default.wrap(function _$(_context7) {
+  return _regenerator2.default.wrap(function _callee7$(_context7) {
     while (1) {
       switch (_context7.prev = _context7.next) {
         case 0:
@@ -22824,9 +22796,9 @@ var ops = (_ops = {
           return _context7.stop();
       }
     }
-  }, _, this);
-}), _ops["-"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context8) {
+  }, _callee7, this);
+}), _ops["-"] = _regenerator2.default.mark(function _callee8(a, b) {
+  return _regenerator2.default.wrap(function _callee8$(_context8) {
     while (1) {
       switch (_context8.prev = _context8.next) {
         case 0:
@@ -22847,9 +22819,9 @@ var ops = (_ops = {
           return _context8.stop();
       }
     }
-  }, _, this);
-}), _ops["/"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context9) {
+  }, _callee8, this);
+}), _ops["/"] = _regenerator2.default.mark(function _callee9(a, b) {
+  return _regenerator2.default.wrap(function _callee9$(_context9) {
     while (1) {
       switch (_context9.prev = _context9.next) {
         case 0:
@@ -22870,9 +22842,9 @@ var ops = (_ops = {
           return _context9.stop();
       }
     }
-  }, _, this);
-}), _ops["*"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context10) {
+  }, _callee9, this);
+}), _ops["*"] = _regenerator2.default.mark(function _callee10(a, b) {
+  return _regenerator2.default.wrap(function _callee10$(_context10) {
     while (1) {
       switch (_context10.prev = _context10.next) {
         case 0:
@@ -22893,9 +22865,9 @@ var ops = (_ops = {
           return _context10.stop();
       }
     }
-  }, _, this);
-}), _ops["%"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context11) {
+  }, _callee10, this);
+}), _ops["%"] = _regenerator2.default.mark(function _callee11(a, b) {
+  return _regenerator2.default.wrap(function _callee11$(_context11) {
     while (1) {
       switch (_context11.prev = _context11.next) {
         case 0:
@@ -22916,9 +22888,9 @@ var ops = (_ops = {
           return _context11.stop();
       }
     }
-  }, _, this);
-}), _ops["<<"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context12) {
+  }, _callee11, this);
+}), _ops["<<"] = _regenerator2.default.mark(function _callee12(a, b) {
+  return _regenerator2.default.wrap(function _callee12$(_context12) {
     while (1) {
       switch (_context12.prev = _context12.next) {
         case 0:
@@ -22939,9 +22911,9 @@ var ops = (_ops = {
           return _context12.stop();
       }
     }
-  }, _, this);
-}), _ops[">>"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context13) {
+  }, _callee12, this);
+}), _ops[">>"] = _regenerator2.default.mark(function _callee13(a, b) {
+  return _regenerator2.default.wrap(function _callee13$(_context13) {
     while (1) {
       switch (_context13.prev = _context13.next) {
         case 0:
@@ -22962,9 +22934,9 @@ var ops = (_ops = {
           return _context13.stop();
       }
     }
-  }, _, this);
-}), _ops[">>>"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context14) {
+  }, _callee13, this);
+}), _ops[">>>"] = _regenerator2.default.mark(function _callee14(a, b) {
+  return _regenerator2.default.wrap(function _callee14$(_context14) {
     while (1) {
       switch (_context14.prev = _context14.next) {
         case 0:
@@ -22985,9 +22957,9 @@ var ops = (_ops = {
           return _context14.stop();
       }
     }
-  }, _, this);
-}), _ops["|"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context15) {
+  }, _callee14, this);
+}), _ops["|"] = _regenerator2.default.mark(function _callee15(a, b) {
+  return _regenerator2.default.wrap(function _callee15$(_context15) {
     while (1) {
       switch (_context15.prev = _context15.next) {
         case 0:
@@ -23008,9 +22980,9 @@ var ops = (_ops = {
           return _context15.stop();
       }
     }
-  }, _, this);
-}), _ops["^"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context16) {
+  }, _callee15, this);
+}), _ops["^"] = _regenerator2.default.mark(function _callee16(a, b) {
+  return _regenerator2.default.wrap(function _callee16$(_context16) {
     while (1) {
       switch (_context16.prev = _context16.next) {
         case 0:
@@ -23031,9 +23003,9 @@ var ops = (_ops = {
           return _context16.stop();
       }
     }
-  }, _, this);
-}), _ops["&"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context17) {
+  }, _callee16, this);
+}), _ops["&"] = _regenerator2.default.mark(function _callee17(a, b) {
+  return _regenerator2.default.wrap(function _callee17$(_context17) {
     while (1) {
       switch (_context17.prev = _context17.next) {
         case 0:
@@ -23054,9 +23026,9 @@ var ops = (_ops = {
           return _context17.stop();
       }
     }
-  }, _, this);
-}), _ops["<"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context18) {
+  }, _callee17, this);
+}), _ops["<"] = _regenerator2.default.mark(function _callee18(a, b) {
+  return _regenerator2.default.wrap(function _callee18$(_context18) {
     while (1) {
       switch (_context18.prev = _context18.next) {
         case 0:
@@ -23072,9 +23044,9 @@ var ops = (_ops = {
           return _context18.stop();
       }
     }
-  }, _, this);
-}), _ops["<="] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context19) {
+  }, _callee18, this);
+}), _ops["<="] = _regenerator2.default.mark(function _callee19(a, b) {
+  return _regenerator2.default.wrap(function _callee19$(_context19) {
     while (1) {
       switch (_context19.prev = _context19.next) {
         case 0:
@@ -23090,9 +23062,9 @@ var ops = (_ops = {
           return _context19.stop();
       }
     }
-  }, _, this);
-}), _ops[">"] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context20) {
+  }, _callee19, this);
+}), _ops[">"] = _regenerator2.default.mark(function _callee20(a, b) {
+  return _regenerator2.default.wrap(function _callee20$(_context20) {
     while (1) {
       switch (_context20.prev = _context20.next) {
         case 0:
@@ -23108,9 +23080,9 @@ var ops = (_ops = {
           return _context20.stop();
       }
     }
-  }, _, this);
-}), _ops[">="] = _regenerator2.default.mark(function _(a, b) {
-  return _regenerator2.default.wrap(function _$(_context21) {
+  }, _callee20, this);
+}), _ops[">="] = _regenerator2.default.mark(function _callee21(a, b) {
+  return _regenerator2.default.wrap(function _callee21$(_context21) {
     while (1) {
       switch (_context21.prev = _context21.next) {
         case 0:
@@ -23126,10 +23098,10 @@ var ops = (_ops = {
           return _context21.stop();
       }
     }
-  }, _, this);
-}), _ops["in"] = _regenerator2.default.mark(function _in(a, b) {
+  }, _callee21, this);
+}), _ops["in"] = _regenerator2.default.mark(function _callee22(a, b) {
   var key, bString;
-  return _regenerator2.default.wrap(function _in$(_context22) {
+  return _regenerator2.default.wrap(function _callee22$(_context22) {
     while (1) {
       switch (_context22.prev = _context22.next) {
         case 0:
@@ -23159,8 +23131,8 @@ var ops = (_ops = {
           return _context22.stop();
       }
     }
-  }, _in, this);
-}), _ops["instanceof"] = function _instanceof(a, b) {
+  }, _callee22, this);
+}), _ops["instanceof"] = function (a, b) {
   if (b.type !== "function") {
     throw TypeError("Expecting a function in instanceof check, but got " + b.type);
   }

@@ -90,6 +90,17 @@ function tryCatch (it, priorValue, method) {
  */
 export function exhaust (it, value, stack = [], state = "next") {
   while (it) {
+    if (typeof it[state] !== "function") {
+      value = it;
+      
+      if (stack.length > 0) {
+        it = stack.pop();
+        continue;
+      }
+      
+      break;
+    }
+    
     let done;
     ({ state, done, value } = tryCatch(it, value, state));
 
