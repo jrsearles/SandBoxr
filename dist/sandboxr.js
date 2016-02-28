@@ -1,5 +1,5 @@
 /**
- * SandBoxr JavaScript library v0.15.2
+ * SandBoxr JavaScript library v0.16.0
  * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr
  * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
@@ -16,7 +16,7 @@ var _env = require("./src/env");
 
 var _src = require("./src");
 
-var version = exports.version = "0.15.2";
+var version = exports.version = "0.16.0";
 
 /**
 	* Creates an environment instance.

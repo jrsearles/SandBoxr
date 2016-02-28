@@ -1,7 +1,7 @@
 import { Environment } from "./src/env";
 import { Sandbox } from "./src";
 
-export const version = "0.15.2";
+export const version = "0.16.0";
 
 /**
 	* Creates an environment instance.
