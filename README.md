@@ -130,16 +130,45 @@ Default: `false`
 
 Allows `debugger` statements to be used. When enabled a `debugger` statement is generated when the statement is hit. (Otherwise `debugger` statements are ignored.)
 
-### API
+## API
 
-`SandBoxr.createEnvironment()`: Create an execution environment. Returns an Environment instance.
+`SandBoxr.createEnvironment(): Environment` - Create an execution environment. Returns an Environment instance.
 
-`SandBoxr.create(AST: node, Object: options - optional)`: Create a new sandbox, optionally passing in options. Returns a Sandbox instance.
+`SandBoxr.create(node: AST, options: object?): SandBox` - Create a new sandbox, optionally passing in options. Returns a Sandbox instance.
 
-`SandBox.prototype.execute(Environment: env - optional)`: Executes the node using the provided environment. If no environment is provided a new one is created using the provided options. The function will return the result of the execution. If async code is executed a Promise will be returned that will resolve to the execution result.
+#### Sandbox
+`SandBox.prototype.execute(env: Environment?): ObjectType|Promise` - Executes the node using the provided environment. If no environment is provided a new one is created using the provided options. The function will return the result of the execution. If async code is executed a Promise will be returned that will resolve to the execution result.
 
-`SandBox.prototype.resolve(Environment: env - optional)`: Resolve calls the execute method but always returns a promise.
+`SandBox.prototype.resolve(env: Environment?): Promise` - Resolve calls the execute method but always returns a promise.
+
+#### Environment
+
+`Envionment.init(options: object?): void` - Initializes the environment using the optionally provided options.
+
+`Environment.prototype.createVariable(key: string, kind: string = "var"): Reference` - Creates a new variable binding in the current scope. The kind argument is optional and indicates the kind of binding that is created. Available options are "var" (the default), "let", "const", "function", and "class". Returns a Reference.
+
+`Environment.prototype.getVariable(key: string): Reference` - Traverses up the scope chain, returning the matching variable Reference if found. (`null` if the variable is not found.)
  
+`Environment.prototype.isStrict(): boolean` - Returns a boolean indicating whether the current scope is in strict mode or not.
+
+#### Reference
+`Reference.prototype.getValue(): ObjectType` - Returns the value of the reference. The return type is ObjectType.
+
+`Reference.prototype.setValue(value: ObjectType, throwOnError: boolean = false): boolean` - Sets the value of the reference. Returns a boolean indicating whether the operation failed or succeeded. (If `throwOnError` is true a failed operation will throw.)
+
+`Reference.prototype.delete(): boolean` - Deletes the reference from the current scope (or object if a property reference). Returns a boolean indicating whether the operation passed.
+
+#### ObjectFactory
+An instance of an ObjectFactory is attached to the environment as `objectFactory`. This factory is used to create instances.
+
+`ObjectFactory.prototype.createPrimitive(value: any): ObjectType` - Creates an instance based on the primitive value passed in.
+
+`ObjectFactory.prototype.create(type: string, value: any?): ObjectType` - Creates an instance of the given type, and uses the primitive value if passed in.
+
+`ObjectFactory.prototype.createArray(elements: Array<ObjectType>?): ArrayType` - Creates an array instance and populates it with the provided elements if passed in.
+
+`ObjectFactory.prototype.createObject(ctor: FunctionType|null?): FunctionType` - Creates an object instance. If a constructor function is provided, the prototype is set using that function. If `null` is passed in the object will be created with no prototype. If no object is passed in the default Object prototype is used.
+
 #### Extending available APIs
 
 To add additional objects or functions into the execution function, create the environment and add them:
