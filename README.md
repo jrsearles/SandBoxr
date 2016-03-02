@@ -2,7 +2,7 @@
 
 [![NPM Version](https://img.shields.io/npm/v/sandboxr.svg)](https://www.npmjs.org/package/sandboxr)
 
-> A fully compliant [5.1 ECMAScript](http://www.ecma-international.org/ecma-262/5.1/index.html) runner. (And mostly [6.0 ECMAScript compliant](es6-kangax-compat.md) _SandBoxr_ runs JavaScript in a sandboxed environment.
+> A fully compliant [5.1 ECMAScript](http://www.ecma-international.org/ecma-262/5.1/index.html) runner. (And mostly [6.0 ECMAScript compliant](es6-kangax-compat.md)) _SandBoxr_ runs JavaScript in a sandboxed environment.
 -----
 
 ## Purpose
