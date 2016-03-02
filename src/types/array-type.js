@@ -131,7 +131,7 @@ ArrayType.prototype.toNative = function () {
   // it's an edge case but we may want to address it
   for (let index in this.properties) {
     if (this.properties[index].enumerable) {
-      arr[Number(index)] = this.getValue(index).toNative();
+      arr[index] = this.getValue(index).toNative();
     }
   }
 

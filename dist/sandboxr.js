@@ -1,5 +1,5 @@
 /**
- * SandBoxr JavaScript library v0.16.0
+ * SandBoxr JavaScript library v0.16.1
  * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr
  * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
@@ -16,15 +16,14 @@ var _env = require("./src/env");
 
 var _src = require("./src");
 
-var version = exports.version = "0.16.0";
+var version = exports.version = "0.16.1";
 
 /**
 	* Creates an environment instance.
-	* @param {Object} [options] The options to use with the environment.
 	* @returns {Object} The environment instance.
 	*/
-function createEnvironment(options) {
-	return new _env.Environment(options);
+function createEnvironment() {
+	return new _env.Environment();
 }
 
 /**
@@ -18033,7 +18032,7 @@ ArrayType.prototype.toNative = function () {
   // it's an edge case but we may want to address it
   for (var index in this.properties) {
     if (this.properties[index].enumerable) {
-      arr[Number(index)] = this.getValue(index).toNative();
+      arr[index] = this.getValue(index).toNative();
     }
   }
 

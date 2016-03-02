@@ -1,15 +1,14 @@
 import { Environment } from "./src/env";
 import { Sandbox } from "./src";
 
-export const version = "0.16.0";
+export const version = "0.16.1";
 
 /**
 	* Creates an environment instance.
-	* @param {Object} [options] The options to use with the environment.
 	* @returns {Object} The environment instance.
 	*/
-export function createEnvironment (options) {
-  return new Environment(options);
+export function createEnvironment () {
+  return new Environment();
 }
 
 /**

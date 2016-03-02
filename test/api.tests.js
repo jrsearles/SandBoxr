@@ -113,7 +113,7 @@ describe("API", () => {
     expect(result.toNative().foo).to.be.true;
   });
 
-  it("should allow a primitive to be toNativeped", () => {
+  it("should allow a primitive to be converted toNative", () => {
     let ast = parser.parse("(1);");
     let sandbox = SandBoxr.create(ast);
     let result = sandbox.execute();
@@ -121,7 +121,15 @@ describe("API", () => {
     expect(result.toNative()).to.equal(1);
   });
 
-  it("should allow an array to be toNativeped", () => {
+  it("should allow an array to be converted toNative", () => {
+    let ast = parser.parse("var a = [1,2,3];a.foo = 'bar';a;");
+    let sandbox = SandBoxr.create(ast);
+    let result = sandbox.execute();
+
+    expect(result.toNative().foo).to.equal("bar");
+  });
+
+  it("should copy own properties on array", () => {
     let ast = parser.parse("([1,2,3]);");
     let sandbox = SandBoxr.create(ast);
     let result = sandbox.execute();
