@@ -132,7 +132,7 @@ Allows `debugger` statements to be used. When enabled a `debugger` statement is 
 
 ### API
 
-`SandBoxr.createEnvironment(Object: options - optional)`: Create an execution environment, optionally passing in options. Returns an Environment instance.
+`SandBoxr.createEnvironment()`: Create an execution environment. Returns an Environment instance.
 
 `SandBoxr.create(AST: node, Object: options - optional)`: Create a new sandbox, optionally passing in options. Returns a Sandbox instance.
 
