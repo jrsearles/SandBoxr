@@ -175,6 +175,7 @@ To add additional objects or functions into the execution function, create the e
 
 ```js
 var env = SandBoxr.createEnvironment();
+env.init();
 
 // add a primitive variable
 var a = env.createVariable("a");
