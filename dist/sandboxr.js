@@ -1,5 +1,5 @@
 /**
- * SandBoxr JavaScript library v0.16.1
+ * SandBoxr JavaScript library v0.16.2
  * (c) Joshua Searles - https://github.com/jrsearles/SandBoxr
  * License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
  */
@@ -36,935 +36,328 @@ function create(ast, options) {
 	return new _src.Sandbox(ast, options);
 }
 
-},{"./src":350,"./src/env":177}],2:[function(require,module,exports){
+},{"./src":365,"./src/env":192}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/get-iterator"), __esModule: true };
-},{"core-js/library/fn/get-iterator":39}],3:[function(require,module,exports){
+},{"core-js/library/fn/get-iterator":35}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
-},{"core-js/library/fn/json/stringify":40}],4:[function(require,module,exports){
+},{"core-js/library/fn/json/stringify":36}],4:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/map"), __esModule: true };
-},{"core-js/library/fn/map":41}],5:[function(require,module,exports){
+},{"core-js/library/fn/map":37}],5:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/acosh"), __esModule: true };
-},{"core-js/library/fn/math/acosh":42}],6:[function(require,module,exports){
+},{"core-js/library/fn/math/acosh":38}],6:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/asinh"), __esModule: true };
-},{"core-js/library/fn/math/asinh":43}],7:[function(require,module,exports){
+},{"core-js/library/fn/math/asinh":39}],7:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/atanh"), __esModule: true };
-},{"core-js/library/fn/math/atanh":44}],8:[function(require,module,exports){
+},{"core-js/library/fn/math/atanh":40}],8:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/cbrt"), __esModule: true };
-},{"core-js/library/fn/math/cbrt":45}],9:[function(require,module,exports){
+},{"core-js/library/fn/math/cbrt":41}],9:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/clz32"), __esModule: true };
-},{"core-js/library/fn/math/clz32":46}],10:[function(require,module,exports){
+},{"core-js/library/fn/math/clz32":42}],10:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/cosh"), __esModule: true };
-},{"core-js/library/fn/math/cosh":47}],11:[function(require,module,exports){
+},{"core-js/library/fn/math/cosh":43}],11:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/expm1"), __esModule: true };
-},{"core-js/library/fn/math/expm1":48}],12:[function(require,module,exports){
+},{"core-js/library/fn/math/expm1":44}],12:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/fround"), __esModule: true };
-},{"core-js/library/fn/math/fround":49}],13:[function(require,module,exports){
+},{"core-js/library/fn/math/fround":45}],13:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/hypot"), __esModule: true };
-},{"core-js/library/fn/math/hypot":50}],14:[function(require,module,exports){
+},{"core-js/library/fn/math/hypot":46}],14:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/imul"), __esModule: true };
-},{"core-js/library/fn/math/imul":51}],15:[function(require,module,exports){
+},{"core-js/library/fn/math/imul":47}],15:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/log10"), __esModule: true };
-},{"core-js/library/fn/math/log10":52}],16:[function(require,module,exports){
+},{"core-js/library/fn/math/log10":48}],16:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/log1p"), __esModule: true };
-},{"core-js/library/fn/math/log1p":53}],17:[function(require,module,exports){
+},{"core-js/library/fn/math/log1p":49}],17:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/log2"), __esModule: true };
-},{"core-js/library/fn/math/log2":54}],18:[function(require,module,exports){
+},{"core-js/library/fn/math/log2":50}],18:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/sign"), __esModule: true };
-},{"core-js/library/fn/math/sign":55}],19:[function(require,module,exports){
+},{"core-js/library/fn/math/sign":51}],19:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/sinh"), __esModule: true };
-},{"core-js/library/fn/math/sinh":56}],20:[function(require,module,exports){
+},{"core-js/library/fn/math/sinh":52}],20:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/tanh"), __esModule: true };
-},{"core-js/library/fn/math/tanh":57}],21:[function(require,module,exports){
+},{"core-js/library/fn/math/tanh":53}],21:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/math/trunc"), __esModule: true };
-},{"core-js/library/fn/math/trunc":58}],22:[function(require,module,exports){
+},{"core-js/library/fn/math/trunc":54}],22:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/number/epsilon"), __esModule: true };
-},{"core-js/library/fn/number/epsilon":59}],23:[function(require,module,exports){
+},{"core-js/library/fn/number/epsilon":55}],23:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/number/max-safe-integer"), __esModule: true };
-},{"core-js/library/fn/number/max-safe-integer":60}],24:[function(require,module,exports){
+},{"core-js/library/fn/number/max-safe-integer":56}],24:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/number/min-safe-integer"), __esModule: true };
-},{"core-js/library/fn/number/min-safe-integer":61}],25:[function(require,module,exports){
+},{"core-js/library/fn/number/min-safe-integer":57}],25:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/assign"), __esModule: true };
-},{"core-js/library/fn/object/assign":62}],26:[function(require,module,exports){
+},{"core-js/library/fn/object/assign":58}],26:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/create"), __esModule: true };
-},{"core-js/library/fn/object/create":63}],27:[function(require,module,exports){
+},{"core-js/library/fn/object/create":59}],27:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/keys"), __esModule: true };
-},{"core-js/library/fn/object/keys":64}],28:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/set-prototype-of"), __esModule: true };
-},{"core-js/library/fn/object/set-prototype-of":65}],29:[function(require,module,exports){
+},{"core-js/library/fn/object/keys":60}],28:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/promise"), __esModule: true };
-},{"core-js/library/fn/promise":66}],30:[function(require,module,exports){
+},{"core-js/library/fn/promise":61}],29:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/string/code-point-at"), __esModule: true };
-},{"core-js/library/fn/string/code-point-at":67}],31:[function(require,module,exports){
+},{"core-js/library/fn/string/code-point-at":62}],30:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/string/from-code-point"), __esModule: true };
-},{"core-js/library/fn/string/from-code-point":68}],32:[function(require,module,exports){
+},{"core-js/library/fn/string/from-code-point":63}],31:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/string/repeat"), __esModule: true };
-},{"core-js/library/fn/string/repeat":69}],33:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/symbol"), __esModule: true };
-},{"core-js/library/fn/symbol":71}],34:[function(require,module,exports){
+},{"core-js/library/fn/string/repeat":64}],32:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol/for"), __esModule: true };
-},{"core-js/library/fn/symbol/for":70}],35:[function(require,module,exports){
+},{"core-js/library/fn/symbol/for":65}],33:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol/iterator"), __esModule: true };
-},{"core-js/library/fn/symbol/iterator":72}],36:[function(require,module,exports){
-"use strict";
+},{"core-js/library/fn/symbol/iterator":66}],34:[function(require,module,exports){
+module.exports = require("regenerator-runtime");
 
-var _typeof = typeof _Symbol === "function" && typeof _Symbol$iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof _Symbol === "function" && obj.constructor === _Symbol ? "symbol" : typeof obj; };
-
-exports.__esModule = true;
-
-var _iterator = require("../core-js/symbol/iterator");
-
-var _iterator2 = _interopRequireDefault(_iterator);
-
-var _symbol = require("../core-js/symbol");
-
-var _symbol2 = _interopRequireDefault(_symbol);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.default) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof(obj);
-} : function (obj) {
-  return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
-};
-},{"../core-js/symbol":33,"../core-js/symbol/iterator":35}],37:[function(require,module,exports){
-(function (global){
-// This method of obtaining a reference to the global object needs to be
-// kept identical to the way it is obtained in runtime.js
-var g =
-  typeof global === "object" ? global :
-  typeof window === "object" ? window :
-  typeof self === "object" ? self : this;
-
-// Use `getOwnPropertyNames` because not all browsers support calling
-// `hasOwnProperty` on the global `self` object in a worker. See #183.
-var hadRuntime = g.regeneratorRuntime &&
-  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
-
-// Save the old regeneratorRuntime in case it needs to be restored later.
-var oldRuntime = hadRuntime && g.regeneratorRuntime;
-
-// Force reevalutation of runtime.js.
-g.regeneratorRuntime = undefined;
-
-module.exports = require("./runtime");
-
-if (hadRuntime) {
-  // Restore the original runtime.
-  g.regeneratorRuntime = oldRuntime;
-} else {
-  // Remove the global property added by runtime.js.
-  try {
-    delete g.regeneratorRuntime;
-  } catch(e) {
-    g.regeneratorRuntime = undefined;
-  }
-}
-
-module.exports = { "default": module.exports, __esModule: true };
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./runtime":38}],38:[function(require,module,exports){
-(function (process,global){
-"use strict";
-
-var _promise = require("../core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-var _setPrototypeOf = require("../core-js/object/set-prototype-of");
-
-var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
-
-var _create = require("../core-js/object/create");
-
-var _create2 = _interopRequireDefault(_create);
-
-var _typeof2 = require("../helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-var _iterator = require("../core-js/symbol/iterator");
-
-var _iterator2 = _interopRequireDefault(_iterator);
-
-var _symbol = require("../core-js/symbol");
-
-var _symbol2 = _interopRequireDefault(_symbol);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
- * additional grant of patent rights can be found in the PATENTS file in
- * the same directory.
- */
-
-!function (global) {
-  "use strict";
-
-  var hasOwn = Object.prototype.hasOwnProperty;
-  var undefined; // More compressible than void 0.
-  var iteratorSymbol = typeof _symbol2.default === "function" && _iterator2.default || "@@iterator";
-
-  var inModule = (typeof module === "undefined" ? "undefined" : (0, _typeof3.default)(module)) === "object";
-  var runtime = global.regeneratorRuntime;
-  if (runtime) {
-    if (inModule) {
-      // If regeneratorRuntime is defined globally and we're in a module,
-      // make the exports object identical to regeneratorRuntime.
-      module.exports = runtime;
-    }
-    // Don't bother evaluating the rest of this file if the runtime was
-    // already defined globally.
-    return;
-  }
-
-  // Define the runtime globally (as expected by generated code) as either
-  // module.exports (if we're in a module) or a new, empty object.
-  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    // If outerFn provided, then outerFn.prototype instanceof Generator.
-    var generator = (0, _create2.default)((outerFn || Generator).prototype);
-    var context = new Context(tryLocsList || []);
-
-    // The ._invoke method unifies the implementations of the .next,
-    // .throw, and .return methods.
-    generator._invoke = makeInvokeMethod(innerFn, self, context);
-
-    return generator;
-  }
-  runtime.wrap = wrap;
-
-  // Try/catch helper to minimize deoptimizations. Returns a completion
-  // record like context.tryEntries[i].completion. This interface could
-  // have been (and was previously) designed to take a closure to be
-  // invoked without arguments, but in all the cases we care about we
-  // already have an existing method we want to call, so there's no need
-  // to create a new function object. We can even get away with assuming
-  // the method takes exactly one argument, since that happens to be true
-  // in every case, so we don't have to touch the arguments object. The
-  // only additional allocation required is the completion record, which
-  // has a stable shape and so hopefully should be cheap to allocate.
-  function tryCatch(fn, obj, arg) {
-    try {
-      return { type: "normal", arg: fn.call(obj, arg) };
-    } catch (err) {
-      return { type: "throw", arg: err };
-    }
-  }
-
-  var GenStateSuspendedStart = "suspendedStart";
-  var GenStateSuspendedYield = "suspendedYield";
-  var GenStateExecuting = "executing";
-  var GenStateCompleted = "completed";
-
-  // Returning this object from the innerFn has the same effect as
-  // breaking out of the dispatch switch statement.
-  var ContinueSentinel = {};
-
-  // Dummy constructor functions that we use as the .constructor and
-  // .constructor.prototype properties for functions that return Generator
-  // objects. For full spec compliance, you may wish to configure your
-  // minifier not to mangle the names of these two functions.
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-
-  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
-  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunction.displayName = "GeneratorFunction";
-
-  // Helper for defining the .next, .throw, and .return methods of the
-  // Iterator interface in terms of a single ._invoke method.
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function (method) {
-      prototype[method] = function (arg) {
-        return this._invoke(method, arg);
-      };
-    });
-  }
-
-  runtime.isGeneratorFunction = function (genFun) {
-    var ctor = typeof genFun === "function" && genFun.constructor;
-    return ctor ? ctor === GeneratorFunction ||
-    // For the native GeneratorFunction constructor, the best we can
-    // do is to check its .name property.
-    (ctor.displayName || ctor.name) === "GeneratorFunction" : false;
-  };
-
-  runtime.mark = function (genFun) {
-    if (_setPrototypeOf2.default) {
-      (0, _setPrototypeOf2.default)(genFun, GeneratorFunctionPrototype);
-    } else {
-      genFun.__proto__ = GeneratorFunctionPrototype;
-    }
-    genFun.prototype = (0, _create2.default)(Gp);
-    return genFun;
-  };
-
-  // Within the body of any async function, `await x` is transformed to
-  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-  // `value instanceof AwaitArgument` to determine if the yielded value is
-  // meant to be awaited. Some may consider the name of this method too
-  // cutesy, but they are curmudgeons.
-  runtime.awrap = function (arg) {
-    return new AwaitArgument(arg);
-  };
-
-  function AwaitArgument(arg) {
-    this.arg = arg;
-  }
-
-  function AsyncIterator(generator) {
-    // This invoke function is written in a style that assumes some
-    // calling function (or Promise) will handle exceptions.
-    function invoke(method, arg) {
-      var result = generator[method](arg);
-      var value = result.value;
-      return value instanceof AwaitArgument ? _promise2.default.resolve(value.arg).then(invokeNext, invokeThrow) : _promise2.default.resolve(value).then(function (unwrapped) {
-        // When a yielded Promise is resolved, its final value becomes
-        // the .value of the Promise<{value,done}> result for the
-        // current iteration. If the Promise is rejected, however, the
-        // result for this iteration will be rejected with the same
-        // reason. Note that rejections of yielded Promises are not
-        // thrown back into the generator function, as is the case
-        // when an awaited Promise is rejected. This difference in
-        // behavior between yield and await is important, because it
-        // allows the consumer to decide what to do with the yielded
-        // rejection (swallow it and continue, manually .throw it back
-        // into the generator, abandon iteration, whatever). With
-        // await, by contrast, there is no opportunity to examine the
-        // rejection reason outside the generator function, so the
-        // only option is to throw it from the await expression, and
-        // let the generator function handle the exception.
-        result.value = unwrapped;
-        return result;
-      });
-    }
-
-    if ((typeof process === "undefined" ? "undefined" : (0, _typeof3.default)(process)) === "object" && process.domain) {
-      invoke = process.domain.bind(invoke);
-    }
-
-    var invokeNext = invoke.bind(generator, "next");
-    var invokeThrow = invoke.bind(generator, "throw");
-    var invokeReturn = invoke.bind(generator, "return");
-    var previousPromise;
-
-    function enqueue(method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return invoke(method, arg);
-      }
-
-      return previousPromise =
-      // If enqueue has been called before, then we want to wait until
-      // all previous Promises have been resolved before calling invoke,
-      // so that results are always delivered in the correct order. If
-      // enqueue has not been called before, then it is important to
-      // call invoke immediately, without waiting on a callback to fire,
-      // so that the async generator function has the opportunity to do
-      // any necessary setup in a predictable way. This predictability
-      // is why the Promise constructor synchronously invokes its
-      // executor callback, and why async functions synchronously
-      // execute code before the first await. Since we implement simple
-      // async functions in terms of async generators, it is especially
-      // important to get this right, even though it requires care.
-      previousPromise ? previousPromise.then(callInvokeWithMethodAndArg,
-      // Avoid propagating failures to Promises returned by later
-      // invocations of the iterator.
-      callInvokeWithMethodAndArg) : new _promise2.default(function (resolve) {
-        resolve(callInvokeWithMethodAndArg());
-      });
-    }
-
-    // Define the unified helper method that is used to implement .next,
-    // .throw, and .return (see defineIteratorMethods).
-    this._invoke = enqueue;
-  }
-
-  defineIteratorMethods(AsyncIterator.prototype);
-
-  // Note that simple async functions are implemented on top of
-  // AsyncIterator objects; they just return a Promise for the value of
-  // the final result produced by the iterator.
-  runtime.async = function (innerFn, outerFn, self, tryLocsList) {
-    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList));
-
-    return runtime.isGeneratorFunction(outerFn) ? iter // If outerFn is a generator, return the full iterator.
-    : iter.next().then(function (result) {
-      return result.done ? result.value : iter.next();
-    });
-  };
-
-  function makeInvokeMethod(innerFn, self, context) {
-    var state = GenStateSuspendedStart;
-
-    return function invoke(method, arg) {
-      if (state === GenStateExecuting) {
-        throw new Error("Generator is already running");
-      }
-
-      if (state === GenStateCompleted) {
-        if (method === "throw") {
-          throw arg;
-        }
-
-        // Be forgiving, per 25.3.3.3.3 of the spec:
-        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
-        return doneResult();
-      }
-
-      while (true) {
-        var delegate = context.delegate;
-        if (delegate) {
-          if (method === "return" || method === "throw" && delegate.iterator[method] === undefined) {
-            // A return or throw (when the delegate iterator has no throw
-            // method) always terminates the yield* loop.
-            context.delegate = null;
-
-            // If the delegate iterator has a return method, give it a
-            // chance to clean up.
-            var returnMethod = delegate.iterator["return"];
-            if (returnMethod) {
-              var record = tryCatch(returnMethod, delegate.iterator, arg);
-              if (record.type === "throw") {
-                // If the return method threw an exception, let that
-                // exception prevail over the original return or throw.
-                method = "throw";
-                arg = record.arg;
-                continue;
-              }
-            }
-
-            if (method === "return") {
-              // Continue with the outer return, now that the delegate
-              // iterator has been terminated.
-              continue;
-            }
-          }
-
-          var record = tryCatch(delegate.iterator[method], delegate.iterator, arg);
-
-          if (record.type === "throw") {
-            context.delegate = null;
-
-            // Like returning generator.throw(uncaught), but without the
-            // overhead of an extra function call.
-            method = "throw";
-            arg = record.arg;
-            continue;
-          }
-
-          // Delegate generator ran and handled its own exceptions so
-          // regardless of what the method was, we continue as if it is
-          // "next" with an undefined arg.
-          method = "next";
-          arg = undefined;
-
-          var info = record.arg;
-          if (info.done) {
-            context[delegate.resultName] = info.value;
-            context.next = delegate.nextLoc;
-          } else {
-            state = GenStateSuspendedYield;
-            return info;
-          }
-
-          context.delegate = null;
-        }
-
-        if (method === "next") {
-          context._sent = arg;
-
-          if (state === GenStateSuspendedYield) {
-            context.sent = arg;
-          } else {
-            context.sent = undefined;
-          }
-        } else if (method === "throw") {
-          if (state === GenStateSuspendedStart) {
-            state = GenStateCompleted;
-            throw arg;
-          }
-
-          if (context.dispatchException(arg)) {
-            // If the dispatched exception was caught by a catch block,
-            // then let that catch block handle the exception normally.
-            method = "next";
-            arg = undefined;
-          }
-        } else if (method === "return") {
-          context.abrupt("return", arg);
-        }
-
-        state = GenStateExecuting;
-
-        var record = tryCatch(innerFn, self, context);
-        if (record.type === "normal") {
-          // If an exception is thrown from innerFn, we leave state ===
-          // GenStateExecuting and loop back for another invocation.
-          state = context.done ? GenStateCompleted : GenStateSuspendedYield;
-
-          var info = {
-            value: record.arg,
-            done: context.done
-          };
-
-          if (record.arg === ContinueSentinel) {
-            if (context.delegate && method === "next") {
-              // Deliberately forget the last sent value so that we don't
-              // accidentally pass it on to the delegate.
-              arg = undefined;
-            }
-          } else {
-            return info;
-          }
-        } else if (record.type === "throw") {
-          state = GenStateCompleted;
-          // Dispatch the exception by looping back around to the
-          // context.dispatchException(arg) call above.
-          method = "throw";
-          arg = record.arg;
-        }
-      }
-    };
-  }
-
-  // Define Generator.prototype.{next,throw,return} in terms of the
-  // unified ._invoke helper method.
-  defineIteratorMethods(Gp);
-
-  Gp[iteratorSymbol] = function () {
-    return this;
-  };
-
-  Gp.toString = function () {
-    return "[object Generator]";
-  };
-
-  function pushTryEntry(locs) {
-    var entry = { tryLoc: locs[0] };
-
-    if (1 in locs) {
-      entry.catchLoc = locs[1];
-    }
-
-    if (2 in locs) {
-      entry.finallyLoc = locs[2];
-      entry.afterLoc = locs[3];
-    }
-
-    this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal";
-    delete record.arg;
-    entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    // The root entry object (effectively a try statement without a catch
-    // or a finally block) gives us a place to store values thrown from
-    // locations where there is no enclosing try statement.
-    this.tryEntries = [{ tryLoc: "root" }];
-    tryLocsList.forEach(pushTryEntry, this);
-    this.reset(true);
-  }
-
-  runtime.keys = function (object) {
-    var keys = [];
-    for (var key in object) {
-      keys.push(key);
-    }
-    keys.reverse();
-
-    // Rather than returning an object with a next method, we keep
-    // things simple and return the next function itself.
-    return function next() {
-      while (keys.length) {
-        var key = keys.pop();
-        if (key in object) {
-          next.value = key;
-          next.done = false;
-          return next;
-        }
-      }
-
-      // To avoid creating an additional object, we just hang the .value
-      // and .done properties off the next function object itself. This
-      // also ensures that the minifier will not anonymize the function.
-      next.done = true;
-      return next;
-    };
-  };
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) {
-        return iteratorMethod.call(iterable);
-      }
-
-      if (typeof iterable.next === "function") {
-        return iterable;
-      }
-
-      if (!isNaN(iterable.length)) {
-        var i = -1,
-            next = function next() {
-          while (++i < iterable.length) {
-            if (hasOwn.call(iterable, i)) {
-              next.value = iterable[i];
-              next.done = false;
-              return next;
-            }
-          }
-
-          next.value = undefined;
-          next.done = true;
-
-          return next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    // Return an iterator with no values.
-    return { next: doneResult };
-  }
-  runtime.values = values;
-
-  function doneResult() {
-    return { value: undefined, done: true };
-  }
-
-  Context.prototype = {
-    constructor: Context,
-
-    reset: function reset(skipTempReset) {
-      this.prev = 0;
-      this.next = 0;
-      this.sent = undefined;
-      this.done = false;
-      this.delegate = null;
-
-      this.tryEntries.forEach(resetTryEntry);
-
-      if (!skipTempReset) {
-        for (var name in this) {
-          // Not sure about the optimal order of these conditions:
-          if (name.charAt(0) === "t" && hasOwn.call(this, name) && !isNaN(+name.slice(1))) {
-            this[name] = undefined;
-          }
-        }
-      }
-    },
-
-    stop: function stop() {
-      this.done = true;
-
-      var rootEntry = this.tryEntries[0];
-      var rootRecord = rootEntry.completion;
-      if (rootRecord.type === "throw") {
-        throw rootRecord.arg;
-      }
-
-      return this.rval;
-    },
-
-    dispatchException: function dispatchException(exception) {
-      if (this.done) {
-        throw exception;
-      }
-
-      var context = this;
-      function handle(loc, caught) {
-        record.type = "throw";
-        record.arg = exception;
-        context.next = loc;
-        return !!caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        var record = entry.completion;
-
-        if (entry.tryLoc === "root") {
-          // Exception thrown outside of any try block that could handle
-          // it, so set the completion value of the entire function to
-          // throw the exception.
-          return handle("end");
-        }
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc");
-          var hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            } else if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            }
-          } else if (hasFinally) {
-            if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-          } else {
-            throw new Error("try statement without catch or finally");
-          }
-        }
-      }
-    },
-
-    abrupt: function abrupt(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      if (finallyEntry && (type === "break" || type === "continue") && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc) {
-        // Ignore the finally entry if control is not jumping to a
-        // location outside the try/catch block.
-        finallyEntry = null;
-      }
-
-      var record = finallyEntry ? finallyEntry.completion : {};
-      record.type = type;
-      record.arg = arg;
-
-      if (finallyEntry) {
-        this.next = finallyEntry.finallyLoc;
-      } else {
-        this.complete(record);
-      }
-
-      return ContinueSentinel;
-    },
-
-    complete: function complete(record, afterLoc) {
-      if (record.type === "throw") {
-        throw record.arg;
-      }
-
-      if (record.type === "break" || record.type === "continue") {
-        this.next = record.arg;
-      } else if (record.type === "return") {
-        this.rval = record.arg;
-        this.next = "end";
-      } else if (record.type === "normal" && afterLoc) {
-        this.next = afterLoc;
-      }
-    },
-
-    finish: function finish(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) {
-          this.complete(entry.completion, entry.afterLoc);
-          resetTryEntry(entry);
-          return ContinueSentinel;
-        }
-      }
-    },
-
-    "catch": function _catch(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if (record.type === "throw") {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-
-      // The context.catch method must only be called with a location
-      // argument that corresponds to a known catch block.
-      throw new Error("illegal catch attempt");
-    },
-
-    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      };
-
-      return ContinueSentinel;
-    }
-  };
-}(
-// Among the various tricks for obtaining a reference to the global
-// object, this seems to be the most reliable technique that does not
-// use indirect eval (which violates Content Security Policy).
-(typeof global === "undefined" ? "undefined" : (0, _typeof3.default)(global)) === "object" ? global : (typeof window === "undefined" ? "undefined" : (0, _typeof3.default)(window)) === "object" ? window : (typeof self === "undefined" ? "undefined" : (0, _typeof3.default)(self)) === "object" ? self : undefined);
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../core-js/object/create":26,"../core-js/object/set-prototype-of":28,"../core-js/promise":29,"../core-js/symbol":33,"../core-js/symbol/iterator":35,"../helpers/typeof":36,"_process":172}],39:[function(require,module,exports){
+},{"regenerator-runtime":185}],35:[function(require,module,exports){
 require('../modules/web.dom.iterable');
 require('../modules/es6.string.iterator');
 module.exports = require('../modules/core.get-iterator');
-},{"../modules/core.get-iterator":136,"../modules/es6.string.iterator":166,"../modules/web.dom.iterable":170}],40:[function(require,module,exports){
-var core = require('../../modules/$.core');
+},{"../modules/core.get-iterator":149,"../modules/es6.string.iterator":179,"../modules/web.dom.iterable":183}],36:[function(require,module,exports){
+var core  = require('../../modules/_core')
+  , $JSON = core.JSON || (core.JSON = {stringify: JSON.stringify});
 module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
-  return (core.JSON && core.JSON.stringify || JSON.stringify).apply(JSON, arguments);
+  return $JSON.stringify.apply($JSON, arguments);
 };
-},{"../../modules/$.core":81}],41:[function(require,module,exports){
+},{"../../modules/_core":81}],37:[function(require,module,exports){
 require('../modules/es6.object.to-string');
 require('../modules/es6.string.iterator');
 require('../modules/web.dom.iterable');
 require('../modules/es6.map');
 require('../modules/es7.map.to-json');
-module.exports = require('../modules/$.core').Map;
-},{"../modules/$.core":81,"../modules/es6.map":138,"../modules/es6.object.to-string":162,"../modules/es6.string.iterator":166,"../modules/es7.map.to-json":169,"../modules/web.dom.iterable":170}],42:[function(require,module,exports){
+module.exports = require('../modules/_core').Map;
+},{"../modules/_core":81,"../modules/es6.map":151,"../modules/es6.object.to-string":175,"../modules/es6.string.iterator":179,"../modules/es7.map.to-json":182,"../modules/web.dom.iterable":183}],38:[function(require,module,exports){
 require('../../modules/es6.math.acosh');
-module.exports = require('../../modules/$.core').Math.acosh;
-},{"../../modules/$.core":81,"../../modules/es6.math.acosh":139}],43:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.acosh;
+},{"../../modules/_core":81,"../../modules/es6.math.acosh":152}],39:[function(require,module,exports){
 require('../../modules/es6.math.asinh');
-module.exports = require('../../modules/$.core').Math.asinh;
-},{"../../modules/$.core":81,"../../modules/es6.math.asinh":140}],44:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.asinh;
+},{"../../modules/_core":81,"../../modules/es6.math.asinh":153}],40:[function(require,module,exports){
 require('../../modules/es6.math.atanh');
-module.exports = require('../../modules/$.core').Math.atanh;
-},{"../../modules/$.core":81,"../../modules/es6.math.atanh":141}],45:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.atanh;
+},{"../../modules/_core":81,"../../modules/es6.math.atanh":154}],41:[function(require,module,exports){
 require('../../modules/es6.math.cbrt');
-module.exports = require('../../modules/$.core').Math.cbrt;
-},{"../../modules/$.core":81,"../../modules/es6.math.cbrt":142}],46:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.cbrt;
+},{"../../modules/_core":81,"../../modules/es6.math.cbrt":155}],42:[function(require,module,exports){
 require('../../modules/es6.math.clz32');
-module.exports = require('../../modules/$.core').Math.clz32;
-},{"../../modules/$.core":81,"../../modules/es6.math.clz32":143}],47:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.clz32;
+},{"../../modules/_core":81,"../../modules/es6.math.clz32":156}],43:[function(require,module,exports){
 require('../../modules/es6.math.cosh');
-module.exports = require('../../modules/$.core').Math.cosh;
-},{"../../modules/$.core":81,"../../modules/es6.math.cosh":144}],48:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.cosh;
+},{"../../modules/_core":81,"../../modules/es6.math.cosh":157}],44:[function(require,module,exports){
 require('../../modules/es6.math.expm1');
-module.exports = require('../../modules/$.core').Math.expm1;
-},{"../../modules/$.core":81,"../../modules/es6.math.expm1":145}],49:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.expm1;
+},{"../../modules/_core":81,"../../modules/es6.math.expm1":158}],45:[function(require,module,exports){
 require('../../modules/es6.math.fround');
-module.exports = require('../../modules/$.core').Math.fround;
-},{"../../modules/$.core":81,"../../modules/es6.math.fround":146}],50:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.fround;
+},{"../../modules/_core":81,"../../modules/es6.math.fround":159}],46:[function(require,module,exports){
 require('../../modules/es6.math.hypot');
-module.exports = require('../../modules/$.core').Math.hypot;
-},{"../../modules/$.core":81,"../../modules/es6.math.hypot":147}],51:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.hypot;
+},{"../../modules/_core":81,"../../modules/es6.math.hypot":160}],47:[function(require,module,exports){
 require('../../modules/es6.math.imul');
-module.exports = require('../../modules/$.core').Math.imul;
-},{"../../modules/$.core":81,"../../modules/es6.math.imul":148}],52:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.imul;
+},{"../../modules/_core":81,"../../modules/es6.math.imul":161}],48:[function(require,module,exports){
 require('../../modules/es6.math.log10');
-module.exports = require('../../modules/$.core').Math.log10;
-},{"../../modules/$.core":81,"../../modules/es6.math.log10":149}],53:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.log10;
+},{"../../modules/_core":81,"../../modules/es6.math.log10":162}],49:[function(require,module,exports){
 require('../../modules/es6.math.log1p');
-module.exports = require('../../modules/$.core').Math.log1p;
-},{"../../modules/$.core":81,"../../modules/es6.math.log1p":150}],54:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.log1p;
+},{"../../modules/_core":81,"../../modules/es6.math.log1p":163}],50:[function(require,module,exports){
 require('../../modules/es6.math.log2');
-module.exports = require('../../modules/$.core').Math.log2;
-},{"../../modules/$.core":81,"../../modules/es6.math.log2":151}],55:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.log2;
+},{"../../modules/_core":81,"../../modules/es6.math.log2":164}],51:[function(require,module,exports){
 require('../../modules/es6.math.sign');
-module.exports = require('../../modules/$.core').Math.sign;
-},{"../../modules/$.core":81,"../../modules/es6.math.sign":152}],56:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.sign;
+},{"../../modules/_core":81,"../../modules/es6.math.sign":165}],52:[function(require,module,exports){
 require('../../modules/es6.math.sinh');
-module.exports = require('../../modules/$.core').Math.sinh;
-},{"../../modules/$.core":81,"../../modules/es6.math.sinh":153}],57:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.sinh;
+},{"../../modules/_core":81,"../../modules/es6.math.sinh":166}],53:[function(require,module,exports){
 require('../../modules/es6.math.tanh');
-module.exports = require('../../modules/$.core').Math.tanh;
-},{"../../modules/$.core":81,"../../modules/es6.math.tanh":154}],58:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.tanh;
+},{"../../modules/_core":81,"../../modules/es6.math.tanh":167}],54:[function(require,module,exports){
 require('../../modules/es6.math.trunc');
-module.exports = require('../../modules/$.core').Math.trunc;
-},{"../../modules/$.core":81,"../../modules/es6.math.trunc":155}],59:[function(require,module,exports){
+module.exports = require('../../modules/_core').Math.trunc;
+},{"../../modules/_core":81,"../../modules/es6.math.trunc":168}],55:[function(require,module,exports){
 require('../../modules/es6.number.epsilon');
 module.exports = Math.pow(2, -52);
-},{"../../modules/es6.number.epsilon":156}],60:[function(require,module,exports){
+},{"../../modules/es6.number.epsilon":169}],56:[function(require,module,exports){
 require('../../modules/es6.number.max-safe-integer');
 module.exports = 0x1fffffffffffff;
-},{"../../modules/es6.number.max-safe-integer":157}],61:[function(require,module,exports){
+},{"../../modules/es6.number.max-safe-integer":170}],57:[function(require,module,exports){
 require('../../modules/es6.number.min-safe-integer');
 module.exports = -0x1fffffffffffff;
-},{"../../modules/es6.number.min-safe-integer":158}],62:[function(require,module,exports){
+},{"../../modules/es6.number.min-safe-integer":171}],58:[function(require,module,exports){
 require('../../modules/es6.object.assign');
-module.exports = require('../../modules/$.core').Object.assign;
-},{"../../modules/$.core":81,"../../modules/es6.object.assign":159}],63:[function(require,module,exports){
-var $ = require('../../modules/$');
+module.exports = require('../../modules/_core').Object.assign;
+},{"../../modules/_core":81,"../../modules/es6.object.assign":172}],59:[function(require,module,exports){
+require('../../modules/es6.object.create');
+var $Object = require('../../modules/_core').Object;
 module.exports = function create(P, D){
-  return $.create(P, D);
+  return $Object.create(P, D);
 };
-},{"../../modules/$":106}],64:[function(require,module,exports){
+},{"../../modules/_core":81,"../../modules/es6.object.create":173}],60:[function(require,module,exports){
 require('../../modules/es6.object.keys');
-module.exports = require('../../modules/$.core').Object.keys;
-},{"../../modules/$.core":81,"../../modules/es6.object.keys":160}],65:[function(require,module,exports){
-require('../../modules/es6.object.set-prototype-of');
-module.exports = require('../../modules/$.core').Object.setPrototypeOf;
-},{"../../modules/$.core":81,"../../modules/es6.object.set-prototype-of":161}],66:[function(require,module,exports){
+module.exports = require('../../modules/_core').Object.keys;
+},{"../../modules/_core":81,"../../modules/es6.object.keys":174}],61:[function(require,module,exports){
 require('../modules/es6.object.to-string');
 require('../modules/es6.string.iterator');
 require('../modules/web.dom.iterable');
 require('../modules/es6.promise');
-module.exports = require('../modules/$.core').Promise;
-},{"../modules/$.core":81,"../modules/es6.object.to-string":162,"../modules/es6.promise":163,"../modules/es6.string.iterator":166,"../modules/web.dom.iterable":170}],67:[function(require,module,exports){
+module.exports = require('../modules/_core').Promise;
+},{"../modules/_core":81,"../modules/es6.object.to-string":175,"../modules/es6.promise":176,"../modules/es6.string.iterator":179,"../modules/web.dom.iterable":183}],62:[function(require,module,exports){
 require('../../modules/es6.string.code-point-at');
-module.exports = require('../../modules/$.core').String.codePointAt;
-},{"../../modules/$.core":81,"../../modules/es6.string.code-point-at":164}],68:[function(require,module,exports){
+module.exports = require('../../modules/_core').String.codePointAt;
+},{"../../modules/_core":81,"../../modules/es6.string.code-point-at":177}],63:[function(require,module,exports){
 require('../../modules/es6.string.from-code-point');
-module.exports = require('../../modules/$.core').String.fromCodePoint;
-},{"../../modules/$.core":81,"../../modules/es6.string.from-code-point":165}],69:[function(require,module,exports){
+module.exports = require('../../modules/_core').String.fromCodePoint;
+},{"../../modules/_core":81,"../../modules/es6.string.from-code-point":178}],64:[function(require,module,exports){
 require('../../modules/es6.string.repeat');
-module.exports = require('../../modules/$.core').String.repeat;
-},{"../../modules/$.core":81,"../../modules/es6.string.repeat":167}],70:[function(require,module,exports){
+module.exports = require('../../modules/_core').String.repeat;
+},{"../../modules/_core":81,"../../modules/es6.string.repeat":180}],65:[function(require,module,exports){
 require('../../modules/es6.symbol');
-module.exports = require('../../modules/$.core').Symbol['for'];
-},{"../../modules/$.core":81,"../../modules/es6.symbol":168}],71:[function(require,module,exports){
-require('../../modules/es6.symbol');
-require('../../modules/es6.object.to-string');
-module.exports = require('../../modules/$.core').Symbol;
-},{"../../modules/$.core":81,"../../modules/es6.object.to-string":162,"../../modules/es6.symbol":168}],72:[function(require,module,exports){
+module.exports = require('../../modules/_core').Symbol['for'];
+},{"../../modules/_core":81,"../../modules/es6.symbol":181}],66:[function(require,module,exports){
 require('../../modules/es6.string.iterator');
 require('../../modules/web.dom.iterable');
-module.exports = require('../../modules/$.wks')('iterator');
-},{"../../modules/$.wks":134,"../../modules/es6.string.iterator":166,"../../modules/web.dom.iterable":170}],73:[function(require,module,exports){
+module.exports = require('../../modules/_wks-ext').f('iterator');
+},{"../../modules/_wks-ext":146,"../../modules/es6.string.iterator":179,"../../modules/web.dom.iterable":183}],67:[function(require,module,exports){
 module.exports = function(it){
   if(typeof it != 'function')throw TypeError(it + ' is not a function!');
   return it;
 };
-},{}],74:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 module.exports = function(){ /* empty */ };
-},{}],75:[function(require,module,exports){
-var isObject = require('./$.is-object');
+},{}],69:[function(require,module,exports){
+module.exports = function(it, Constructor, name, forbiddenField){
+  if(!(it instanceof Constructor) || (forbiddenField !== undefined && forbiddenField in it)){
+    throw TypeError(name + ': incorrect invocation!');
+  } return it;
+};
+},{}],70:[function(require,module,exports){
+var isObject = require('./_is-object');
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
-},{"./$.is-object":99}],76:[function(require,module,exports){
+},{"./_is-object":100}],71:[function(require,module,exports){
+var forOf = require('./_for-of');
+
+module.exports = function(iter, ITERATOR){
+  var result = [];
+  forOf(iter, false, result.push, result, ITERATOR);
+  return result;
+};
+
+},{"./_for-of":90}],72:[function(require,module,exports){
+// false -> Array#indexOf
+// true  -> Array#includes
+var toIObject = require('./_to-iobject')
+  , toLength  = require('./_to-length')
+  , toIndex   = require('./_to-index');
+module.exports = function(IS_INCLUDES){
+  return function($this, el, fromIndex){
+    var O      = toIObject($this)
+      , length = toLength(O.length)
+      , index  = toIndex(fromIndex, length)
+      , value;
+    // Array#includes uses SameValueZero equality algorithm
+    if(IS_INCLUDES && el != el)while(length > index){
+      value = O[index++];
+      if(value != value)return true;
+    // Array#toIndex ignores holes, Array#includes - not
+    } else for(;length > index; index++)if(IS_INCLUDES || index in O){
+      if(O[index] === el)return IS_INCLUDES || index || 0;
+    } return !IS_INCLUDES && -1;
+  };
+};
+},{"./_to-index":138,"./_to-iobject":140,"./_to-length":141}],73:[function(require,module,exports){
+// 0 -> Array#forEach
+// 1 -> Array#map
+// 2 -> Array#filter
+// 3 -> Array#some
+// 4 -> Array#every
+// 5 -> Array#find
+// 6 -> Array#findIndex
+var ctx      = require('./_ctx')
+  , IObject  = require('./_iobject')
+  , toObject = require('./_to-object')
+  , toLength = require('./_to-length')
+  , asc      = require('./_array-species-create');
+module.exports = function(TYPE, $create){
+  var IS_MAP        = TYPE == 1
+    , IS_FILTER     = TYPE == 2
+    , IS_SOME       = TYPE == 3
+    , IS_EVERY      = TYPE == 4
+    , IS_FIND_INDEX = TYPE == 6
+    , NO_HOLES      = TYPE == 5 || IS_FIND_INDEX
+    , create        = $create || asc;
+  return function($this, callbackfn, that){
+    var O      = toObject($this)
+      , self   = IObject(O)
+      , f      = ctx(callbackfn, that, 3)
+      , length = toLength(self.length)
+      , index  = 0
+      , result = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined
+      , val, res;
+    for(;length > index; index++)if(NO_HOLES || index in self){
+      val = self[index];
+      res = f(val, index, O);
+      if(TYPE){
+        if(IS_MAP)result[index] = res;            // map
+        else if(res)switch(TYPE){
+          case 3: return true;                    // some
+          case 5: return val;                     // find
+          case 6: return index;                   // findIndex
+          case 2: result.push(val);               // filter
+        } else if(IS_EVERY)return false;          // every
+      }
+    }
+    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : result;
+  };
+};
+},{"./_array-species-create":75,"./_ctx":82,"./_iobject":97,"./_to-length":141,"./_to-object":142}],74:[function(require,module,exports){
+var isObject = require('./_is-object')
+  , isArray  = require('./_is-array')
+  , SPECIES  = require('./_wks')('species');
+
+module.exports = function(original){
+  var C;
+  if(isArray(original)){
+    C = original.constructor;
+    // cross-realm fallback
+    if(typeof C == 'function' && (C === Array || isArray(C.prototype)))C = undefined;
+    if(isObject(C)){
+      C = C[SPECIES];
+      if(C === null)C = undefined;
+    }
+  } return C === undefined ? Array : C;
+};
+},{"./_is-array":99,"./_is-object":100,"./_wks":147}],75:[function(require,module,exports){
+// 9.4.2.3 ArraySpeciesCreate(originalArray, length)
+var speciesConstructor = require('./_array-species-constructor');
+
+module.exports = function(original, length){
+  return new (speciesConstructor(original))(length);
+};
+},{"./_array-species-constructor":74}],76:[function(require,module,exports){
 // getting tag from 19.1.3.6 Object.prototype.toString()
-var cof = require('./$.cof')
-  , TAG = require('./$.wks')('toStringTag')
+var cof = require('./_cof')
+  , TAG = require('./_wks')('toStringTag')
   // ES3 wrong here
   , ARG = cof(function(){ return arguments; }()) == 'Arguments';
+
+// fallback for IE11 Script Access Denied error
+var tryGet = function(it, key){
+  try {
+    return it[key];
+  } catch(e){ /* empty */ }
+};
 
 module.exports = function(it){
   var O, T, B;
   return it === undefined ? 'Undefined' : it === null ? 'Null'
     // @@toStringTag case
-    : typeof (T = (O = Object(it))[TAG]) == 'string' ? T
+    : typeof (T = tryGet(O = Object(it), TAG)) == 'string' ? T
     // builtinTag case
     : ARG ? cof(O)
     // ES3 arguments fallback
     : (B = cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
 };
-},{"./$.cof":77,"./$.wks":134}],77:[function(require,module,exports){
+},{"./_cof":77,"./_wks":147}],77:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function(it){
@@ -972,37 +365,19 @@ module.exports = function(it){
 };
 },{}],78:[function(require,module,exports){
 'use strict';
-var $            = require('./$')
-  , hide         = require('./$.hide')
-  , redefineAll  = require('./$.redefine-all')
-  , ctx          = require('./$.ctx')
-  , strictNew    = require('./$.strict-new')
-  , defined      = require('./$.defined')
-  , forOf        = require('./$.for-of')
-  , $iterDefine  = require('./$.iter-define')
-  , step         = require('./$.iter-step')
-  , ID           = require('./$.uid')('id')
-  , $has         = require('./$.has')
-  , isObject     = require('./$.is-object')
-  , setSpecies   = require('./$.set-species')
-  , DESCRIPTORS  = require('./$.descriptors')
-  , isExtensible = Object.isExtensible || isObject
-  , SIZE         = DESCRIPTORS ? '_s' : 'size'
-  , id           = 0;
-
-var fastKey = function(it, create){
-  // return primitive with prefix
-  if(!isObject(it))return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-  if(!$has(it, ID)){
-    // can't set id to frozen object
-    if(!isExtensible(it))return 'F';
-    // not necessary to add id
-    if(!create)return 'E';
-    // add missing object id
-    hide(it, ID, ++id);
-  // return object id with prefix
-  } return 'O' + it[ID];
-};
+var dP          = require('./_object-dp').f
+  , create      = require('./_object-create')
+  , redefineAll = require('./_redefine-all')
+  , ctx         = require('./_ctx')
+  , anInstance  = require('./_an-instance')
+  , defined     = require('./_defined')
+  , forOf       = require('./_for-of')
+  , $iterDefine = require('./_iter-define')
+  , step        = require('./_iter-step')
+  , setSpecies  = require('./_set-species')
+  , DESCRIPTORS = require('./_descriptors')
+  , fastKey     = require('./_meta').fastKey
+  , SIZE        = DESCRIPTORS ? '_s' : 'size';
 
 var getEntry = function(that, key){
   // fast case
@@ -1017,11 +392,11 @@ var getEntry = function(that, key){
 module.exports = {
   getConstructor: function(wrapper, NAME, IS_MAP, ADDER){
     var C = wrapper(function(that, iterable){
-      strictNew(that, C, NAME);
-      that._i = $.create(null); // index
-      that._f = undefined;      // first entry
-      that._l = undefined;      // last entry
-      that[SIZE] = 0;           // size
+      anInstance(that, C, NAME, '_i');
+      that._i = create(null); // index
+      that._f = undefined;    // first entry
+      that._l = undefined;    // last entry
+      that[SIZE] = 0;         // size
       if(iterable != undefined)forOf(iterable, IS_MAP, that[ADDER], that);
     });
     redefineAll(C.prototype, {
@@ -1056,6 +431,7 @@ module.exports = {
       // 23.2.3.6 Set.prototype.forEach(callbackfn, thisArg = undefined)
       // 23.1.3.5 Map.prototype.forEach(callbackfn, thisArg = undefined)
       forEach: function forEach(callbackfn /*, that = undefined */){
+        anInstance(this, C, 'forEach');
         var f = ctx(callbackfn, arguments.length > 1 ? arguments[1] : undefined, 3)
           , entry;
         while(entry = entry ? entry.n : this._f){
@@ -1070,7 +446,7 @@ module.exports = {
         return !!getEntry(this, key);
       }
     });
-    if(DESCRIPTORS)$.setDesc(C.prototype, 'size', {
+    if(DESCRIPTORS)dP(C.prototype, 'size', {
       get: function(){
         return defined(this[SIZE]);
       }
@@ -1130,31 +506,31 @@ module.exports = {
     setSpecies(NAME);
   }
 };
-},{"./$":106,"./$.ctx":82,"./$.defined":83,"./$.descriptors":84,"./$.for-of":89,"./$.has":92,"./$.hide":93,"./$.is-object":99,"./$.iter-define":102,"./$.iter-step":104,"./$.redefine-all":116,"./$.set-species":120,"./$.strict-new":124,"./$.uid":133}],79:[function(require,module,exports){
+},{"./_an-instance":69,"./_ctx":82,"./_defined":83,"./_descriptors":84,"./_for-of":90,"./_iter-define":103,"./_iter-step":105,"./_meta":112,"./_object-create":115,"./_object-dp":116,"./_redefine-all":128,"./_set-species":130}],79:[function(require,module,exports){
 // https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var forOf   = require('./$.for-of')
-  , classof = require('./$.classof');
+var classof = require('./_classof')
+  , from    = require('./_array-from-iterable');
 module.exports = function(NAME){
   return function toJSON(){
     if(classof(this) != NAME)throw TypeError(NAME + "#toJSON isn't generic");
-    var arr = [];
-    forOf(this, false, arr.push, arr);
-    return arr;
+    return from(this);
   };
 };
-},{"./$.classof":76,"./$.for-of":89}],80:[function(require,module,exports){
+},{"./_array-from-iterable":71,"./_classof":76}],80:[function(require,module,exports){
 'use strict';
-var $              = require('./$')
-  , global         = require('./$.global')
-  , $export        = require('./$.export')
-  , fails          = require('./$.fails')
-  , hide           = require('./$.hide')
-  , redefineAll    = require('./$.redefine-all')
-  , forOf          = require('./$.for-of')
-  , strictNew      = require('./$.strict-new')
-  , isObject       = require('./$.is-object')
-  , setToStringTag = require('./$.set-to-string-tag')
-  , DESCRIPTORS    = require('./$.descriptors');
+var global         = require('./_global')
+  , $export        = require('./_export')
+  , meta           = require('./_meta')
+  , fails          = require('./_fails')
+  , hide           = require('./_hide')
+  , redefineAll    = require('./_redefine-all')
+  , forOf          = require('./_for-of')
+  , anInstance     = require('./_an-instance')
+  , isObject       = require('./_is-object')
+  , setToStringTag = require('./_set-to-string-tag')
+  , dP             = require('./_object-dp').f
+  , each           = require('./_array-methods')(0)
+  , DESCRIPTORS    = require('./_descriptors');
 
 module.exports = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
   var Base  = global[NAME]
@@ -1168,21 +544,23 @@ module.exports = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
     // create collection constructor
     C = common.getConstructor(wrapper, NAME, IS_MAP, ADDER);
     redefineAll(C.prototype, methods);
+    meta.NEED = true;
   } else {
     C = wrapper(function(target, iterable){
-      strictNew(target, C, NAME);
+      anInstance(target, C, NAME, '_c');
       target._c = new Base;
       if(iterable != undefined)forOf(iterable, IS_MAP, target[ADDER], target);
     });
-    $.each.call('add,clear,delete,forEach,get,has,set,keys,values,entries'.split(','),function(KEY){
+    each('add,clear,delete,forEach,get,has,set,keys,values,entries,toJSON'.split(','),function(KEY){
       var IS_ADDER = KEY == 'add' || KEY == 'set';
       if(KEY in proto && !(IS_WEAK && KEY == 'clear'))hide(C.prototype, KEY, function(a, b){
+        anInstance(this, C, KEY);
         if(!IS_ADDER && IS_WEAK && !isObject(a))return KEY == 'get' ? undefined : false;
         var result = this._c[KEY](a === 0 ? 0 : a, b);
         return IS_ADDER ? this : result;
       });
     });
-    if('size' in proto)$.setDesc(C.prototype, 'size', {
+    if('size' in proto)dP(C.prototype, 'size', {
       get: function(){
         return this._c.size;
       }
@@ -1198,12 +576,12 @@ module.exports = function(NAME, wrapper, methods, common, IS_MAP, IS_WEAK){
 
   return C;
 };
-},{"./$":106,"./$.descriptors":84,"./$.export":87,"./$.fails":88,"./$.for-of":89,"./$.global":91,"./$.hide":93,"./$.is-object":99,"./$.redefine-all":116,"./$.set-to-string-tag":121,"./$.strict-new":124}],81:[function(require,module,exports){
-var core = module.exports = {version: '1.2.6'};
+},{"./_an-instance":69,"./_array-methods":73,"./_descriptors":84,"./_export":88,"./_fails":89,"./_for-of":90,"./_global":91,"./_hide":93,"./_is-object":100,"./_meta":112,"./_object-dp":116,"./_redefine-all":128,"./_set-to-string-tag":131}],81:[function(require,module,exports){
+var core = module.exports = {version: '2.4.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
 },{}],82:[function(require,module,exports){
 // optional / simple context binding
-var aFunction = require('./$.a-function');
+var aFunction = require('./_a-function');
 module.exports = function(fn, that, length){
   aFunction(fn);
   if(that === undefined)return fn;
@@ -1222,7 +600,7 @@ module.exports = function(fn, that, length){
     return fn.apply(that, arguments);
   };
 };
-},{"./$.a-function":73}],83:[function(require,module,exports){
+},{"./_a-function":67}],83:[function(require,module,exports){
 // 7.2.1 RequireObjectCoercible(argument)
 module.exports = function(it){
   if(it == undefined)throw TypeError("Can't call method on  " + it);
@@ -1230,36 +608,43 @@ module.exports = function(it){
 };
 },{}],84:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
-module.exports = !require('./$.fails')(function(){
+module.exports = !require('./_fails')(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./$.fails":88}],85:[function(require,module,exports){
-var isObject = require('./$.is-object')
-  , document = require('./$.global').document
+},{"./_fails":89}],85:[function(require,module,exports){
+var isObject = require('./_is-object')
+  , document = require('./_global').document
   // in old IE typeof document.createElement is 'object'
   , is = isObject(document) && isObject(document.createElement);
 module.exports = function(it){
   return is ? document.createElement(it) : {};
 };
-},{"./$.global":91,"./$.is-object":99}],86:[function(require,module,exports){
+},{"./_global":91,"./_is-object":100}],86:[function(require,module,exports){
+// IE 8- don't enum bug keys
+module.exports = (
+  'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf'
+).split(',');
+},{}],87:[function(require,module,exports){
 // all enumerable object keys, includes symbols
-var $ = require('./$');
+var getKeys = require('./_object-keys')
+  , gOPS    = require('./_object-gops')
+  , pIE     = require('./_object-pie');
 module.exports = function(it){
-  var keys       = $.getKeys(it)
-    , getSymbols = $.getSymbols;
+  var result     = getKeys(it)
+    , getSymbols = gOPS.f;
   if(getSymbols){
     var symbols = getSymbols(it)
-      , isEnum  = $.isEnum
+      , isEnum  = pIE.f
       , i       = 0
       , key;
-    while(symbols.length > i)if(isEnum.call(it, key = symbols[i++]))keys.push(key);
-  }
-  return keys;
+    while(symbols.length > i)if(isEnum.call(it, key = symbols[i++]))result.push(key);
+  } return result;
 };
-},{"./$":106}],87:[function(require,module,exports){
-var global    = require('./$.global')
-  , core      = require('./$.core')
-  , ctx       = require('./$.ctx')
+},{"./_object-gops":121,"./_object-keys":124,"./_object-pie":125}],88:[function(require,module,exports){
+var global    = require('./_global')
+  , core      = require('./_core')
+  , ctx       = require('./_ctx')
+  , hide      = require('./_hide')
   , PROTOTYPE = 'prototype';
 
 var $export = function(type, name, source){
@@ -1270,12 +655,13 @@ var $export = function(type, name, source){
     , IS_BIND   = type & $export.B
     , IS_WRAP   = type & $export.W
     , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
+    , expProto  = exports[PROTOTYPE]
     , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
     , key, own, out;
   if(IS_GLOBAL)source = name;
   for(key in source){
     // contains in native
-    own = !IS_FORCED && target && key in target;
+    own = !IS_FORCED && target && target[key] !== undefined;
     if(own && key in exports)continue;
     // export native or passed
     out = own ? target[key] : source[key];
@@ -1285,25 +671,38 @@ var $export = function(type, name, source){
     : IS_BIND && own ? ctx(out, global)
     // wrap global constructors for prevent change them in library
     : IS_WRAP && target[key] == out ? (function(C){
-      var F = function(param){
-        return this instanceof C ? new C(param) : C(param);
+      var F = function(a, b, c){
+        if(this instanceof C){
+          switch(arguments.length){
+            case 0: return new C;
+            case 1: return new C(a);
+            case 2: return new C(a, b);
+          } return new C(a, b, c);
+        } return C.apply(this, arguments);
       };
       F[PROTOTYPE] = C[PROTOTYPE];
       return F;
     // make static versions for prototype methods
     })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
-    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
+    // export proto methods to core.%CONSTRUCTOR%.methods.%NAME%
+    if(IS_PROTO){
+      (exports.virtual || (exports.virtual = {}))[key] = out;
+      // export proto methods to core.%CONSTRUCTOR%.prototype.%NAME%
+      if(type & $export.R && expProto && !expProto[key])hide(expProto, key, out);
+    }
   }
 };
 // type bitmap
-$export.F = 1;  // forced
-$export.G = 2;  // global
-$export.S = 4;  // static
-$export.P = 8;  // proto
-$export.B = 16; // bind
-$export.W = 32; // wrap
+$export.F = 1;   // forced
+$export.G = 2;   // global
+$export.S = 4;   // static
+$export.P = 8;   // proto
+$export.B = 16;  // bind
+$export.W = 32;  // wrap
+$export.U = 64;  // safe
+$export.R = 128; // real proto method for `library` 
 module.exports = $export;
-},{"./$.core":81,"./$.ctx":82,"./$.global":91}],88:[function(require,module,exports){
+},{"./_core":81,"./_ctx":82,"./_global":91,"./_hide":93}],89:[function(require,module,exports){
 module.exports = function(exec){
   try {
     return !!exec();
@@ -1311,48 +710,33 @@ module.exports = function(exec){
     return true;
   }
 };
-},{}],89:[function(require,module,exports){
-var ctx         = require('./$.ctx')
-  , call        = require('./$.iter-call')
-  , isArrayIter = require('./$.is-array-iter')
-  , anObject    = require('./$.an-object')
-  , toLength    = require('./$.to-length')
-  , getIterFn   = require('./core.get-iterator-method');
-module.exports = function(iterable, entries, fn, that){
-  var iterFn = getIterFn(iterable)
+},{}],90:[function(require,module,exports){
+var ctx         = require('./_ctx')
+  , call        = require('./_iter-call')
+  , isArrayIter = require('./_is-array-iter')
+  , anObject    = require('./_an-object')
+  , toLength    = require('./_to-length')
+  , getIterFn   = require('./core.get-iterator-method')
+  , BREAK       = {}
+  , RETURN      = {};
+var exports = module.exports = function(iterable, entries, fn, that, ITERATOR){
+  var iterFn = ITERATOR ? function(){ return iterable; } : getIterFn(iterable)
     , f      = ctx(fn, that, entries ? 2 : 1)
     , index  = 0
-    , length, step, iterator;
+    , length, step, iterator, result;
   if(typeof iterFn != 'function')throw TypeError(iterable + ' is not iterable!');
   // fast case for arrays with default iterator
   if(isArrayIter(iterFn))for(length = toLength(iterable.length); length > index; index++){
-    entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
+    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
+    if(result === BREAK || result === RETURN)return result;
   } else for(iterator = iterFn.call(iterable); !(step = iterator.next()).done; ){
-    call(iterator, f, step.value, entries);
+    result = call(iterator, f, step.value, entries);
+    if(result === BREAK || result === RETURN)return result;
   }
 };
-},{"./$.an-object":75,"./$.ctx":82,"./$.is-array-iter":97,"./$.iter-call":100,"./$.to-length":131,"./core.get-iterator-method":135}],90:[function(require,module,exports){
-// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
-var toIObject = require('./$.to-iobject')
-  , getNames  = require('./$').getNames
-  , toString  = {}.toString;
-
-var windowNames = typeof window == 'object' && Object.getOwnPropertyNames
-  ? Object.getOwnPropertyNames(window) : [];
-
-var getWindowNames = function(it){
-  try {
-    return getNames(it);
-  } catch(e){
-    return windowNames.slice();
-  }
-};
-
-module.exports.get = function getOwnPropertyNames(it){
-  if(windowNames && toString.call(it) == '[object Window]')return getWindowNames(it);
-  return getNames(toIObject(it));
-};
-},{"./$":106,"./$.to-iobject":130}],91:[function(require,module,exports){
+exports.BREAK  = BREAK;
+exports.RETURN = RETURN;
+},{"./_an-object":70,"./_ctx":82,"./_is-array-iter":98,"./_iter-call":101,"./_to-length":141,"./core.get-iterator-method":148}],91:[function(require,module,exports){
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 var global = module.exports = typeof window != 'undefined' && window.Math == Math
   ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
@@ -1363,17 +747,21 @@ module.exports = function(it, key){
   return hasOwnProperty.call(it, key);
 };
 },{}],93:[function(require,module,exports){
-var $          = require('./$')
-  , createDesc = require('./$.property-desc');
-module.exports = require('./$.descriptors') ? function(object, key, value){
-  return $.setDesc(object, key, createDesc(1, value));
+var dP         = require('./_object-dp')
+  , createDesc = require('./_property-desc');
+module.exports = require('./_descriptors') ? function(object, key, value){
+  return dP.f(object, key, createDesc(1, value));
 } : function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./$":106,"./$.descriptors":84,"./$.property-desc":115}],94:[function(require,module,exports){
-module.exports = require('./$.global').document && document.documentElement;
-},{"./$.global":91}],95:[function(require,module,exports){
+},{"./_descriptors":84,"./_object-dp":116,"./_property-desc":127}],94:[function(require,module,exports){
+module.exports = require('./_global').document && document.documentElement;
+},{"./_global":91}],95:[function(require,module,exports){
+module.exports = !require('./_descriptors') && !require('./_fails')(function(){
+  return Object.defineProperty(require('./_dom-create')('div'), 'a', {get: function(){ return 7; }}).a != 7;
+});
+},{"./_descriptors":84,"./_dom-create":85,"./_fails":89}],96:[function(require,module,exports){
 // fast apply, http://jsperf.lnkit.com/fast-apply/5
 module.exports = function(fn, args, that){
   var un = that === undefined;
@@ -1390,34 +778,34 @@ module.exports = function(fn, args, that){
                       : fn.call(that, args[0], args[1], args[2], args[3]);
   } return              fn.apply(that, args);
 };
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
-var cof = require('./$.cof');
+var cof = require('./_cof');
 module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
   return cof(it) == 'String' ? it.split('') : Object(it);
 };
-},{"./$.cof":77}],97:[function(require,module,exports){
+},{"./_cof":77}],98:[function(require,module,exports){
 // check on default Array iterator
-var Iterators  = require('./$.iterators')
-  , ITERATOR   = require('./$.wks')('iterator')
+var Iterators  = require('./_iterators')
+  , ITERATOR   = require('./_wks')('iterator')
   , ArrayProto = Array.prototype;
 
 module.exports = function(it){
   return it !== undefined && (Iterators.Array === it || ArrayProto[ITERATOR] === it);
 };
-},{"./$.iterators":105,"./$.wks":134}],98:[function(require,module,exports){
+},{"./_iterators":106,"./_wks":147}],99:[function(require,module,exports){
 // 7.2.2 IsArray(argument)
-var cof = require('./$.cof');
-module.exports = Array.isArray || function(arg){
+var cof = require('./_cof');
+module.exports = Array.isArray || function isArray(arg){
   return cof(arg) == 'Array';
 };
-},{"./$.cof":77}],99:[function(require,module,exports){
+},{"./_cof":77}],100:[function(require,module,exports){
 module.exports = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 // call something on iterator step with safe closing on error
-var anObject = require('./$.an-object');
+var anObject = require('./_an-object');
 module.exports = function(iterator, fn, value, entries){
   try {
     return entries ? fn(anObject(value)[0], value[1]) : fn(value);
@@ -1428,32 +816,32 @@ module.exports = function(iterator, fn, value, entries){
     throw e;
   }
 };
-},{"./$.an-object":75}],101:[function(require,module,exports){
+},{"./_an-object":70}],102:[function(require,module,exports){
 'use strict';
-var $              = require('./$')
-  , descriptor     = require('./$.property-desc')
-  , setToStringTag = require('./$.set-to-string-tag')
+var create         = require('./_object-create')
+  , descriptor     = require('./_property-desc')
+  , setToStringTag = require('./_set-to-string-tag')
   , IteratorPrototype = {};
 
 // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-require('./$.hide')(IteratorPrototype, require('./$.wks')('iterator'), function(){ return this; });
+require('./_hide')(IteratorPrototype, require('./_wks')('iterator'), function(){ return this; });
 
 module.exports = function(Constructor, NAME, next){
-  Constructor.prototype = $.create(IteratorPrototype, {next: descriptor(1, next)});
+  Constructor.prototype = create(IteratorPrototype, {next: descriptor(1, next)});
   setToStringTag(Constructor, NAME + ' Iterator');
 };
-},{"./$":106,"./$.hide":93,"./$.property-desc":115,"./$.set-to-string-tag":121,"./$.wks":134}],102:[function(require,module,exports){
+},{"./_hide":93,"./_object-create":115,"./_property-desc":127,"./_set-to-string-tag":131,"./_wks":147}],103:[function(require,module,exports){
 'use strict';
-var LIBRARY        = require('./$.library')
-  , $export        = require('./$.export')
-  , redefine       = require('./$.redefine')
-  , hide           = require('./$.hide')
-  , has            = require('./$.has')
-  , Iterators      = require('./$.iterators')
-  , $iterCreate    = require('./$.iter-create')
-  , setToStringTag = require('./$.set-to-string-tag')
-  , getProto       = require('./$').getProto
-  , ITERATOR       = require('./$.wks')('iterator')
+var LIBRARY        = require('./_library')
+  , $export        = require('./_export')
+  , redefine       = require('./_redefine')
+  , hide           = require('./_hide')
+  , has            = require('./_has')
+  , Iterators      = require('./_iterators')
+  , $iterCreate    = require('./_iter-create')
+  , setToStringTag = require('./_set-to-string-tag')
+  , getPrototypeOf = require('./_object-gpo')
+  , ITERATOR       = require('./_wks')('iterator')
   , BUGGY          = !([].keys && 'next' in [].keys()) // Safari has buggy iterators w/o `next`
   , FF_ITERATOR    = '@@iterator'
   , KEYS           = 'keys'
@@ -1476,19 +864,23 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
     , proto      = Base.prototype
     , $native    = proto[ITERATOR] || proto[FF_ITERATOR] || DEFAULT && proto[DEFAULT]
     , $default   = $native || getMethod(DEFAULT)
-    , methods, key;
+    , $entries   = DEFAULT ? !DEF_VALUES ? $default : getMethod('entries') : undefined
+    , $anyNative = NAME == 'Array' ? proto.entries || $native : $native
+    , methods, key, IteratorPrototype;
   // Fix native
-  if($native){
-    var IteratorPrototype = getProto($default.call(new Base));
-    // Set @@toStringTag to native iterators
-    setToStringTag(IteratorPrototype, TAG, true);
-    // FF fix
-    if(!LIBRARY && has(proto, FF_ITERATOR))hide(IteratorPrototype, ITERATOR, returnThis);
-    // fix Array#{values, @@iterator}.name in V8 / FF
-    if(DEF_VALUES && $native.name !== VALUES){
-      VALUES_BUG = true;
-      $default = function values(){ return $native.call(this); };
+  if($anyNative){
+    IteratorPrototype = getPrototypeOf($anyNative.call(new Base));
+    if(IteratorPrototype !== Object.prototype){
+      // Set @@toStringTag to native iterators
+      setToStringTag(IteratorPrototype, TAG, true);
+      // fix for some old engines
+      if(!LIBRARY && !has(IteratorPrototype, ITERATOR))hide(IteratorPrototype, ITERATOR, returnThis);
     }
+  }
+  // fix Array#{values, @@iterator}.name in V8 / FF
+  if(DEF_VALUES && $native && $native.name !== VALUES){
+    VALUES_BUG = true;
+    $default = function values(){ return $native.call(this); };
   }
   // Define iterator
   if((!LIBRARY || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR])){
@@ -1499,9 +891,9 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
   Iterators[TAG]  = returnThis;
   if(DEFAULT){
     methods = {
-      values:  DEF_VALUES  ? $default : getMethod(VALUES),
-      keys:    IS_SET      ? $default : getMethod(KEYS),
-      entries: !DEF_VALUES ? $default : getMethod('entries')
+      values:  DEF_VALUES ? $default : getMethod(VALUES),
+      keys:    IS_SET     ? $default : getMethod(KEYS),
+      entries: $entries
     };
     if(FORCED)for(key in methods){
       if(!(key in proto))redefine(proto, key, methods[key]);
@@ -1509,8 +901,8 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
   }
   return methods;
 };
-},{"./$":106,"./$.export":87,"./$.has":92,"./$.hide":93,"./$.iter-create":101,"./$.iterators":105,"./$.library":108,"./$.redefine":117,"./$.set-to-string-tag":121,"./$.wks":134}],103:[function(require,module,exports){
-var ITERATOR     = require('./$.wks')('iterator')
+},{"./_export":88,"./_has":92,"./_hide":93,"./_iter-create":102,"./_iterators":106,"./_library":108,"./_object-gpo":122,"./_redefine":129,"./_set-to-string-tag":131,"./_wks":147}],104:[function(require,module,exports){
+var ITERATOR     = require('./_wks')('iterator')
   , SAFE_CLOSING = false;
 
 try {
@@ -1525,50 +917,42 @@ module.exports = function(exec, skipClosing){
   try {
     var arr  = [7]
       , iter = arr[ITERATOR]();
-    iter.next = function(){ safe = true; };
+    iter.next = function(){ return {done: safe = true}; };
     arr[ITERATOR] = function(){ return iter; };
     exec(arr);
   } catch(e){ /* empty */ }
   return safe;
 };
-},{"./$.wks":134}],104:[function(require,module,exports){
+},{"./_wks":147}],105:[function(require,module,exports){
 module.exports = function(done, value){
   return {value: value, done: !!done};
 };
-},{}],105:[function(require,module,exports){
-module.exports = {};
 },{}],106:[function(require,module,exports){
-var $Object = Object;
-module.exports = {
-  create:     $Object.create,
-  getProto:   $Object.getPrototypeOf,
-  isEnum:     {}.propertyIsEnumerable,
-  getDesc:    $Object.getOwnPropertyDescriptor,
-  setDesc:    $Object.defineProperty,
-  setDescs:   $Object.defineProperties,
-  getKeys:    $Object.keys,
-  getNames:   $Object.getOwnPropertyNames,
-  getSymbols: $Object.getOwnPropertySymbols,
-  each:       [].forEach
-};
+module.exports = {};
 },{}],107:[function(require,module,exports){
-var $         = require('./$')
-  , toIObject = require('./$.to-iobject');
+var getKeys   = require('./_object-keys')
+  , toIObject = require('./_to-iobject');
 module.exports = function(object, el){
   var O      = toIObject(object)
-    , keys   = $.getKeys(O)
+    , keys   = getKeys(O)
     , length = keys.length
     , index  = 0
     , key;
   while(length > index)if(O[key = keys[index++]] === el)return key;
 };
-},{"./$":106,"./$.to-iobject":130}],108:[function(require,module,exports){
+},{"./_object-keys":124,"./_to-iobject":140}],108:[function(require,module,exports){
 module.exports = true;
 },{}],109:[function(require,module,exports){
 // 20.2.2.14 Math.expm1(x)
-module.exports = Math.expm1 || function expm1(x){
+var $expm1 = Math.expm1;
+module.exports = (!$expm1
+  // Old FF bug
+  || $expm1(10) > 22025.465794806719 || $expm1(10) < 22025.4657948067165168
+  // Tor Browser bug
+  || $expm1(-2e-17) != -2e-17
+) ? function expm1(x){
   return (x = +x) == 0 ? x : x > -1e-6 && x < 1e-6 ? x + x * x / 2 : Math.exp(x) - 1;
-};
+} : $expm1;
 },{}],110:[function(require,module,exports){
 // 20.2.2.20 Math.log1p(x)
 module.exports = Math.log1p || function log1p(x){
@@ -1580,116 +964,338 @@ module.exports = Math.sign || function sign(x){
   return (x = +x) == 0 || x != x ? x : x < 0 ? -1 : 1;
 };
 },{}],112:[function(require,module,exports){
-var global    = require('./$.global')
-  , macrotask = require('./$.task').set
+var META     = require('./_uid')('meta')
+  , isObject = require('./_is-object')
+  , has      = require('./_has')
+  , setDesc  = require('./_object-dp').f
+  , id       = 0;
+var isExtensible = Object.isExtensible || function(){
+  return true;
+};
+var FREEZE = !require('./_fails')(function(){
+  return isExtensible(Object.preventExtensions({}));
+});
+var setMeta = function(it){
+  setDesc(it, META, {value: {
+    i: 'O' + ++id, // object ID
+    w: {}          // weak collections IDs
+  }});
+};
+var fastKey = function(it, create){
+  // return primitive with prefix
+  if(!isObject(it))return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
+  if(!has(it, META)){
+    // can't set metadata to uncaught frozen object
+    if(!isExtensible(it))return 'F';
+    // not necessary to add metadata
+    if(!create)return 'E';
+    // add missing metadata
+    setMeta(it);
+  // return object ID
+  } return it[META].i;
+};
+var getWeak = function(it, create){
+  if(!has(it, META)){
+    // can't set metadata to uncaught frozen object
+    if(!isExtensible(it))return true;
+    // not necessary to add metadata
+    if(!create)return false;
+    // add missing metadata
+    setMeta(it);
+  // return hash weak collections IDs
+  } return it[META].w;
+};
+// add metadata on freeze-family methods calling
+var onFreeze = function(it){
+  if(FREEZE && meta.NEED && isExtensible(it) && !has(it, META))setMeta(it);
+  return it;
+};
+var meta = module.exports = {
+  KEY:      META,
+  NEED:     false,
+  fastKey:  fastKey,
+  getWeak:  getWeak,
+  onFreeze: onFreeze
+};
+},{"./_fails":89,"./_has":92,"./_is-object":100,"./_object-dp":116,"./_uid":144}],113:[function(require,module,exports){
+var global    = require('./_global')
+  , macrotask = require('./_task').set
   , Observer  = global.MutationObserver || global.WebKitMutationObserver
   , process   = global.process
   , Promise   = global.Promise
-  , isNode    = require('./$.cof')(process) == 'process'
-  , head, last, notify;
+  , isNode    = require('./_cof')(process) == 'process';
 
-var flush = function(){
-  var parent, domain, fn;
-  if(isNode && (parent = process.domain)){
-    process.domain = null;
-    parent.exit();
+module.exports = function(){
+  var head, last, notify;
+
+  var flush = function(){
+    var parent, fn;
+    if(isNode && (parent = process.domain))parent.exit();
+    while(head){
+      fn   = head.fn;
+      head = head.next;
+      try {
+        fn();
+      } catch(e){
+        if(head)notify();
+        else last = undefined;
+        throw e;
+      }
+    } last = undefined;
+    if(parent)parent.enter();
+  };
+
+  // Node.js
+  if(isNode){
+    notify = function(){
+      process.nextTick(flush);
+    };
+  // browsers with MutationObserver
+  } else if(Observer){
+    var toggle = true
+      , node   = document.createTextNode('');
+    new Observer(flush).observe(node, {characterData: true}); // eslint-disable-line no-new
+    notify = function(){
+      node.data = toggle = !toggle;
+    };
+  // environments with maybe non-completely correct, but existent Promise
+  } else if(Promise && Promise.resolve){
+    var promise = Promise.resolve();
+    notify = function(){
+      promise.then(flush);
+    };
+  // for other environments - macrotask based on:
+  // - setImmediate
+  // - MessageChannel
+  // - window.postMessag
+  // - onreadystatechange
+  // - setTimeout
+  } else {
+    notify = function(){
+      // strange IE + webpack dev server bug - use .call(global)
+      macrotask.call(global, flush);
+    };
   }
-  while(head){
-    domain = head.domain;
-    fn     = head.fn;
-    if(domain)domain.enter();
-    fn(); // <- currently we use it only for Promise - try / catch not required
-    if(domain)domain.exit();
-    head = head.next;
-  } last = undefined;
-  if(parent)parent.enter();
-};
 
-// Node.js
-if(isNode){
-  notify = function(){
-    process.nextTick(flush);
+  return function(fn){
+    var task = {fn: fn, next: undefined};
+    if(last)last.next = task;
+    if(!head){
+      head = task;
+      notify();
+    } last = task;
   };
-// browsers with MutationObserver
-} else if(Observer){
-  var toggle = 1
-    , node   = document.createTextNode('');
-  new Observer(flush).observe(node, {characterData: true}); // eslint-disable-line no-new
-  notify = function(){
-    node.data = toggle = -toggle;
-  };
-// environments with maybe non-completely correct, but existent Promise
-} else if(Promise && Promise.resolve){
-  notify = function(){
-    Promise.resolve().then(flush);
-  };
-// for other environments - macrotask based on:
-// - setImmediate
-// - MessageChannel
-// - window.postMessag
-// - onreadystatechange
-// - setTimeout
-} else {
-  notify = function(){
-    // strange IE + webpack dev server bug - use .call(global)
-    macrotask.call(global, flush);
-  };
-}
-
-module.exports = function asap(fn){
-  var task = {fn: fn, next: undefined, domain: isNode && process.domain};
-  if(last)last.next = task;
-  if(!head){
-    head = task;
-    notify();
-  } last = task;
 };
-},{"./$.cof":77,"./$.global":91,"./$.task":127}],113:[function(require,module,exports){
+},{"./_cof":77,"./_global":91,"./_task":137}],114:[function(require,module,exports){
+'use strict';
 // 19.1.2.1 Object.assign(target, source, ...)
-var $        = require('./$')
-  , toObject = require('./$.to-object')
-  , IObject  = require('./$.iobject');
+var getKeys  = require('./_object-keys')
+  , gOPS     = require('./_object-gops')
+  , pIE      = require('./_object-pie')
+  , toObject = require('./_to-object')
+  , IObject  = require('./_iobject')
+  , $assign  = Object.assign;
 
 // should work with symbols and should have deterministic property order (V8 bug)
-module.exports = require('./$.fails')(function(){
-  var a = Object.assign
-    , A = {}
+module.exports = !$assign || require('./_fails')(function(){
+  var A = {}
     , B = {}
     , S = Symbol()
     , K = 'abcdefghijklmnopqrst';
   A[S] = 7;
   K.split('').forEach(function(k){ B[k] = k; });
-  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
+  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
 }) ? function assign(target, source){ // eslint-disable-line no-unused-vars
   var T     = toObject(target)
-    , $$    = arguments
-    , $$len = $$.length
+    , aLen  = arguments.length
     , index = 1
-    , getKeys    = $.getKeys
-    , getSymbols = $.getSymbols
-    , isEnum     = $.isEnum;
-  while($$len > index){
-    var S      = IObject($$[index++])
+    , getSymbols = gOPS.f
+    , isEnum     = pIE.f;
+  while(aLen > index){
+    var S      = IObject(arguments[index++])
       , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
       , length = keys.length
       , j      = 0
       , key;
     while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
+  } return T;
+} : $assign;
+},{"./_fails":89,"./_iobject":97,"./_object-gops":121,"./_object-keys":124,"./_object-pie":125,"./_to-object":142}],115:[function(require,module,exports){
+// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
+var anObject    = require('./_an-object')
+  , dPs         = require('./_object-dps')
+  , enumBugKeys = require('./_enum-bug-keys')
+  , IE_PROTO    = require('./_shared-key')('IE_PROTO')
+  , Empty       = function(){ /* empty */ }
+  , PROTOTYPE   = 'prototype';
+
+// Create object with fake `null` prototype: use iframe Object with cleared prototype
+var createDict = function(){
+  // Thrash, waste and sodomy: IE GC bug
+  var iframe = require('./_dom-create')('iframe')
+    , i      = enumBugKeys.length
+    , lt     = '<'
+    , gt     = '>'
+    , iframeDocument;
+  iframe.style.display = 'none';
+  require('./_html').appendChild(iframe);
+  iframe.src = 'javascript:'; // eslint-disable-line no-script-url
+  // createDict = iframe.contentWindow.Object;
+  // html.removeChild(iframe);
+  iframeDocument = iframe.contentWindow.document;
+  iframeDocument.open();
+  iframeDocument.write(lt + 'script' + gt + 'document.F=Object' + lt + '/script' + gt);
+  iframeDocument.close();
+  createDict = iframeDocument.F;
+  while(i--)delete createDict[PROTOTYPE][enumBugKeys[i]];
+  return createDict();
+};
+
+module.exports = Object.create || function create(O, Properties){
+  var result;
+  if(O !== null){
+    Empty[PROTOTYPE] = anObject(O);
+    result = new Empty;
+    Empty[PROTOTYPE] = null;
+    // add "__proto__" for Object.getPrototypeOf polyfill
+    result[IE_PROTO] = O;
+  } else result = createDict();
+  return Properties === undefined ? result : dPs(result, Properties);
+};
+
+},{"./_an-object":70,"./_dom-create":85,"./_enum-bug-keys":86,"./_html":94,"./_object-dps":117,"./_shared-key":132}],116:[function(require,module,exports){
+var anObject       = require('./_an-object')
+  , IE8_DOM_DEFINE = require('./_ie8-dom-define')
+  , toPrimitive    = require('./_to-primitive')
+  , dP             = Object.defineProperty;
+
+exports.f = require('./_descriptors') ? Object.defineProperty : function defineProperty(O, P, Attributes){
+  anObject(O);
+  P = toPrimitive(P, true);
+  anObject(Attributes);
+  if(IE8_DOM_DEFINE)try {
+    return dP(O, P, Attributes);
+  } catch(e){ /* empty */ }
+  if('get' in Attributes || 'set' in Attributes)throw TypeError('Accessors not supported!');
+  if('value' in Attributes)O[P] = Attributes.value;
+  return O;
+};
+},{"./_an-object":70,"./_descriptors":84,"./_ie8-dom-define":95,"./_to-primitive":143}],117:[function(require,module,exports){
+var dP       = require('./_object-dp')
+  , anObject = require('./_an-object')
+  , getKeys  = require('./_object-keys');
+
+module.exports = require('./_descriptors') ? Object.defineProperties : function defineProperties(O, Properties){
+  anObject(O);
+  var keys   = getKeys(Properties)
+    , length = keys.length
+    , i = 0
+    , P;
+  while(length > i)dP.f(O, P = keys[i++], Properties[P]);
+  return O;
+};
+},{"./_an-object":70,"./_descriptors":84,"./_object-dp":116,"./_object-keys":124}],118:[function(require,module,exports){
+var pIE            = require('./_object-pie')
+  , createDesc     = require('./_property-desc')
+  , toIObject      = require('./_to-iobject')
+  , toPrimitive    = require('./_to-primitive')
+  , has            = require('./_has')
+  , IE8_DOM_DEFINE = require('./_ie8-dom-define')
+  , gOPD           = Object.getOwnPropertyDescriptor;
+
+exports.f = require('./_descriptors') ? gOPD : function getOwnPropertyDescriptor(O, P){
+  O = toIObject(O);
+  P = toPrimitive(P, true);
+  if(IE8_DOM_DEFINE)try {
+    return gOPD(O, P);
+  } catch(e){ /* empty */ }
+  if(has(O, P))return createDesc(!pIE.f.call(O, P), O[P]);
+};
+},{"./_descriptors":84,"./_has":92,"./_ie8-dom-define":95,"./_object-pie":125,"./_property-desc":127,"./_to-iobject":140,"./_to-primitive":143}],119:[function(require,module,exports){
+// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+var toIObject = require('./_to-iobject')
+  , gOPN      = require('./_object-gopn').f
+  , toString  = {}.toString;
+
+var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
+  ? Object.getOwnPropertyNames(window) : [];
+
+var getWindowNames = function(it){
+  try {
+    return gOPN(it);
+  } catch(e){
+    return windowNames.slice();
   }
-  return T;
-} : Object.assign;
-},{"./$":106,"./$.fails":88,"./$.iobject":96,"./$.to-object":132}],114:[function(require,module,exports){
+};
+
+module.exports.f = function getOwnPropertyNames(it){
+  return windowNames && toString.call(it) == '[object Window]' ? getWindowNames(it) : gOPN(toIObject(it));
+};
+
+},{"./_object-gopn":120,"./_to-iobject":140}],120:[function(require,module,exports){
+// 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
+var $keys      = require('./_object-keys-internal')
+  , hiddenKeys = require('./_enum-bug-keys').concat('length', 'prototype');
+
+exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
+  return $keys(O, hiddenKeys);
+};
+},{"./_enum-bug-keys":86,"./_object-keys-internal":123}],121:[function(require,module,exports){
+exports.f = Object.getOwnPropertySymbols;
+},{}],122:[function(require,module,exports){
+// 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
+var has         = require('./_has')
+  , toObject    = require('./_to-object')
+  , IE_PROTO    = require('./_shared-key')('IE_PROTO')
+  , ObjectProto = Object.prototype;
+
+module.exports = Object.getPrototypeOf || function(O){
+  O = toObject(O);
+  if(has(O, IE_PROTO))return O[IE_PROTO];
+  if(typeof O.constructor == 'function' && O instanceof O.constructor){
+    return O.constructor.prototype;
+  } return O instanceof Object ? ObjectProto : null;
+};
+},{"./_has":92,"./_shared-key":132,"./_to-object":142}],123:[function(require,module,exports){
+var has          = require('./_has')
+  , toIObject    = require('./_to-iobject')
+  , arrayIndexOf = require('./_array-includes')(false)
+  , IE_PROTO     = require('./_shared-key')('IE_PROTO');
+
+module.exports = function(object, names){
+  var O      = toIObject(object)
+    , i      = 0
+    , result = []
+    , key;
+  for(key in O)if(key != IE_PROTO)has(O, key) && result.push(key);
+  // Don't enum bug & hidden keys
+  while(names.length > i)if(has(O, key = names[i++])){
+    ~arrayIndexOf(result, key) || result.push(key);
+  }
+  return result;
+};
+},{"./_array-includes":72,"./_has":92,"./_shared-key":132,"./_to-iobject":140}],124:[function(require,module,exports){
+// 19.1.2.14 / 15.2.3.14 Object.keys(O)
+var $keys       = require('./_object-keys-internal')
+  , enumBugKeys = require('./_enum-bug-keys');
+
+module.exports = Object.keys || function keys(O){
+  return $keys(O, enumBugKeys);
+};
+},{"./_enum-bug-keys":86,"./_object-keys-internal":123}],125:[function(require,module,exports){
+exports.f = {}.propertyIsEnumerable;
+},{}],126:[function(require,module,exports){
 // most Object methods by ES6 should accept primitives
-var $export = require('./$.export')
-  , core    = require('./$.core')
-  , fails   = require('./$.fails');
+var $export = require('./_export')
+  , core    = require('./_core')
+  , fails   = require('./_fails');
 module.exports = function(KEY, exec){
   var fn  = (core.Object || {})[KEY] || Object[KEY]
     , exp = {};
   exp[KEY] = exec(fn);
   $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
 };
-},{"./$.core":81,"./$.export":87,"./$.fails":88}],115:[function(require,module,exports){
+},{"./_core":81,"./_export":88,"./_fails":89}],127:[function(require,module,exports){
 module.exports = function(bitmap, value){
   return {
     enumerable  : !(bitmap & 1),
@@ -1698,92 +1304,64 @@ module.exports = function(bitmap, value){
     value       : value
   };
 };
-},{}],116:[function(require,module,exports){
-var redefine = require('./$.redefine');
-module.exports = function(target, src){
-  for(var key in src)redefine(target, key, src[key]);
-  return target;
+},{}],128:[function(require,module,exports){
+var hide = require('./_hide');
+module.exports = function(target, src, safe){
+  for(var key in src){
+    if(safe && target[key])target[key] = src[key];
+    else hide(target, key, src[key]);
+  } return target;
 };
-},{"./$.redefine":117}],117:[function(require,module,exports){
-module.exports = require('./$.hide');
-},{"./$.hide":93}],118:[function(require,module,exports){
-// 7.2.9 SameValue(x, y)
-module.exports = Object.is || function is(x, y){
-  return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
-};
-},{}],119:[function(require,module,exports){
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-/* eslint-disable no-proto */
-var getDesc  = require('./$').getDesc
-  , isObject = require('./$.is-object')
-  , anObject = require('./$.an-object');
-var check = function(O, proto){
-  anObject(O);
-  if(!isObject(proto) && proto !== null)throw TypeError(proto + ": can't set as prototype!");
-};
-module.exports = {
-  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
-    function(test, buggy, set){
-      try {
-        set = require('./$.ctx')(Function.call, getDesc(Object.prototype, '__proto__').set, 2);
-        set(test, []);
-        buggy = !(test instanceof Array);
-      } catch(e){ buggy = true; }
-      return function setPrototypeOf(O, proto){
-        check(O, proto);
-        if(buggy)O.__proto__ = proto;
-        else set(O, proto);
-        return O;
-      };
-    }({}, false) : undefined),
-  check: check
-};
-},{"./$":106,"./$.an-object":75,"./$.ctx":82,"./$.is-object":99}],120:[function(require,module,exports){
+},{"./_hide":93}],129:[function(require,module,exports){
+module.exports = require('./_hide');
+},{"./_hide":93}],130:[function(require,module,exports){
 'use strict';
-var core        = require('./$.core')
-  , $           = require('./$')
-  , DESCRIPTORS = require('./$.descriptors')
-  , SPECIES     = require('./$.wks')('species');
+var global      = require('./_global')
+  , core        = require('./_core')
+  , dP          = require('./_object-dp')
+  , DESCRIPTORS = require('./_descriptors')
+  , SPECIES     = require('./_wks')('species');
 
 module.exports = function(KEY){
-  var C = core[KEY];
-  if(DESCRIPTORS && C && !C[SPECIES])$.setDesc(C, SPECIES, {
+  var C = typeof core[KEY] == 'function' ? core[KEY] : global[KEY];
+  if(DESCRIPTORS && C && !C[SPECIES])dP.f(C, SPECIES, {
     configurable: true,
     get: function(){ return this; }
   });
 };
-},{"./$":106,"./$.core":81,"./$.descriptors":84,"./$.wks":134}],121:[function(require,module,exports){
-var def = require('./$').setDesc
-  , has = require('./$.has')
-  , TAG = require('./$.wks')('toStringTag');
+},{"./_core":81,"./_descriptors":84,"./_global":91,"./_object-dp":116,"./_wks":147}],131:[function(require,module,exports){
+var def = require('./_object-dp').f
+  , has = require('./_has')
+  , TAG = require('./_wks')('toStringTag');
 
 module.exports = function(it, tag, stat){
   if(it && !has(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
 };
-},{"./$":106,"./$.has":92,"./$.wks":134}],122:[function(require,module,exports){
-var global = require('./$.global')
+},{"./_has":92,"./_object-dp":116,"./_wks":147}],132:[function(require,module,exports){
+var shared = require('./_shared')('keys')
+  , uid    = require('./_uid');
+module.exports = function(key){
+  return shared[key] || (shared[key] = uid(key));
+};
+},{"./_shared":133,"./_uid":144}],133:[function(require,module,exports){
+var global = require('./_global')
   , SHARED = '__core-js_shared__'
   , store  = global[SHARED] || (global[SHARED] = {});
 module.exports = function(key){
   return store[key] || (store[key] = {});
 };
-},{"./$.global":91}],123:[function(require,module,exports){
+},{"./_global":91}],134:[function(require,module,exports){
 // 7.3.20 SpeciesConstructor(O, defaultConstructor)
-var anObject  = require('./$.an-object')
-  , aFunction = require('./$.a-function')
-  , SPECIES   = require('./$.wks')('species');
+var anObject  = require('./_an-object')
+  , aFunction = require('./_a-function')
+  , SPECIES   = require('./_wks')('species');
 module.exports = function(O, D){
   var C = anObject(O).constructor, S;
   return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? D : aFunction(S);
 };
-},{"./$.a-function":73,"./$.an-object":75,"./$.wks":134}],124:[function(require,module,exports){
-module.exports = function(it, Constructor, name){
-  if(!(it instanceof Constructor))throw TypeError(name + ": use the 'new' operator!");
-  return it;
-};
-},{}],125:[function(require,module,exports){
-var toInteger = require('./$.to-integer')
-  , defined   = require('./$.defined');
+},{"./_a-function":67,"./_an-object":70,"./_wks":147}],135:[function(require,module,exports){
+var toInteger = require('./_to-integer')
+  , defined   = require('./_defined');
 // true  -> String#at
 // false -> String#codePointAt
 module.exports = function(TO_STRING){
@@ -1799,10 +1377,10 @@ module.exports = function(TO_STRING){
       : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
   };
 };
-},{"./$.defined":83,"./$.to-integer":129}],126:[function(require,module,exports){
+},{"./_defined":83,"./_to-integer":139}],136:[function(require,module,exports){
 'use strict';
-var toInteger = require('./$.to-integer')
-  , defined   = require('./$.defined');
+var toInteger = require('./_to-integer')
+  , defined   = require('./_defined');
 
 module.exports = function repeat(count){
   var str = String(defined(this))
@@ -1812,12 +1390,12 @@ module.exports = function repeat(count){
   for(;n > 0; (n >>>= 1) && (str += str))if(n & 1)res += str;
   return res;
 };
-},{"./$.defined":83,"./$.to-integer":129}],127:[function(require,module,exports){
-var ctx                = require('./$.ctx')
-  , invoke             = require('./$.invoke')
-  , html               = require('./$.html')
-  , cel                = require('./$.dom-create')
-  , global             = require('./$.global')
+},{"./_defined":83,"./_to-integer":139}],137:[function(require,module,exports){
+var ctx                = require('./_ctx')
+  , invoke             = require('./_invoke')
+  , html               = require('./_html')
+  , cel                = require('./_dom-create')
+  , global             = require('./_global')
   , process            = global.process
   , setTask            = global.setImmediate
   , clearTask          = global.clearImmediate
@@ -1834,7 +1412,7 @@ var run = function(){
     fn();
   }
 };
-var listner = function(event){
+var listener = function(event){
   run.call(event.data);
 };
 // Node.js 0.9+ & IE10+ has setImmediate, otherwise:
@@ -1852,7 +1430,7 @@ if(!setTask || !clearTask){
     delete queue[id];
   };
   // Node.js 0.8-
-  if(require('./$.cof')(process) == 'process'){
+  if(require('./_cof')(process) == 'process'){
     defer = function(id){
       process.nextTick(ctx(run, id, 1));
     };
@@ -1860,7 +1438,7 @@ if(!setTask || !clearTask){
   } else if(MessageChannel){
     channel = new MessageChannel;
     port    = channel.port2;
-    channel.port1.onmessage = listner;
+    channel.port1.onmessage = listener;
     defer = ctx(port.postMessage, port, 1);
   // Browsers with postMessage, skip WebWorkers
   // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
@@ -1868,7 +1446,7 @@ if(!setTask || !clearTask){
     defer = function(id){
       global.postMessage(id + '', '*');
     };
-    global.addEventListener('message', listner, false);
+    global.addEventListener('message', listener, false);
   // IE8-
   } else if(ONREADYSTATECHANGE in cel('script')){
     defer = function(id){
@@ -1888,84 +1466,113 @@ module.exports = {
   set:   setTask,
   clear: clearTask
 };
-},{"./$.cof":77,"./$.ctx":82,"./$.dom-create":85,"./$.global":91,"./$.html":94,"./$.invoke":95}],128:[function(require,module,exports){
-var toInteger = require('./$.to-integer')
+},{"./_cof":77,"./_ctx":82,"./_dom-create":85,"./_global":91,"./_html":94,"./_invoke":96}],138:[function(require,module,exports){
+var toInteger = require('./_to-integer')
   , max       = Math.max
   , min       = Math.min;
 module.exports = function(index, length){
   index = toInteger(index);
   return index < 0 ? max(index + length, 0) : min(index, length);
 };
-},{"./$.to-integer":129}],129:[function(require,module,exports){
+},{"./_to-integer":139}],139:[function(require,module,exports){
 // 7.1.4 ToInteger
 var ceil  = Math.ceil
   , floor = Math.floor;
 module.exports = function(it){
   return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
 };
-},{}],130:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = require('./$.iobject')
-  , defined = require('./$.defined');
+var IObject = require('./_iobject')
+  , defined = require('./_defined');
 module.exports = function(it){
   return IObject(defined(it));
 };
-},{"./$.defined":83,"./$.iobject":96}],131:[function(require,module,exports){
+},{"./_defined":83,"./_iobject":97}],141:[function(require,module,exports){
 // 7.1.15 ToLength
-var toInteger = require('./$.to-integer')
+var toInteger = require('./_to-integer')
   , min       = Math.min;
 module.exports = function(it){
   return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
 };
-},{"./$.to-integer":129}],132:[function(require,module,exports){
+},{"./_to-integer":139}],142:[function(require,module,exports){
 // 7.1.13 ToObject(argument)
-var defined = require('./$.defined');
+var defined = require('./_defined');
 module.exports = function(it){
   return Object(defined(it));
 };
-},{"./$.defined":83}],133:[function(require,module,exports){
+},{"./_defined":83}],143:[function(require,module,exports){
+// 7.1.1 ToPrimitive(input [, PreferredType])
+var isObject = require('./_is-object');
+// instead of the ES6 spec version, we didn't implement @@toPrimitive case
+// and the second argument - flag - preferred type is a string
+module.exports = function(it, S){
+  if(!isObject(it))return it;
+  var fn, val;
+  if(S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
+  if(typeof (fn = it.valueOf) == 'function' && !isObject(val = fn.call(it)))return val;
+  if(!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
+  throw TypeError("Can't convert object to primitive value");
+};
+},{"./_is-object":100}],144:[function(require,module,exports){
 var id = 0
   , px = Math.random();
 module.exports = function(key){
   return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
 };
-},{}],134:[function(require,module,exports){
-var store  = require('./$.shared')('wks')
-  , uid    = require('./$.uid')
-  , Symbol = require('./$.global').Symbol;
+},{}],145:[function(require,module,exports){
+var global         = require('./_global')
+  , core           = require('./_core')
+  , LIBRARY        = require('./_library')
+  , wksExt         = require('./_wks-ext')
+  , defineProperty = require('./_object-dp').f;
 module.exports = function(name){
-  return store[name] || (store[name] =
-    Symbol && Symbol[name] || (Symbol || uid)('Symbol.' + name));
+  var $Symbol = core.Symbol || (core.Symbol = LIBRARY ? {} : global.Symbol || {});
+  if(name.charAt(0) != '_' && !(name in $Symbol))defineProperty($Symbol, name, {value: wksExt.f(name)});
 };
-},{"./$.global":91,"./$.shared":122,"./$.uid":133}],135:[function(require,module,exports){
-var classof   = require('./$.classof')
-  , ITERATOR  = require('./$.wks')('iterator')
-  , Iterators = require('./$.iterators');
-module.exports = require('./$.core').getIteratorMethod = function(it){
+},{"./_core":81,"./_global":91,"./_library":108,"./_object-dp":116,"./_wks-ext":146}],146:[function(require,module,exports){
+exports.f = require('./_wks');
+},{"./_wks":147}],147:[function(require,module,exports){
+var store      = require('./_shared')('wks')
+  , uid        = require('./_uid')
+  , Symbol     = require('./_global').Symbol
+  , USE_SYMBOL = typeof Symbol == 'function';
+
+var $exports = module.exports = function(name){
+  return store[name] || (store[name] =
+    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
+};
+
+$exports.store = store;
+},{"./_global":91,"./_shared":133,"./_uid":144}],148:[function(require,module,exports){
+var classof   = require('./_classof')
+  , ITERATOR  = require('./_wks')('iterator')
+  , Iterators = require('./_iterators');
+module.exports = require('./_core').getIteratorMethod = function(it){
   if(it != undefined)return it[ITERATOR]
     || it['@@iterator']
     || Iterators[classof(it)];
 };
-},{"./$.classof":76,"./$.core":81,"./$.iterators":105,"./$.wks":134}],136:[function(require,module,exports){
-var anObject = require('./$.an-object')
+},{"./_classof":76,"./_core":81,"./_iterators":106,"./_wks":147}],149:[function(require,module,exports){
+var anObject = require('./_an-object')
   , get      = require('./core.get-iterator-method');
-module.exports = require('./$.core').getIterator = function(it){
+module.exports = require('./_core').getIterator = function(it){
   var iterFn = get(it);
   if(typeof iterFn != 'function')throw TypeError(it + ' is not iterable!');
   return anObject(iterFn.call(it));
 };
-},{"./$.an-object":75,"./$.core":81,"./core.get-iterator-method":135}],137:[function(require,module,exports){
+},{"./_an-object":70,"./_core":81,"./core.get-iterator-method":148}],150:[function(require,module,exports){
 'use strict';
-var addToUnscopables = require('./$.add-to-unscopables')
-  , step             = require('./$.iter-step')
-  , Iterators        = require('./$.iterators')
-  , toIObject        = require('./$.to-iobject');
+var addToUnscopables = require('./_add-to-unscopables')
+  , step             = require('./_iter-step')
+  , Iterators        = require('./_iterators')
+  , toIObject        = require('./_to-iobject');
 
 // 22.1.3.4 Array.prototype.entries()
 // 22.1.3.13 Array.prototype.keys()
 // 22.1.3.29 Array.prototype.values()
 // 22.1.3.30 Array.prototype[@@iterator]()
-module.exports = require('./$.iter-define')(Array, 'Array', function(iterated, kind){
+module.exports = require('./_iter-define')(Array, 'Array', function(iterated, kind){
   this._t = toIObject(iterated); // target
   this._i = 0;                   // next index
   this._k = kind;                // kind
@@ -1989,12 +1596,12 @@ Iterators.Arguments = Iterators.Array;
 addToUnscopables('keys');
 addToUnscopables('values');
 addToUnscopables('entries');
-},{"./$.add-to-unscopables":74,"./$.iter-define":102,"./$.iter-step":104,"./$.iterators":105,"./$.to-iobject":130}],138:[function(require,module,exports){
+},{"./_add-to-unscopables":68,"./_iter-define":103,"./_iter-step":105,"./_iterators":106,"./_to-iobject":140}],151:[function(require,module,exports){
 'use strict';
-var strong = require('./$.collection-strong');
+var strong = require('./_collection-strong');
 
 // 23.1 Map Objects
-require('./$.collection')('Map', function(get){
+module.exports = require('./_collection')('Map', function(get){
   return function Map(){ return get(this, arguments.length > 0 ? arguments[0] : undefined); };
 }, {
   // 23.1.3.6 Map.prototype.get(key)
@@ -2007,61 +1614,69 @@ require('./$.collection')('Map', function(get){
     return strong.def(this, key === 0 ? 0 : key, value);
   }
 }, strong, true);
-},{"./$.collection":80,"./$.collection-strong":78}],139:[function(require,module,exports){
+},{"./_collection":80,"./_collection-strong":78}],152:[function(require,module,exports){
 // 20.2.2.3 Math.acosh(x)
-var $export = require('./$.export')
-  , log1p   = require('./$.math-log1p')
+var $export = require('./_export')
+  , log1p   = require('./_math-log1p')
   , sqrt    = Math.sqrt
   , $acosh  = Math.acosh;
 
-// V8 bug https://code.google.com/p/v8/issues/detail?id=3509
-$export($export.S + $export.F * !($acosh && Math.floor($acosh(Number.MAX_VALUE)) == 710), 'Math', {
+$export($export.S + $export.F * !($acosh
+  // V8 bug: https://code.google.com/p/v8/issues/detail?id=3509
+  && Math.floor($acosh(Number.MAX_VALUE)) == 710
+  // Tor Browser bug: Math.acosh(Infinity) -> NaN 
+  && $acosh(Infinity) == Infinity
+), 'Math', {
   acosh: function acosh(x){
     return (x = +x) < 1 ? NaN : x > 94906265.62425156
       ? Math.log(x) + Math.LN2
       : log1p(x - 1 + sqrt(x - 1) * sqrt(x + 1));
   }
 });
-},{"./$.export":87,"./$.math-log1p":110}],140:[function(require,module,exports){
+},{"./_export":88,"./_math-log1p":110}],153:[function(require,module,exports){
 // 20.2.2.5 Math.asinh(x)
-var $export = require('./$.export');
+var $export = require('./_export')
+  , $asinh  = Math.asinh;
 
 function asinh(x){
   return !isFinite(x = +x) || x == 0 ? x : x < 0 ? -asinh(-x) : Math.log(x + Math.sqrt(x * x + 1));
 }
 
-$export($export.S, 'Math', {asinh: asinh});
-},{"./$.export":87}],141:[function(require,module,exports){
+// Tor Browser bug: Math.asinh(0) -> -0 
+$export($export.S + $export.F * !($asinh && 1 / $asinh(0) > 0), 'Math', {asinh: asinh});
+},{"./_export":88}],154:[function(require,module,exports){
 // 20.2.2.7 Math.atanh(x)
-var $export = require('./$.export');
+var $export = require('./_export')
+  , $atanh  = Math.atanh;
 
-$export($export.S, 'Math', {
+// Tor Browser bug: Math.atanh(-0) -> 0 
+$export($export.S + $export.F * !($atanh && 1 / $atanh(-0) < 0), 'Math', {
   atanh: function atanh(x){
     return (x = +x) == 0 ? x : Math.log((1 + x) / (1 - x)) / 2;
   }
 });
-},{"./$.export":87}],142:[function(require,module,exports){
+},{"./_export":88}],155:[function(require,module,exports){
 // 20.2.2.9 Math.cbrt(x)
-var $export = require('./$.export')
-  , sign    = require('./$.math-sign');
+var $export = require('./_export')
+  , sign    = require('./_math-sign');
 
 $export($export.S, 'Math', {
   cbrt: function cbrt(x){
     return sign(x = +x) * Math.pow(Math.abs(x), 1 / 3);
   }
 });
-},{"./$.export":87,"./$.math-sign":111}],143:[function(require,module,exports){
+},{"./_export":88,"./_math-sign":111}],156:[function(require,module,exports){
 // 20.2.2.11 Math.clz32(x)
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Math', {
   clz32: function clz32(x){
     return (x >>>= 0) ? 31 - Math.floor(Math.log(x + 0.5) * Math.LOG2E) : 32;
   }
 });
-},{"./$.export":87}],144:[function(require,module,exports){
+},{"./_export":88}],157:[function(require,module,exports){
 // 20.2.2.12 Math.cosh(x)
-var $export = require('./$.export')
+var $export = require('./_export')
   , exp     = Math.exp;
 
 $export($export.S, 'Math', {
@@ -2069,15 +1684,16 @@ $export($export.S, 'Math', {
     return (exp(x = +x) + exp(-x)) / 2;
   }
 });
-},{"./$.export":87}],145:[function(require,module,exports){
+},{"./_export":88}],158:[function(require,module,exports){
 // 20.2.2.14 Math.expm1(x)
-var $export = require('./$.export');
+var $export = require('./_export')
+  , $expm1  = require('./_math-expm1');
 
-$export($export.S, 'Math', {expm1: require('./$.math-expm1')});
-},{"./$.export":87,"./$.math-expm1":109}],146:[function(require,module,exports){
+$export($export.S + $export.F * ($expm1 != Math.expm1), 'Math', {expm1: $expm1});
+},{"./_export":88,"./_math-expm1":109}],159:[function(require,module,exports){
 // 20.2.2.16 Math.fround(x)
-var $export   = require('./$.export')
-  , sign      = require('./$.math-sign')
+var $export   = require('./_export')
+  , sign      = require('./_math-sign')
   , pow       = Math.pow
   , EPSILON   = pow(2, -52)
   , EPSILON32 = pow(2, -23)
@@ -2101,21 +1717,20 @@ $export($export.S, 'Math', {
     return $sign * result;
   }
 });
-},{"./$.export":87,"./$.math-sign":111}],147:[function(require,module,exports){
+},{"./_export":88,"./_math-sign":111}],160:[function(require,module,exports){
 // 20.2.2.17 Math.hypot([value1[, value2[, … ]]])
-var $export = require('./$.export')
+var $export = require('./_export')
   , abs     = Math.abs;
 
 $export($export.S, 'Math', {
   hypot: function hypot(value1, value2){ // eslint-disable-line no-unused-vars
-    var sum   = 0
-      , i     = 0
-      , $$    = arguments
-      , $$len = $$.length
-      , larg  = 0
+    var sum  = 0
+      , i    = 0
+      , aLen = arguments.length
+      , larg = 0
       , arg, div;
-    while(i < $$len){
-      arg = abs($$[i++]);
+    while(i < aLen){
+      arg = abs(arguments[i++]);
       if(larg < arg){
         div  = larg / arg;
         sum  = sum * div * div + 1;
@@ -2128,13 +1743,13 @@ $export($export.S, 'Math', {
     return larg === Infinity ? Infinity : larg * Math.sqrt(sum);
   }
 });
-},{"./$.export":87}],148:[function(require,module,exports){
+},{"./_export":88}],161:[function(require,module,exports){
 // 20.2.2.18 Math.imul(x, y)
-var $export = require('./$.export')
+var $export = require('./_export')
   , $imul   = Math.imul;
 
 // some WebKit versions fails with big numbers, some has wrong arity
-$export($export.S + $export.F * require('./$.fails')(function(){
+$export($export.S + $export.F * require('./_fails')(function(){
   return $imul(0xffffffff, 5) != -5 || $imul.length != 2;
 }), 'Math', {
   imul: function imul(x, y){
@@ -2146,42 +1761,42 @@ $export($export.S + $export.F * require('./$.fails')(function(){
     return 0 | xl * yl + ((UINT16 & xn >>> 16) * yl + xl * (UINT16 & yn >>> 16) << 16 >>> 0);
   }
 });
-},{"./$.export":87,"./$.fails":88}],149:[function(require,module,exports){
+},{"./_export":88,"./_fails":89}],162:[function(require,module,exports){
 // 20.2.2.21 Math.log10(x)
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Math', {
   log10: function log10(x){
     return Math.log(x) / Math.LN10;
   }
 });
-},{"./$.export":87}],150:[function(require,module,exports){
+},{"./_export":88}],163:[function(require,module,exports){
 // 20.2.2.20 Math.log1p(x)
-var $export = require('./$.export');
+var $export = require('./_export');
 
-$export($export.S, 'Math', {log1p: require('./$.math-log1p')});
-},{"./$.export":87,"./$.math-log1p":110}],151:[function(require,module,exports){
+$export($export.S, 'Math', {log1p: require('./_math-log1p')});
+},{"./_export":88,"./_math-log1p":110}],164:[function(require,module,exports){
 // 20.2.2.22 Math.log2(x)
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Math', {
   log2: function log2(x){
     return Math.log(x) / Math.LN2;
   }
 });
-},{"./$.export":87}],152:[function(require,module,exports){
+},{"./_export":88}],165:[function(require,module,exports){
 // 20.2.2.28 Math.sign(x)
-var $export = require('./$.export');
+var $export = require('./_export');
 
-$export($export.S, 'Math', {sign: require('./$.math-sign')});
-},{"./$.export":87,"./$.math-sign":111}],153:[function(require,module,exports){
+$export($export.S, 'Math', {sign: require('./_math-sign')});
+},{"./_export":88,"./_math-sign":111}],166:[function(require,module,exports){
 // 20.2.2.30 Math.sinh(x)
-var $export = require('./$.export')
-  , expm1   = require('./$.math-expm1')
+var $export = require('./_export')
+  , expm1   = require('./_math-expm1')
   , exp     = Math.exp;
 
 // V8 near Chromium 38 has a problem with very small numbers
-$export($export.S + $export.F * require('./$.fails')(function(){
+$export($export.S + $export.F * require('./_fails')(function(){
   return !Math.sinh(-2e-17) != -2e-17;
 }), 'Math', {
   sinh: function sinh(x){
@@ -2190,10 +1805,10 @@ $export($export.S + $export.F * require('./$.fails')(function(){
       : (exp(x - 1) - exp(-x - 1)) * (Math.E / 2);
   }
 });
-},{"./$.export":87,"./$.fails":88,"./$.math-expm1":109}],154:[function(require,module,exports){
+},{"./_export":88,"./_fails":89,"./_math-expm1":109}],167:[function(require,module,exports){
 // 20.2.2.33 Math.tanh(x)
-var $export = require('./$.export')
-  , expm1   = require('./$.math-expm1')
+var $export = require('./_export')
+  , expm1   = require('./_math-expm1')
   , exp     = Math.exp;
 
 $export($export.S, 'Math', {
@@ -2203,130 +1818,107 @@ $export($export.S, 'Math', {
     return a == Infinity ? 1 : b == Infinity ? -1 : (a - b) / (exp(x) + exp(-x));
   }
 });
-},{"./$.export":87,"./$.math-expm1":109}],155:[function(require,module,exports){
+},{"./_export":88,"./_math-expm1":109}],168:[function(require,module,exports){
 // 20.2.2.34 Math.trunc(x)
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Math', {
   trunc: function trunc(it){
     return (it > 0 ? Math.floor : Math.ceil)(it);
   }
 });
-},{"./$.export":87}],156:[function(require,module,exports){
+},{"./_export":88}],169:[function(require,module,exports){
 // 20.1.2.1 Number.EPSILON
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Number', {EPSILON: Math.pow(2, -52)});
-},{"./$.export":87}],157:[function(require,module,exports){
+},{"./_export":88}],170:[function(require,module,exports){
 // 20.1.2.6 Number.MAX_SAFE_INTEGER
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Number', {MAX_SAFE_INTEGER: 0x1fffffffffffff});
-},{"./$.export":87}],158:[function(require,module,exports){
+},{"./_export":88}],171:[function(require,module,exports){
 // 20.1.2.10 Number.MIN_SAFE_INTEGER
-var $export = require('./$.export');
+var $export = require('./_export');
 
 $export($export.S, 'Number', {MIN_SAFE_INTEGER: -0x1fffffffffffff});
-},{"./$.export":87}],159:[function(require,module,exports){
+},{"./_export":88}],172:[function(require,module,exports){
 // 19.1.3.1 Object.assign(target, source)
-var $export = require('./$.export');
+var $export = require('./_export');
 
-$export($export.S + $export.F, 'Object', {assign: require('./$.object-assign')});
-},{"./$.export":87,"./$.object-assign":113}],160:[function(require,module,exports){
+$export($export.S + $export.F, 'Object', {assign: require('./_object-assign')});
+},{"./_export":88,"./_object-assign":114}],173:[function(require,module,exports){
+var $export = require('./_export')
+// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
+$export($export.S, 'Object', {create: require('./_object-create')});
+},{"./_export":88,"./_object-create":115}],174:[function(require,module,exports){
 // 19.1.2.14 Object.keys(O)
-var toObject = require('./$.to-object');
+var toObject = require('./_to-object')
+  , $keys    = require('./_object-keys');
 
-require('./$.object-sap')('keys', function($keys){
+require('./_object-sap')('keys', function(){
   return function keys(it){
     return $keys(toObject(it));
   };
 });
-},{"./$.object-sap":114,"./$.to-object":132}],161:[function(require,module,exports){
-// 19.1.3.19 Object.setPrototypeOf(O, proto)
-var $export = require('./$.export');
-$export($export.S, 'Object', {setPrototypeOf: require('./$.set-proto').set});
-},{"./$.export":87,"./$.set-proto":119}],162:[function(require,module,exports){
+},{"./_object-keys":124,"./_object-sap":126,"./_to-object":142}],175:[function(require,module,exports){
 
-},{}],163:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 'use strict';
-var $          = require('./$')
-  , LIBRARY    = require('./$.library')
-  , global     = require('./$.global')
-  , ctx        = require('./$.ctx')
-  , classof    = require('./$.classof')
-  , $export    = require('./$.export')
-  , isObject   = require('./$.is-object')
-  , anObject   = require('./$.an-object')
-  , aFunction  = require('./$.a-function')
-  , strictNew  = require('./$.strict-new')
-  , forOf      = require('./$.for-of')
-  , setProto   = require('./$.set-proto').set
-  , same       = require('./$.same-value')
-  , SPECIES    = require('./$.wks')('species')
-  , speciesConstructor = require('./$.species-constructor')
-  , asap       = require('./$.microtask')
-  , PROMISE    = 'Promise'
-  , process    = global.process
-  , isNode     = classof(process) == 'process'
-  , P          = global[PROMISE]
-  , Wrapper;
+var LIBRARY            = require('./_library')
+  , global             = require('./_global')
+  , ctx                = require('./_ctx')
+  , classof            = require('./_classof')
+  , $export            = require('./_export')
+  , isObject           = require('./_is-object')
+  , aFunction          = require('./_a-function')
+  , anInstance         = require('./_an-instance')
+  , forOf              = require('./_for-of')
+  , speciesConstructor = require('./_species-constructor')
+  , task               = require('./_task').set
+  , microtask          = require('./_microtask')()
+  , PROMISE            = 'Promise'
+  , TypeError          = global.TypeError
+  , process            = global.process
+  , $Promise           = global[PROMISE]
+  , process            = global.process
+  , isNode             = classof(process) == 'process'
+  , empty              = function(){ /* empty */ }
+  , Internal, GenericPromiseCapability, Wrapper;
 
-var testResolve = function(sub){
-  var test = new P(function(){});
-  if(sub)test.constructor = Object;
-  return P.resolve(test) === test;
-};
-
-var USE_NATIVE = function(){
-  var works = false;
-  function P2(x){
-    var self = new P(x);
-    setProto(self, P2.prototype);
-    return self;
-  }
+var USE_NATIVE = !!function(){
   try {
-    works = P && P.resolve && testResolve();
-    setProto(P2, P);
-    P2.prototype = $.create(P.prototype, {constructor: {value: P2}});
-    // actual Firefox has broken subclass support, test that
-    if(!(P2.resolve(5).then(function(){}) instanceof P2)){
-      works = false;
-    }
-    // actual V8 bug, https://code.google.com/p/v8/issues/detail?id=4162
-    if(works && require('./$.descriptors')){
-      var thenableThenGotten = false;
-      P.resolve($.setDesc({}, 'then', {
-        get: function(){ thenableThenGotten = true; }
-      }));
-      works = thenableThenGotten;
-    }
-  } catch(e){ works = false; }
-  return works;
+    // correct subclassing with @@species support
+    var promise     = $Promise.resolve(1)
+      , FakePromise = (promise.constructor = {})[require('./_wks')('species')] = function(exec){ exec(empty, empty); };
+    // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
+    return (isNode || typeof PromiseRejectionEvent == 'function') && promise.then(empty) instanceof FakePromise;
+  } catch(e){ /* empty */ }
 }();
 
 // helpers
 var sameConstructor = function(a, b){
-  // library wrapper special case
-  if(LIBRARY && a === P && b === Wrapper)return true;
-  return same(a, b);
-};
-var getConstructor = function(C){
-  var S = anObject(C)[SPECIES];
-  return S != undefined ? S : C;
+  // with library wrapper special case
+  return a === b || a === $Promise && b === Wrapper;
 };
 var isThenable = function(it){
   var then;
   return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
 };
-var PromiseCapability = function(C){
+var newPromiseCapability = function(C){
+  return sameConstructor($Promise, C)
+    ? new PromiseCapability(C)
+    : new GenericPromiseCapability(C);
+};
+var PromiseCapability = GenericPromiseCapability = function(C){
   var resolve, reject;
   this.promise = new C(function($$resolve, $$reject){
     if(resolve !== undefined || reject !== undefined)throw TypeError('Bad Promise constructor');
     resolve = $$resolve;
     reject  = $$reject;
   });
-  this.resolve = aFunction(resolve),
-  this.reject  = aFunction(reject)
+  this.resolve = aFunction(resolve);
+  this.reject  = aFunction(reject);
 };
 var perform = function(exec){
   try {
@@ -2335,23 +1927,32 @@ var perform = function(exec){
     return {error: e};
   }
 };
-var notify = function(record, isReject){
-  if(record.n)return;
-  record.n = true;
-  var chain = record.c;
-  asap(function(){
-    var value = record.v
-      , ok    = record.s == 1
+var notify = function(promise, isReject){
+  if(promise._n)return;
+  promise._n = true;
+  var chain = promise._c;
+  microtask(function(){
+    var value = promise._v
+      , ok    = promise._s == 1
       , i     = 0;
     var run = function(reaction){
       var handler = ok ? reaction.ok : reaction.fail
         , resolve = reaction.resolve
         , reject  = reaction.reject
+        , domain  = reaction.domain
         , result, then;
       try {
         if(handler){
-          if(!ok)record.h = true;
-          result = handler === true ? value : handler(value);
+          if(!ok){
+            if(promise._h == 2)onHandleUnhandled(promise);
+            promise._h = 1;
+          }
+          if(handler === true)result = value;
+          else {
+            if(domain)domain.enter();
+            result = handler(value);
+            if(domain)domain.exit();
+          }
           if(result === reaction.promise){
             reject(TypeError('Promise-chain cycle'));
           } else if(then = isThenable(result)){
@@ -2363,12 +1964,17 @@ var notify = function(record, isReject){
       }
     };
     while(chain.length > i)run(chain[i++]); // variable length - can't use forEach
-    chain.length = 0;
-    record.n = false;
-    if(isReject)setTimeout(function(){
-      var promise = record.p
-        , handler, console;
-      if(isUnhandled(promise)){
+    promise._c = [];
+    promise._n = false;
+    if(isReject && !promise._h)onUnhandled(promise);
+  });
+};
+var onUnhandled = function(promise){
+  task.call(global, function(){
+    var value = promise._v
+      , abrupt, handler, console;
+    if(isUnhandled(promise)){
+      abrupt = perform(function(){
         if(isNode){
           process.emit('unhandledRejection', value, promise);
         } else if(handler = global.onunhandledrejection){
@@ -2376,42 +1982,54 @@ var notify = function(record, isReject){
         } else if((console = global.console) && console.error){
           console.error('Unhandled promise rejection', value);
         }
-      } record.a = undefined;
-    }, 1);
+      });
+      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
+      promise._h = isNode || isUnhandled(promise) ? 2 : 1;
+    } promise._a = undefined;
+    if(abrupt)throw abrupt.error;
   });
 };
 var isUnhandled = function(promise){
-  var record = promise._d
-    , chain  = record.a || record.c
-    , i      = 0
+  if(promise._h == 1)return false;
+  var chain = promise._a || promise._c
+    , i     = 0
     , reaction;
-  if(record.h)return false;
   while(chain.length > i){
     reaction = chain[i++];
     if(reaction.fail || !isUnhandled(reaction.promise))return false;
   } return true;
 };
+var onHandleUnhandled = function(promise){
+  task.call(global, function(){
+    var handler;
+    if(isNode){
+      process.emit('rejectionHandled', promise);
+    } else if(handler = global.onrejectionhandled){
+      handler({promise: promise, reason: promise._v});
+    }
+  });
+};
 var $reject = function(value){
-  var record = this;
-  if(record.d)return;
-  record.d = true;
-  record = record.r || record; // unwrap
-  record.v = value;
-  record.s = 2;
-  record.a = record.c.slice();
-  notify(record, true);
+  var promise = this;
+  if(promise._d)return;
+  promise._d = true;
+  promise = promise._w || promise; // unwrap
+  promise._v = value;
+  promise._s = 2;
+  if(!promise._a)promise._a = promise._c.slice();
+  notify(promise, true);
 };
 var $resolve = function(value){
-  var record = this
+  var promise = this
     , then;
-  if(record.d)return;
-  record.d = true;
-  record = record.r || record; // unwrap
+  if(promise._d)return;
+  promise._d = true;
+  promise = promise._w || promise; // unwrap
   try {
-    if(record.p === value)throw TypeError("Promise can't be resolved itself");
+    if(promise === value)throw TypeError("Promise can't be resolved itself");
     if(then = isThenable(value)){
-      asap(function(){
-        var wrapper = {r: record, d: false}; // wrap
+      microtask(function(){
+        var wrapper = {_w: promise, _d: false}; // wrap
         try {
           then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
         } catch(e){
@@ -2419,114 +2037,122 @@ var $resolve = function(value){
         }
       });
     } else {
-      record.v = value;
-      record.s = 1;
-      notify(record, false);
+      promise._v = value;
+      promise._s = 1;
+      notify(promise, false);
     }
   } catch(e){
-    $reject.call({r: record, d: false}, e); // wrap
+    $reject.call({_w: promise, _d: false}, e); // wrap
   }
 };
 
 // constructor polyfill
 if(!USE_NATIVE){
   // 25.4.3.1 Promise(executor)
-  P = function Promise(executor){
+  $Promise = function Promise(executor){
+    anInstance(this, $Promise, PROMISE, '_h');
     aFunction(executor);
-    var record = this._d = {
-      p: strictNew(this, P, PROMISE),         // <- promise
-      c: [],                                  // <- awaiting reactions
-      a: undefined,                           // <- checked in isUnhandled reactions
-      s: 0,                                   // <- state
-      d: false,                               // <- done
-      v: undefined,                           // <- value
-      h: false,                               // <- handled rejection
-      n: false                                // <- notify
-    };
+    Internal.call(this);
     try {
-      executor(ctx($resolve, record, 1), ctx($reject, record, 1));
+      executor(ctx($resolve, this, 1), ctx($reject, this, 1));
     } catch(err){
-      $reject.call(record, err);
+      $reject.call(this, err);
     }
   };
-  require('./$.redefine-all')(P.prototype, {
+  Internal = function Promise(executor){
+    this._c = [];             // <- awaiting reactions
+    this._a = undefined;      // <- checked in isUnhandled reactions
+    this._s = 0;              // <- state
+    this._d = false;          // <- done
+    this._v = undefined;      // <- value
+    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
+    this._n = false;          // <- notify
+  };
+  Internal.prototype = require('./_redefine-all')($Promise.prototype, {
     // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
     then: function then(onFulfilled, onRejected){
-      var reaction = new PromiseCapability(speciesConstructor(this, P))
-        , promise  = reaction.promise
-        , record   = this._d;
-      reaction.ok   = typeof onFulfilled == 'function' ? onFulfilled : true;
-      reaction.fail = typeof onRejected == 'function' && onRejected;
-      record.c.push(reaction);
-      if(record.a)record.a.push(reaction);
-      if(record.s)notify(record, false);
-      return promise;
+      var reaction    = newPromiseCapability(speciesConstructor(this, $Promise));
+      reaction.ok     = typeof onFulfilled == 'function' ? onFulfilled : true;
+      reaction.fail   = typeof onRejected == 'function' && onRejected;
+      reaction.domain = isNode ? process.domain : undefined;
+      this._c.push(reaction);
+      if(this._a)this._a.push(reaction);
+      if(this._s)notify(this, false);
+      return reaction.promise;
     },
     // 25.4.5.1 Promise.prototype.catch(onRejected)
     'catch': function(onRejected){
       return this.then(undefined, onRejected);
     }
   });
+  PromiseCapability = function(){
+    var promise  = new Internal;
+    this.promise = promise;
+    this.resolve = ctx($resolve, promise, 1);
+    this.reject  = ctx($reject, promise, 1);
+  };
 }
 
-$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: P});
-require('./$.set-to-string-tag')(P, PROMISE);
-require('./$.set-species')(PROMISE);
-Wrapper = require('./$.core')[PROMISE];
+$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: $Promise});
+require('./_set-to-string-tag')($Promise, PROMISE);
+require('./_set-species')(PROMISE);
+Wrapper = require('./_core')[PROMISE];
 
 // statics
 $export($export.S + $export.F * !USE_NATIVE, PROMISE, {
   // 25.4.4.5 Promise.reject(r)
   reject: function reject(r){
-    var capability = new PromiseCapability(this)
+    var capability = newPromiseCapability(this)
       , $$reject   = capability.reject;
     $$reject(r);
     return capability.promise;
   }
 });
-$export($export.S + $export.F * (!USE_NATIVE || testResolve(true)), PROMISE, {
+$export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
   // 25.4.4.6 Promise.resolve(x)
   resolve: function resolve(x){
     // instanceof instead of internal slot check because we should fix it without replacement native Promise core
-    if(x instanceof P && sameConstructor(x.constructor, this))return x;
-    var capability = new PromiseCapability(this)
+    if(x instanceof $Promise && sameConstructor(x.constructor, this))return x;
+    var capability = newPromiseCapability(this)
       , $$resolve  = capability.resolve;
     $$resolve(x);
     return capability.promise;
   }
 });
-$export($export.S + $export.F * !(USE_NATIVE && require('./$.iter-detect')(function(iter){
-  P.all(iter)['catch'](function(){});
+$export($export.S + $export.F * !(USE_NATIVE && require('./_iter-detect')(function(iter){
+  $Promise.all(iter)['catch'](empty);
 })), PROMISE, {
   // 25.4.4.1 Promise.all(iterable)
   all: function all(iterable){
-    var C          = getConstructor(this)
-      , capability = new PromiseCapability(C)
+    var C          = this
+      , capability = newPromiseCapability(C)
       , resolve    = capability.resolve
-      , reject     = capability.reject
-      , values     = [];
+      , reject     = capability.reject;
     var abrupt = perform(function(){
-      forOf(iterable, false, values.push, values);
-      var remaining = values.length
-        , results   = Array(remaining);
-      if(remaining)$.each.call(values, function(promise, index){
-        var alreadyCalled = false;
+      var values    = []
+        , index     = 0
+        , remaining = 1;
+      forOf(iterable, false, function(promise){
+        var $index        = index++
+          , alreadyCalled = false;
+        values.push(undefined);
+        remaining++;
         C.resolve(promise).then(function(value){
           if(alreadyCalled)return;
-          alreadyCalled = true;
-          results[index] = value;
-          --remaining || resolve(results);
+          alreadyCalled  = true;
+          values[$index] = value;
+          --remaining || resolve(values);
         }, reject);
       });
-      else resolve(results);
+      --remaining || resolve(values);
     });
     if(abrupt)reject(abrupt.error);
     return capability.promise;
   },
   // 25.4.4.4 Promise.race(iterable)
   race: function race(iterable){
-    var C          = getConstructor(this)
-      , capability = new PromiseCapability(C)
+    var C          = this
+      , capability = newPromiseCapability(C)
       , reject     = capability.reject;
     var abrupt = perform(function(){
       forOf(iterable, false, function(promise){
@@ -2537,19 +2163,19 @@ $export($export.S + $export.F * !(USE_NATIVE && require('./$.iter-detect')(funct
     return capability.promise;
   }
 });
-},{"./$":106,"./$.a-function":73,"./$.an-object":75,"./$.classof":76,"./$.core":81,"./$.ctx":82,"./$.descriptors":84,"./$.export":87,"./$.for-of":89,"./$.global":91,"./$.is-object":99,"./$.iter-detect":103,"./$.library":108,"./$.microtask":112,"./$.redefine-all":116,"./$.same-value":118,"./$.set-proto":119,"./$.set-species":120,"./$.set-to-string-tag":121,"./$.species-constructor":123,"./$.strict-new":124,"./$.wks":134}],164:[function(require,module,exports){
+},{"./_a-function":67,"./_an-instance":69,"./_classof":76,"./_core":81,"./_ctx":82,"./_export":88,"./_for-of":90,"./_global":91,"./_is-object":100,"./_iter-detect":104,"./_library":108,"./_microtask":113,"./_redefine-all":128,"./_set-species":130,"./_set-to-string-tag":131,"./_species-constructor":134,"./_task":137,"./_wks":147}],177:[function(require,module,exports){
 'use strict';
-var $export = require('./$.export')
-  , $at     = require('./$.string-at')(false);
+var $export = require('./_export')
+  , $at     = require('./_string-at')(false);
 $export($export.P, 'String', {
   // 21.1.3.3 String.prototype.codePointAt(pos)
   codePointAt: function codePointAt(pos){
     return $at(this, pos);
   }
 });
-},{"./$.export":87,"./$.string-at":125}],165:[function(require,module,exports){
-var $export        = require('./$.export')
-  , toIndex        = require('./$.to-index')
+},{"./_export":88,"./_string-at":135}],178:[function(require,module,exports){
+var $export        = require('./_export')
+  , toIndex        = require('./_to-index')
   , fromCharCode   = String.fromCharCode
   , $fromCodePoint = String.fromCodePoint;
 
@@ -2557,13 +2183,12 @@ var $export        = require('./$.export')
 $export($export.S + $export.F * (!!$fromCodePoint && $fromCodePoint.length != 1), 'String', {
   // 21.1.2.2 String.fromCodePoint(...codePoints)
   fromCodePoint: function fromCodePoint(x){ // eslint-disable-line no-unused-vars
-    var res   = []
-      , $$    = arguments
-      , $$len = $$.length
-      , i     = 0
+    var res  = []
+      , aLen = arguments.length
+      , i    = 0
       , code;
-    while($$len > i){
-      code = +$$[i++];
+    while(aLen > i){
+      code = +arguments[i++];
       if(toIndex(code, 0x10ffff) !== code)throw RangeError(code + ' is not a valid code point');
       res.push(code < 0x10000
         ? fromCharCode(code)
@@ -2572,12 +2197,12 @@ $export($export.S + $export.F * (!!$fromCodePoint && $fromCodePoint.length != 1)
     } return res.join('');
   }
 });
-},{"./$.export":87,"./$.to-index":128}],166:[function(require,module,exports){
+},{"./_export":88,"./_to-index":138}],179:[function(require,module,exports){
 'use strict';
-var $at  = require('./$.string-at')(true);
+var $at  = require('./_string-at')(true);
 
 // 21.1.3.27 String.prototype[@@iterator]()
-require('./$.iter-define')(String, 'String', function(iterated){
+require('./_iter-define')(String, 'String', function(iterated){
   this._t = String(iterated); // target
   this._i = 0;                // next index
 // 21.1.5.2.1 %StringIteratorPrototype%.next()
@@ -2590,88 +2215,98 @@ require('./$.iter-define')(String, 'String', function(iterated){
   this._i += point.length;
   return {value: point, done: false};
 });
-},{"./$.iter-define":102,"./$.string-at":125}],167:[function(require,module,exports){
-var $export = require('./$.export');
+},{"./_iter-define":103,"./_string-at":135}],180:[function(require,module,exports){
+var $export = require('./_export');
 
 $export($export.P, 'String', {
   // 21.1.3.13 String.prototype.repeat(count)
-  repeat: require('./$.string-repeat')
+  repeat: require('./_string-repeat')
 });
-},{"./$.export":87,"./$.string-repeat":126}],168:[function(require,module,exports){
+},{"./_export":88,"./_string-repeat":136}],181:[function(require,module,exports){
 'use strict';
 // ECMAScript 6 symbols shim
-var $              = require('./$')
-  , global         = require('./$.global')
-  , has            = require('./$.has')
-  , DESCRIPTORS    = require('./$.descriptors')
-  , $export        = require('./$.export')
-  , redefine       = require('./$.redefine')
-  , $fails         = require('./$.fails')
-  , shared         = require('./$.shared')
-  , setToStringTag = require('./$.set-to-string-tag')
-  , uid            = require('./$.uid')
-  , wks            = require('./$.wks')
-  , keyOf          = require('./$.keyof')
-  , $names         = require('./$.get-names')
-  , enumKeys       = require('./$.enum-keys')
-  , isArray        = require('./$.is-array')
-  , anObject       = require('./$.an-object')
-  , toIObject      = require('./$.to-iobject')
-  , createDesc     = require('./$.property-desc')
-  , getDesc        = $.getDesc
-  , setDesc        = $.setDesc
-  , _create        = $.create
-  , getNames       = $names.get
+var global         = require('./_global')
+  , has            = require('./_has')
+  , DESCRIPTORS    = require('./_descriptors')
+  , $export        = require('./_export')
+  , redefine       = require('./_redefine')
+  , META           = require('./_meta').KEY
+  , $fails         = require('./_fails')
+  , shared         = require('./_shared')
+  , setToStringTag = require('./_set-to-string-tag')
+  , uid            = require('./_uid')
+  , wks            = require('./_wks')
+  , wksExt         = require('./_wks-ext')
+  , wksDefine      = require('./_wks-define')
+  , keyOf          = require('./_keyof')
+  , enumKeys       = require('./_enum-keys')
+  , isArray        = require('./_is-array')
+  , anObject       = require('./_an-object')
+  , toIObject      = require('./_to-iobject')
+  , toPrimitive    = require('./_to-primitive')
+  , createDesc     = require('./_property-desc')
+  , _create        = require('./_object-create')
+  , gOPNExt        = require('./_object-gopn-ext')
+  , $GOPD          = require('./_object-gopd')
+  , $DP            = require('./_object-dp')
+  , $keys          = require('./_object-keys')
+  , gOPD           = $GOPD.f
+  , dP             = $DP.f
+  , gOPN           = gOPNExt.f
   , $Symbol        = global.Symbol
   , $JSON          = global.JSON
   , _stringify     = $JSON && $JSON.stringify
-  , setter         = false
+  , PROTOTYPE      = 'prototype'
   , HIDDEN         = wks('_hidden')
-  , isEnum         = $.isEnum
+  , TO_PRIMITIVE   = wks('toPrimitive')
+  , isEnum         = {}.propertyIsEnumerable
   , SymbolRegistry = shared('symbol-registry')
   , AllSymbols     = shared('symbols')
-  , useNative      = typeof $Symbol == 'function'
-  , ObjectProto    = Object.prototype;
+  , OPSymbols      = shared('op-symbols')
+  , ObjectProto    = Object[PROTOTYPE]
+  , USE_NATIVE     = typeof $Symbol == 'function'
+  , QObject        = global.QObject;
+// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
+var setter = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
 
 // fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
 var setSymbolDesc = DESCRIPTORS && $fails(function(){
-  return _create(setDesc({}, 'a', {
-    get: function(){ return setDesc(this, 'a', {value: 7}).a; }
+  return _create(dP({}, 'a', {
+    get: function(){ return dP(this, 'a', {value: 7}).a; }
   })).a != 7;
 }) ? function(it, key, D){
-  var protoDesc = getDesc(ObjectProto, key);
+  var protoDesc = gOPD(ObjectProto, key);
   if(protoDesc)delete ObjectProto[key];
-  setDesc(it, key, D);
-  if(protoDesc && it !== ObjectProto)setDesc(ObjectProto, key, protoDesc);
-} : setDesc;
+  dP(it, key, D);
+  if(protoDesc && it !== ObjectProto)dP(ObjectProto, key, protoDesc);
+} : dP;
 
 var wrap = function(tag){
-  var sym = AllSymbols[tag] = _create($Symbol.prototype);
+  var sym = AllSymbols[tag] = _create($Symbol[PROTOTYPE]);
   sym._k = tag;
-  DESCRIPTORS && setter && setSymbolDesc(ObjectProto, tag, {
-    configurable: true,
-    set: function(value){
-      if(has(this, HIDDEN) && has(this[HIDDEN], tag))this[HIDDEN][tag] = false;
-      setSymbolDesc(this, tag, createDesc(1, value));
-    }
-  });
   return sym;
 };
 
-var isSymbol = function(it){
+var isSymbol = USE_NATIVE && typeof $Symbol.iterator == 'symbol' ? function(it){
   return typeof it == 'symbol';
+} : function(it){
+  return it instanceof $Symbol;
 };
 
 var $defineProperty = function defineProperty(it, key, D){
-  if(D && has(AllSymbols, key)){
+  if(it === ObjectProto)$defineProperty(OPSymbols, key, D);
+  anObject(it);
+  key = toPrimitive(key, true);
+  anObject(D);
+  if(has(AllSymbols, key)){
     if(!D.enumerable){
-      if(!has(it, HIDDEN))setDesc(it, HIDDEN, createDesc(1, {}));
+      if(!has(it, HIDDEN))dP(it, HIDDEN, createDesc(1, {}));
       it[HIDDEN][key] = true;
     } else {
       if(has(it, HIDDEN) && it[HIDDEN][key])it[HIDDEN][key] = false;
       D = _create(D, {enumerable: createDesc(0, false)});
     } return setSymbolDesc(it, key, D);
-  } return setDesc(it, key, D);
+  } return dP(it, key, D);
 };
 var $defineProperties = function defineProperties(it, P){
   anObject(it);
@@ -2686,83 +2321,80 @@ var $create = function create(it, P){
   return P === undefined ? _create(it) : $defineProperties(_create(it), P);
 };
 var $propertyIsEnumerable = function propertyIsEnumerable(key){
-  var E = isEnum.call(this, key);
-  return E || !has(this, key) || !has(AllSymbols, key) || has(this, HIDDEN) && this[HIDDEN][key]
-    ? E : true;
+  var E = isEnum.call(this, key = toPrimitive(key, true));
+  if(this === ObjectProto && has(AllSymbols, key) && !has(OPSymbols, key))return false;
+  return E || !has(this, key) || !has(AllSymbols, key) || has(this, HIDDEN) && this[HIDDEN][key] ? E : true;
 };
 var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(it, key){
-  var D = getDesc(it = toIObject(it), key);
+  it  = toIObject(it);
+  key = toPrimitive(key, true);
+  if(it === ObjectProto && has(AllSymbols, key) && !has(OPSymbols, key))return;
+  var D = gOPD(it, key);
   if(D && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key]))D.enumerable = true;
   return D;
 };
 var $getOwnPropertyNames = function getOwnPropertyNames(it){
-  var names  = getNames(toIObject(it))
+  var names  = gOPN(toIObject(it))
     , result = []
     , i      = 0
     , key;
-  while(names.length > i)if(!has(AllSymbols, key = names[i++]) && key != HIDDEN)result.push(key);
-  return result;
+  while(names.length > i){
+    if(!has(AllSymbols, key = names[i++]) && key != HIDDEN && key != META)result.push(key);
+  } return result;
 };
 var $getOwnPropertySymbols = function getOwnPropertySymbols(it){
-  var names  = getNames(toIObject(it))
+  var IS_OP  = it === ObjectProto
+    , names  = gOPN(IS_OP ? OPSymbols : toIObject(it))
     , result = []
     , i      = 0
     , key;
-  while(names.length > i)if(has(AllSymbols, key = names[i++]))result.push(AllSymbols[key]);
-  return result;
+  while(names.length > i){
+    if(has(AllSymbols, key = names[i++]) && (IS_OP ? has(ObjectProto, key) : true))result.push(AllSymbols[key]);
+  } return result;
 };
-var $stringify = function stringify(it){
-  if(it === undefined || isSymbol(it))return; // IE8 returns string on undefined
-  var args = [it]
-    , i    = 1
-    , $$   = arguments
-    , replacer, $replacer;
-  while($$.length > i)args.push($$[i++]);
-  replacer = args[1];
-  if(typeof replacer == 'function')$replacer = replacer;
-  if($replacer || !isArray(replacer))replacer = function(key, value){
-    if($replacer)value = $replacer.call(this, key, value);
-    if(!isSymbol(value))return value;
-  };
-  args[1] = replacer;
-  return _stringify.apply($JSON, args);
-};
-var buggyJSON = $fails(function(){
-  var S = $Symbol();
-  // MS Edge converts symbol values to JSON as {}
-  // WebKit converts symbol values to JSON as null
-  // V8 throws on boxed symbols
-  return _stringify([S]) != '[null]' || _stringify({a: S}) != '{}' || _stringify(Object(S)) != '{}';
-});
 
 // 19.4.1.1 Symbol([description])
-if(!useNative){
+if(!USE_NATIVE){
   $Symbol = function Symbol(){
-    if(isSymbol(this))throw TypeError('Symbol is not a constructor');
-    return wrap(uid(arguments.length > 0 ? arguments[0] : undefined));
+    if(this instanceof $Symbol)throw TypeError('Symbol is not a constructor!');
+    var tag = uid(arguments.length > 0 ? arguments[0] : undefined);
+    var $set = function(value){
+      if(this === ObjectProto)$set.call(OPSymbols, value);
+      if(has(this, HIDDEN) && has(this[HIDDEN], tag))this[HIDDEN][tag] = false;
+      setSymbolDesc(this, tag, createDesc(1, value));
+    };
+    if(DESCRIPTORS && setter)setSymbolDesc(ObjectProto, tag, {configurable: true, set: $set});
+    return wrap(tag);
   };
-  redefine($Symbol.prototype, 'toString', function toString(){
+  redefine($Symbol[PROTOTYPE], 'toString', function toString(){
     return this._k;
   });
 
-  isSymbol = function(it){
-    return it instanceof $Symbol;
-  };
+  $GOPD.f = $getOwnPropertyDescriptor;
+  $DP.f   = $defineProperty;
+  require('./_object-gopn').f = gOPNExt.f = $getOwnPropertyNames;
+  require('./_object-pie').f  = $propertyIsEnumerable;
+  require('./_object-gops').f = $getOwnPropertySymbols;
 
-  $.create     = $create;
-  $.isEnum     = $propertyIsEnumerable;
-  $.getDesc    = $getOwnPropertyDescriptor;
-  $.setDesc    = $defineProperty;
-  $.setDescs   = $defineProperties;
-  $.getNames   = $names.get = $getOwnPropertyNames;
-  $.getSymbols = $getOwnPropertySymbols;
-
-  if(DESCRIPTORS && !require('./$.library')){
+  if(DESCRIPTORS && !require('./_library')){
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
+  }
+
+  wksExt.f = function(name){
+    return wrap(wks(name));
   }
 }
 
-var symbolStatics = {
+$export($export.G + $export.W + $export.F * !USE_NATIVE, {Symbol: $Symbol});
+
+for(var symbols = (
+  // 19.4.2.2, 19.4.2.3, 19.4.2.4, 19.4.2.6, 19.4.2.8, 19.4.2.9, 19.4.2.10, 19.4.2.11, 19.4.2.12, 19.4.2.13, 19.4.2.14
+  'hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables'
+).split(','), i = 0; symbols.length > i; )wks(symbols[i++]);
+
+for(var symbols = $keys(wks.store), i = 0; symbols.length > i; )wksDefine(symbols[i++]);
+
+$export($export.S + $export.F * !USE_NATIVE, 'Symbol', {
   // 19.4.2.1 Symbol.for(key)
   'for': function(key){
     return has(SymbolRegistry, key += '')
@@ -2771,37 +2403,14 @@ var symbolStatics = {
   },
   // 19.4.2.5 Symbol.keyFor(sym)
   keyFor: function keyFor(key){
-    return keyOf(SymbolRegistry, key);
+    if(isSymbol(key))return keyOf(SymbolRegistry, key);
+    throw TypeError(key + ' is not a symbol!');
   },
   useSetter: function(){ setter = true; },
   useSimple: function(){ setter = false; }
-};
-// 19.4.2.2 Symbol.hasInstance
-// 19.4.2.3 Symbol.isConcatSpreadable
-// 19.4.2.4 Symbol.iterator
-// 19.4.2.6 Symbol.match
-// 19.4.2.8 Symbol.replace
-// 19.4.2.9 Symbol.search
-// 19.4.2.10 Symbol.species
-// 19.4.2.11 Symbol.split
-// 19.4.2.12 Symbol.toPrimitive
-// 19.4.2.13 Symbol.toStringTag
-// 19.4.2.14 Symbol.unscopables
-$.each.call((
-  'hasInstance,isConcatSpreadable,iterator,match,replace,search,' +
-  'species,split,toPrimitive,toStringTag,unscopables'
-).split(','), function(it){
-  var sym = wks(it);
-  symbolStatics[it] = useNative ? sym : wrap(sym);
 });
 
-setter = true;
-
-$export($export.G + $export.W, {Symbol: $Symbol});
-
-$export($export.S, 'Symbol', symbolStatics);
-
-$export($export.S + $export.F * !useNative, 'Object', {
+$export($export.S + $export.F * !USE_NATIVE, 'Object', {
   // 19.1.2.2 Object.create(O [, Properties])
   create: $create,
   // 19.1.2.4 Object.defineProperty(O, P, Attributes)
@@ -2817,58 +2426,156 @@ $export($export.S + $export.F * !useNative, 'Object', {
 });
 
 // 24.3.2 JSON.stringify(value [, replacer [, space]])
-$JSON && $export($export.S + $export.F * (!useNative || buggyJSON), 'JSON', {stringify: $stringify});
+$JSON && $export($export.S + $export.F * (!USE_NATIVE || $fails(function(){
+  var S = $Symbol();
+  // MS Edge converts symbol values to JSON as {}
+  // WebKit converts symbol values to JSON as null
+  // V8 throws on boxed symbols
+  return _stringify([S]) != '[null]' || _stringify({a: S}) != '{}' || _stringify(Object(S)) != '{}';
+})), 'JSON', {
+  stringify: function stringify(it){
+    if(it === undefined || isSymbol(it))return; // IE8 returns string on undefined
+    var args = [it]
+      , i    = 1
+      , replacer, $replacer;
+    while(arguments.length > i)args.push(arguments[i++]);
+    replacer = args[1];
+    if(typeof replacer == 'function')$replacer = replacer;
+    if($replacer || !isArray(replacer))replacer = function(key, value){
+      if($replacer)value = $replacer.call(this, key, value);
+      if(!isSymbol(value))return value;
+    };
+    args[1] = replacer;
+    return _stringify.apply($JSON, args);
+  }
+});
 
+// 19.4.3.4 Symbol.prototype[@@toPrimitive](hint)
+$Symbol[PROTOTYPE][TO_PRIMITIVE] || require('./_hide')($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
 // 19.4.3.5 Symbol.prototype[@@toStringTag]
 setToStringTag($Symbol, 'Symbol');
 // 20.2.1.9 Math[@@toStringTag]
 setToStringTag(Math, 'Math', true);
 // 24.3.3 JSON[@@toStringTag]
 setToStringTag(global.JSON, 'JSON', true);
-},{"./$":106,"./$.an-object":75,"./$.descriptors":84,"./$.enum-keys":86,"./$.export":87,"./$.fails":88,"./$.get-names":90,"./$.global":91,"./$.has":92,"./$.is-array":98,"./$.keyof":107,"./$.library":108,"./$.property-desc":115,"./$.redefine":117,"./$.set-to-string-tag":121,"./$.shared":122,"./$.to-iobject":130,"./$.uid":133,"./$.wks":134}],169:[function(require,module,exports){
+},{"./_an-object":70,"./_descriptors":84,"./_enum-keys":87,"./_export":88,"./_fails":89,"./_global":91,"./_has":92,"./_hide":93,"./_is-array":99,"./_keyof":107,"./_library":108,"./_meta":112,"./_object-create":115,"./_object-dp":116,"./_object-gopd":118,"./_object-gopn":120,"./_object-gopn-ext":119,"./_object-gops":121,"./_object-keys":124,"./_object-pie":125,"./_property-desc":127,"./_redefine":129,"./_set-to-string-tag":131,"./_shared":133,"./_to-iobject":140,"./_to-primitive":143,"./_uid":144,"./_wks":147,"./_wks-define":145,"./_wks-ext":146}],182:[function(require,module,exports){
 // https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var $export  = require('./$.export');
+var $export  = require('./_export');
 
-$export($export.P, 'Map', {toJSON: require('./$.collection-to-json')('Map')});
-},{"./$.collection-to-json":79,"./$.export":87}],170:[function(require,module,exports){
+$export($export.P + $export.R, 'Map', {toJSON: require('./_collection-to-json')('Map')});
+},{"./_collection-to-json":79,"./_export":88}],183:[function(require,module,exports){
 require('./es6.array.iterator');
-var Iterators = require('./$.iterators');
-Iterators.NodeList = Iterators.HTMLCollection = Iterators.Array;
-},{"./$.iterators":105,"./es6.array.iterator":137}],171:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
+var global        = require('./_global')
+  , hide          = require('./_hide')
+  , Iterators     = require('./_iterators')
+  , TO_STRING_TAG = require('./_wks')('toStringTag');
+
+for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList', 'CSSRuleList'], i = 0; i < 5; i++){
+  var NAME       = collections[i]
+    , Collection = global[NAME]
+    , proto      = Collection && Collection.prototype;
+  if(proto && !proto[TO_STRING_TAG])hide(proto, TO_STRING_TAG, NAME);
+  Iterators[NAME] = Iterators.Array;
 }
-
-},{}],172:[function(require,module,exports){
+},{"./_global":91,"./_hide":93,"./_iterators":106,"./_wks":147,"./es6.array.iterator":150}],184:[function(require,module,exports){
 // shim for using process in browser
-
 var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
 var queue = [];
 var draining = false;
 var currentQueue;
 var queueIndex = -1;
 
 function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
     draining = false;
     if (currentQueue.length) {
         queue = currentQueue.concat(queue);
@@ -2884,7 +2591,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    var timeout = runTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -2901,7 +2608,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    clearTimeout(timeout);
+    runClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -2913,7 +2620,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+        runTimeout(drainQueue);
     }
 };
 
@@ -2941,6 +2648,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -2952,14 +2663,814 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],173:[function(require,module,exports){
+},{}],185:[function(require,module,exports){
+(function (global){
+// This method of obtaining a reference to the global object needs to be
+// kept identical to the way it is obtained in runtime.js
+var g =
+  typeof global === "object" ? global :
+  typeof window === "object" ? window :
+  typeof self === "object" ? self : this;
+
+// Use `getOwnPropertyNames` because not all browsers support calling
+// `hasOwnProperty` on the global `self` object in a worker. See #183.
+var hadRuntime = g.regeneratorRuntime &&
+  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
+
+// Save the old regeneratorRuntime in case it needs to be restored later.
+var oldRuntime = hadRuntime && g.regeneratorRuntime;
+
+// Force reevalutation of runtime.js.
+g.regeneratorRuntime = undefined;
+
+module.exports = require("./runtime");
+
+if (hadRuntime) {
+  // Restore the original runtime.
+  g.regeneratorRuntime = oldRuntime;
+} else {
+  // Remove the global property added by runtime.js.
+  try {
+    delete g.regeneratorRuntime;
+  } catch(e) {
+    g.regeneratorRuntime = undefined;
+  }
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./runtime":186}],186:[function(require,module,exports){
+(function (global){
+/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
+ * additional grant of patent rights can be found in the PATENTS file in
+ * the same directory.
+ */
+
+!(function(global) {
+  "use strict";
+
+  var Op = Object.prototype;
+  var hasOwn = Op.hasOwnProperty;
+  var undefined; // More compressible than void 0.
+  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
+  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  var inModule = typeof module === "object";
+  var runtime = global.regeneratorRuntime;
+  if (runtime) {
+    if (inModule) {
+      // If regeneratorRuntime is defined globally and we're in a module,
+      // make the exports object identical to regeneratorRuntime.
+      module.exports = runtime;
+    }
+    // Don't bother evaluating the rest of this file if the runtime was
+    // already defined globally.
+    return;
+  }
+
+  // Define the runtime globally (as expected by generated code) as either
+  // module.exports (if we're in a module) or a new, empty object.
+  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
+    var generator = Object.create(protoGenerator.prototype);
+    var context = new Context(tryLocsList || []);
+
+    // The ._invoke method unifies the implementations of the .next,
+    // .throw, and .return methods.
+    generator._invoke = makeInvokeMethod(innerFn, self, context);
+
+    return generator;
+  }
+  runtime.wrap = wrap;
+
+  // Try/catch helper to minimize deoptimizations. Returns a completion
+  // record like context.tryEntries[i].completion. This interface could
+  // have been (and was previously) designed to take a closure to be
+  // invoked without arguments, but in all the cases we care about we
+  // already have an existing method we want to call, so there's no need
+  // to create a new function object. We can even get away with assuming
+  // the method takes exactly one argument, since that happens to be true
+  // in every case, so we don't have to touch the arguments object. The
+  // only additional allocation required is the completion record, which
+  // has a stable shape and so hopefully should be cheap to allocate.
+  function tryCatch(fn, obj, arg) {
+    try {
+      return { type: "normal", arg: fn.call(obj, arg) };
+    } catch (err) {
+      return { type: "throw", arg: err };
+    }
+  }
+
+  var GenStateSuspendedStart = "suspendedStart";
+  var GenStateSuspendedYield = "suspendedYield";
+  var GenStateExecuting = "executing";
+  var GenStateCompleted = "completed";
+
+  // Returning this object from the innerFn has the same effect as
+  // breaking out of the dispatch switch statement.
+  var ContinueSentinel = {};
+
+  // Dummy constructor functions that we use as the .constructor and
+  // .constructor.prototype properties for functions that return Generator
+  // objects. For full spec compliance, you may wish to configure your
+  // minifier not to mangle the names of these two functions.
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+
+  // This is a polyfill for %IteratorPrototype% for environments that
+  // don't natively support it.
+  var IteratorPrototype = {};
+  IteratorPrototype[iteratorSymbol] = function () {
+    return this;
+  };
+
+  var getProto = Object.getPrototypeOf;
+  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype &&
+      NativeIteratorPrototype !== Op &&
+      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+    // This environment has a native %IteratorPrototype%; use it instead
+    // of the polyfill.
+    IteratorPrototype = NativeIteratorPrototype;
+  }
+
+  var Gp = GeneratorFunctionPrototype.prototype =
+    Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
+  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunctionPrototype[toStringTagSymbol] =
+    GeneratorFunction.displayName = "GeneratorFunction";
+
+  // Helper for defining the .next, .throw, and .return methods of the
+  // Iterator interface in terms of a single ._invoke method.
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function(method) {
+      prototype[method] = function(arg) {
+        return this._invoke(method, arg);
+      };
+    });
+  }
+
+  runtime.isGeneratorFunction = function(genFun) {
+    var ctor = typeof genFun === "function" && genFun.constructor;
+    return ctor
+      ? ctor === GeneratorFunction ||
+        // For the native GeneratorFunction constructor, the best we can
+        // do is to check its .name property.
+        (ctor.displayName || ctor.name) === "GeneratorFunction"
+      : false;
+  };
+
+  runtime.mark = function(genFun) {
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+    } else {
+      genFun.__proto__ = GeneratorFunctionPrototype;
+      if (!(toStringTagSymbol in genFun)) {
+        genFun[toStringTagSymbol] = "GeneratorFunction";
+      }
+    }
+    genFun.prototype = Object.create(Gp);
+    return genFun;
+  };
+
+  // Within the body of any async function, `await x` is transformed to
+  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
+  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+  // meant to be awaited.
+  runtime.awrap = function(arg) {
+    return { __await: arg };
+  };
+
+  function AsyncIterator(generator) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if (record.type === "throw") {
+        reject(record.arg);
+      } else {
+        var result = record.arg;
+        var value = result.value;
+        if (value &&
+            typeof value === "object" &&
+            hasOwn.call(value, "__await")) {
+          return Promise.resolve(value.__await).then(function(value) {
+            invoke("next", value, resolve, reject);
+          }, function(err) {
+            invoke("throw", err, resolve, reject);
+          });
+        }
+
+        return Promise.resolve(value).then(function(unwrapped) {
+          // When a yielded Promise is resolved, its final value becomes
+          // the .value of the Promise<{value,done}> result for the
+          // current iteration. If the Promise is rejected, however, the
+          // result for this iteration will be rejected with the same
+          // reason. Note that rejections of yielded Promises are not
+          // thrown back into the generator function, as is the case
+          // when an awaited Promise is rejected. This difference in
+          // behavior between yield and await is important, because it
+          // allows the consumer to decide what to do with the yielded
+          // rejection (swallow it and continue, manually .throw it back
+          // into the generator, abandon iteration, whatever). With
+          // await, by contrast, there is no opportunity to examine the
+          // rejection reason outside the generator function, so the
+          // only option is to throw it from the await expression, and
+          // let the generator function handle the exception.
+          result.value = unwrapped;
+          resolve(result);
+        }, reject);
+      }
+    }
+
+    if (typeof global.process === "object" && global.process.domain) {
+      invoke = global.process.domain.bind(invoke);
+    }
+
+    var previousPromise;
+
+    function enqueue(method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new Promise(function(resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise =
+        // If enqueue has been called before, then we want to wait until
+        // all previous Promises have been resolved before calling invoke,
+        // so that results are always delivered in the correct order. If
+        // enqueue has not been called before, then it is important to
+        // call invoke immediately, without waiting on a callback to fire,
+        // so that the async generator function has the opportunity to do
+        // any necessary setup in a predictable way. This predictability
+        // is why the Promise constructor synchronously invokes its
+        // executor callback, and why async functions synchronously
+        // execute code before the first await. Since we implement simple
+        // async functions in terms of async generators, it is especially
+        // important to get this right, even though it requires care.
+        previousPromise ? previousPromise.then(
+          callInvokeWithMethodAndArg,
+          // Avoid propagating failures to Promises returned by later
+          // invocations of the iterator.
+          callInvokeWithMethodAndArg
+        ) : callInvokeWithMethodAndArg();
+    }
+
+    // Define the unified helper method that is used to implement .next,
+    // .throw, and .return (see defineIteratorMethods).
+    this._invoke = enqueue;
+  }
+
+  defineIteratorMethods(AsyncIterator.prototype);
+  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+    return this;
+  };
+  runtime.AsyncIterator = AsyncIterator;
+
+  // Note that simple async functions are implemented on top of
+  // AsyncIterator objects; they just return a Promise for the value of
+  // the final result produced by the iterator.
+  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+    var iter = new AsyncIterator(
+      wrap(innerFn, outerFn, self, tryLocsList)
+    );
+
+    return runtime.isGeneratorFunction(outerFn)
+      ? iter // If outerFn is a generator, return the full iterator.
+      : iter.next().then(function(result) {
+          return result.done ? result.value : iter.next();
+        });
+  };
+
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = GenStateSuspendedStart;
+
+    return function invoke(method, arg) {
+      if (state === GenStateExecuting) {
+        throw new Error("Generator is already running");
+      }
+
+      if (state === GenStateCompleted) {
+        if (method === "throw") {
+          throw arg;
+        }
+
+        // Be forgiving, per 25.3.3.3.3 of the spec:
+        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
+        return doneResult();
+      }
+
+      context.method = method;
+      context.arg = arg;
+
+      while (true) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+
+        if (context.method === "next") {
+          // Setting context._sent for legacy support of Babel's
+          // function.sent implementation.
+          context.sent = context._sent = context.arg;
+
+        } else if (context.method === "throw") {
+          if (state === GenStateSuspendedStart) {
+            state = GenStateCompleted;
+            throw context.arg;
+          }
+
+          context.dispatchException(context.arg);
+
+        } else if (context.method === "return") {
+          context.abrupt("return", context.arg);
+        }
+
+        state = GenStateExecuting;
+
+        var record = tryCatch(innerFn, self, context);
+        if (record.type === "normal") {
+          // If an exception is thrown from innerFn, we leave state ===
+          // GenStateExecuting and loop back for another invocation.
+          state = context.done
+            ? GenStateCompleted
+            : GenStateSuspendedYield;
+
+          if (record.arg === ContinueSentinel) {
+            continue;
+          }
+
+          return {
+            value: record.arg,
+            done: context.done
+          };
+
+        } else if (record.type === "throw") {
+          state = GenStateCompleted;
+          // Dispatch the exception by looping back around to the
+          // context.dispatchException(context.arg) call above.
+          context.method = "throw";
+          context.arg = record.arg;
+        }
+      }
+    };
+  }
+
+  // Call delegate.iterator[context.method](context.arg) and handle the
+  // result, either by returning a { value, done } result from the
+  // delegate iterator, or by modifying context.method and context.arg,
+  // setting context.delegate to null, and returning the ContinueSentinel.
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+    if (method === undefined) {
+      // A .throw or .return when the delegate iterator has no .throw
+      // method always terminates the yield* loop.
+      context.delegate = null;
+
+      if (context.method === "throw") {
+        if (delegate.iterator.return) {
+          // If the delegate iterator has a return method, give it a
+          // chance to clean up.
+          context.method = "return";
+          context.arg = undefined;
+          maybeInvokeDelegate(delegate, context);
+
+          if (context.method === "throw") {
+            // If maybeInvokeDelegate(context) changed context.method from
+            // "return" to "throw", let that override the TypeError below.
+            return ContinueSentinel;
+          }
+        }
+
+        context.method = "throw";
+        context.arg = new TypeError(
+          "The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+
+    if (record.type === "throw") {
+      context.method = "throw";
+      context.arg = record.arg;
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    var info = record.arg;
+
+    if (! info) {
+      context.method = "throw";
+      context.arg = new TypeError("iterator result is not an object");
+      context.delegate = null;
+      return ContinueSentinel;
+    }
+
+    if (info.done) {
+      // Assign the result of the finished delegate to the temporary
+      // variable specified by delegate.resultName (see delegateYield).
+      context[delegate.resultName] = info.value;
+
+      // Resume execution at the desired location (see delegateYield).
+      context.next = delegate.nextLoc;
+
+      // If context.method was "throw" but the delegate handled the
+      // exception, let the outer generator proceed normally. If
+      // context.method was "next", forget context.arg since it has been
+      // "consumed" by the delegate iterator. If context.method was
+      // "return", allow the original .return call to continue in the
+      // outer generator.
+      if (context.method !== "return") {
+        context.method = "next";
+        context.arg = undefined;
+      }
+
+    } else {
+      // Re-yield the result returned by the delegate method.
+      return info;
+    }
+
+    // The delegate iterator is finished, so forget it and continue with
+    // the outer generator.
+    context.delegate = null;
+    return ContinueSentinel;
+  }
+
+  // Define Generator.prototype.{next,throw,return} in terms of the
+  // unified ._invoke helper method.
+  defineIteratorMethods(Gp);
+
+  Gp[toStringTagSymbol] = "Generator";
+
+  // A Generator should always return itself as the iterator object when the
+  // @@iterator function is called on it. Some browsers' implementations of the
+  // iterator prototype chain incorrectly implement this, causing the Generator
+  // object to not be returned from this call. This ensures that doesn't happen.
+  // See https://github.com/facebook/regenerator/issues/274 for more details.
+  Gp[iteratorSymbol] = function() {
+    return this;
+  };
+
+  Gp.toString = function() {
+    return "[object Generator]";
+  };
+
+  function pushTryEntry(locs) {
+    var entry = { tryLoc: locs[0] };
+
+    if (1 in locs) {
+      entry.catchLoc = locs[1];
+    }
+
+    if (2 in locs) {
+      entry.finallyLoc = locs[2];
+      entry.afterLoc = locs[3];
+    }
+
+    this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal";
+    delete record.arg;
+    entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    // The root entry object (effectively a try statement without a catch
+    // or a finally block) gives us a place to store values thrown from
+    // locations where there is no enclosing try statement.
+    this.tryEntries = [{ tryLoc: "root" }];
+    tryLocsList.forEach(pushTryEntry, this);
+    this.reset(true);
+  }
+
+  runtime.keys = function(object) {
+    var keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    keys.reverse();
+
+    // Rather than returning an object with a next method, we keep
+    // things simple and return the next function itself.
+    return function next() {
+      while (keys.length) {
+        var key = keys.pop();
+        if (key in object) {
+          next.value = key;
+          next.done = false;
+          return next;
+        }
+      }
+
+      // To avoid creating an additional object, we just hang the .value
+      // and .done properties off the next function object itself. This
+      // also ensures that the minifier will not anonymize the function.
+      next.done = true;
+      return next;
+    };
+  };
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) {
+        return iteratorMethod.call(iterable);
+      }
+
+      if (typeof iterable.next === "function") {
+        return iterable;
+      }
+
+      if (!isNaN(iterable.length)) {
+        var i = -1, next = function next() {
+          while (++i < iterable.length) {
+            if (hasOwn.call(iterable, i)) {
+              next.value = iterable[i];
+              next.done = false;
+              return next;
+            }
+          }
+
+          next.value = undefined;
+          next.done = true;
+
+          return next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    // Return an iterator with no values.
+    return { next: doneResult };
+  }
+  runtime.values = values;
+
+  function doneResult() {
+    return { value: undefined, done: true };
+  }
+
+  Context.prototype = {
+    constructor: Context,
+
+    reset: function(skipTempReset) {
+      this.prev = 0;
+      this.next = 0;
+      // Resetting context._sent for legacy support of Babel's
+      // function.sent implementation.
+      this.sent = this._sent = undefined;
+      this.done = false;
+      this.delegate = null;
+
+      this.method = "next";
+      this.arg = undefined;
+
+      this.tryEntries.forEach(resetTryEntry);
+
+      if (!skipTempReset) {
+        for (var name in this) {
+          // Not sure about the optimal order of these conditions:
+          if (name.charAt(0) === "t" &&
+              hasOwn.call(this, name) &&
+              !isNaN(+name.slice(1))) {
+            this[name] = undefined;
+          }
+        }
+      }
+    },
+
+    stop: function() {
+      this.done = true;
+
+      var rootEntry = this.tryEntries[0];
+      var rootRecord = rootEntry.completion;
+      if (rootRecord.type === "throw") {
+        throw rootRecord.arg;
+      }
+
+      return this.rval;
+    },
+
+    dispatchException: function(exception) {
+      if (this.done) {
+        throw exception;
+      }
+
+      var context = this;
+      function handle(loc, caught) {
+        record.type = "throw";
+        record.arg = exception;
+        context.next = loc;
+
+        if (caught) {
+          // If the dispatched exception was caught by a catch block,
+          // then let that catch block handle the exception normally.
+          context.method = "next";
+          context.arg = undefined;
+        }
+
+        return !! caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        var record = entry.completion;
+
+        if (entry.tryLoc === "root") {
+          // Exception thrown outside of any try block that could handle
+          // it, so set the completion value of the entire function to
+          // throw the exception.
+          return handle("end");
+        }
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc");
+          var hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            } else if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) {
+              return handle(entry.catchLoc, true);
+            }
+
+          } else if (hasFinally) {
+            if (this.prev < entry.finallyLoc) {
+              return handle(entry.finallyLoc);
+            }
+
+          } else {
+            throw new Error("try statement without catch or finally");
+          }
+        }
+      }
+    },
+
+    abrupt: function(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev &&
+            hasOwn.call(entry, "finallyLoc") &&
+            this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      if (finallyEntry &&
+          (type === "break" ||
+           type === "continue") &&
+          finallyEntry.tryLoc <= arg &&
+          arg <= finallyEntry.finallyLoc) {
+        // Ignore the finally entry if control is not jumping to a
+        // location outside the try/catch block.
+        finallyEntry = null;
+      }
+
+      var record = finallyEntry ? finallyEntry.completion : {};
+      record.type = type;
+      record.arg = arg;
+
+      if (finallyEntry) {
+        this.method = "next";
+        this.next = finallyEntry.finallyLoc;
+        return ContinueSentinel;
+      }
+
+      return this.complete(record);
+    },
+
+    complete: function(record, afterLoc) {
+      if (record.type === "throw") {
+        throw record.arg;
+      }
+
+      if (record.type === "break" ||
+          record.type === "continue") {
+        this.next = record.arg;
+      } else if (record.type === "return") {
+        this.rval = this.arg = record.arg;
+        this.method = "return";
+        this.next = "end";
+      } else if (record.type === "normal" && afterLoc) {
+        this.next = afterLoc;
+      }
+
+      return ContinueSentinel;
+    },
+
+    finish: function(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) {
+          this.complete(entry.completion, entry.afterLoc);
+          resetTryEntry(entry);
+          return ContinueSentinel;
+        }
+      }
+    },
+
+    "catch": function(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if (record.type === "throw") {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+
+      // The context.catch method must only be called with a location
+      // argument that corresponds to a known catch block.
+      throw new Error("illegal catch attempt");
+    },
+
+    delegateYield: function(iterable, resultName, nextLoc) {
+      this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      };
+
+      if (this.method === "next") {
+        // Deliberately forget the last sent value so that we don't
+        // accidentally pass it on to the delegate.
+        this.arg = undefined;
+      }
+
+      return ContinueSentinel;
+    }
+  };
+})(
+  // Among the various tricks for obtaining a reference to the global
+  // object, this seems to be the most reliable technique that does not
+  // use indirect eval (which violates Content Security Policy).
+  typeof global === "object" ? global :
+  typeof window === "object" ? window :
+  typeof self === "object" ? self : this
+);
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],187:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+},{}],188:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],174:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3549,7 +4060,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":173,"_process":172,"inherits":171}],175:[function(require,module,exports){
+},{"./support/isBuffer":188,"_process":184,"inherits":187}],190:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -3642,7 +4153,7 @@ BlockScope.prototype.reset = _regenerator2.default.mark(function _callee2(initNo
   }, _callee2, this);
 });
 
-},{"../utils/assign":374,"./scope":181,"babel-runtime/regenerator":37,"util":174}],176:[function(require,module,exports){
+},{"../utils/assign":389,"./scope":196,"babel-runtime/regenerator":34,"util":189}],191:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -3708,14 +4219,13 @@ DeclarativeEnvironment.prototype = {
     return true;
   },
   createVariable: function (key) {
-    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var _ref$configurable = _ref.configurable;
-    var configurable = _ref$configurable === undefined ? false : _ref$configurable;
-    var _ref$writable = _ref.writable;
-    var writable = _ref$writable === undefined ? true : _ref$writable;
-    var _ref$initialized = _ref.initialized;
-    var initialized = _ref$initialized === undefined ? true : _ref$initialized;
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        _ref$configurable = _ref.configurable,
+        configurable = _ref$configurable === undefined ? false : _ref$configurable,
+        _ref$writable = _ref.writable,
+        writable = _ref$writable === undefined ? true : _ref$writable,
+        _ref$initialized = _ref.initialized,
+        initialized = _ref$initialized === undefined ? true : _ref$initialized;
 
     if (this.has(key)) {
       return this.properties[key];
@@ -3759,7 +4269,7 @@ DeclarativeEnvironment.prototype = {
   }
 };
 
-},{"../types/primitive-type":368,"../types/property-descriptor":369,"./reference":180,"babel-runtime/core-js/object/create":26}],177:[function(require,module,exports){
+},{"../types/primitive-type":383,"../types/property-descriptor":384,"./reference":195,"babel-runtime/core-js/object/create":26}],192:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -3830,7 +4340,7 @@ Environment.prototype = {
   init: function () {
     var _this = this;
 
-    var options = arguments.length <= 0 || arguments[0] === undefined ? defaultOptions : arguments[0];
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultOptions;
 
     // clear state in case of re-init
     this.current = null;
@@ -4050,7 +4560,7 @@ Environment.prototype = {
   }
 };
 
-},{"../es5":227,"../es6":284,"../execution-context":348,"../types/primitive-type":368,"../types/symbol-type":373,"../utils/async":375,"../utils/contracts":377,"../utils/operators":380,"./block-scope":175,"./declarative-environment":176,"./object-environment":178,"./reference":180,"./scope":181,"babel-runtime/core-js/object/assign":25,"babel-runtime/core-js/object/create":26}],178:[function(require,module,exports){
+},{"../es5":242,"../es6":299,"../execution-context":363,"../types/primitive-type":383,"../types/symbol-type":388,"../utils/async":390,"../utils/contracts":392,"../utils/operators":395,"./block-scope":190,"./declarative-environment":191,"./object-environment":193,"./reference":195,"./scope":196,"babel-runtime/core-js/object/assign":25,"babel-runtime/core-js/object/create":26}],193:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4102,14 +4612,13 @@ ObjectEnvironment.prototype = {
     return this.object.deleteProperty(key, false);
   },
   createVariable: function (key) {
-    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-    var _ref$configurable = _ref.configurable;
-    var configurable = _ref$configurable === undefined ? true : _ref$configurable;
-    var _ref$writable = _ref.writable;
-    var writable = _ref$writable === undefined ? true : _ref$writable;
-    var _ref$initialized = _ref.initialized;
-    var initialized = _ref$initialized === undefined ? true : _ref$initialized;
+    var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+        _ref$configurable = _ref.configurable,
+        configurable = _ref$configurable === undefined ? true : _ref$configurable,
+        _ref$writable = _ref.writable,
+        writable = _ref$writable === undefined ? true : _ref$writable,
+        _ref$initialized = _ref.initialized,
+        initialized = _ref$initialized === undefined ? true : _ref$initialized;
 
     if (!this.owns(key)) {
       if (this.parent) {
@@ -4148,7 +4657,7 @@ ObjectEnvironment.prototype = {
   }
 };
 
-},{"./declarative-environment":176,"./property-reference":179,"babel-runtime/core-js/object/create":26}],179:[function(require,module,exports){
+},{"./declarative-environment":191,"./property-reference":194,"babel-runtime/core-js/object/create":26}],194:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4237,7 +4746,7 @@ PropertyReference.prototype.isUnresolved = function () {
   return false;
 };
 
-},{"../types/primitive-type":368,"./reference":180,"util":174}],180:[function(require,module,exports){
+},{"../types/primitive-type":383,"./reference":195,"util":189}],195:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4317,7 +4826,7 @@ Reference.prototype = (_Reference$prototype = {
   return !this.base;
 }, _Reference$prototype);
 
-},{"../utils/contracts":377}],181:[function(require,module,exports){
+},{"../utils/contracts":392}],196:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4404,10 +4913,10 @@ Scope.prototype = {
         value = env.objectFactory.createFunction(decl, undefined, { strict: strictFunc, name: key });
         // value.bindScope(this);
       } else if (decl.isClass()) {
-          kind = "class";
-        } else if (env.has(key)) {
-          return;
-        }
+        kind = "class";
+      } else if (env.has(key)) {
+        return;
+      }
 
       var newVar = env.createVariable(key, kind);
       if (initialized) {
@@ -4416,7 +4925,7 @@ Scope.prototype = {
     });
   },
   loadComplexArgs: _regenerator2.default.mark(function _callee(params, args, callee) {
-    var env, strict, scope, argIndex, argLength, i, ln, param, rest, restIndex;
+    var env, strict, scope, argIndex, argLength, i, ln, param, rest, restIndex, argumentList;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -4471,22 +4980,21 @@ Scope.prototype = {
           case 21:
 
             if (!callee.arrow) {
-              (function () {
-                // preserve the passed in arguments, even if defaults are used instead
-                var argumentList = env.objectFactory.createArguments(args, callee, strict);
-                scope.createVariable("arguments");
-                scope.setValue("arguments", argumentList);
+              // preserve the passed in arguments, even if defaults are used instead
+              argumentList = env.objectFactory.createArguments(args, callee, strict);
 
-                args.forEach(function (value, index) {
-                  (0, _helpers.createDataProperty)(argumentList, index, value);
-                });
+              scope.createVariable("arguments");
+              scope.setValue("arguments", argumentList);
 
-                argumentList.defineProperty("length", {
-                  value: env.objectFactory.createPrimitive(args.length),
-                  configurable: true,
-                  writable: true
-                });
-              })();
+              args.forEach(function (value, index) {
+                (0, _helpers.createDataProperty)(argumentList, index, value);
+              });
+
+              argumentList.defineProperty("length", {
+                value: env.objectFactory.createPrimitive(args.length),
+                configurable: true,
+                writable: true
+              });
             }
 
             // return scope back to main scope
@@ -4509,11 +5017,7 @@ Scope.prototype = {
    * @returns {void}
    */
   loadArgs: _regenerator2.default.mark(function _callee2(params, args, callee) {
-    var
-
-    // todo: this method is getting far too complex
-    env, scope, strictCallee, strict, argumentList, argsLength, paramsLength, shouldMap, loadedParams, paramIndex, _param, value, name, mapped, descriptor, _i;
-
+    var env, scope, strictCallee, strict, argumentList, argsLength, paramsLength, shouldMap, loadedParams, paramIndex, param, value, name, mapped, descriptor, i;
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -4534,8 +5038,9 @@ Scope.prototype = {
             return _context2.abrupt("return", _context2.sent);
 
           case 5:
-            env = this.env;
-            scope = this.scope;
+
+            // todo: this method is getting far too complex
+            env = this.env, scope = this.scope;
             strictCallee = callee.node.isStrict();
             strict = strictCallee || env.isStrict();
             argumentList = env.objectFactory.createArguments(args, callee, strict);
@@ -4554,9 +5059,9 @@ Scope.prototype = {
 
 
               while (paramIndex--) {
-                _param = params[paramIndex];
+                param = params[paramIndex];
                 value = args[paramIndex] || _primitiveType.UNDEFINED;
-                name = _param.name;
+                name = param.name;
                 mapped = false;
 
 
@@ -4584,8 +5089,8 @@ Scope.prototype = {
             }
 
             // just set value if additional, unnamed arguments are passed in
-            for (_i = paramsLength; _i < argsLength; _i++) {
-              (0, _helpers.createDataProperty)(argumentList, _i, args[_i]);
+            for (i = paramsLength; i < argsLength; i++) {
+              (0, _helpers.createDataProperty)(argumentList, i, args[i]);
             }
 
             argumentList.defineProperty("length", {
@@ -4594,7 +5099,7 @@ Scope.prototype = {
               writable: true
             });
 
-          case 17:
+          case 16:
           case "end":
             return _context2.stop();
         }
@@ -4657,7 +5162,7 @@ Scope.prototype = {
   }
 };
 
-},{"../types/primitive-type":368,"../utils/assign":374,"../utils/contracts":377,"../utils/helpers":378,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":37}],182:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/assign":389,"../utils/contracts":392,"../utils/helpers":393,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":34}],197:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4765,7 +5270,7 @@ function isSpreadable(obj) {
   return obj.className === "Array";
 }
 
-},{"../../types/primitive-type":368,"../../types/symbol-type":373,"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],183:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../types/symbol-type":388,"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],198:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4857,7 +5362,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/helpers":378,"../../utils/native":379,"./array-helpers":182,"babel-runtime/regenerator":37}],184:[function(require,module,exports){
+},{"../../utils/helpers":393,"../../utils/native":394,"./array-helpers":197,"babel-runtime/regenerator":34}],199:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -4901,7 +5406,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 26);
+            return _context.abrupt("break", 27);
 
           case 10:
             _ref = _iterator[_i++];
@@ -4916,35 +5421,36 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 26);
+            return _context.abrupt("break", 27);
 
           case 16:
             _ref = _i.value;
 
           case 17:
             entry = _ref;
-            _context.next = 20;
+            _context.t0 = _native.toBoolean;
+            _context.next = 21;
             return (0, _arrayHelpers.executeCallback)(env, callback, entry, thisArg, arr);
 
-          case 20:
-            _context.t0 = _context.sent;
-            passed = (0, _native.toBoolean)(_context.t0);
+          case 21:
+            _context.t1 = _context.sent;
+            passed = (0, _context.t0)(_context.t1);
 
             if (passed) {
-              _context.next = 24;
+              _context.next = 25;
               break;
             }
 
             return _context.abrupt("return", factory.createPrimitive(false));
 
-          case 24:
+          case 25:
             _context.next = 7;
             break;
 
-          case 26:
+          case 27:
             return _context.abrupt("return", factory.createPrimitive(true));
 
-          case 27:
+          case 28:
           case "end":
             return _context.stop();
         }
@@ -4965,7 +5471,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],185:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],200:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5016,7 +5522,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 29);
+            return _context.abrupt("break", 30);
 
           case 14:
             _ref = _iterator[_i++];
@@ -5031,32 +5537,33 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 29);
+            return _context.abrupt("break", 30);
 
           case 20:
             _ref = _i.value;
 
           case 21:
             entry = _ref;
-            _context.next = 24;
+            _context.t0 = _native.toBoolean;
+            _context.next = 25;
             return (0, _arrayHelpers.executeCallback)(env, callback, entry, thisArg, arr);
 
-          case 24:
-            _context.t0 = _context.sent;
-            passed = (0, _native.toBoolean)(_context.t0);
+          case 25:
+            _context.t1 = _context.sent;
+            passed = (0, _context.t0)(_context.t1);
 
             if (passed) {
               (0, _helpers.createDataProperty)(newArray, index++, entry.value);
             }
 
-          case 27:
+          case 28:
             _context.next = 11;
             break;
 
-          case 29:
+          case 30:
             return _context.abrupt("return", newArray);
 
-          case 30:
+          case 31:
           case "end":
             return _context.stop();
         }
@@ -5079,7 +5586,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/helpers":378,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],186:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/helpers":393,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],201:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5172,7 +5679,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],187:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],202:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5254,7 +5761,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 34);
+            return _context.abrupt("break", 32);
 
           case 20:
             _ref = _iterator[_i++];
@@ -5269,31 +5776,29 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 34);
+            return _context.abrupt("break", 32);
 
           case 26:
             _ref = _i.value;
 
           case 27:
-            _ref2 = _ref;
-            key = _ref2.key;
-            value = _ref2.value;
+            _ref2 = _ref, key = _ref2.key, value = _ref2.value;
 
             if (!env.ops.strictEquals(searchElement, value || _primitiveType.UNDEFINED)) {
-              _context.next = 32;
+              _context.next = 30;
               break;
             }
 
             return _context.abrupt("return", factory.createPrimitive(key));
 
-          case 32:
+          case 30:
             _context.next = 17;
             break;
 
-          case 34:
+          case 32:
             return _context.abrupt("return", notFound);
 
-          case 35:
+          case 33:
           case "end":
             return _context.stop();
         }
@@ -5314,7 +5819,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators":352,"../../types/primitive-type":368,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],188:[function(require,module,exports){
+},{"../../iterators":367,"../../types/primitive-type":383,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],203:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5326,7 +5831,7 @@ exports.default = function ($target, env, factory) {
   }, 1, "Array.isArray"));
 };
 
-},{}],189:[function(require,module,exports){
+},{}],204:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5371,7 +5876,7 @@ exports.default = function ($target, env, factory) {
           case 10:
             separator = _context.t0;
             stringValues = [];
-            stringValue = undefined;
+            stringValue = void 0;
             i = 0;
 
           case 14:
@@ -5434,7 +5939,7 @@ var _primitiveType = require("../../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],190:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],205:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5508,7 +6013,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 31);
+            return _context.abrupt("break", 29);
 
           case 17:
             _ref = _iterator[_i++];
@@ -5523,31 +6028,29 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 31);
+            return _context.abrupt("break", 29);
 
           case 23:
             _ref = _i.value;
 
           case 24:
-            _ref2 = _ref;
-            key = _ref2.key;
-            value = _ref2.value;
+            _ref2 = _ref, key = _ref2.key, value = _ref2.value;
 
             if (!env.ops.strictEquals(searchElement, value || _primitiveType.UNDEFINED)) {
-              _context.next = 29;
+              _context.next = 27;
               break;
             }
 
             return _context.abrupt("return", factory.createPrimitive(key));
 
-          case 29:
+          case 27:
             _context.next = 14;
             break;
 
-          case 31:
+          case 29:
             return _context.abrupt("return", factory.createPrimitive(-1));
 
-          case 32:
+          case 30:
           case "end":
             return _context.stop();
         }
@@ -5566,7 +6069,7 @@ var _iterators2 = _interopRequireDefault(_iterators);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators":352,"../../types/primitive-type":368,"../../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],191:[function(require,module,exports){
+},{"../../iterators":367,"../../types/primitive-type":383,"../../utils/native":394,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],206:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5680,7 +6183,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/helpers":378,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],192:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/helpers":393,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],207:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5696,7 +6199,7 @@ exports.default = function ($target, env, factory) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            obj = undefined;
+            obj = void 0;
             _context.next = 3;
             return (0, _native.toLength)(this.object);
 
@@ -5731,7 +6234,7 @@ var _primitiveType = require("../../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/native":379,"babel-runtime/regenerator":37}],193:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/native":394,"babel-runtime/regenerator":34}],208:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5794,7 +6297,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"babel-runtime/core-js/number/max-safe-integer":23,"babel-runtime/regenerator":37}],194:[function(require,module,exports){
+},{"../../utils/native":394,"babel-runtime/core-js/number/max-safe-integer":23,"babel-runtime/regenerator":34}],209:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5836,7 +6339,7 @@ exports.default = function ($target, env, factory) {
 
             (0, _contracts.assertIsFunction)(callback, arr);
 
-            accumulator = undefined;
+            accumulator = void 0;
             hasInitialValue = false;
 
 
@@ -5946,7 +6449,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],195:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],210:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -5988,7 +6491,7 @@ exports.default = function ($target, env, factory) {
             (0, _contracts.assertIsFunction)(callback, arr);
 
             hasInitialValue = false;
-            value = undefined;
+            value = void 0;
 
 
             if (_args.length > 1) {
@@ -6097,7 +6600,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],196:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],211:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6120,7 +6623,7 @@ exports.default = function ($target, env, factory) {
             length = _context.sent;
             middle = Math.floor(length / 2);
             lower = 0;
-            upper = undefined, upperValue = undefined, lowerValue = undefined;
+            upper = void 0, upperValue = void 0, lowerValue = void 0;
 
 
             while (lower !== middle) {
@@ -6160,7 +6663,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"babel-runtime/regenerator":37}],197:[function(require,module,exports){
+},{"../../utils/native":394,"babel-runtime/regenerator":34}],212:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6220,7 +6723,7 @@ var _primitiveType = require("../../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/native":379,"babel-runtime/regenerator":37}],198:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/native":394,"babel-runtime/regenerator":34}],213:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6310,7 +6813,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 45);
+            return _context.abrupt("break", 43);
 
           case 30:
             _ref = _iterator[_i++];
@@ -6325,30 +6828,28 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 45);
+            return _context.abrupt("break", 43);
 
           case 36:
             _ref = _i.value;
 
           case 37:
-            _ref2 = _ref;
-            key = _ref2.key;
-            value = _ref2.value;
+            _ref2 = _ref, key = _ref2.key, value = _ref2.value;
             index = key - begin;
 
             (0, _helpers.createDataProperty)(arr, index, value);
             newLength = ++index;
 
-          case 43:
+          case 41:
             _context.next = 27;
             break;
 
-          case 45:
+          case 43:
 
             arr.setValue("length", factory.createPrimitive(newLength));
             return _context.abrupt("return", arr);
 
-          case 47:
+          case 45:
           case "end":
             return _context.stop();
         }
@@ -6369,7 +6870,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/helpers":378,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],199:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/helpers":393,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],214:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6413,7 +6914,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 26);
+            return _context.abrupt("break", 27);
 
           case 10:
             _ref = _iterator[_i++];
@@ -6428,35 +6929,36 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            return _context.abrupt("break", 26);
+            return _context.abrupt("break", 27);
 
           case 16:
             _ref = _i.value;
 
           case 17:
             entry = _ref;
-            _context.next = 20;
+            _context.t0 = _native.toBoolean;
+            _context.next = 21;
             return (0, _arrayHelpers.executeCallback)(env, callback, entry, thisArg, arr);
 
-          case 20:
-            _context.t0 = _context.sent;
-            passed = (0, _native.toBoolean)(_context.t0);
+          case 21:
+            _context.t1 = _context.sent;
+            passed = (0, _context.t0)(_context.t1);
 
             if (!passed) {
-              _context.next = 24;
+              _context.next = 25;
               break;
             }
 
             return _context.abrupt("return", factory.createPrimitive(true));
 
-          case 24:
+          case 25:
             _context.next = 7;
             break;
 
-          case 26:
+          case 27:
             return _context.abrupt("return", factory.createPrimitive(false));
 
-          case 27:
+          case 28:
           case "end":
             return _context.stop();
         }
@@ -6477,7 +6979,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../iterators/":352,"../../utils/contracts":377,"../../utils/native":379,"./array-helpers":182,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],200:[function(require,module,exports){
+},{"../../iterators/":367,"../../utils/contracts":392,"../../utils/native":394,"./array-helpers":197,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],215:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6579,7 +7081,7 @@ var _primitiveType = require("../../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/async":375,"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],201:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/async":390,"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],216:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6719,7 +7221,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],202:[function(require,module,exports){
+},{"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/regenerator":34}],217:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6742,16 +7244,16 @@ exports.default = function ($target, env, factory) {
             length = _context.sent;
             arr = new Array(length);
             i = 0;
-            current = undefined;
+            current = void 0;
 
           case 6:
             if (!(i < length)) {
-              _context.next = 23;
+              _context.next = 24;
               break;
             }
 
             if (!this.object.has(i)) {
-              _context.next = 20;
+              _context.next = 21;
               break;
             }
 
@@ -6763,32 +7265,33 @@ exports.default = function ($target, env, factory) {
             }
 
             arr[i] = "";
-            _context.next = 20;
+            _context.next = 21;
             break;
 
           case 13:
             func = current.getValue("toLocaleString") || current.getValue("toString");
-            _context.next = 16;
+            _context.t0 = _native.toString;
+            _context.next = 17;
             return func.call(current);
 
-          case 16:
-            _context.t0 = _context.sent;
-            _context.next = 19;
-            return (0, _native.toString)(_context.t0);
-
-          case 19:
-            arr[i] = _context.sent;
+          case 17:
+            _context.t1 = _context.sent;
+            _context.next = 20;
+            return (0, _context.t0)(_context.t1);
 
           case 20:
+            arr[i] = _context.sent;
+
+          case 21:
 
             i++;
             _context.next = 6;
             break;
 
-          case 23:
+          case 24:
             return _context.abrupt("return", factory.createPrimitive(arr.join()));
 
-          case 24:
+          case 25:
           case "end":
             return _context.stop();
         }
@@ -6803,7 +7306,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],203:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],218:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6847,7 +7350,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/contracts":377,"babel-runtime/regenerator":37}],204:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/contracts":392,"babel-runtime/regenerator":34}],219:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -6874,7 +7377,7 @@ exports.default = function ($target, env, factory) {
             length = _context.sent;
             argCount = items.length;
             i = length;
-            toIndex = undefined, fromIndex = undefined;
+            toIndex = void 0, fromIndex = void 0;
 
 
             while (i > 0) {
@@ -6912,14 +7415,14 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"babel-runtime/regenerator":37}],205:[function(require,module,exports){
+},{"../../utils/native":394,"babel-runtime/regenerator":34}],220:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
 
 exports.default = function (env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = objectFactory.createObject();
@@ -7056,7 +7559,7 @@ var _array44 = _interopRequireDefault(_array43);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"./array.concat":183,"./array.every":184,"./array.filter":185,"./array.for-each":186,"./array.index-of":187,"./array.is-array":188,"./array.join":189,"./array.last-index-of":190,"./array.map":191,"./array.pop":192,"./array.push":193,"./array.reduce":195,"./array.reduce-right":194,"./array.reverse":196,"./array.shift":197,"./array.slice":198,"./array.some":199,"./array.sort":200,"./array.splice":201,"./array.to-locale-string":202,"./array.to-string":203,"./array.unshift":204}],206:[function(require,module,exports){
+},{"../../utils/contracts":392,"./array.concat":198,"./array.every":199,"./array.filter":200,"./array.for-each":201,"./array.index-of":202,"./array.is-array":203,"./array.join":204,"./array.last-index-of":205,"./array.map":206,"./array.pop":207,"./array.push":208,"./array.reduce":210,"./array.reduce-right":209,"./array.reverse":211,"./array.shift":212,"./array.slice":213,"./array.some":214,"./array.sort":215,"./array.splice":216,"./array.to-locale-string":217,"./array.to-string":218,"./array.unshift":219}],221:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7070,7 +7573,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],207:[function(require,module,exports){
+},{"../../utils/contracts":392}],222:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7084,7 +7587,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],208:[function(require,module,exports){
+},{"../../utils/contracts":392}],223:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7103,8 +7606,8 @@ var _boolean4 = _interopRequireDefault(_boolean3);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function booleanApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = objectFactory.createObject();
@@ -7129,7 +7632,7 @@ function booleanApi(env) {
   globalObject.define("Boolean", booleanClass);
 }
 
-},{"../../utils/native":379,"./boolean.to-string":206,"./boolean.value-of":207}],209:[function(require,module,exports){
+},{"../../utils/native":394,"./boolean.to-string":221,"./boolean.value-of":222}],224:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7200,7 +7703,7 @@ function consoleApi(env) {
   globalObject.define("console", consoleClass);
 }
 
-},{"../../utils/async":375,"../../utils/native":379,"babel-runtime/regenerator":37}],210:[function(require,module,exports){
+},{"../../utils/async":390,"../../utils/native":394,"babel-runtime/regenerator":34}],225:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7237,7 +7740,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"babel-runtime/regenerator":37}],211:[function(require,module,exports){
+},{"../../utils/native":394,"babel-runtime/regenerator":34}],226:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7296,7 +7799,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/async":375,"../../utils/native":379,"babel-runtime/regenerator":37}],212:[function(require,module,exports){
+},{"../../utils/async":390,"../../utils/native":394,"babel-runtime/regenerator":34}],227:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7307,7 +7810,7 @@ exports.default = function ($target, env, factory) {
   }, 0, "Date.prototype.valueOf"));
 };
 
-},{}],213:[function(require,module,exports){
+},{}],228:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7343,8 +7846,8 @@ var protoMethods = ["getDate", "getDay", "getFullYear", "getHours", "getMillisec
 var setters = ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds", "setYear"];
 
 function dateApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = objectFactory.createObject();
@@ -7361,7 +7864,7 @@ function dateApi(env) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            dateValue = undefined, args = undefined;
+            dateValue = void 0, args = void 0;
 
             if (!(_args2.length === 0)) {
               _context2.next = 5;
@@ -7541,7 +8044,7 @@ function dateApi(env) {
   globalObject.define("Date", dateClass);
 }
 
-},{"../../utils/async":375,"../../utils/native":379,"./date.parse":210,"./date.utc":211,"./date.value-of":212,"babel-runtime/regenerator":37}],214:[function(require,module,exports){
+},{"../../utils/async":390,"../../utils/native":394,"./date.parse":225,"./date.utc":226,"./date.value-of":227,"babel-runtime/regenerator":34}],229:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7623,7 +8126,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],215:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],230:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -7648,8 +8151,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var errorTypes = ["TypeError", "ReferenceError", "SyntaxError", "RangeError", "URIError", "EvalError"];
 
 function errorApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = objectFactory.createObject();
@@ -7663,7 +8166,7 @@ function errorApi(env) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            messageString = undefined;
+            messageString = void 0;
 
             if ((0, _checks.isNullOrUndefined)(message)) {
               _context.next = 5;
@@ -7724,7 +8227,7 @@ function errorApi(env) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/checks":376,"../../utils/native":379,"./error.to-string":214,"babel-runtime/regenerator":37}],216:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"./error.to-string":229,"babel-runtime/regenerator":34}],231:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7748,7 +8251,7 @@ function defineThis(env, fn, thisArg) {
   return (0, _native.toObject)(thisArg);
 }
 
-},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/native":379}],217:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/checks":391,"../../utils/native":394}],232:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7806,7 +8309,7 @@ var _functionHelpers = require("./function-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"./function-helpers":216,"babel-runtime/regenerator":37}],218:[function(require,module,exports){
+},{"../../utils/native":394,"./function-helpers":231,"babel-runtime/regenerator":34}],233:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7938,7 +8441,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/native":379,"./function-helpers":216,"babel-runtime/regenerator":37}],219:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"./function-helpers":231,"babel-runtime/regenerator":34}],234:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7978,7 +8481,7 @@ var _functionHelpers = require("./function-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./function-helpers":216,"babel-runtime/regenerator":37}],220:[function(require,module,exports){
+},{"./function-helpers":231,"babel-runtime/regenerator":34}],235:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -7997,7 +8500,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],221:[function(require,module,exports){
+},{"../../utils/contracts":392}],236:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8041,185 +8544,167 @@ var _function8 = _interopRequireDefault(_function7);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function functionApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
-  var options = env.options;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory,
+      options = env.options;
 
 
-  var funcClass = undefined;
+  var funcClass = void 0;
 
-  var funcCtor = _regenerator2.default.mark(function _callee4() {
-    var _this = this;
-
+  var funcCtor = _regenerator2.default.mark(function _callee3() {
     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
 
-    var funcInstance;
-    return _regenerator2.default.wrap(function _callee4$(_context4) {
+    var funcInstance, body, params, bodyString, ast, callee, userNode, strict, wrappedFunc;
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
-        switch (_context4.prev = _context4.next) {
+        switch (_context3.prev = _context3.next) {
           case 0:
-            funcInstance = undefined;
+            funcInstance = void 0;
 
             if (!(options.parser && args.length > 0)) {
-              _context4.next = 5;
+              _context3.next = 22;
               break;
             }
 
-            return _context4.delegateYield(_regenerator2.default.mark(function _callee3() {
-              var body, params, bodyString, ast, callee, userNode, strict, wrappedFunc;
-              return _regenerator2.default.wrap(function _callee3$(_context3) {
-                while (1) {
-                  switch (_context3.prev = _context3.next) {
-                    case 0:
-                      body = args.pop();
-                      params = "";
+            body = args.pop();
+            params = "";
 
-                      if (!(args.length > 0)) {
-                        _context3.next = 6;
+            if (!(args.length > 0)) {
+              _context3.next = 8;
+              break;
+            }
+
+            _context3.next = 7;
+            return (0, _async.map)(args, _regenerator2.default.mark(function _callee(arg, index) {
+              return _regenerator2.default.wrap(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      if (!(0, _checks.isNull)(arg)) {
+                        _context.next = 2;
                         break;
                       }
 
-                      _context3.next = 5;
-                      return (0, _async.map)(args, _regenerator2.default.mark(function _callee(arg, index) {
-                        return _regenerator2.default.wrap(function _callee$(_context) {
-                          while (1) {
-                            switch (_context.prev = _context.next) {
-                              case 0:
-                                if (!(0, _checks.isNull)(arg)) {
-                                  _context.next = 2;
-                                  break;
-                                }
+                      throw SyntaxError("Unexpected token null");
 
-                                throw SyntaxError("Unexpected token null");
+                    case 2:
+                      if (!(0, _checks.isUndefined)(arg)) {
+                        _context.next = 6;
+                        break;
+                      }
 
-                              case 2:
-                                if (!(0, _checks.isUndefined)(arg)) {
-                                  _context.next = 6;
-                                  break;
-                                }
-
-                                _context.t0 = "";
-                                _context.next = 9;
-                                break;
-
-                              case 6:
-                                _context.next = 8;
-                                return (0, _native.toString)(arg);
-
-                              case 8:
-                                _context.t0 = _context.sent;
-
-                              case 9:
-                                return _context.abrupt("return", _context.t0);
-
-                              case 10:
-                              case "end":
-                                return _context.stop();
-                            }
-                          }
-                        }, _callee, this);
-                      }));
-
-                    case 5:
-                      params = _context3.sent.
-                      // the spec allows parameters to be comma-delimited, so we will join and split again comma
-                      join(",");
+                      _context.t0 = "";
+                      _context.next = 9;
+                      break;
 
                     case 6:
-                      _context3.next = 8;
-                      return (0, _native.toString)(body);
+                      _context.next = 8;
+                      return (0, _native.toString)(arg);
 
                     case 8:
-                      bodyString = _context3.sent;
-                      ast = options.parser("(function(" + params + "){" + bodyString + "}).apply($this,$args);");
-                      callee = ast.body[0].expression.callee.object;
-                      userNode = callee.body.body;
-                      strict = (0, _checks.isStrictNode)(userNode);
-                      wrappedFunc = _regenerator2.default.mark(function _callee2() {
-                        var thisArg,
-                            $args,
-                            executionResult,
-                            _args2 = arguments;
-                        return _regenerator2.default.wrap(function _callee2$(_context2) {
-                          while (1) {
-                            switch (_context2.prev = _context2.next) {
-                              case 0:
-                                thisArg = undefined;
+                      _context.t0 = _context.sent;
 
-                                if (this.isNew) {
-                                  thisArg = objectFactory.createObject(funcInstance);
-                                } else {
-                                  thisArg = this.object;
+                    case 9:
+                      return _context.abrupt("return", _context.t0);
 
-                                  if (!strict && (0, _checks.isUndefined)(thisArg)) {
-                                    thisArg = globalObject;
-                                  }
-                                }
-
-                                env.createVariable("$this").setValue(thisArg);
-
-                                $args = objectFactory.createArray(_args2);
-
-                                env.createVariable("$args").setValue($args);
-
-                                _context2.next = 7;
-                                return this.execute(ast);
-
-                              case 7:
-                                executionResult = _context2.sent;
-
-                                if (!this.isNew) {
-                                  _context2.next = 10;
-                                  break;
-                                }
-
-                                return _context2.abrupt("return", thisArg);
-
-                              case 10:
-                                return _context2.abrupt("return", executionResult && executionResult.result || _primitiveType.UNDEFINED);
-
-                              case 11:
-                              case "end":
-                                return _context2.stop();
-                            }
-                          }
-                        }, _callee2, this);
-                      });
-
-
-                      wrappedFunc.nativeLength = callee.params.length;
-                      wrappedFunc.strict = strict;
-                      funcInstance = objectFactory.createFunction(wrappedFunc, undefined, { strict: strict, name: "anonymous" });
-                      funcInstance.bindScope(env.globalScope);
-
-                    case 18:
+                    case 10:
                     case "end":
-                      return _context3.stop();
+                      return _context.stop();
                   }
                 }
-              }, _callee3, _this);
-            })(), "t0", 3);
+              }, _callee, this);
+            }));
 
-          case 3:
-            _context4.next = 6;
-            break;
-
-          case 5:
-            funcInstance = objectFactory.createFunction(function () {}, undefined, { name: "anonymous" });
-
-          case 6:
-
-            funcInstance.setValue("constructor", funcClass);
-            return _context4.abrupt("return", funcInstance);
+          case 7:
+            params = _context3.sent.
+            // the spec allows parameters to be comma-delimited, so we will join and split again comma
+            join(",");
 
           case 8:
+            _context3.next = 10;
+            return (0, _native.toString)(body);
+
+          case 10:
+            bodyString = _context3.sent;
+            ast = options.parser("(function(" + params + "){" + bodyString + "}).apply($this,$args);");
+            callee = ast.body[0].expression.callee.object;
+            userNode = callee.body.body;
+            strict = (0, _checks.isStrictNode)(userNode);
+            wrappedFunc = _regenerator2.default.mark(function _callee2() {
+              var thisArg,
+                  $args,
+                  executionResult,
+                  _args2 = arguments;
+              return _regenerator2.default.wrap(function _callee2$(_context2) {
+                while (1) {
+                  switch (_context2.prev = _context2.next) {
+                    case 0:
+                      thisArg = void 0;
+
+                      if (this.isNew) {
+                        thisArg = objectFactory.createObject(funcInstance);
+                      } else {
+                        thisArg = this.object;
+
+                        if (!strict && (0, _checks.isUndefined)(thisArg)) {
+                          thisArg = globalObject;
+                        }
+                      }
+
+                      env.createVariable("$this").setValue(thisArg);
+
+                      $args = objectFactory.createArray(_args2);
+
+                      env.createVariable("$args").setValue($args);
+
+                      _context2.next = 7;
+                      return this.execute(ast);
+
+                    case 7:
+                      executionResult = _context2.sent;
+
+                      if (!this.isNew) {
+                        _context2.next = 10;
+                        break;
+                      }
+
+                      return _context2.abrupt("return", thisArg);
+
+                    case 10:
+                      return _context2.abrupt("return", executionResult && executionResult.result || _primitiveType.UNDEFINED);
+
+                    case 11:
+                    case "end":
+                      return _context2.stop();
+                  }
+                }
+              }, _callee2, this);
+            });
+
+
+            wrappedFunc.nativeLength = callee.params.length;
+            wrappedFunc.strict = strict;
+            funcInstance = objectFactory.createFunction(wrappedFunc, undefined, { strict: strict, name: "anonymous" });
+            funcInstance.bindScope(env.globalScope);
+            _context3.next = 23;
+            break;
+
+          case 22:
+            funcInstance = objectFactory.createFunction(function () {}, undefined, { name: "anonymous" });
+
+          case 23:
+
+            funcInstance.setValue("constructor", funcClass);
+            return _context3.abrupt("return", funcInstance);
+
+          case 25:
           case "end":
-            return _context4.stop();
+            return _context3.stop();
         }
       }
-    }, _callee4, this);
+    }, _callee3, this);
   });
 
   // the prototype of a function is actually callable and evaluates as a function
@@ -8274,7 +8759,7 @@ function functionApi(env) {
   proto.defineProperty("arguments", prop);
 }
 
-},{"../../types/native-function-type":365,"../../types/primitive-type":368,"../../utils/async":375,"../../utils/checks":376,"../../utils/native":379,"./function.apply":217,"./function.bind":218,"./function.call":219,"./function.to-string":220,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37}],222:[function(require,module,exports){
+},{"../../types/native-function-type":380,"../../types/primitive-type":383,"../../utils/async":390,"../../utils/checks":391,"../../utils/native":394,"./function.apply":232,"./function.bind":233,"./function.call":234,"./function.to-string":235,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34}],237:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8295,7 +8780,7 @@ exports.default = function ($target, env, factory) {
     // in which case we use the global scope
     if (directCall) {
       if (strictCode) {
-        var thisArg = undefined;
+        var thisArg = void 0;
         if (strictScope) {
           thisArg = inGlobal ? $target : _primitiveType.UNDEFINED;
         } else {
@@ -8342,7 +8827,7 @@ exports.default = function ($target, env, factory) {
             return _context2.abrupt("return", code);
 
           case 4:
-            ast = undefined;
+            ast = void 0;
             _context2.prev = 5;
 
             ast = parser(code.value);
@@ -8407,7 +8892,7 @@ var _primitiveType = require("../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../env/reference":180,"../types/primitive-type":368,"../utils/checks":376,"babel-runtime/regenerator":37}],223:[function(require,module,exports){
+},{"../env/reference":195,"../types/primitive-type":383,"../utils/checks":391,"babel-runtime/regenerator":34}],238:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8443,7 +8928,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],224:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],239:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8479,7 +8964,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],225:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],240:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8520,7 +9005,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],226:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],241:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -8531,9 +9016,9 @@ var _regenerator = require("babel-runtime/regenerator");
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
 exports.default = function (env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
-  var options = env.options;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory,
+      options = env.options;
 
 
   globalObject.define("Infinity", objectFactory.createPrimitive(Infinity), { configurable: false, writable: false });
@@ -8592,7 +9077,7 @@ var _global8 = _interopRequireDefault(_global7);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils/native":379,"./global.eval":222,"./global.is-finite":223,"./global.is-nan":224,"./global.parse-int":225,"babel-runtime/regenerator":37}],227:[function(require,module,exports){
+},{"../utils/native":394,"./global.eval":237,"./global.is-finite":238,"./global.is-nan":239,"./global.parse-int":240,"babel-runtime/regenerator":34}],242:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8685,7 +9170,7 @@ function ecma51(env) {
   (0, _globals2.default)(env);
 }
 
-},{"../types/object-factory":366,"../types/primitive-type":368,"./array/":205,"./boolean/":208,"./console/":209,"./date/":213,"./error/":215,"./function/":221,"./globals":226,"./json/":228,"./math/":231,"./number/":232,"./object/":236,"./regex/":256,"./string/":260}],228:[function(require,module,exports){
+},{"../types/object-factory":381,"../types/primitive-type":383,"./array/":220,"./boolean/":223,"./console/":224,"./date/":228,"./error/":230,"./function/":236,"./globals":241,"./json/":243,"./math/":246,"./number/":247,"./object/":251,"./regex/":271,"./string/":275}],243:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8702,8 +9187,8 @@ var _json4 = _interopRequireDefault(_json3);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function jsonApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var jsonClass = objectFactory.createObject();
@@ -8715,7 +9200,7 @@ function jsonApi(env) {
   globalObject.define("JSON", jsonClass);
 }
 
-},{"./json.parse":229,"./json.stringify":230}],229:[function(require,module,exports){
+},{"./json.parse":244,"./json.stringify":245}],244:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8763,7 +9248,7 @@ exports.default = function ($target, env, factory) {
           case 0:
             valueType = (0, _helpers.getNativeType)(value);
             _context2.t0 = valueType;
-            _context2.next = _context2.t0 === "Undefined" ? 4 : _context2.t0 === "Null" ? 4 : _context2.t0 === "String" ? 4 : _context2.t0 === "Number" ? 4 : _context2.t0 === "Boolean" ? 4 : _context2.t0 === "Array" ? 5 : 28;
+            _context2.next = _context2.t0 === "Undefined" ? 4 : _context2.t0 === "Null" ? 4 : _context2.t0 === "String" ? 4 : _context2.t0 === "Number" ? 4 : _context2.t0 === "Boolean" ? 4 : _context2.t0 === "Array" ? 5 : 29;
             break;
 
           case 4:
@@ -8775,90 +9260,92 @@ exports.default = function ($target, env, factory) {
 
           case 7:
             if (!(i < ln)) {
-              _context2.next = 27;
+              _context2.next = 28;
               break;
             }
 
             element = value[i];
-            _context2.t1 = arr;
-            _context2.t2 = String(i);
-            _context2.next = 13;
+            _context2.t1 = reviver;
+            _context2.t2 = arr;
+            _context2.t3 = String(i);
+            _context2.next = 14;
             return deserialize(element, reviver);
 
-          case 13:
-            _context2.t3 = _context2.sent;
-            _context2.next = 16;
-            return reviver(_context2.t1, _context2.t2, _context2.t3);
+          case 14:
+            _context2.t4 = _context2.sent;
+            _context2.next = 17;
+            return (0, _context2.t1)(_context2.t2, _context2.t3, _context2.t4);
 
-          case 16:
+          case 17:
             elementValue = _context2.sent;
 
             if ((0, _checks.isUndefined)(elementValue)) {
-              _context2.next = 24;
+              _context2.next = 25;
               break;
             }
 
-            _context2.t4 = arr;
-            _context2.t5 = i;
-            _context2.next = 22;
-            return deserialize(element);
+            _context2.t5 = arr;
+            _context2.t6 = i;
+            _context2.next = 23;
+            return deserialize(element, reviver);
 
-          case 22:
-            _context2.t6 = _context2.sent;
+          case 23:
+            _context2.t7 = _context2.sent;
 
-            _context2.t4.setIndex.call(_context2.t4, _context2.t5, _context2.t6);
+            _context2.t5.setIndex.call(_context2.t5, _context2.t6, _context2.t7);
 
-          case 24:
+          case 25:
             i++;
             _context2.next = 7;
             break;
 
-          case 27:
+          case 28:
             return _context2.abrupt("return", arr);
 
-          case 28:
+          case 29:
             obj = factory.createObject();
-            propValue = undefined;
-            _context2.t7 = _regenerator2.default.keys(value);
+            propValue = void 0;
+            _context2.t8 = _regenerator2.default.keys(value);
 
-          case 31:
-            if ((_context2.t8 = _context2.t7()).done) {
+          case 32:
+            if ((_context2.t9 = _context2.t8()).done) {
+              _context2.next = 47;
+              break;
+            }
+
+            prop = _context2.t9.value;
+
+            if (!value.hasOwnProperty(prop)) {
               _context2.next = 45;
               break;
             }
 
-            prop = _context2.t8.value;
-
-            if (!value.hasOwnProperty(prop)) {
-              _context2.next = 43;
-              break;
-            }
-
-            _context2.t9 = obj;
-            _context2.t10 = prop;
-            _context2.next = 38;
+            _context2.t10 = reviver;
+            _context2.t11 = obj;
+            _context2.t12 = prop;
+            _context2.next = 40;
             return deserialize(value[prop], reviver);
 
-          case 38:
-            _context2.t11 = _context2.sent;
-            _context2.next = 41;
-            return reviver(_context2.t9, _context2.t10, _context2.t11);
+          case 40:
+            _context2.t13 = _context2.sent;
+            _context2.next = 43;
+            return (0, _context2.t10)(_context2.t11, _context2.t12, _context2.t13);
 
-          case 41:
+          case 43:
             propValue = _context2.sent;
 
             if (!(0, _checks.isUndefined)(propValue)) {
               obj.defineProperty(prop, { value: propValue, configurable: true, enumerable: true, writable: true });
             }
 
-          case 43:
-            _context2.next = 31;
+          case 45:
+            _context2.next = 32;
             break;
 
-          case 45:
+          case 47:
             return _context2.abrupt("return", obj);
 
-          case 46:
+          case 48:
           case "end":
             return _context2.stop();
         }
@@ -8910,7 +9397,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],230:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/checks":391,"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/regenerator":34}],245:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -8989,7 +9476,7 @@ exports.default = function ($target, env, factory) {
             depth++;
             stack.push(obj);
 
-            jsonResult = undefined;
+            jsonResult = void 0;
 
             if (!(obj.className === "Array")) {
               _context.next = 23;
@@ -9050,7 +9537,7 @@ exports.default = function ($target, env, factory) {
           case 0:
             colon = gap ? ": " : ":";
             values = [];
-            value = undefined;
+            value = void 0;
             keys = obj.getOwnPropertyKeys("String");
             _iterator = keys, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : (0, _getIterator3.default)(_iterator);
 
@@ -9198,25 +9685,22 @@ exports.default = function ($target, env, factory) {
   }
 
   function createReplacer(replacer) {
-    var _this = this;
-
-    var _ret;
-
-    return _regenerator2.default.wrap(function createReplacer$(_context7) {
+    var arr, keys;
+    return _regenerator2.default.wrap(function createReplacer$(_context6) {
       while (1) {
-        switch (_context7.prev = _context7.next) {
+        switch (_context6.prev = _context6.next) {
           case 0:
             if (!replacer) {
-              _context7.next = 8;
+              _context6.next = 10;
               break;
             }
 
             if (!(replacer.className === "Function")) {
-              _context7.next = 3;
+              _context6.next = 3;
               break;
             }
 
-            return _context7.abrupt("return", _regenerator2.default.mark(function _callee(holder, key, value) {
+            return _context6.abrupt("return", _regenerator2.default.mark(function _callee(holder, key, value) {
               var args;
               return _regenerator2.default.wrap(function _callee$(_context4) {
                 while (1) {
@@ -9239,100 +9723,75 @@ exports.default = function ($target, env, factory) {
 
           case 3:
             if (!(replacer.className === "Array")) {
-              _context7.next = 8;
+              _context6.next = 10;
               break;
             }
 
-            return _context7.delegateYield(_regenerator2.default.mark(function _callee3() {
-              var arr, keys;
-              return _regenerator2.default.wrap(function _callee3$(_context6) {
+            _context6.next = 6;
+            return (0, _native.toArray)(replacer);
+
+          case 6:
+            arr = _context6.sent;
+            return _context6.delegateYield((0, _async.map)(arr, _regenerator2.default.mark(function _callee2(arg) {
+              return _regenerator2.default.wrap(function _callee2$(_context5) {
                 while (1) {
-                  switch (_context6.prev = _context6.next) {
+                  switch (_context5.prev = _context5.next) {
                     case 0:
-                      _context6.next = 2;
-                      return (0, _native.toArray)(replacer);
+                      if (!(arg.className === "String")) {
+                        _context5.next = 4;
+                        break;
+                      }
 
-                    case 2:
-                      arr = _context6.sent;
-                      return _context6.delegateYield((0, _async.map)(arr, _regenerator2.default.mark(function _callee2(arg) {
-                        return _regenerator2.default.wrap(function _callee2$(_context5) {
-                          while (1) {
-                            switch (_context5.prev = _context5.next) {
-                              case 0:
-                                if (!(arg.className === "String")) {
-                                  _context5.next = 4;
-                                  break;
-                                }
+                      _context5.next = 3;
+                      return (0, _native.toString)(arg);
 
-                                _context5.next = 3;
-                                return (0, _native.toString)(arg);
-
-                              case 3:
-                                return _context5.abrupt("return", _context5.sent);
-
-                              case 4:
-                                if (!(arg.className === "Number")) {
-                                  _context5.next = 9;
-                                  break;
-                                }
-
-                                _context5.next = 7;
-                                return (0, _native.toNumber)(arg);
-
-                              case 7:
-                                _context5.t0 = _context5.sent;
-                                return _context5.abrupt("return", String(_context5.t0));
-
-                              case 9:
-                                return _context5.abrupt("return", undefined);
-
-                              case 10:
-                              case "end":
-                                return _context5.stop();
-                            }
-                          }
-                        }, _callee2, this);
-                      })), "t0", 4);
+                    case 3:
+                      return _context5.abrupt("return", _context5.sent);
 
                     case 4:
-                      keys = _context6.t0;
-                      return _context6.abrupt("return", {
-                        v: function (holder, key, value) {
-                          // allow empty key - this will be from the root
-                          if (!key || keys.indexOf(key) >= 0) {
-                            return value;
-                          }
+                      if (!(arg.className === "Number")) {
+                        _context5.next = 10;
+                        break;
+                      }
 
-                          return undefined;
-                        }
-                      });
+                      _context5.t0 = String;
+                      _context5.next = 8;
+                      return (0, _native.toNumber)(arg);
 
-                    case 6:
+                    case 8:
+                      _context5.t1 = _context5.sent;
+                      return _context5.abrupt("return", (0, _context5.t0)(_context5.t1));
+
+                    case 10:
+                      return _context5.abrupt("return", undefined);
+
+                    case 11:
                     case "end":
-                      return _context6.stop();
+                      return _context5.stop();
                   }
                 }
-              }, _callee3, _this);
-            })(), "t0", 5);
-
-          case 5:
-            _ret = _context7.t0;
-
-            if (!(typeof _ret === "object")) {
-              _context7.next = 8;
-              break;
-            }
-
-            return _context7.abrupt("return", _ret.v);
+              }, _callee2, this);
+            })), "t0", 8);
 
           case 8:
-            return _context7.abrupt("return", function (holder, key, value) {
+            keys = _context6.t0;
+            return _context6.abrupt("return", function (holder, key, value) {
+              // allow empty key - this will be from the root
+              if (!key || keys.indexOf(key) >= 0) {
+                return value;
+              }
+
+              return undefined;
+            });
+
+          case 10:
+            return _context6.abrupt("return", function (holder, key, value) {
               return value;
             });
 
-          case 9:
+          case 11:
           case "end":
-            return _context7.stop();
+            return _context6.stop();
         }
       }
     }, _marked[3], this);
@@ -9340,109 +9799,109 @@ exports.default = function ($target, env, factory) {
 
   function getSpacer(spacer) {
     var count, gap;
-    return _regenerator2.default.wrap(function getSpacer$(_context8) {
+    return _regenerator2.default.wrap(function getSpacer$(_context7) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             if (!spacer) {
-              _context8.next = 16;
+              _context7.next = 16;
               break;
             }
 
             if (!(spacer.className === "Number")) {
-              _context8.next = 11;
+              _context7.next = 11;
               break;
             }
 
-            _context8.t0 = Math;
-            _context8.next = 5;
+            _context7.t0 = Math;
+            _context7.next = 5;
             return (0, _native.toNumber)(spacer);
 
           case 5:
-            _context8.t1 = _context8.sent;
-            count = _context8.t0.floor.call(_context8.t0, _context8.t1);
+            _context7.t1 = _context7.sent;
+            count = _context7.t0.floor.call(_context7.t0, _context7.t1);
 
             count = Math.max(Math.min(10, count), 0);
 
             if (!(count > 0)) {
-              _context8.next = 10;
+              _context7.next = 10;
               break;
             }
 
-            return _context8.abrupt("return", (0, _repeat2.default)(" ", count));
+            return _context7.abrupt("return", (0, _repeat2.default)(" ", count));
 
           case 10:
-            return _context8.abrupt("return", "");
+            return _context7.abrupt("return", "");
 
           case 11:
             if (!(spacer.className === "String")) {
-              _context8.next = 16;
+              _context7.next = 16;
               break;
             }
 
-            _context8.next = 14;
+            _context7.next = 14;
             return (0, _native.toString)(spacer);
 
           case 14:
-            gap = _context8.sent;
-            return _context8.abrupt("return", gap.substr(0, 10));
+            gap = _context7.sent;
+            return _context7.abrupt("return", gap.substr(0, 10));
 
           case 16:
-            return _context8.abrupt("return", "");
+            return _context7.abrupt("return", "");
+
+          case 17:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _marked[4], this);
+  }
+
+  $target.define("stringify", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee3(obj, replacer, spacer) {
+    var stack;
+    return _regenerator2.default.wrap(function _callee3$(_context8) {
+      while (1) {
+        switch (_context8.prev = _context8.next) {
+          case 0:
+            _context8.next = 2;
+            return createReplacer(replacer);
+
+          case 2:
+            replacer = _context8.sent;
+            _context8.next = 5;
+            return getSpacer(spacer);
+
+          case 5:
+            spacer = _context8.sent;
+            _context8.next = 8;
+            return replacer(obj, "", obj);
+
+          case 8:
+            obj = _context8.sent;
+
+            if (!(0, _checks.isUndefined)(obj)) {
+              _context8.next = 11;
+              break;
+            }
+
+            return _context8.abrupt("return", _primitiveType.UNDEFINED);
+
+          case 11:
+            stack = [];
+            _context8.t0 = factory;
+            _context8.next = 15;
+            return serialize(stack, obj, replacer, spacer, 0);
+
+          case 15:
+            _context8.t1 = _context8.sent;
+            return _context8.abrupt("return", _context8.t0.createPrimitive.call(_context8.t0, _context8.t1));
 
           case 17:
           case "end":
             return _context8.stop();
         }
       }
-    }, _marked[4], this);
-  }
-
-  $target.define("stringify", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee4(obj, replacer, spacer) {
-    var stack;
-    return _regenerator2.default.wrap(function _callee4$(_context9) {
-      while (1) {
-        switch (_context9.prev = _context9.next) {
-          case 0:
-            _context9.next = 2;
-            return createReplacer(replacer);
-
-          case 2:
-            replacer = _context9.sent;
-            _context9.next = 5;
-            return getSpacer(spacer);
-
-          case 5:
-            spacer = _context9.sent;
-            _context9.next = 8;
-            return replacer(obj, "", obj);
-
-          case 8:
-            obj = _context9.sent;
-
-            if (!(0, _checks.isUndefined)(obj)) {
-              _context9.next = 11;
-              break;
-            }
-
-            return _context9.abrupt("return", _primitiveType.UNDEFINED);
-
-          case 11:
-            stack = [];
-            _context9.t0 = factory;
-            _context9.next = 15;
-            return serialize(stack, obj, replacer, spacer, 0);
-
-          case 15:
-            _context9.t1 = _context9.sent;
-            return _context9.abrupt("return", _context9.t0.createPrimitive.call(_context9.t0, _context9.t1));
-
-          case 17:
-          case "end":
-            return _context9.stop();
-        }
-      }
-    }, _callee4, this);
+    }, _callee3, this);
   }), 3, "JSON.stringify"));
 };
 
@@ -9474,7 +9933,7 @@ var ignored = {
   "Symbol": true
 };
 
-},{"../../types/primitive-type":368,"../../utils/async":375,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/json/stringify":3,"babel-runtime/core-js/string/repeat":32,"babel-runtime/regenerator":37}],231:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/async":390,"../../utils/checks":391,"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/json/stringify":3,"babel-runtime/core-js/string/repeat":31,"babel-runtime/regenerator":34}],246:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9486,8 +9945,8 @@ var constants = ["E", "LN10", "LN2", "LOG10E", "LOG2E", "PI", "SQRT1_2", "SQRT2"
 var methods = ["abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "exp", "floor", "log", "max", "min", "pow", "random", "round", "sin", "sqrt", "tan"];
 
 function mathApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var mathClass = objectFactory.createObject();
@@ -9504,7 +9963,7 @@ function mathApi(env) {
   globalObject.define("Math", mathClass);
 }
 
-},{"../../utils/native":379}],232:[function(require,module,exports){
+},{"../../utils/native":394}],247:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9534,8 +9993,8 @@ var _number6 = _interopRequireDefault(_number5);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function numberApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = objectFactory.createObject();
@@ -9548,25 +10007,26 @@ function numberApi(env) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.next = 2;
+            _context.t0 = Number;
+            _context.next = 3;
             return (0, _native.toPrimitive)(value, "number");
 
-          case 2:
-            _context.t0 = _context.sent;
-            numberValue = Number(_context.t0);
+          case 3:
+            _context.t1 = _context.sent;
+            numberValue = (0, _context.t0)(_context.t1);
             obj = objectFactory.create("Number", numberValue);
 
             if (!this.isNew) {
-              _context.next = 7;
+              _context.next = 8;
               break;
             }
 
             return _context.abrupt("return", obj.toObject());
 
-          case 7:
+          case 8:
             return _context.abrupt("return", obj);
 
-          case 8:
+          case 9:
           case "end":
             return _context.stop();
         }
@@ -9585,20 +10045,18 @@ function numberApi(env) {
   ["toExponential", "toPrecision", "toLocaleString"].forEach(function (name) {
     var fn = Number.prototype[name];
     if (fn) {
-      (function () {
-        var methodName = "Number.prototype." + name;
-        proto.define(name, objectFactory.createBuiltInFunction(function () {
-          (0, _contracts.assertIsNotGeneric)(this.object, "Number", methodName);
-          return objectFactory.createPrimitive(fn.call(this.object.value));
-        }, fn.length, methodName));
-      })();
+      var methodName = "Number.prototype." + name;
+      proto.define(name, objectFactory.createBuiltInFunction(function () {
+        (0, _contracts.assertIsNotGeneric)(this.object, "Number", methodName);
+        return objectFactory.createPrimitive(fn.call(this.object.value));
+      }, fn.length, methodName));
     }
   });
 
   globalObject.define("Number", numberClass);
 }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"./number.to-fixed":233,"./number.to-string":234,"./number.value-of":235,"babel-runtime/regenerator":37}],233:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"./number.to-fixed":248,"./number.to-string":249,"./number.value-of":250,"babel-runtime/regenerator":34}],248:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9647,7 +10105,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"babel-runtime/regenerator":37}],234:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"babel-runtime/regenerator":34}],249:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9703,7 +10161,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"babel-runtime/regenerator":37}],235:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"babel-runtime/regenerator":34}],250:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9717,7 +10175,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],236:[function(require,module,exports){
+},{"../../utils/contracts":392}],251:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9800,8 +10258,8 @@ var _object36 = _interopRequireDefault(_object35);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function objectApi(env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = new _objectType.ObjectType();
@@ -9854,7 +10312,7 @@ function objectApi(env) {
   globalObject.define("Object", objectClass);
 }
 
-},{"../../types/object-type":367,"./object.create":238,"./object.define-properties":239,"./object.define-property":240,"./object.freeze":241,"./object.get-own-property-descriptor":242,"./object.get-own-property-names":243,"./object.get-prototype-of":244,"./object.has-own-property":245,"./object.is-extensible":246,"./object.is-frozen":247,"./object.is-prototype-of":248,"./object.is-sealed":249,"./object.keys":250,"./object.prevent-extensions":251,"./object.property-is-enumerable":252,"./object.seal":253,"./object.to-string":254,"./object.value-of":255}],237:[function(require,module,exports){
+},{"../../types/object-type":382,"./object.create":253,"./object.define-properties":254,"./object.define-property":255,"./object.freeze":256,"./object.get-own-property-descriptor":257,"./object.get-own-property-names":258,"./object.get-prototype-of":259,"./object.has-own-property":260,"./object.is-extensible":261,"./object.is-frozen":262,"./object.is-prototype-of":263,"./object.is-sealed":264,"./object.keys":265,"./object.prevent-extensions":266,"./object.property-is-enumerable":267,"./object.seal":268,"./object.to-string":269,"./object.value-of":270}],252:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -9882,256 +10340,213 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var _marked = [defineProperty, getOwnPropertyDescriptor].map(_regenerator2.default.mark);
 
 function defineProperty(env, obj, key, descriptor) {
-  var _this = this;
+  var throwOnError = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
 
-  var throwOnError = arguments.length <= 4 || arguments[4] === undefined ? true : arguments[4];
-  var stringValue, options;
-  return _regenerator2.default.wrap(function defineProperty$(_context8) {
+  var stringValue, options, hasValue, hasGetter, hasSetter, currentScope, getter, _stringValue, setter, _stringValue2;
+
+  return _regenerator2.default.wrap(function defineProperty$(_context5) {
     while (1) {
-      switch (_context8.prev = _context8.next) {
+      switch (_context5.prev = _context5.next) {
         case 0:
           if ((0, _checks.isObject)(descriptor)) {
-            _context8.next = 5;
+            _context5.next = 5;
             break;
           }
 
-          _context8.next = 3;
+          _context5.next = 3;
           return (0, _native.toString)(descriptor);
 
         case 3:
-          stringValue = _context8.sent;
+          stringValue = _context5.sent;
           throw TypeError("Property description must be an object: " + stringValue);
 
         case 5:
           options = (0, _create2.default)(null);
 
           if (!descriptor) {
-            _context8.next = 8;
+            _context5.next = 41;
             break;
           }
 
-          return _context8.delegateYield(_regenerator2.default.mark(function _callee7() {
-            var hasValue, hasGetter, hasSetter, currentScope;
-            return _regenerator2.default.wrap(function _callee7$(_context7) {
+          hasValue = descriptor.has("value");
+          hasGetter = descriptor.has("get");
+          hasSetter = descriptor.has("set");
+
+          if (!((hasValue || descriptor.has("writable")) && (hasGetter || hasSetter))) {
+            _context5.next = 12;
+            break;
+          }
+
+          throw TypeError("Invalid property. A property cannot both have accessors and be writable or have a value");
+
+        case 12:
+
+          ["writable", "enumerable", "configurable"].forEach(function (prop) {
+            if (descriptor.has(prop)) {
+              var attrValue = descriptor.getValue(prop);
+              options[prop] = (0, _native.toBoolean)(attrValue);
+            }
+          });
+
+          currentScope = env.current.scope;
+
+          // we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
+
+          if (!hasGetter) {
+            _context5.next = 27;
+            break;
+          }
+
+          getter = descriptor.getValue("get") || _primitiveType.UNDEFINED;
+
+          if (!(getter.isPrimitive && getter.value === undefined)) {
+            _context5.next = 20;
+            break;
+          }
+
+          options.get = options.getter = undefined;
+          _context5.next = 27;
+          break;
+
+        case 20:
+          if (!(getter.className !== "Function")) {
+            _context5.next = 25;
+            break;
+          }
+
+          _context5.next = 23;
+          return (0, _native.toString)(getter);
+
+        case 23:
+          _stringValue = _context5.sent;
+          throw TypeError("Getter must be a function: " + _stringValue);
+
+        case 25:
+
+          options.get = getter;
+          options.getter = _regenerator2.default.mark(function _callee2() {
+            var scope, thisArg;
+            return _regenerator2.default.wrap(function _callee2$(_context2) {
               while (1) {
-                switch (_context7.prev = _context7.next) {
+                switch (_context2.prev = _context2.next) {
                   case 0:
-                    hasValue = descriptor.has("value");
-                    hasGetter = descriptor.has("get");
-                    hasSetter = descriptor.has("set");
+                    scope = env.setScope(currentScope);
+                    thisArg = getter.isStrict() ? this : (0, _native.toObject)(this);
+                    _context2.next = 4;
+                    return scope.use(_regenerator2.default.mark(function _callee() {
+                      return _regenerator2.default.wrap(function _callee$(_context) {
+                        while (1) {
+                          switch (_context.prev = _context.next) {
+                            case 0:
+                              _context.next = 2;
+                              return getter.call(thisArg) || _primitiveType.UNDEFINED;
 
-                    if (!((hasValue || descriptor.has("writable")) && (hasGetter || hasSetter))) {
-                      _context7.next = 5;
-                      break;
-                    }
+                            case 2:
+                              return _context.abrupt("return", _context.sent);
 
-                    throw TypeError("Invalid property. A property cannot both have accessors and be writable or have a value");
+                            case 3:
+                            case "end":
+                              return _context.stop();
+                          }
+                        }
+                      }, _callee, this);
+                    }));
+
+                  case 4:
+                    return _context2.abrupt("return", _context2.sent);
 
                   case 5:
+                  case "end":
+                    return _context2.stop();
+                }
+              }
+            }, _callee2, this);
+          });
 
-                    ["writable", "enumerable", "configurable"].forEach(function (prop) {
-                      if (descriptor.has(prop)) {
-                        var attrValue = descriptor.getValue(prop);
-                        options[prop] = (0, _native.toBoolean)(attrValue);
-                      }
-                    });
+        case 27:
+          if (!hasSetter) {
+            _context5.next = 40;
+            break;
+          }
 
-                    currentScope = env.current.scope;
+          setter = descriptor.getValue("set") || _primitiveType.UNDEFINED;
 
-                    // we only keep a copy of the original getter/setter for use with `getOwnPropertyDescriptor`
+          if (!(setter.isPrimitive && setter.value === undefined)) {
+            _context5.next = 33;
+            break;
+          }
 
-                    if (!hasGetter) {
-                      _context7.next = 9;
-                      break;
-                    }
+          options.set = options.setter = undefined;
+          _context5.next = 40;
+          break;
 
-                    return _context7.delegateYield(_regenerator2.default.mark(function _callee3() {
-                      var getter, stringValue;
+        case 33:
+          if (!(setter.className !== "Function")) {
+            _context5.next = 38;
+            break;
+          }
+
+          _context5.next = 36;
+          return (0, _native.toString)(setter);
+
+        case 36:
+          _stringValue2 = _context5.sent;
+          throw TypeError("Setter must be a function: " + _stringValue2);
+
+        case 38:
+
+          options.set = setter;
+          options.setter = _regenerator2.default.mark(function _callee4(value) {
+            var scope, thisArg;
+            return _regenerator2.default.wrap(function _callee4$(_context4) {
+              while (1) {
+                switch (_context4.prev = _context4.next) {
+                  case 0:
+                    scope = env.setScope(currentScope);
+                    thisArg = setter.isStrict() ? this : (0, _native.toObject)(this);
+                    _context4.next = 4;
+                    return scope.use(_regenerator2.default.mark(function _callee3() {
                       return _regenerator2.default.wrap(function _callee3$(_context3) {
                         while (1) {
                           switch (_context3.prev = _context3.next) {
                             case 0:
-                              getter = descriptor.getValue("get") || _primitiveType.UNDEFINED;
+                              _context3.next = 2;
+                              return setter.call(thisArg, [value]);
 
-                              if (!(getter.isPrimitive && getter.value === undefined)) {
-                                _context3.next = 5;
-                                break;
-                              }
+                            case 2:
+                              return _context3.abrupt("return", _primitiveType.UNDEFINED);
 
-                              options.get = options.getter = undefined;
-                              _context3.next = 12;
-                              break;
-
-                            case 5:
-                              if (!(getter.className !== "Function")) {
-                                _context3.next = 10;
-                                break;
-                              }
-
-                              _context3.next = 8;
-                              return (0, _native.toString)(getter);
-
-                            case 8:
-                              stringValue = _context3.sent;
-                              throw TypeError("Getter must be a function: " + stringValue);
-
-                            case 10:
-
-                              options.get = getter;
-                              options.getter = _regenerator2.default.mark(function _callee2() {
-                                var scope, thisArg;
-                                return _regenerator2.default.wrap(function _callee2$(_context2) {
-                                  while (1) {
-                                    switch (_context2.prev = _context2.next) {
-                                      case 0:
-                                        scope = env.setScope(currentScope);
-                                        thisArg = getter.isStrict() ? this : (0, _native.toObject)(this);
-                                        _context2.next = 4;
-                                        return scope.use(_regenerator2.default.mark(function _callee() {
-                                          return _regenerator2.default.wrap(function _callee$(_context) {
-                                            while (1) {
-                                              switch (_context.prev = _context.next) {
-                                                case 0:
-                                                  _context.next = 2;
-                                                  return getter.call(thisArg) || _primitiveType.UNDEFINED;
-
-                                                case 2:
-                                                  return _context.abrupt("return", _context.sent);
-
-                                                case 3:
-                                                case "end":
-                                                  return _context.stop();
-                                              }
-                                            }
-                                          }, _callee, this);
-                                        }));
-
-                                      case 4:
-                                        return _context2.abrupt("return", _context2.sent);
-
-                                      case 5:
-                                      case "end":
-                                        return _context2.stop();
-                                    }
-                                  }
-                                }, _callee2, this);
-                              });
-
-                            case 12:
+                            case 3:
                             case "end":
                               return _context3.stop();
                           }
                         }
-                      }, _callee3, _this);
-                    })(), "t0", 9);
+                      }, _callee3, this);
+                    }));
 
-                  case 9:
-                    if (!hasSetter) {
-                      _context7.next = 11;
-                      break;
-                    }
+                  case 4:
+                    return _context4.abrupt("return", _context4.sent);
 
-                    return _context7.delegateYield(_regenerator2.default.mark(function _callee6() {
-                      var setter, _stringValue;
-
-                      return _regenerator2.default.wrap(function _callee6$(_context6) {
-                        while (1) {
-                          switch (_context6.prev = _context6.next) {
-                            case 0:
-                              setter = descriptor.getValue("set") || _primitiveType.UNDEFINED;
-
-                              if (!(setter.isPrimitive && setter.value === undefined)) {
-                                _context6.next = 5;
-                                break;
-                              }
-
-                              options.set = options.setter = undefined;
-                              _context6.next = 12;
-                              break;
-
-                            case 5:
-                              if (!(setter.className !== "Function")) {
-                                _context6.next = 10;
-                                break;
-                              }
-
-                              _context6.next = 8;
-                              return (0, _native.toString)(setter);
-
-                            case 8:
-                              _stringValue = _context6.sent;
-                              throw TypeError("Setter must be a function: " + _stringValue);
-
-                            case 10:
-
-                              options.set = setter;
-                              options.setter = _regenerator2.default.mark(function _callee5(value) {
-                                var scope, thisArg;
-                                return _regenerator2.default.wrap(function _callee5$(_context5) {
-                                  while (1) {
-                                    switch (_context5.prev = _context5.next) {
-                                      case 0:
-                                        scope = env.setScope(currentScope);
-                                        thisArg = setter.isStrict() ? this : (0, _native.toObject)(this);
-                                        _context5.next = 4;
-                                        return scope.use(_regenerator2.default.mark(function _callee4() {
-                                          return _regenerator2.default.wrap(function _callee4$(_context4) {
-                                            while (1) {
-                                              switch (_context4.prev = _context4.next) {
-                                                case 0:
-                                                  _context4.next = 2;
-                                                  return setter.call(thisArg, [value]);
-
-                                                case 2:
-                                                  return _context4.abrupt("return", _primitiveType.UNDEFINED);
-
-                                                case 3:
-                                                case "end":
-                                                  return _context4.stop();
-                                              }
-                                            }
-                                          }, _callee4, this);
-                                        }));
-
-                                      case 4:
-                                        return _context5.abrupt("return", _context5.sent);
-
-                                      case 5:
-                                      case "end":
-                                        return _context5.stop();
-                                    }
-                                  }
-                                }, _callee5, this);
-                              });
-
-                            case 12:
-                            case "end":
-                              return _context6.stop();
-                          }
-                        }
-                      }, _callee6, _this);
-                    })(), "t1", 11);
-
-                  case 11:
-
-                    if (hasValue) {
-                      options.value = descriptor.getValue("value") || _primitiveType.UNDEFINED;
-                    }
-
-                  case 12:
+                  case 5:
                   case "end":
-                    return _context7.stop();
+                    return _context4.stop();
                 }
               }
-            }, _callee7, _this);
-          })(), "t0", 8);
+            }, _callee4, this);
+          });
 
-        case 8:
-          return _context8.abrupt("return", obj.defineProperty(key, options, throwOnError, env));
+        case 40:
 
-        case 9:
+          if (hasValue) {
+            options.value = descriptor.getValue("value") || _primitiveType.UNDEFINED;
+          }
+
+        case 41:
+          return _context5.abrupt("return", obj.defineProperty(key, options, throwOnError, env));
+
+        case 42:
         case "end":
-          return _context8.stop();
+          return _context5.stop();
       }
     }
   }, _marked[0], this);
@@ -10151,19 +10566,19 @@ function confirmObject(obj, methodName, ecmaVersion) {
 
 function getOwnPropertyDescriptor(env, target, propertyKey) {
   var key, descriptor, result;
-  return _regenerator2.default.wrap(function getOwnPropertyDescriptor$(_context9) {
+  return _regenerator2.default.wrap(function getOwnPropertyDescriptor$(_context6) {
     while (1) {
-      switch (_context9.prev = _context9.next) {
+      switch (_context6.prev = _context6.next) {
         case 0:
-          _context9.next = 2;
+          _context6.next = 2;
           return (0, _native.toPropertyKey)(propertyKey);
 
         case 2:
-          key = _context9.sent;
+          key = _context6.sent;
           descriptor = target.getOwnProperty(key);
 
           if (!descriptor) {
-            _context9.next = 10;
+            _context6.next = 10;
             break;
           }
 
@@ -10179,20 +10594,20 @@ function getOwnPropertyDescriptor(env, target, propertyKey) {
 
           result.setValue("enumerable", env.objectFactory.createPrimitive(descriptor.enumerable));
           result.setValue("configurable", env.objectFactory.createPrimitive(descriptor.configurable));
-          return _context9.abrupt("return", result);
+          return _context6.abrupt("return", result);
 
         case 10:
-          return _context9.abrupt("return", _primitiveType.UNDEFINED);
+          return _context6.abrupt("return", _primitiveType.UNDEFINED);
 
         case 11:
         case "end":
-          return _context9.stop();
+          return _context6.stop();
       }
     }
   }, _marked[1], this);
 }
 
-},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/native":379,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":37}],238:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/checks":391,"../../utils/native":394,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":34}],253:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10281,7 +10696,7 @@ var _objectHelpers = require("./object-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"./object-helpers":237,"babel-runtime/regenerator":37}],239:[function(require,module,exports){
+},{"../../utils/native":394,"./object-helpers":252,"babel-runtime/regenerator":34}],254:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10340,7 +10755,7 @@ var _objectHelpers = require("./object-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"./object-helpers":237,"babel-runtime/regenerator":37}],240:[function(require,module,exports){
+},{"../../utils/contracts":392,"./object-helpers":252,"babel-runtime/regenerator":34}],255:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10385,7 +10800,7 @@ var _objectHelpers = require("./object-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"./object-helpers":237,"babel-runtime/regenerator":37}],241:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"./object-helpers":252,"babel-runtime/regenerator":34}],256:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10402,7 +10817,7 @@ exports.default = function ($target, env, factory) {
 
 var _objectHelpers = require("./object-helpers");
 
-},{"./object-helpers":237}],242:[function(require,module,exports){
+},{"./object-helpers":252}],257:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10441,7 +10856,7 @@ var _objectHelpers = require("./object-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"./object-helpers":237,"babel-runtime/regenerator":37}],243:[function(require,module,exports){
+},{"../../utils/contracts":392,"./object-helpers":252,"babel-runtime/regenerator":34}],258:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10461,7 +10876,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],244:[function(require,module,exports){
+},{"../../utils/contracts":392}],259:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10483,7 +10898,7 @@ var _primitiveType = require("../../types/primitive-type");
 
 var _objectHelpers = require("./object-helpers");
 
-},{"../../types/primitive-type":368,"../../utils/native":379,"./object-helpers":237}],245:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/native":394,"./object-helpers":252}],260:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10522,7 +10937,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"babel-runtime/regenerator":37}],246:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"babel-runtime/regenerator":34}],261:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10539,7 +10954,7 @@ exports.default = function ($target, env, factory) {
 
 var _objectHelpers = require("./object-helpers");
 
-},{"./object-helpers":237}],247:[function(require,module,exports){
+},{"./object-helpers":252}],262:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10570,7 +10985,7 @@ exports.default = function ($target, env, factory) {
 
 var _objectHelpers = require("./object-helpers");
 
-},{"./object-helpers":237}],248:[function(require,module,exports){
+},{"./object-helpers":252}],263:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10594,7 +11009,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],249:[function(require,module,exports){
+},{"../../utils/contracts":392}],264:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10622,7 +11037,7 @@ exports.default = function ($target, env, factory) {
 
 var _objectHelpers = require("./object-helpers");
 
-},{"./object-helpers":237}],250:[function(require,module,exports){
+},{"./object-helpers":252}],265:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10649,7 +11064,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],251:[function(require,module,exports){
+},{"../../utils/contracts":392}],266:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10666,7 +11081,7 @@ exports.default = function ($target, env, factory) {
 
 var _objectHelpers = require("./object-helpers");
 
-},{"./object-helpers":237}],252:[function(require,module,exports){
+},{"./object-helpers":252}],267:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10707,7 +11122,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"babel-runtime/regenerator":37}],253:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"babel-runtime/regenerator":34}],268:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10724,7 +11139,7 @@ exports.default = function ($target, env, factory) {
 
 var _objectHelpers = require("./object-helpers");
 
-},{"./object-helpers":237}],254:[function(require,module,exports){
+},{"./object-helpers":252}],269:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10768,7 +11183,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/helpers":378,"./object-helpers":237,"babel-runtime/regenerator":37}],255:[function(require,module,exports){
+},{"../../utils/helpers":393,"./object-helpers":252,"babel-runtime/regenerator":34}],270:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10786,7 +11201,7 @@ exports.default = function ($target, env, factory) {
 
 var _native = require("../../utils/native");
 
-},{"../../utils/native":379}],256:[function(require,module,exports){
+},{"../../utils/native":394}],271:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10796,8 +11211,8 @@ var _regenerator = require("babel-runtime/regenerator");
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
 exports.default = function (env) {
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   var proto = objectFactory.createObject();
@@ -10906,7 +11321,7 @@ var _regex6 = _interopRequireDefault(_regex5);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/native":379,"./regex.exec":257,"./regex.test":258,"./regex.to-string":259,"babel-runtime/regenerator":37}],257:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"./regex.exec":272,"./regex.test":273,"./regex.to-string":274,"babel-runtime/regenerator":34}],272:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -10975,7 +11390,7 @@ var _primitiveType = require("../../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/native":379,"babel-runtime/regenerator":37}],258:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/native":394,"babel-runtime/regenerator":34}],273:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11020,7 +11435,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/native":379,"babel-runtime/regenerator":37}],259:[function(require,module,exports){
+},{"../../utils/native":394,"babel-runtime/regenerator":34}],274:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11031,7 +11446,7 @@ exports.default = function ($target, env, factory) {
   }, 0, "RegExp.prototype.toString"));
 };
 
-},{}],260:[function(require,module,exports){
+},{}],275:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11043,8 +11458,8 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 exports.default = function (env) {
   var _marked = [getString].map(_regenerator2.default.mark);
 
-  var globalObject = env.global;
-  var objectFactory = env.objectFactory;
+  var globalObject = env.global,
+      objectFactory = env.objectFactory;
 
 
   function getString(value, isNew) {
@@ -11234,7 +11649,7 @@ var _string22 = _interopRequireDefault(_string21);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/async":375,"../../utils/native":379,"./string.concat":261,"./string.from-char-code":262,"./string.match":263,"./string.replace":264,"./string.search":265,"./string.slice":266,"./string.split":267,"./string.substring":268,"./string.to-string":269,"./string.trim":270,"./string.value-of":271,"babel-runtime/regenerator":37}],261:[function(require,module,exports){
+},{"../../utils/async":390,"../../utils/native":394,"./string.concat":276,"./string.from-char-code":277,"./string.match":278,"./string.replace":279,"./string.search":280,"./string.slice":281,"./string.split":282,"./string.substring":283,"./string.to-string":284,"./string.trim":285,"./string.value-of":286,"babel-runtime/regenerator":34}],276:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11305,7 +11720,7 @@ var _async = require("../../utils/async");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/async":375,"../../utils/contracts":377,"../../utils/native":379,"babel-runtime/regenerator":37}],262:[function(require,module,exports){
+},{"../../utils/async":390,"../../utils/contracts":392,"../../utils/native":394,"babel-runtime/regenerator":34}],277:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11316,8 +11731,6 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 
 exports.default = function ($target, env, factory) {
   $target.define("fromCharCode", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee2() {
-    var _String;
-
     for (var _len = arguments.length, charCodes = Array(_len), _key = 0; _key < _len; _key++) {
       charCodes[_key] = arguments[_key];
     }
@@ -11348,7 +11761,7 @@ exports.default = function ($target, env, factory) {
 
           case 1:
             args = _context2.t0;
-            return _context2.abrupt("return", factory.create("String", (_String = String).fromCharCode.apply(_String, args)));
+            return _context2.abrupt("return", factory.create("String", String.fromCharCode.apply(String, args)));
 
           case 3:
           case "end":
@@ -11365,7 +11778,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/async":375,"../../utils/native":379,"babel-runtime/regenerator":37}],263:[function(require,module,exports){
+},{"../../utils/async":390,"../../utils/native":394,"babel-runtime/regenerator":34}],278:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11376,8 +11789,7 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 
 exports.default = function ($target, env, factory) {
   $target.define("match", factory.createBuiltInFunction(_regenerator2.default.mark(function _callee(regex) {
-    var matchKey, matcher, stringValue, actualRegex, match, _ret;
-
+    var matchKey, matcher, stringValue, actualRegex, match, matches;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -11413,7 +11825,7 @@ exports.default = function ($target, env, factory) {
 
           case 10:
             stringValue = _context.sent;
-            actualRegex = undefined;
+            actualRegex = void 0;
 
             if (!(regex && regex.className === "RegExp")) {
               _context.next = 16;
@@ -11442,35 +11854,25 @@ exports.default = function ($target, env, factory) {
             match = stringValue.match(actualRegex);
 
             if (!match) {
-              _context.next = 27;
+              _context.next = 29;
               break;
             }
 
-            _ret = function () {
-              var matches = factory.createArray();
+            matches = factory.createArray();
 
-              match.forEach(function (value, index) {
-                matches.setValue(index, factory.createPrimitive(value));
-              });
 
-              matches.setValue("index", factory.create("Number", match.index));
-              matches.setValue("input", factory.create("String", match.input));
-              return {
-                v: matches
-              };
-            }();
+            match.forEach(function (value, index) {
+              matches.setValue(index, factory.createPrimitive(value));
+            });
 
-            if (!(typeof _ret === "object")) {
-              _context.next = 27;
-              break;
-            }
+            matches.setValue("index", factory.create("Number", match.index));
+            matches.setValue("input", factory.create("String", match.input));
+            return _context.abrupt("return", matches);
 
-            return _context.abrupt("return", _ret.v);
-
-          case 27:
+          case 29:
             return _context.abrupt("return", _primitiveType.NULL);
 
-          case 28:
+          case 30:
           case "end":
             return _context.stop();
         }
@@ -11489,7 +11891,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],264:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/checks":391,"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/regenerator":34}],279:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11533,7 +11935,7 @@ exports.default = function ($target, env, factory) {
 
           case 10:
             stringValue = _context.sent;
-            matcher = undefined;
+            matcher = void 0;
 
             if (!(regexOrSubstr && regexOrSubstr.className === "RegExp")) {
               _context.next = 16;
@@ -11552,7 +11954,7 @@ exports.default = function ($target, env, factory) {
             matcher = _context.sent;
 
           case 19:
-            replacer = undefined;
+            replacer = void 0;
 
             if (!(substrOrFn && substrOrFn.type === "function")) {
               _context.next = 24;
@@ -11608,7 +12010,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../types/primitive-type":368,"../../utils/async":375,"../../utils/checks":376,"../../utils/contracts":377,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],265:[function(require,module,exports){
+},{"../../types/primitive-type":383,"../../utils/async":390,"../../utils/checks":391,"../../utils/contracts":392,"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/regenerator":34}],280:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11667,7 +12069,7 @@ exports.default = function ($target, env, factory) {
 
           case 16:
             stringValue = _context.sent;
-            underlyingRegex = undefined;
+            underlyingRegex = void 0;
 
             if (!regexp) {
               _context.next = 28;
@@ -11712,7 +12114,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],266:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/regenerator":34}],281:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11738,7 +12140,7 @@ exports.default = function ($target, env, factory) {
 
           case 5:
             startValue = _context.sent;
-            endValue = undefined;
+            endValue = void 0;
 
             if ((0, _checks.isNullOrUndefined)(end)) {
               _context.next = 11;
@@ -11769,7 +12171,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],267:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],282:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11850,7 +12252,7 @@ exports.default = function ($target, env, factory) {
             break;
 
           case 26:
-            separatorValue = undefined;
+            separatorValue = void 0;
 
             if (!(separator.className === "RegExp")) {
               _context.next = 31;
@@ -11895,7 +12297,7 @@ var _helpers = require("../../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/helpers":378,"../../utils/native":379,"babel-runtime/regenerator":37}],268:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/helpers":393,"../../utils/native":394,"babel-runtime/regenerator":34}],283:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11958,7 +12360,7 @@ var _checks = require("../../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/checks":376,"../../utils/native":379,"babel-runtime/regenerator":37}],269:[function(require,module,exports){
+},{"../../utils/checks":391,"../../utils/native":394,"babel-runtime/regenerator":34}],284:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -11972,7 +12374,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],270:[function(require,module,exports){
+},{"../../utils/contracts":392}],285:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12012,7 +12414,7 @@ var _native = require("../../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../../utils/contracts":377,"../../utils/native":379,"babel-runtime/regenerator":37}],271:[function(require,module,exports){
+},{"../../utils/contracts":392,"../../utils/native":394,"babel-runtime/regenerator":34}],286:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12026,7 +12428,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../../utils/contracts");
 
-},{"../../utils/contracts":377}],272:[function(require,module,exports){
+},{"../../utils/contracts":392}],287:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12077,7 +12479,7 @@ function executeCallback(env, callback, entry, thisArg, arr) {
   }, _marked[0], this);
 }
 
-},{"../types/primitive-type":368,"babel-runtime/regenerator":37}],273:[function(require,module,exports){
+},{"../types/primitive-type":383,"babel-runtime/regenerator":34}],288:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12099,41 +12501,44 @@ exports.default = function ($target, env, factory) {
 
           case 3:
             length = _context.sent;
-            _context.next = 6;
+            _context.t0 = _arrayHelpers.normalizeIndex;
+            _context.next = 7;
             return (0, _native.toInteger)(target);
 
-          case 6:
-            _context.t0 = _context.sent;
-            _context.t1 = length;
-            to = (0, _arrayHelpers.normalizeIndex)(_context.t0, _context.t1);
-            _context.next = 11;
+          case 7:
+            _context.t1 = _context.sent;
+            _context.t2 = length;
+            to = (0, _context.t0)(_context.t1, _context.t2);
+            _context.t3 = _arrayHelpers.normalizeIndex;
+            _context.next = 13;
             return (0, _native.toInteger)(start);
 
-          case 11:
-            _context.t2 = _context.sent;
-            _context.t3 = length;
-            from = (0, _arrayHelpers.normalizeIndex)(_context.t2, _context.t3);
+          case 13:
+            _context.t4 = _context.sent;
+            _context.t5 = length;
+            from = (0, _context.t3)(_context.t4, _context.t5);
 
             if (!(0, _checks.isUndefined)(end)) {
-              _context.next = 18;
+              _context.next = 20;
               break;
             }
 
-            _context.t4 = length;
-            _context.next = 23;
+            _context.t6 = length;
+            _context.next = 26;
             break;
 
-          case 18:
-            _context.next = 20;
+          case 20:
+            _context.t7 = _arrayHelpers.normalizeIndex;
+            _context.next = 23;
             return (0, _native.toInteger)(end);
 
-          case 20:
-            _context.t5 = _context.sent;
-            _context.t6 = length;
-            _context.t4 = (0, _arrayHelpers.normalizeIndex)(_context.t5, _context.t6);
-
           case 23:
-            final = _context.t4;
+            _context.t8 = _context.sent;
+            _context.t9 = length;
+            _context.t6 = (0, _context.t7)(_context.t8, _context.t9);
+
+          case 26:
+            final = _context.t6;
             count = Math.min(final - from, length - to);
             dir = 1;
 
@@ -12158,7 +12563,7 @@ exports.default = function ($target, env, factory) {
 
             return _context.abrupt("return", arr);
 
-          case 29:
+          case 32:
           case "end":
             return _context.stop();
         }
@@ -12175,7 +12580,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/native":379,"./array-helpers":272,"babel-runtime/regenerator":37}],274:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/native":394,"./array-helpers":287,"babel-runtime/regenerator":34}],289:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12251,7 +12656,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/checks":376,"../utils/native":379,"./array-helpers":272,"babel-runtime/regenerator":37}],275:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/checks":391,"../utils/native":394,"./array-helpers":287,"babel-runtime/regenerator":34}],290:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12282,36 +12687,37 @@ exports.default = function ($target, env, factory) {
 
           case 6:
             if (!(i < length)) {
-              _context.next = 18;
+              _context.next = 19;
               break;
             }
 
             propInfo = this.object.getProperty(i);
             value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
-            _context.next = 11;
+            _context.t0 = _native.toBoolean;
+            _context.next = 12;
             return (0, _arrayHelpers.executeCallback)(env, predicate, { key: i, value: value }, thisArg, this.object);
 
-          case 11:
-            _context.t0 = _context.sent;
-            passed = (0, _native.toBoolean)(_context.t0);
+          case 12:
+            _context.t1 = _context.sent;
+            passed = (0, _context.t0)(_context.t1);
 
             if (!passed) {
-              _context.next = 15;
+              _context.next = 16;
               break;
             }
 
             return _context.abrupt("return", factory.createPrimitive(i));
 
-          case 15:
+          case 16:
 
             i++;
             _context.next = 6;
             break;
 
-          case 18:
+          case 19:
             return _context.abrupt("return", factory.createPrimitive(-1));
 
-          case 19:
+          case 20:
           case "end":
             return _context.stop();
         }
@@ -12330,7 +12736,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"../utils/native":379,"./array-helpers":272,"babel-runtime/regenerator":37}],276:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"../utils/native":394,"./array-helpers":287,"babel-runtime/regenerator":34}],291:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12362,36 +12768,37 @@ exports.default = function ($target, env, factory) {
 
           case 6:
             if (!(i < length)) {
-              _context.next = 18;
+              _context.next = 19;
               break;
             }
 
             propInfo = arr.getProperty(i);
             value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
-            _context.next = 11;
+            _context.t0 = _native.toBoolean;
+            _context.next = 12;
             return (0, _arrayHelpers.executeCallback)(env, predicate, { key: i, value: value }, thisArg, arr);
 
-          case 11:
-            _context.t0 = _context.sent;
-            passed = (0, _native.toBoolean)(_context.t0);
+          case 12:
+            _context.t1 = _context.sent;
+            passed = (0, _context.t0)(_context.t1);
 
             if (!passed) {
-              _context.next = 15;
+              _context.next = 16;
               break;
             }
 
             return _context.abrupt("return", value);
 
-          case 15:
+          case 16:
 
             i++;
             _context.next = 6;
             break;
 
-          case 18:
+          case 19:
             return _context.abrupt("return", _primitiveType.UNDEFINED);
 
-          case 19:
+          case 20:
           case "end":
             return _context.stop();
         }
@@ -12410,7 +12817,7 @@ var _arrayHelpers = require("./array-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"../utils/native":379,"./array-helpers":272,"babel-runtime/regenerator":37}],277:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"../utils/native":394,"./array-helpers":287,"babel-runtime/regenerator":34}],292:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12478,7 +12885,7 @@ exports.default = function ($target, env, factory) {
           case 0:
             thisArg = thisArg || _primitiveType.UNDEFINED;
 
-            mapper = undefined;
+            mapper = void 0;
 
             if ((0, _checks.isUndefined)(mapFn)) {
               mapper = function (v) {
@@ -12522,7 +12929,7 @@ exports.default = function ($target, env, factory) {
             }
 
             _context3.prev = 10;
-            current = undefined;
+            current = void 0;
             _it$next = it.next();
             done = _it$next.done;
             current = _it$next.value;
@@ -12590,7 +12997,7 @@ var _iterators2 = _interopRequireDefault(_iterators);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../iterators/":352,"../types/primitive-type":368,"../utils/checks":376,"../utils/contracts":377,"../utils/helpers":378,"../utils/native":379,"babel-runtime/regenerator":37}],278:[function(require,module,exports){
+},{"../iterators/":367,"../types/primitive-type":383,"../utils/checks":391,"../utils/contracts":392,"../utils/helpers":393,"../utils/native":394,"babel-runtime/regenerator":34}],293:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12616,7 +13023,7 @@ exports.default = function ($target, env, factory) {
   }, 0, "ArrayIterator.prototype.next"));
 
   function createIteratorValue(arr, index, kind) {
-    var key = undefined;
+    var key = void 0;
     if (kind !== "value") {
       key = factory.createPrimitive(index);
       if (kind === "key") {
@@ -12714,7 +13121,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/async":375,"../utils/native":379,"babel-runtime/regenerator":37}],279:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/async":390,"../utils/native":394,"babel-runtime/regenerator":34}],294:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12763,7 +13170,7 @@ var _array14 = _interopRequireDefault(_array13);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./array.copy-within":273,"./array.fill":274,"./array.find":276,"./array.find-index":275,"./array.from":277,"./array.iterator":278,"./array.of":280}],280:[function(require,module,exports){
+},{"./array.copy-within":288,"./array.fill":289,"./array.find":291,"./array.find-index":290,"./array.from":292,"./array.iterator":293,"./array.of":295}],295:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12822,7 +13229,7 @@ var _checks = require("../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"babel-runtime/regenerator":37}],281:[function(require,module,exports){
+},{"../utils/checks":391,"babel-runtime/regenerator":34}],296:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12850,7 +13257,7 @@ function findIndex(obj, key) {
   return -1;
 }
 
-},{"babel-runtime/core-js/symbol/for":34}],282:[function(require,module,exports){
+},{"babel-runtime/core-js/symbol/for":32}],297:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12871,7 +13278,7 @@ exports.default = function (globalObject, env, factory) {
         switch (_context.prev = _context.next) {
           case 0:
             (0, _contracts.assertIsObject)(this.object);
-            primitiveHint = undefined;
+            primitiveHint = void 0;
 
             if (!(hint && hint.type === "string")) {
               _context.next = 11;
@@ -12895,28 +13302,29 @@ exports.default = function (globalObject, env, factory) {
 
           case 11:
             if (primitiveHint) {
-              _context.next = 18;
+              _context.next = 19;
               break;
             }
 
-            _context.next = 14;
+            _context.t1 = TypeError;
+            _context.next = 15;
             return (0, _native.toString)(hint);
 
-          case 14:
-            _context.t1 = _context.sent;
-            _context.t2 = "Invalid hint '" + _context.t1;
-            _context.t3 = _context.t2 + "'' used in primitive conversion";
-            throw TypeError(_context.t3);
+          case 15:
+            _context.t2 = _context.sent;
+            _context.t3 = "Invalid hint '" + _context.t2;
+            _context.t4 = _context.t3 + "'' used in primitive conversion";
+            throw (0, _context.t1)(_context.t4);
 
-          case 18:
-            _context.next = 20;
+          case 19:
+            _context.next = 21;
             return (0, _native.toPrimitiveOrdinary)(this.object, primitiveHint);
 
-          case 20:
+          case 21:
             value = _context.sent;
             return _context.abrupt("return", factory.createPrimitive(value));
 
-          case 22:
+          case 23:
           case "end":
             return _context.stop();
         }
@@ -12931,7 +13339,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],283:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],298:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -12942,7 +13350,7 @@ exports.default = function (globalObject, env, factory) {
   proto.className = "Object";
 };
 
-},{}],284:[function(require,module,exports){
+},{}],299:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13086,7 +13494,7 @@ var _iterator2 = _interopRequireDefault(_iterator);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../es5/":227,"./array":279,"./date":282,"./error":283,"./iterator":285,"./map":292,"./math":295,"./number":300,"./object":306,"./proxy":309,"./reflect":320,"./regex":325,"./set":332,"./string":338,"./symbol":342}],285:[function(require,module,exports){
+},{"../es5/":242,"./array":294,"./date":297,"./error":298,"./iterator":300,"./map":307,"./math":310,"./number":315,"./object":321,"./proxy":324,"./reflect":335,"./regex":340,"./set":347,"./string":353,"./symbol":357}],300:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13101,7 +13509,7 @@ exports.default = function ($target, env, factory) {
   $target.define("%IteratorPrototype%", proto);
 };
 
-},{}],286:[function(require,module,exports){
+},{}],301:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13115,7 +13523,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],287:[function(require,module,exports){
+},{"../utils/contracts":392}],302:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13142,7 +13550,7 @@ var _contracts = require("../utils/contracts");
 
 var _collectionHelpers = require("./collection-helpers");
 
-},{"../utils/contracts":377,"./collection-helpers":281}],288:[function(require,module,exports){
+},{"../utils/contracts":392,"./collection-helpers":296}],303:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13203,7 +13611,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"babel-runtime/regenerator":37}],289:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"babel-runtime/regenerator":34}],304:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13227,7 +13635,7 @@ var _collectionHelpers = require("./collection-helpers");
 
 var _primitiveType = require("../types/primitive-type");
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"./collection-helpers":281}],290:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"./collection-helpers":296}],305:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13243,7 +13651,7 @@ var _contracts = require("../utils/contracts");
 
 var _collectionHelpers = require("./collection-helpers");
 
-},{"../utils/contracts":377,"./collection-helpers":281}],291:[function(require,module,exports){
+},{"../utils/contracts":392,"./collection-helpers":296}],306:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13282,7 +13690,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            value = undefined;
+            value = void 0;
 
           case 4:
             if (!(index < obj.data.length)) {
@@ -13363,7 +13771,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"babel-runtime/regenerator":37}],292:[function(require,module,exports){
+},{"../utils/contracts":392,"babel-runtime/regenerator":34}],307:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13375,16 +13783,14 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 exports.default = function ($global, env, factory) {
   var proto = factory.createObject();
 
-  var mapClass = factory.createFunction(_regenerator2.default.mark(function _callee3(iterable) {
-    var _this = this;
-
-    var instance;
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
+  var mapClass = factory.createFunction(_regenerator2.default.mark(function _callee2(iterable) {
+    var instance, setter, it;
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
             if (this.isNew) {
-              _context3.next = 2;
+              _context2.next = 2;
               break;
             }
 
@@ -13394,62 +13800,48 @@ exports.default = function ($global, env, factory) {
             instance = factory.create("Map");
 
             if ((0, _checks.isNullOrUndefined)(iterable)) {
-              _context3.next = 5;
+              _context2.next = 10;
               break;
             }
 
-            return _context3.delegateYield(_regenerator2.default.mark(function _callee2() {
-              var setter, it;
-              return _regenerator2.default.wrap(function _callee2$(_context2) {
+            (0, _contracts.assertIsObject)(iterable, "Map");
+
+            setter = instance.getValue("set");
+
+            (0, _contracts.assertIsFunction)(setter, "set");
+
+            it = _iterators2.default.getIterator(iterable);
+            _context2.next = 10;
+            return it.each(_regenerator2.default.mark(function _callee(item) {
+              var key, value;
+              return _regenerator2.default.wrap(function _callee$(_context) {
                 while (1) {
-                  switch (_context2.prev = _context2.next) {
+                  switch (_context.prev = _context.next) {
                     case 0:
-                      (0, _contracts.assertIsObject)(iterable, "Map");
+                      (0, _contracts.assertIsObject)(item, "Map");
 
-                      setter = instance.getValue("set");
+                      key = item.getValue("0") || _primitiveType.UNDEFINED;
+                      value = item.getValue("1") || _primitiveType.UNDEFINED;
+                      _context.next = 5;
+                      return setter.call(instance, [key, value]);
 
-                      (0, _contracts.assertIsFunction)(setter, "set");
-
-                      it = _iterators2.default.getIterator(iterable);
-                      _context2.next = 6;
-                      return it.each(_regenerator2.default.mark(function _callee(item) {
-                        var key, value;
-                        return _regenerator2.default.wrap(function _callee$(_context) {
-                          while (1) {
-                            switch (_context.prev = _context.next) {
-                              case 0:
-                                (0, _contracts.assertIsObject)(item, "Map");
-
-                                key = item.getValue("0") || _primitiveType.UNDEFINED;
-                                value = item.getValue("1") || _primitiveType.UNDEFINED;
-                                _context.next = 5;
-                                return setter.call(instance, [key, value]);
-
-                              case 5:
-                              case "end":
-                                return _context.stop();
-                            }
-                          }
-                        }, _callee, this);
-                      }));
-
-                    case 6:
+                    case 5:
                     case "end":
-                      return _context2.stop();
+                      return _context.stop();
                   }
                 }
-              }, _callee2, _this);
-            })(), "t0", 5);
+              }, _callee, this);
+            }));
 
-          case 5:
-            return _context3.abrupt("return", instance);
+          case 10:
+            return _context2.abrupt("return", instance);
 
-          case 6:
+          case 11:
           case "end":
-            return _context3.stop();
+            return _context2.stop();
         }
       }
-    }, _callee3, this);
+    }, _callee2, this);
   }), proto, { name: "Map", writable: false });
 
   (0, _map2.default)(proto, env, factory);
@@ -13508,7 +13900,7 @@ var _map16 = _interopRequireDefault(_map15);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../iterators/":352,"../types/primitive-type":368,"../utils/checks":376,"../utils/contracts":377,"./map.clear":286,"./map.delete":287,"./map.for-each":288,"./map.get":289,"./map.has":290,"./map.iterator":291,"./map.set":293,"./map.size":294,"babel-runtime/regenerator":37}],293:[function(require,module,exports){
+},{"../iterators/":367,"../types/primitive-type":383,"../utils/checks":391,"../utils/contracts":392,"./map.clear":301,"./map.delete":302,"./map.for-each":303,"./map.get":304,"./map.has":305,"./map.iterator":306,"./map.set":308,"./map.size":309,"babel-runtime/regenerator":34}],308:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13538,7 +13930,7 @@ var _checks = require("../utils/checks");
 
 var _collectionHelpers = require("./collection-helpers");
 
-},{"../utils/checks":376,"../utils/contracts":377,"./collection-helpers":281}],294:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392,"./collection-helpers":296}],309:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13563,7 +13955,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],295:[function(require,module,exports){
+},{"../utils/contracts":392}],310:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13663,7 +14055,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/core-js/math/acosh":5,"babel-runtime/core-js/math/asinh":6,"babel-runtime/core-js/math/atanh":7,"babel-runtime/core-js/math/cbrt":8,"babel-runtime/core-js/math/clz32":9,"babel-runtime/core-js/math/cosh":10,"babel-runtime/core-js/math/expm1":11,"babel-runtime/core-js/math/fround":12,"babel-runtime/core-js/math/hypot":13,"babel-runtime/core-js/math/imul":14,"babel-runtime/core-js/math/log10":15,"babel-runtime/core-js/math/log1p":16,"babel-runtime/core-js/math/log2":17,"babel-runtime/core-js/math/sign":18,"babel-runtime/core-js/math/sinh":19,"babel-runtime/core-js/math/tanh":20,"babel-runtime/core-js/math/trunc":21}],296:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/core-js/math/acosh":5,"babel-runtime/core-js/math/asinh":6,"babel-runtime/core-js/math/atanh":7,"babel-runtime/core-js/math/cbrt":8,"babel-runtime/core-js/math/clz32":9,"babel-runtime/core-js/math/cosh":10,"babel-runtime/core-js/math/expm1":11,"babel-runtime/core-js/math/fround":12,"babel-runtime/core-js/math/hypot":13,"babel-runtime/core-js/math/imul":14,"babel-runtime/core-js/math/log10":15,"babel-runtime/core-js/math/log1p":16,"babel-runtime/core-js/math/log2":17,"babel-runtime/core-js/math/sign":18,"babel-runtime/core-js/math/sinh":19,"babel-runtime/core-js/math/tanh":20,"babel-runtime/core-js/math/trunc":21}],311:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13685,7 +14077,7 @@ exports.default = function (target, env, factory) {
 
 var _checks = require("../utils/checks");
 
-},{"../utils/checks":376}],297:[function(require,module,exports){
+},{"../utils/checks":391}],312:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13741,7 +14133,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/native":379,"babel-runtime/regenerator":37}],298:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/native":394,"babel-runtime/regenerator":34}],313:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13758,7 +14150,7 @@ exports.default = function (target, env, factory) {
 
 var _checks = require("../utils/checks");
 
-},{"../utils/checks":376}],299:[function(require,module,exports){
+},{"../utils/checks":391}],314:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13837,7 +14229,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/native":379,"babel-runtime/core-js/number/max-safe-integer":23,"babel-runtime/core-js/number/min-safe-integer":24,"babel-runtime/regenerator":37}],300:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/native":394,"babel-runtime/core-js/number/max-safe-integer":23,"babel-runtime/core-js/number/min-safe-integer":24,"babel-runtime/regenerator":34}],315:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13886,7 +14278,7 @@ var _number12 = _interopRequireDefault(_number11);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./number.is-finite":296,"./number.is-integer":297,"./number.is-nan":298,"./number.is-safe-integer":299,"./number.parse-float":301,"./number.parse-int":302,"babel-runtime/core-js/number/epsilon":22}],301:[function(require,module,exports){
+},{"./number.is-finite":311,"./number.is-integer":312,"./number.is-nan":313,"./number.is-safe-integer":314,"./number.parse-float":316,"./number.parse-int":317,"babel-runtime/core-js/number/epsilon":22}],316:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13922,7 +14314,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],302:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],317:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13963,7 +14355,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],303:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],318:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -13978,18 +14370,16 @@ exports.default = function (objectClass, env, factory) {
 
     sources.forEach(function (next) {
       if (!(0, _checks.isNullOrUndefined)(next)) {
-        (function () {
-          var source = (0, _native.toObject)(next);
+        var source = (0, _native.toObject)(next);
 
-          source.getOwnPropertyKeys().forEach(function (key) {
-            var desc = source.getOwnProperty(key);
-            if (desc && desc.enumerable) {
-              if (!to.setValue(key, source.getValue(key))) {
-                throw TypeError("Cannot assign to read only property '" + key + "'");
-              }
+        source.getOwnPropertyKeys().forEach(function (key) {
+          var desc = source.getOwnProperty(key);
+          if (desc && desc.enumerable) {
+            if (!to.setValue(key, source.getValue(key))) {
+              throw TypeError("Cannot assign to read only property '" + key + "'");
             }
-          });
-        })();
+          }
+        });
       }
     });
 
@@ -14001,7 +14391,7 @@ var _native = require("../utils/native");
 
 var _checks = require("../utils/checks");
 
-},{"../utils/checks":376,"../utils/native":379}],304:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/native":394}],319:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14023,7 +14413,7 @@ exports.default = function (target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],305:[function(require,module,exports){
+},{"../utils/contracts":392}],320:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14037,7 +14427,7 @@ exports.default = function (target, env, factory) {
 
 var _primitiveType = require("../types/primitive-type");
 
-},{"../types/primitive-type":368}],306:[function(require,module,exports){
+},{"../types/primitive-type":383}],321:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14106,7 +14496,7 @@ var _object10 = _interopRequireDefault(_object9);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"./object.assign":303,"./object.get-own-property-symbols":304,"./object.is":305,"./object.set-prototype-of":307,"./object.to-string":308}],307:[function(require,module,exports){
+},{"../utils/contracts":392,"./object.assign":318,"./object.get-own-property-symbols":319,"./object.is":320,"./object.set-prototype-of":322,"./object.to-string":323}],322:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14131,7 +14521,7 @@ var _contracts = require("../utils/contracts");
 
 var _checks = require("../utils/checks");
 
-},{"../utils/checks":376,"../utils/contracts":377}],308:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392}],323:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14169,7 +14559,7 @@ var _contracts = require("../utils/contracts");
 
 var _checks = require("../utils/checks");
 
-},{"../utils/checks":376,"../utils/contracts":377}],309:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392}],324:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14199,7 +14589,7 @@ exports.default = function (globalObject, env, factory) {
   globalObject.define("Proxy", proxyClass);
 };
 
-},{}],310:[function(require,module,exports){
+},{}],325:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14248,7 +14638,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],311:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],326:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14308,7 +14698,7 @@ var _checks = require("../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],312:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],327:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14356,7 +14746,7 @@ var _objectHelpers = require("../es5/object/object-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../es5/object/object-helpers":237,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],313:[function(require,module,exports){
+},{"../es5/object/object-helpers":252,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],328:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14396,7 +14786,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],314:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],329:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14410,7 +14800,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],315:[function(require,module,exports){
+},{"../utils/contracts":392}],330:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14447,7 +14837,7 @@ var _objectHelpers = require("../es5/object/object-helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../es5/object/object-helpers":237,"../utils/contracts":377,"babel-runtime/regenerator":37}],316:[function(require,module,exports){
+},{"../es5/object/object-helpers":252,"../utils/contracts":392,"babel-runtime/regenerator":34}],331:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14461,7 +14851,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],317:[function(require,module,exports){
+},{"../utils/contracts":392}],332:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14513,7 +14903,7 @@ var _primitiveType = require("../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],318:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],333:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14552,7 +14942,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],319:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],334:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14566,7 +14956,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],320:[function(require,module,exports){
+},{"../utils/contracts":392}],335:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14650,7 +15040,7 @@ var _reflect28 = _interopRequireDefault(_reflect27);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./reflect.apply":310,"./reflect.construct":311,"./reflect.define-property":312,"./reflect.delete-property":313,"./reflect.enumerate":314,"./reflect.get":317,"./reflect.get-own-property-descriptor":315,"./reflect.get-prototype-of":316,"./reflect.has":318,"./reflect.is-extensible":319,"./reflect.own-keys":321,"./reflect.prevent-extensions":322,"./reflect.set":324,"./reflect.set-prototype-of":323}],321:[function(require,module,exports){
+},{"./reflect.apply":325,"./reflect.construct":326,"./reflect.define-property":327,"./reflect.delete-property":328,"./reflect.enumerate":329,"./reflect.get":332,"./reflect.get-own-property-descriptor":330,"./reflect.get-prototype-of":331,"./reflect.has":333,"./reflect.is-extensible":334,"./reflect.own-keys":336,"./reflect.prevent-extensions":337,"./reflect.set":339,"./reflect.set-prototype-of":338}],336:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14668,7 +15058,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],322:[function(require,module,exports){
+},{"../utils/contracts":392}],337:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14682,7 +15072,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],323:[function(require,module,exports){
+},{"../utils/contracts":392}],338:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14703,7 +15093,7 @@ var _contracts = require("../utils/contracts");
 
 var _primitiveType = require("../types/primitive-type");
 
-},{"../types/primitive-type":368,"../utils/contracts":377}],324:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392}],339:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14750,7 +15140,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],325:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],340:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -14775,7 +15165,7 @@ exports.default = function (globalObject, env, factory) {
 
           case 2:
             stringValue = _context.sent;
-            replacer = undefined;
+            replacer = void 0;
 
             if (!(0, _checks.isFunction)(replaceValue)) {
               _context.next = 8;
@@ -14818,8 +15208,7 @@ exports.default = function (globalObject, env, factory) {
 
   var matchKey = env.getSymbol("match");
   proto.define(matchKey, factory.createBuiltInFunction(_regenerator2.default.mark(function _callee2(value) {
-    var stringValue, match, _ret;
-
+    var stringValue, match, matches;
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -14832,35 +15221,25 @@ exports.default = function (globalObject, env, factory) {
             match = stringValue.match(this.object.source);
 
             if (!match) {
-              _context2.next = 8;
+              _context2.next = 10;
               break;
             }
 
-            _ret = function () {
-              var matches = factory.createArray();
+            matches = factory.createArray();
 
-              match.forEach(function (v, i) {
-                return matches.setValue(i, factory.createPrimitive(v));
-              });
-              matches.setValue("index", factory.createPrimitive(match.index));
-              matches.setValue("input", factory.createPrimitive(match.input));
 
-              return {
-                v: matches
-              };
-            }();
+            match.forEach(function (v, i) {
+              return matches.setValue(i, factory.createPrimitive(v));
+            });
+            matches.setValue("index", factory.createPrimitive(match.index));
+            matches.setValue("input", factory.createPrimitive(match.input));
 
-            if (!(typeof _ret === "object")) {
-              _context2.next = 8;
-              break;
-            }
+            return _context2.abrupt("return", matches);
 
-            return _context2.abrupt("return", _ret.v);
-
-          case 8:
+          case 10:
             return _context2.abrupt("return", _primitiveType.NULL);
 
-          case 9:
+          case 11:
           case "end":
             return _context2.stop();
         }
@@ -14989,7 +15368,7 @@ var _checks = require("../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/async":375,"../utils/checks":376,"../utils/native":379,"babel-runtime/regenerator":37}],326:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/async":390,"../utils/checks":391,"../utils/native":394,"babel-runtime/regenerator":34}],341:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15016,7 +15395,7 @@ var _contracts = require("../utils/contracts");
 
 var _checks = require("../utils/checks");
 
-},{"../utils/checks":376,"../utils/contracts":377}],327:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392}],342:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15030,7 +15409,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],328:[function(require,module,exports){
+},{"../utils/contracts":392}],343:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15056,7 +15435,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],329:[function(require,module,exports){
+},{"../utils/contracts":392}],344:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15116,7 +15495,7 @@ var _primitiveType = require("../types/primitive-type");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"babel-runtime/regenerator":37}],330:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"babel-runtime/regenerator":34}],345:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15133,7 +15512,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],331:[function(require,module,exports){
+},{"../utils/contracts":392}],346:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15160,7 +15539,7 @@ exports.default = function ($target, env, factory) {
               break;
             }
 
-            value = undefined;
+            value = void 0;
 
           case 4:
             if (!(index < obj.data.length)) {
@@ -15239,7 +15618,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"babel-runtime/regenerator":37}],332:[function(require,module,exports){
+},{"../utils/contracts":392,"babel-runtime/regenerator":34}],347:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15251,16 +15630,14 @@ var _regenerator2 = _interopRequireDefault(_regenerator);
 exports.default = function ($global, env, factory) {
   var proto = factory.createObject();
 
-  var setClass = factory.createFunction(_regenerator2.default.mark(function _callee3(iterable) {
-    var _this = this;
-
-    var instance;
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
+  var setClass = factory.createFunction(_regenerator2.default.mark(function _callee2(iterable) {
+    var instance, adder, it;
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
             if (this.isNew) {
-              _context3.next = 2;
+              _context2.next = 2;
               break;
             }
 
@@ -15270,57 +15647,43 @@ exports.default = function ($global, env, factory) {
             instance = factory.create("Set");
 
             if ((0, _checks.isNullOrUndefined)(iterable)) {
-              _context3.next = 5;
+              _context2.next = 10;
               break;
             }
 
-            return _context3.delegateYield(_regenerator2.default.mark(function _callee2() {
-              var adder, it;
-              return _regenerator2.default.wrap(function _callee2$(_context2) {
+            (0, _contracts.assertIsObject)(iterable, "Set");
+
+            adder = proto.getValue("add");
+
+            (0, _contracts.assertIsFunction)(adder, "add");
+
+            it = _iterators2.default.getIterator(iterable);
+            _context2.next = 10;
+            return it.each(_regenerator2.default.mark(function _callee(item) {
+              return _regenerator2.default.wrap(function _callee$(_context) {
                 while (1) {
-                  switch (_context2.prev = _context2.next) {
+                  switch (_context.prev = _context.next) {
                     case 0:
-                      (0, _contracts.assertIsObject)(iterable, "Set");
+                      _context.next = 2;
+                      return adder.call(instance, [item]);
 
-                      adder = proto.getValue("add");
-
-                      (0, _contracts.assertIsFunction)(adder, "add");
-
-                      it = _iterators2.default.getIterator(iterable);
-                      _context2.next = 6;
-                      return it.each(_regenerator2.default.mark(function _callee(item) {
-                        return _regenerator2.default.wrap(function _callee$(_context) {
-                          while (1) {
-                            switch (_context.prev = _context.next) {
-                              case 0:
-                                _context.next = 2;
-                                return adder.call(instance, [item]);
-
-                              case 2:
-                              case "end":
-                                return _context.stop();
-                            }
-                          }
-                        }, _callee, this);
-                      }));
-
-                    case 6:
+                    case 2:
                     case "end":
-                      return _context2.stop();
+                      return _context.stop();
                   }
                 }
-              }, _callee2, _this);
-            })(), "t0", 5);
+              }, _callee, this);
+            }));
 
-          case 5:
-            return _context3.abrupt("return", instance);
+          case 10:
+            return _context2.abrupt("return", instance);
 
-          case 6:
+          case 11:
           case "end":
-            return _context3.stop();
+            return _context2.stop();
         }
       }
-    }, _callee3, this);
+    }, _callee2, this);
   }), proto, { name: "Set" });
 
   (0, _set2.default)(proto, env, factory);
@@ -15372,7 +15735,7 @@ var _set14 = _interopRequireDefault(_set13);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../iterators":352,"../utils/checks":376,"../utils/contracts":377,"./set.add":326,"./set.clear":327,"./set.delete":328,"./set.for-each":329,"./set.has":330,"./set.iterator":331,"./set.size":333,"babel-runtime/regenerator":37}],333:[function(require,module,exports){
+},{"../iterators":367,"../utils/checks":391,"../utils/contracts":392,"./set.add":341,"./set.clear":342,"./set.delete":343,"./set.for-each":344,"./set.has":345,"./set.iterator":346,"./set.size":348,"babel-runtime/regenerator":34}],348:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15397,7 +15760,7 @@ exports.default = function ($target, env, factory) {
 
 var _contracts = require("../utils/contracts");
 
-},{"../utils/contracts":377}],334:[function(require,module,exports){
+},{"../utils/contracts":392}],349:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15456,7 +15819,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"../utils/native":379,"babel-runtime/core-js/string/code-point-at":30,"babel-runtime/regenerator":37}],335:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"../utils/native":394,"babel-runtime/core-js/string/code-point-at":29,"babel-runtime/regenerator":34}],350:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15519,7 +15882,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/async":375,"../utils/native":379,"babel-runtime/core-js/string/from-code-point":31,"babel-runtime/regenerator":37}],336:[function(require,module,exports){
+},{"../utils/async":390,"../utils/native":394,"babel-runtime/core-js/string/from-code-point":30,"babel-runtime/regenerator":34}],351:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15709,7 +16072,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],337:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],352:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15826,7 +16189,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/primitive-type":368,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],338:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],353:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15874,7 +16237,7 @@ var _string14 = _interopRequireDefault(_string13);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"./string.code-point-at":334,"./string.from-code-point":335,"./string.includes":336,"./string.iterator":337,"./string.normalize":339,"./string.raw":340,"./string.repeat":341}],339:[function(require,module,exports){
+},{"./string.code-point-at":349,"./string.from-code-point":350,"./string.includes":351,"./string.iterator":352,"./string.normalize":354,"./string.raw":355,"./string.repeat":356}],354:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -15936,7 +16299,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],340:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],355:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16038,7 +16401,7 @@ var _native = require("../utils/native");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],341:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],356:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16105,7 +16468,7 @@ var _contracts = require("../utils/contracts");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],342:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],357:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16236,7 +16599,7 @@ var _checks = require("../utils/checks");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-},{"../types/symbol-type":373,"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],343:[function(require,module,exports){
+},{"../types/symbol-type":388,"../utils/checks":391,"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],358:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16327,7 +16690,7 @@ function walk(node, visitors, state) {
   var v = (0, _visitors.makeVisitors)(visitors);
   var it = walker(v, new _traversalContext.TraversalContext(node), state);
   var done = false;
-  var value = undefined;
+  var value = void 0;
 
   do {
     var _it$next = it.next(value);
@@ -16360,7 +16723,7 @@ function iterate(node, filters) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          hash = undefined;
+          hash = void 0;
 
           if (filters && Array.isArray(filters)) {
             hash = (0, _create2.default)(null);
@@ -16428,7 +16791,7 @@ function iterate(node, filters) {
 exports.makeRules = _visitors.makeRules;
 exports.makeVisitors = _visitors.makeVisitors;
 
-},{"./traversal-context":345,"./visitors":347,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":37}],344:[function(require,module,exports){
+},{"./traversal-context":360,"./visitors":362,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":34}],359:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16448,7 +16811,7 @@ var interfaces = exports.interfaces = {
   "Scope": ["FunctionExpression", "FunctionDeclaration", "Program"]
 };
 
-},{}],345:[function(require,module,exports){
+},{}],360:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16611,17 +16974,17 @@ var proto = TraversalContext.prototype = {
     if (!this._directives) {
       this._directives = [];
       var it = getDirectives(this._node.body);
-      var done = undefined,
-          _value = undefined;
+      var done = void 0,
+          value = void 0;
 
       do {
         var _it$next = it.next();
 
         done = _it$next.done;
-        _value = _it$next.value;
+        value = _it$next.value;
 
-        if (!done && _value) {
-          this._directives.push(_value);
+        if (!done && value) {
+          this._directives.push(value);
         }
       } while (!done);
     }
@@ -16682,7 +17045,7 @@ var proto = TraversalContext.prototype = {
   };
 });
 
-},{"./interfaces":344,"./types":346,"babel-runtime/core-js/object/keys":27,"babel-runtime/regenerator":37}],346:[function(require,module,exports){
+},{"./interfaces":359,"./types":361,"babel-runtime/core-js/object/keys":27,"babel-runtime/regenerator":34}],361:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16742,7 +17105,7 @@ types.ImportSpecifier = ["imported", "local"];
 types.ImportDefaultSpecifier = ["local"];
 types.ImportNamespaceSpecifier = ["local"];
 
-},{}],347:[function(require,module,exports){
+},{}],362:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16815,8 +17178,7 @@ function makeVisitorFromKeys(keys) {
 }
 
 function defaultVisitor(node, state, w) {
-  var _i, _ln, _key;
-
+  var i, ln, key;
   return _regenerator2.default.wrap(function defaultVisitor$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
@@ -16830,25 +17192,25 @@ function defaultVisitor(node, state, w) {
             break;
           }
 
-          _i = 0, _ln = _types.types[node.type].length;
+          i = 0, ln = _types.types[node.type].length;
 
         case 4:
-          if (!(_i < _ln)) {
+          if (!(i < ln)) {
             _context2.next = 11;
             break;
           }
 
-          _key = _types.types[node.type][_i];
+          key = _types.types[node.type][i];
 
-          if (!node.has(_key)) {
+          if (!node.has(key)) {
             _context2.next = 8;
             break;
           }
 
-          return _context2.delegateYield(w(node[_key], state, w), "t0", 8);
+          return _context2.delegateYield(w(node[key], state, w), "t0", 8);
 
         case 8:
-          _i++;
+          i++;
           _context2.next = 4;
           break;
 
@@ -16915,7 +17277,7 @@ function makeRules(rules) {
   };
 }
 
-},{"./types":346,"babel-runtime/core-js/object/assign":25,"babel-runtime/core-js/object/keys":27,"babel-runtime/regenerator":37}],348:[function(require,module,exports){
+},{"./types":361,"babel-runtime/core-js/object/assign":25,"babel-runtime/core-js/object/keys":27,"babel-runtime/regenerator":34}],363:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -16964,7 +17326,7 @@ ExecutionContext.prototype = {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            executionResult = undefined;
+            executionResult = void 0;
             _context.prev = 1;
             _context.next = 4;
             return (0, _estree.step)(node, extendedVisitors, this, extendedRules);
@@ -17081,7 +17443,7 @@ ExecutionContext.prototype = {
   }
 };
 
-},{"./estree":343,"./execution-result":349,"./syntax-rules":357,"./types/primitive-type":368,"./visitors":399,"babel-runtime/regenerator":37}],349:[function(require,module,exports){
+},{"./estree":358,"./execution-result":364,"./syntax-rules":372,"./types/primitive-type":383,"./visitors":414,"babel-runtime/regenerator":34}],364:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17106,7 +17468,7 @@ ExecutionResult.prototype = {
   }
 };
 
-},{}],350:[function(require,module,exports){
+},{}],365:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17152,7 +17514,7 @@ Sandbox.prototype = {
       env.init(this.options);
     }
 
-    var executionResult = undefined;
+    var executionResult = void 0;
     try {
       executionResult = (0, _async.exhaust)(env.createExecutionContext().execute(this.ast));
     } catch (err) {
@@ -17185,7 +17547,7 @@ Sandbox.prototype = {
   }
 };
 
-},{"./env":177,"./types/error-type":362,"./utils/async":375,"babel-runtime/core-js/promise":29}],351:[function(require,module,exports){
+},{"./env":192,"./types/error-type":377,"./utils/async":390,"babel-runtime/core-js/promise":28}],366:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17228,24 +17590,23 @@ function ascIterator(source, lo, hi) {
 }
 
 function descIterator(source, lo, hi) {
-  var _index;
-
+  var index;
   return _regenerator2.default.wrap(function descIterator$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          _index = hi;
+          index = hi;
 
         case 1:
-          if (!(_index >= lo)) {
+          if (!(index >= lo)) {
             _context2.next = 6;
             break;
           }
 
-          return _context2.delegateYield(yieldIndex(source, _index), "t0", 3);
+          return _context2.delegateYield(yieldIndex(source, index), "t0", 3);
 
         case 3:
-          _index--;
+          index--;
           _context2.next = 1;
           break;
 
@@ -17290,7 +17651,7 @@ var ArrayIterator = {
 
 exports.default = ArrayIterator;
 
-},{"babel-runtime/regenerator":37}],352:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],367:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17362,7 +17723,7 @@ var iterate = {
     return _arrayIterator2.default.create(obj, lo, hi);
   },
   reverse: function (obj, hi) {
-    var lo = arguments.length <= 2 || arguments[2] === undefined ? 0 : arguments[2];
+    var lo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
     if (obj.className === "String") {
       return _stringIterator2.default.create(obj, hi, true);
@@ -17378,7 +17739,7 @@ var iterate = {
 
 exports.default = iterate;
 
-},{"../types/symbol-type":373,"../utils/async":375,"../utils/checks":376,"../utils/native":379,"./array-iterator":351,"./iterable-iterator":353,"./sparse-iterator":354,"./string-iterator":355,"babel-runtime/core-js/object/keys":27}],353:[function(require,module,exports){
+},{"../types/symbol-type":388,"../utils/async":390,"../utils/checks":391,"../utils/native":394,"./array-iterator":366,"./iterable-iterator":368,"./sparse-iterator":369,"./string-iterator":370,"babel-runtime/core-js/object/keys":27}],368:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17443,7 +17804,7 @@ IterableIterator.prototype = (_IterableIterator$pro = {
           }
 
           _context.prev = 2;
-          current = undefined;
+          current = void 0;
           _next = this.next();
           done = _next.done;
           current = _next.value;
@@ -17490,7 +17851,7 @@ IterableIterator.create = function (it) {
   return new IterableIterator(it);
 };
 
-},{"../types/primitive-type":368,"../utils/async":375,"../utils/helpers":378,"../utils/native":379,"babel-runtime/core-js/symbol/iterator":35,"babel-runtime/regenerator":37}],354:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/async":390,"../utils/helpers":393,"../utils/native":394,"babel-runtime/core-js/symbol/iterator":33,"babel-runtime/regenerator":34}],369:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17604,7 +17965,7 @@ SparseIterator.create = function (arr, start, end, desc) {
   return new SparseIterator(arr, start, end, desc);
 };
 
-},{"../utils/native":379,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/symbol/iterator":35}],355:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/symbol/iterator":33}],370:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17649,26 +18010,25 @@ function ascIterator(stringValue, start, length) {
 }
 
 function descIterator(stringValue, start) {
-  var _key, _value;
-
+  var key, value;
   return _regenerator2.default.wrap(function descIterator$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          _key = start;
+          key = start;
 
         case 1:
-          if (!(_key >= 0)) {
+          if (!(key >= 0)) {
             _context2.next = 8;
             break;
           }
 
-          _value = stringValue.getValue(_key);
+          value = stringValue.getValue(key);
           _context2.next = 5;
-          return { value: _value, key: _key };
+          return { value: value, key: key };
 
         case 5:
-          _key--;
+          key--;
           _context2.next = 1;
           break;
 
@@ -17689,7 +18049,7 @@ var StringIterator = {
 
 exports.default = StringIterator;
 
-},{"babel-runtime/regenerator":37}],356:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],371:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17706,7 +18066,7 @@ keywords.es6 = keywords.es5.slice().concat(["class", "const", "debugger", "enum"
 keywords.es6strict = keywords.es5strict.slice().concat(["static", "implements"]);
 
 function isReserved(name) {
-  var ecmaVersion = arguments.length <= 1 || arguments[1] === undefined ? 5 : arguments[1];
+  var ecmaVersion = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
 
   var v = "es" + ecmaVersion;
   if (v in keywords) {
@@ -17717,7 +18077,7 @@ function isReserved(name) {
 }
 
 function isStrictReserved(name) {
-  var ecmaVersion = arguments.length <= 1 || arguments[1] === undefined ? 5 : arguments[1];
+  var ecmaVersion = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
 
   var v = "es" + ecmaVersion + "strict";
   if (v in keywords) {
@@ -17727,7 +18087,7 @@ function isStrictReserved(name) {
   return false;
 }
 
-},{}],357:[function(require,module,exports){
+},{}],372:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17777,7 +18137,7 @@ var rules = (_rules = {
 
 exports.default = rules;
 
-},{"./utils/contracts":377,"./utils/native":379}],358:[function(require,module,exports){
+},{"./utils/contracts":392,"./utils/native":394}],373:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17862,7 +18222,7 @@ ArgumentType.prototype.deleteProperty = function (key, throwOnError) {
   return _objectType.ObjectType.prototype.deleteProperty.apply(this, arguments);
 };
 
-},{"./object-type":367,"babel-runtime/core-js/object/create":26,"util":174}],359:[function(require,module,exports){
+},{"./object-type":382,"babel-runtime/core-js/object/create":26,"util":189}],374:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -17989,8 +18349,8 @@ ArrayType.prototype.setLength = function (descriptor, throwOnError) {
         _ref = _i.value;
       }
 
-      var _ref2 = _ref;
-      var key = _ref2.key;
+      var _ref2 = _ref,
+          key = _ref2.key;
 
       if (!this.deleteProperty(key, false)) {
         newLength = env.objectFactory.createPrimitive(key + 1);
@@ -18039,7 +18399,7 @@ ArrayType.prototype.toNative = function () {
   return arr;
 };
 
-},{"../iterators":352,"../utils/async":375,"../utils/contracts":377,"../utils/native":379,"./object-type":367,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/symbol/for":34,"util":174}],360:[function(require,module,exports){
+},{"../iterators":367,"../utils/async":390,"../utils/contracts":392,"../utils/native":394,"./object-type":382,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/symbol/for":32,"util":189}],375:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18058,7 +18418,7 @@ function CollectionType(className) {
 
 (0, _util.inherits)(CollectionType, _objectType.ObjectType);
 
-},{"./object-type":367,"util":174}],361:[function(require,module,exports){
+},{"./object-type":382,"util":189}],376:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18087,7 +18447,7 @@ DateType.prototype.toNative = function () {
   return this.value;
 };
 
-},{"./object-type":367,"util":174}],362:[function(require,module,exports){
+},{"./object-type":382,"util":189}],377:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18110,7 +18470,7 @@ ErrorType.prototype.toNative = function () {
   return this.source;
 };
 
-},{"./object-type":367,"util":174}],363:[function(require,module,exports){
+},{"./object-type":382,"util":189}],378:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18234,13 +18594,12 @@ function FunctionType(node) {
 FunctionType.prototype.init = function (env, proto, descriptor, strict) {
   _objectType.ObjectType.prototype.init.apply(this, arguments);
 
-  var _ref = descriptor || {};
-
-  var _ref$isConstructor = _ref.isConstructor;
-  var isConstructor = _ref$isConstructor === undefined ? false : _ref$isConstructor;
-  var homeObject = _ref.homeObject;
-  var _ref$kind = _ref.kind;
-  var kind = _ref$kind === undefined ? "base" : _ref$kind;
+  var _ref = descriptor || {},
+      _ref$isConstructor = _ref.isConstructor,
+      isConstructor = _ref$isConstructor === undefined ? false : _ref$isConstructor,
+      homeObject = _ref.homeObject,
+      _ref$kind = _ref.kind,
+      kind = _ref$kind === undefined ? "base" : _ref$kind;
 
   this.isConstructor = isConstructor;
   this.homeObject = homeObject;
@@ -18456,7 +18815,7 @@ FunctionType.prototype.toNative = function () {
   return undefined;
 };
 
-},{"../utils/checks":376,"./object-type":367,"./primitive-type":368,"./property-descriptor":369,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37,"util":174}],364:[function(require,module,exports){
+},{"../utils/checks":391,"./object-type":382,"./primitive-type":383,"./property-descriptor":384,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34,"util":189}],379:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18467,7 +18826,7 @@ var _util = require("util");
 var _objectType = require("./object-type");
 
 function IteratorType(iterable) {
-  var kind = arguments.length <= 1 || arguments[1] === undefined ? "key+value" : arguments[1];
+  var kind = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "key+value";
 
   _objectType.ObjectType.call(this);
 
@@ -18483,21 +18842,19 @@ IteratorType.prototype.init = function (env, proto) {
   _objectType.ObjectType.prototype.init.apply(this, arguments);
 
   if (!proto) {
-    (function () {
-      var factory = env.objectFactory;
-      proto = factory.createObject();
-      proto.className = "[Symbol.iterator]";
-      proto.setPrototype(env.global.getValue("%IteratorPrototype%"));
+    var factory = env.objectFactory;
+    proto = factory.createObject();
+    proto.className = "[Symbol.iterator]";
+    proto.setPrototype(env.global.getValue("%IteratorPrototype%"));
 
-      proto.define("next", factory.createBuiltInFunction(function () {
-        var result = this.object.advance();
-        if (result.value) {
-          return result.value;
-        }
+    proto.define("next", factory.createBuiltInFunction(function () {
+      var result = this.object.advance();
+      if (result.value) {
+        return result.value;
+      }
 
-        return factory.createIteratorResult({ done: true });
-      }));
-    })();
+      return factory.createIteratorResult({ done: true });
+    }));
   }
 
   this.setPrototype(proto);
@@ -18507,7 +18864,7 @@ IteratorType.prototype.advance = function () {
   return this.iterable.next();
 };
 
-},{"./object-type":367,"util":174}],365:[function(require,module,exports){
+},{"./object-type":382,"util":189}],380:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18541,17 +18898,16 @@ function NativeFunctionType(fn) {
 (0, _util.inherits)(NativeFunctionType, _functionType.FunctionType);
 
 NativeFunctionType.prototype.init = function (env, proto) {
-  var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-  var _ref$configurable = _ref.configurable;
-  var configurable = _ref$configurable === undefined ? false : _ref$configurable;
-  var _ref$enumerable = _ref.enumerable;
-  var enumerable = _ref$enumerable === undefined ? false : _ref$enumerable;
-  var _ref$writable = _ref.writable;
-  var writable = _ref$writable === undefined ? true : _ref$writable;
-  var _ref$isConstructor = _ref.isConstructor;
-  var isConstructor = _ref$isConstructor === undefined ? false : _ref$isConstructor;
-  var homeObject = _ref.homeObject;
+  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      _ref$configurable = _ref.configurable,
+      configurable = _ref$configurable === undefined ? false : _ref$configurable,
+      _ref$enumerable = _ref.enumerable,
+      enumerable = _ref$enumerable === undefined ? false : _ref$enumerable,
+      _ref$writable = _ref.writable,
+      writable = _ref$writable === undefined ? true : _ref$writable,
+      _ref$isConstructor = _ref.isConstructor,
+      isConstructor = _ref$isConstructor === undefined ? false : _ref$isConstructor,
+      homeObject = _ref.homeObject;
 
   this[(0, _for2.default)("env")] = env;
   this.isConstructor = isConstructor;
@@ -18676,7 +19032,7 @@ NativeFunctionType.prototype.construct = _regenerator2.default.mark(function _ca
   }, _callee4, this);
 });
 
-},{"./function-type":363,"./property-descriptor":369,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37,"util":174}],366:[function(require,module,exports){
+},{"./function-type":378,"./property-descriptor":384,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34,"util":189}],381:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -18776,14 +19132,13 @@ function setProto(typeName, instance, factory) {
 
 var defaultDescriptor = { configurable: true, enumerable: true, writable: true };
 function createDataPropertyDescriptor(value) {
-  var _ref = arguments.length <= 1 || arguments[1] === undefined ? defaultDescriptor : arguments[1];
-
-  var _ref$configurable = _ref.configurable;
-  var configurable = _ref$configurable === undefined ? true : _ref$configurable;
-  var _ref$enumerable = _ref.enumerable;
-  var enumerable = _ref$enumerable === undefined ? true : _ref$enumerable;
-  var _ref$writable = _ref.writable;
-  var writable = _ref$writable === undefined ? true : _ref$writable;
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultDescriptor,
+      _ref$configurable = _ref.configurable,
+      configurable = _ref$configurable === undefined ? true : _ref$configurable,
+      _ref$enumerable = _ref.enumerable,
+      enumerable = _ref$enumerable === undefined ? true : _ref$enumerable,
+      _ref$writable = _ref.writable,
+      writable = _ref$writable === undefined ? true : _ref$writable;
 
   return { value: value, configurable: configurable, enumerable: enumerable, writable: writable };
 }
@@ -18829,7 +19184,7 @@ ObjectFactory.prototype = {
       return value;
     }
 
-    var instance = undefined;
+    var instance = void 0;
 
     switch (typeName) {
       case "Null":
@@ -18999,9 +19354,9 @@ ObjectFactory.prototype = {
     return instance;
   },
   createIteratorResult: function (_ref2) {
-    var value = _ref2.value;
-    var _ref2$done = _ref2.done;
-    var done = _ref2$done === undefined ? false : _ref2$done;
+    var value = _ref2.value,
+        _ref2$done = _ref2.done,
+        done = _ref2$done === undefined ? false : _ref2$done;
 
     var instance = this.createObject();
     instance.defineProperty("done", { value: this.createPrimitive(done) });
@@ -19106,23 +19461,22 @@ ObjectFactory.prototype = {
    * @returns {FunctionType} The function instance.
    */
   createFunction: function (fnOrNode, proto) {
-    var _ref3 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    var _ref3 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        _ref3$configurable = _ref3.configurable,
+        configurable = _ref3$configurable === undefined ? false : _ref3$configurable,
+        _ref3$enumerable = _ref3.enumerable,
+        enumerable = _ref3$enumerable === undefined ? false : _ref3$enumerable,
+        _ref3$writable = _ref3.writable,
+        writable = _ref3$writable === undefined ? true : _ref3$writable,
+        _ref3$strict = _ref3.strict,
+        strict = _ref3$strict === undefined ? false : _ref3$strict,
+        _ref3$isConstructor = _ref3.isConstructor,
+        isConstructor = _ref3$isConstructor === undefined ? false : _ref3$isConstructor,
+        name = _ref3.name,
+        homeObject = _ref3.homeObject,
+        kind = _ref3.kind;
 
-    var _ref3$configurable = _ref3.configurable;
-    var configurable = _ref3$configurable === undefined ? false : _ref3$configurable;
-    var _ref3$enumerable = _ref3.enumerable;
-    var enumerable = _ref3$enumerable === undefined ? false : _ref3$enumerable;
-    var _ref3$writable = _ref3.writable;
-    var writable = _ref3$writable === undefined ? true : _ref3$writable;
-    var _ref3$strict = _ref3.strict;
-    var strict = _ref3$strict === undefined ? false : _ref3$strict;
-    var _ref3$isConstructor = _ref3.isConstructor;
-    var isConstructor = _ref3$isConstructor === undefined ? false : _ref3$isConstructor;
-    var name = _ref3.name;
-    var homeObject = _ref3.homeObject;
-    var kind = _ref3.kind;
-
-    var instance = undefined;
+    var instance = void 0;
 
     if (typeof fnOrNode === "function") {
       instance = new _nativeFunctionType.NativeFunctionType(fnOrNode);
@@ -19141,10 +19495,9 @@ ObjectFactory.prototype = {
     return instance;
   },
   createClass: function (fnOrNode, proto) {
-    var _ref4 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var name = _ref4.name;
-    var homeObject = _ref4.homeObject;
+    var _ref4 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        name = _ref4.name,
+        homeObject = _ref4.homeObject;
 
     return this.createFunction(fnOrNode, proto, { configurable: false, enumerable: false, writable: false, strict: true, isConstructor: true, kind: "classConstructor", name: name, homeObject: homeObject });
   },
@@ -19211,7 +19564,7 @@ ObjectFactory.prototype = {
   }
 };
 
-},{"../utils/checks":376,"../utils/contracts":377,"../utils/helpers":378,"./argument-type":358,"./array-type":359,"./collection-type":360,"./date-type":361,"./error-type":362,"./function-type":363,"./iterator-type":364,"./native-function-type":365,"./object-type":367,"./primitive-type":368,"./proxy-type":370,"./regex-type":371,"./string-type":372,"./symbol-type":373,"babel-runtime/core-js/map":4,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37}],367:[function(require,module,exports){
+},{"../utils/checks":391,"../utils/contracts":392,"../utils/helpers":393,"./argument-type":373,"./array-type":374,"./collection-type":375,"./date-type":376,"./error-type":377,"./function-type":378,"./iterator-type":379,"./native-function-type":380,"./object-type":382,"./primitive-type":383,"./proxy-type":385,"./regex-type":386,"./string-type":387,"./symbol-type":388,"babel-runtime/core-js/map":4,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34}],382:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -19450,8 +19803,8 @@ ObjectType.prototype = {
 
     // add symbol keys
     if (keyType !== "String") {
-      for (var _key in this.symbols) {
-        keys.push(this.symbols[_key].key);
+      for (var key in this.symbols) {
+        keys.push(this.symbols[key].key);
       }
     }
 
@@ -19586,24 +19939,23 @@ ObjectType.prototype = {
     return delete this[source][key];
   },
   define: function (key, value) {
-    var _ref2 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var _ref2$configurable = _ref2.configurable;
-    var configurable = _ref2$configurable === undefined ? true : _ref2$configurable;
-    var _ref2$enumerable = _ref2.enumerable;
-    var enumerable = _ref2$enumerable === undefined ? false : _ref2$enumerable;
-    var _ref2$writable = _ref2.writable;
-    var writable = _ref2$writable === undefined ? true : _ref2$writable;
-    var getter = _ref2.getter;
-    var get = _ref2.get;
-    var setter = _ref2.setter;
-    var set = _ref2.set;
+    var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        _ref2$configurable = _ref2.configurable,
+        configurable = _ref2$configurable === undefined ? true : _ref2$configurable,
+        _ref2$enumerable = _ref2.enumerable,
+        enumerable = _ref2$enumerable === undefined ? false : _ref2$enumerable,
+        _ref2$writable = _ref2.writable,
+        writable = _ref2$writable === undefined ? true : _ref2$writable,
+        getter = _ref2.getter,
+        get = _ref2.get,
+        setter = _ref2.setter,
+        set = _ref2.set;
 
     // this method is intended for external usage only - it provides a way to define
     // methods and properties and overwrite any existing properties even if they are
     // not configurable
 
-    var descriptor = undefined;
+    var descriptor = void 0;
     if (getter || setter) {
       descriptor = { getter: getter, get: get, setter: setter, set: set, configurable: configurable, enumerable: enumerable };
     } else {
@@ -19680,7 +20032,7 @@ ObjectType.prototype = {
   }
 };
 
-},{"../utils/operators":380,"./property-descriptor":369,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/object/keys":27,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37}],368:[function(require,module,exports){
+},{"../utils/operators":395,"./property-descriptor":384,"babel-runtime/core-js/get-iterator":2,"babel-runtime/core-js/object/create":26,"babel-runtime/core-js/object/keys":27,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34}],383:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -19740,7 +20092,7 @@ PrimitiveType.prototype.toObject = function () {
 var UNDEFINED = exports.UNDEFINED = new PrimitiveType(undefined);
 var NULL = exports.NULL = new PrimitiveType(null);
 
-},{"../utils/helpers":378,"./object-type":367,"babel-runtime/core-js/symbol/for":34,"util":174}],369:[function(require,module,exports){
+},{"../utils/helpers":393,"./object-type":382,"babel-runtime/core-js/symbol/for":32,"util":189}],384:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -19765,7 +20117,7 @@ var defaultDescriptor = {
 };
 
 function PropertyDescriptor(base) {
-  var config = arguments.length <= 1 || arguments[1] === undefined ? defaultDescriptor : arguments[1];
+  var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultDescriptor;
   var key = arguments[2];
 
   this.base = base;
@@ -19899,7 +20251,7 @@ PropertyDescriptor.prototype = {
   }
 };
 
-},{"../utils/async":375,"../utils/operators":380}],370:[function(require,module,exports){
+},{"../utils/async":390,"../utils/operators":395}],385:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -19950,10 +20302,10 @@ function getProxyMethod(proxy, key) {
 }
 
 function getValueOrDefault(obj, key) {
-  var defaultValue = arguments.length <= 2 || arguments[2] === undefined ? _primitiveType.UNDEFINED : arguments[2];
-  var transformer = arguments.length <= 3 || arguments[3] === undefined ? function (v) {
+  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _primitiveType.UNDEFINED;
+  var transformer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function (v) {
     return v;
-  } : arguments[3];
+  };
 
   var propInfo = obj.getProperty(key);
   if (propInfo) {
@@ -20241,7 +20593,7 @@ ProxyType.prototype.getOwnProperty = function (key) {
     throwProxyInvariantError("getOwnPropertyDescriptor");
   }
 
-  var proxyDescriptor = undefined;
+  var proxyDescriptor = void 0;
   if (getter || setter) {
     proxyDescriptor = { getter: getter, setter: setter, get: undefined, set: undefined, enumerable: enumerable, configurable: configurable };
   } else {
@@ -20477,7 +20829,7 @@ ProxyType.prototype.revoke = function () {
   this.revoked = true;
 };
 
-},{"../utils/async":375,"../utils/checks":376,"../utils/contracts":377,"../utils/native":379,"./object-type":367,"./primitive-type":368,"./property-descriptor":369,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37,"util":174}],371:[function(require,module,exports){
+},{"../utils/async":390,"../utils/checks":391,"../utils/contracts":392,"../utils/native":394,"./object-type":382,"./primitive-type":383,"./property-descriptor":384,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34,"util":189}],386:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -20526,7 +20878,7 @@ RegexType.prototype.toNative = function () {
   return this.source;
 };
 
-},{"./object-type":367,"util":174}],372:[function(require,module,exports){
+},{"./object-type":382,"util":189}],387:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -20614,7 +20966,7 @@ StringType.prototype.toObject = function () {
   return obj;
 };
 
-},{"../utils/native":379,"./primitive-type":368,"babel-runtime/core-js/symbol/for":34,"util":174}],373:[function(require,module,exports){
+},{"../utils/native":394,"./primitive-type":383,"babel-runtime/core-js/symbol/for":32,"util":189}],388:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -20687,7 +21039,7 @@ SymbolType.getByInstance = function (sym) {
   return undefined;
 };
 
-},{"./object-type":367,"babel-runtime/core-js/object/create":26,"util":174}],374:[function(require,module,exports){
+},{"./object-type":382,"babel-runtime/core-js/object/create":26,"util":189}],389:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -20770,8 +21122,7 @@ function reset(env, leftNode, priorScope, newScope) {
 }
 
 function declare(env, leftNode, rightValue, kind) {
-  var _i, _ln, left;
-
+  var i, ln, left;
   return _regenerator2.default.wrap(function declare$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
@@ -20785,19 +21136,19 @@ function declare(env, leftNode, rightValue, kind) {
 
           kind = leftNode.kind;
 
-          _i = 0, _ln = leftNode.declarations.length;
+          i = 0, ln = leftNode.declarations.length;
 
         case 4:
-          if (!(_i < _ln)) {
+          if (!(i < ln)) {
             _context3.next = 10;
             break;
           }
 
           _context3.next = 7;
-          return declare(env, leftNode.declarations[_i], rightValue, kind);
+          return declare(env, leftNode.declarations[i], rightValue, kind);
 
         case 7:
-          _i++;
+          i++;
           _context3.next = 4;
           break;
 
@@ -20970,7 +21321,7 @@ function handleDefault(env, left, rightValue, cb) {
 }
 
 function destructureArray(env, pattern, arr, cb) {
-  var it, done, _i2, _ln2, element, value, current, _it$next, rest, _it$next2;
+  var it, done, i, ln, element, value, current, _it$next, rest, _it$next2;
 
   return _regenerator2.default.wrap(function destructureArray$(_context7) {
     while (1) {
@@ -20978,16 +21329,16 @@ function destructureArray(env, pattern, arr, cb) {
         case 0:
           it = _iterators2.default.getIterator(arr);
           done = false;
-          _i2 = 0, _ln2 = pattern.elements.length;
+          i = 0, ln = pattern.elements.length;
 
         case 3:
-          if (!(_i2 < _ln2)) {
+          if (!(i < ln)) {
             _context7.next = 21;
             break;
           }
 
-          element = pattern.elements[_i2];
-          value = undefined, current = undefined;
+          element = pattern.elements[i];
+          value = void 0, current = void 0;
 
 
           if (!done) {
@@ -21036,7 +21387,7 @@ function destructureArray(env, pattern, arr, cb) {
           return cb(env, element, value || _primitiveType.UNDEFINED);
 
         case 18:
-          _i2++;
+          i++;
           _context7.next = 3;
           break;
 
@@ -21086,60 +21437,60 @@ function getObjectKey(env, keyNode) {
 }
 
 function destructureObject(env, pattern, obj, cb) {
-  var _i3, _ln3, _current, _key, propInfo, _value;
-
+  var i, ln, current, key, propInfo, value;
   return _regenerator2.default.wrap(function destructureObject$(_context9) {
     while (1) {
       switch (_context9.prev = _context9.next) {
         case 0:
-          _i3 = 0, _ln3 = pattern.properties.length;
+          i = 0, ln = pattern.properties.length;
 
         case 1:
-          if (!(_i3 < _ln3)) {
-            _context9.next = 23;
+          if (!(i < ln)) {
+            _context9.next = 24;
             break;
           }
 
-          _current = pattern.properties[_i3];
-          _key = undefined;
+          current = pattern.properties[i];
+          key = void 0;
 
-          if (!_current.computed) {
-            _context9.next = 13;
+          if (!current.computed) {
+            _context9.next = 14;
             break;
           }
 
-          _context9.next = 7;
-          return env.createExecutionContext().execute(_current.key);
+          _context9.t0 = _native.toPropertyKey;
+          _context9.next = 8;
+          return env.createExecutionContext().execute(current.key);
 
-        case 7:
-          _context9.t0 = _context9.sent.result.getValue();
-          _context9.next = 10;
-          return (0, _native.toPropertyKey)(_context9.t0);
+        case 8:
+          _context9.t1 = _context9.sent.result.getValue();
+          _context9.next = 11;
+          return (0, _context9.t0)(_context9.t1);
 
-        case 10:
-          _key = _context9.sent;
-          _context9.next = 16;
+        case 11:
+          key = _context9.sent;
+          _context9.next = 17;
           break;
 
-        case 13:
-          _context9.next = 15;
-          return getObjectKey(env, _current.key);
-
-        case 15:
-          _key = _context9.sent;
+        case 14:
+          _context9.next = 16;
+          return getObjectKey(env, current.key);
 
         case 16:
-          propInfo = obj.getProperty(_key);
-          _value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
-          _context9.next = 20;
-          return cb(env, _current.value, _value);
+          key = _context9.sent;
 
-        case 20:
-          _i3++;
+        case 17:
+          propInfo = obj.getProperty(key);
+          value = propInfo ? propInfo.getValue() : _primitiveType.UNDEFINED;
+          _context9.next = 21;
+          return cb(env, current.value, value);
+
+        case 21:
+          i++;
           _context9.next = 1;
           break;
 
-        case 23:
+        case 24:
         case "end":
           return _context9.stop();
       }
@@ -21147,7 +21498,7 @@ function destructureObject(env, pattern, obj, cb) {
   }, _marked[7], this);
 }
 
-},{"../iterators":352,"../types/primitive-type":368,"./native":379,"babel-runtime/regenerator":37}],375:[function(require,module,exports){
+},{"../iterators":367,"../types/primitive-type":383,"./native":394,"babel-runtime/regenerator":34}],390:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -21332,10 +21683,9 @@ function step(it, prev) {
 
 function tryCatch(it, priorValue, method) {
   try {
-    var _it$method = it[method](priorValue);
-
-    var done = _it$method.done;
-    var value = _it$method.value;
+    var _it$method = it[method](priorValue),
+        done = _it$method.done,
+        value = _it$method.value;
 
     return { state: "next", done: done, value: value };
   } catch (err) {
@@ -21355,8 +21705,8 @@ function tryCatch(it, priorValue, method) {
  * at any point in the iteration a Promise is returned.
  */
 function exhaust(it, value) {
-  var stack = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
-  var state = arguments.length <= 3 || arguments[3] === undefined ? "next" : arguments[3];
+  var stack = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var state = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "next";
 
   while (it) {
     if (typeof it[state] !== "function") {
@@ -21370,7 +21720,7 @@ function exhaust(it, value) {
       break;
     }
 
-    var done = undefined;
+    var done = void 0;
 
     var _tryCatch = tryCatch(it, value, state);
 
@@ -21414,7 +21764,7 @@ function exhaust(it, value) {
   return value;
 }
 
-},{"babel-runtime/regenerator":37}],376:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],391:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -21526,7 +21876,7 @@ function isStrictNode(nodes) {
   return false;
 }
 
-},{"babel-runtime/core-js/get-iterator":2}],377:[function(require,module,exports){
+},{"babel-runtime/core-js/get-iterator":2}],392:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -21698,7 +22048,7 @@ function isRegExp(obj) {
   return obj.className === "RegExp";
 }
 
-},{"../keywords":356,"../types/symbol-type":373,"./checks":376,"./native":379}],378:[function(require,module,exports){
+},{"../keywords":371,"../types/symbol-type":388,"./checks":391,"./native":394}],393:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -21754,7 +22104,7 @@ function createDataProperty(obj, key, value, throwOnError) {
   obj.defineProperty(key, { value: value, configurable: true, enumerable: true, writable: true }, throwOnError);
 }
 
-},{"./checks":376}],379:[function(require,module,exports){
+},{"./checks":391}],394:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -21806,7 +22156,8 @@ var octalPattern = /^-?0[0-7]/;
 var octalEscapePattern = /^([^\\]|\\[^0-7])*\\([0-3][0-7]{1,2}|[4-7][0-7]|[0-7])/;
 
 function getPrimitive(value, methods, defaultValue) {
-  var getNative, primitiveValue;
+  var getNative, primitiveValue, _primitiveValue;
+
   return _regenerator2.default.wrap(function getPrimitive$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
@@ -21860,14 +22211,14 @@ function getPrimitive(value, methods, defaultValue) {
           return getNative.call(value);
 
         case 15:
-          primitiveValue = _context.sent;
+          _primitiveValue = _context.sent;
 
-          if (!primitiveValue.isPrimitive) {
+          if (!_primitiveValue.isPrimitive) {
             _context.next = 18;
             break;
           }
 
-          return _context.abrupt("return", primitiveValue.toNative());
+          return _context.abrupt("return", _primitiveValue.toNative());
 
         case 18:
           throw TypeError("Cannot convert object to primitive value.");
@@ -22009,9 +22360,8 @@ function toPropertyKey(key) {
 
 function toArray(obj, length) {
   var arr,
-      _i,
+      i,
       _args5 = arguments;
-
   return _regenerator2.default.wrap(function toArray$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
@@ -22035,14 +22385,14 @@ function toArray(obj, length) {
           length = _context5.sent;
 
         case 6:
-          _i = 0;
+          i = 0;
 
-          while (_i < length) {
-            if (obj.has(_i)) {
-              arr[_i] = obj.getValue(_i);
+          while (i < length) {
+            if (obj.has(i)) {
+              arr[i] = obj.getValue(i);
             }
 
-            _i++;
+            i++;
           }
 
         case 8:
@@ -22176,25 +22526,26 @@ function toPrimitiveOrdinary(obj, preferredType) {
 
         case 4:
           if (!(hint === "string")) {
-            _context8.next = 9;
+            _context8.next = 10;
             break;
           }
 
-          _context8.next = 7;
+          _context8.t0 = String;
+          _context8.next = 8;
           return getPrimitive(obj, ["toString", "valueOf"], "undefined");
 
-        case 7:
-          _context8.t0 = _context8.sent;
-          return _context8.abrupt("return", String(_context8.t0));
+        case 8:
+          _context8.t1 = _context8.sent;
+          return _context8.abrupt("return", (0, _context8.t0)(_context8.t1));
 
-        case 9:
-          _context8.next = 11;
+        case 10:
+          _context8.next = 12;
           return getPrimitive(obj, ["valueOf", "toString"], 0);
 
-        case 11:
+        case 12:
           return _context8.abrupt("return", _context8.sent);
 
-        case 12:
+        case 13:
         case "end":
           return _context8.stop();
       }
@@ -22231,14 +22582,15 @@ function toString(obj) {
           throw TypeError("Symbol cannot be coerced into a string.");
 
         case 6:
-          _context9.next = 8;
+          _context9.t0 = String;
+          _context9.next = 9;
           return toPrimitive(obj, "string");
 
-        case 8:
-          _context9.t0 = _context9.sent;
-          return _context9.abrupt("return", String(_context9.t0));
+        case 9:
+          _context9.t1 = _context9.sent;
+          return _context9.abrupt("return", (0, _context9.t0)(_context9.t1));
 
-        case 10:
+        case 11:
         case "end":
           return _context9.stop();
       }
@@ -22275,14 +22627,15 @@ function toNumber(obj) {
           throw TypeError("Symbol cannot be coerced into a number.");
 
         case 6:
-          _context10.next = 8;
+          _context10.t0 = Number;
+          _context10.next = 9;
           return toPrimitive(obj, "number");
 
-        case 8:
-          _context10.t0 = _context10.sent;
-          return _context10.abrupt("return", Number(_context10.t0));
+        case 9:
+          _context10.t1 = _context10.sent;
+          return _context10.abrupt("return", (0, _context10.t0)(_context10.t1));
 
-        case 10:
+        case 11:
         case "end":
           return _context10.stop();
       }
@@ -22450,7 +22803,7 @@ function isOctalLiteral(rawValue, actualValue) {
   return false;
 }
 
-},{"../utils/helpers":378,"./checks":376,"babel-runtime/core-js/math/sign":18,"babel-runtime/core-js/symbol/for":34,"babel-runtime/regenerator":37}],380:[function(require,module,exports){
+},{"../utils/helpers":393,"./checks":391,"babel-runtime/core-js/math/sign":18,"babel-runtime/core-js/symbol/for":32,"babel-runtime/regenerator":34}],395:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -22479,7 +22832,6 @@ function pos(value) {
 
 var ops = (_ops = {
   // algorithms
-
   areSame: function (a, b) {
     if (a.type !== b.type) {
       return false;
@@ -22605,8 +22957,6 @@ var ops = (_ops = {
       }
     }, _callee, this);
   }),
-
-  /* eslint-enable eqeqeq */
   strictEquals: function (a, b) {
     if (a.isPrimitive && b.isPrimitive) {
       return a.value === b.value;
@@ -22624,7 +22974,7 @@ var ops = (_ops = {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            primitiveA = undefined, primitiveB = undefined;
+            primitiveA = void 0, primitiveB = void 0;
 
             if (!leftFirst) {
               _context2.next = 10;
@@ -23031,14 +23381,15 @@ var ops = (_ops = {
     while (1) {
       switch (_context18.prev = _context18.next) {
         case 0:
-          _context18.next = 2;
+          _context18.t0 = pos;
+          _context18.next = 3;
           return this.relationalCompare(a, b, true);
 
-        case 2:
-          _context18.t0 = _context18.sent;
-          return _context18.abrupt("return", pos(_context18.t0));
+        case 3:
+          _context18.t1 = _context18.sent;
+          return _context18.abrupt("return", (0, _context18.t0)(_context18.t1));
 
-        case 4:
+        case 5:
         case "end":
           return _context18.stop();
       }
@@ -23049,14 +23400,15 @@ var ops = (_ops = {
     while (1) {
       switch (_context19.prev = _context19.next) {
         case 0:
-          _context19.next = 2;
+          _context19.t0 = neg;
+          _context19.next = 3;
           return this.relationalCompare(b, a, false);
 
-        case 2:
-          _context19.t0 = _context19.sent;
-          return _context19.abrupt("return", neg(_context19.t0));
+        case 3:
+          _context19.t1 = _context19.sent;
+          return _context19.abrupt("return", (0, _context19.t0)(_context19.t1));
 
-        case 4:
+        case 5:
         case "end":
           return _context19.stop();
       }
@@ -23067,14 +23419,15 @@ var ops = (_ops = {
     while (1) {
       switch (_context20.prev = _context20.next) {
         case 0:
-          _context20.next = 2;
+          _context20.t0 = pos;
+          _context20.next = 3;
           return this.relationalCompare(b, a, false);
 
-        case 2:
-          _context20.t0 = _context20.sent;
-          return _context20.abrupt("return", pos(_context20.t0));
+        case 3:
+          _context20.t1 = _context20.sent;
+          return _context20.abrupt("return", (0, _context20.t0)(_context20.t1));
 
-        case 4:
+        case 5:
         case "end":
           return _context20.stop();
       }
@@ -23085,14 +23438,15 @@ var ops = (_ops = {
     while (1) {
       switch (_context21.prev = _context21.next) {
         case 0:
-          _context21.next = 2;
+          _context21.t0 = neg;
+          _context21.next = 3;
           return this.relationalCompare(a, b, true);
 
-        case 2:
-          _context21.t0 = _context21.sent;
-          return _context21.abrupt("return", neg(_context21.t0));
+        case 3:
+          _context21.t1 = _context21.sent;
+          return _context21.abrupt("return", (0, _context21.t0)(_context21.t1));
 
-        case 4:
+        case 5:
         case "end":
           return _context21.stop();
       }
@@ -23145,7 +23499,7 @@ var ops = (_ops = {
 
 exports.default = ops;
 
-},{"./native":379,"babel-runtime/regenerator":37}],381:[function(require,module,exports){
+},{"./native":394,"babel-runtime/regenerator":34}],396:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23279,7 +23633,7 @@ function ArrayExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../iterators/":352,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],382:[function(require,module,exports){
+},{"../iterators/":367,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],397:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23297,12 +23651,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var _marked = [AssignmentExpression].map(_regenerator2.default.mark);
 
 function AssignmentExpression(node, context, next) {
-  var rightValue, right, left, op, nativeValue;
+  var rightValue, right, left, _right, op, nativeValue;
+
   return _regenerator2.default.wrap(function AssignmentExpression$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          rightValue = undefined;
+          rightValue = void 0;
 
           if (!(node.operator === "=")) {
             _context.next = 10;
@@ -23334,9 +23689,9 @@ function AssignmentExpression(node, context, next) {
           return next(node.right, context);
 
         case 15:
-          right = _context.sent.result;
+          _right = _context.sent.result;
 
-          rightValue = right.getValue();
+          rightValue = _right.getValue();
 
           // remove equals
           op = node.operator.slice(0, -1);
@@ -23360,7 +23715,7 @@ function AssignmentExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/assign":374,"babel-runtime/regenerator":37}],383:[function(require,module,exports){
+},{"../utils/assign":389,"babel-runtime/regenerator":34}],398:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23411,7 +23766,7 @@ function BinaryExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../types/primitive-type":368,"babel-runtime/regenerator":37}],384:[function(require,module,exports){
+},{"../types/primitive-type":383,"babel-runtime/regenerator":34}],399:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23441,7 +23796,7 @@ function BlockStatement(node, context, next) {
               while (1) {
                 switch (_context.prev = _context.next) {
                   case 0:
-                    result = undefined, priorResult = undefined;
+                    result = void 0, priorResult = void 0;
                     i = 0, ln = node.body.length;
 
                   case 2:
@@ -23495,7 +23850,7 @@ function BlockStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"babel-runtime/regenerator":37}],385:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],400:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23667,7 +24022,7 @@ function CallExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../env/property-reference":179,"../iterators/":352,"../types/primitive-type":368,"../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],386:[function(require,module,exports){
+},{"../env/property-reference":194,"../iterators/":367,"../types/primitive-type":383,"../utils/native":394,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],401:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23682,7 +24037,7 @@ function DebuggerStatement(node, context) {
   return context.empty();
 }
 
-},{}],387:[function(require,module,exports){
+},{}],402:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23706,56 +24061,58 @@ function DoWhileStatement(node, context, next) {
       switch (_context.prev = _context.next) {
         case 0:
           loopContext = context.createLoop();
-          result = undefined, priorResult = undefined;
+          result = void 0, priorResult = void 0;
           passed = true;
 
           if (!node.isWhileStatement()) {
-            _context.next = 8;
+            _context.next = 9;
             break;
           }
 
-          _context.next = 6;
+          _context.t0 = _native.toBoolean;
+          _context.next = 7;
           return next(node.test, loopContext);
 
-        case 6:
-          _context.t0 = _context.sent.result.getValue();
-          passed = (0, _native.toBoolean)(_context.t0);
+        case 7:
+          _context.t1 = _context.sent.result.getValue();
+          passed = (0, _context.t0)(_context.t1);
 
-        case 8:
+        case 9:
           if (!passed) {
-            _context.next = 21;
+            _context.next = 23;
             break;
           }
 
-          _context.next = 11;
+          _context.next = 12;
           return next(node.body, loopContext);
 
-        case 11:
+        case 12:
           result = _context.sent;
 
           if (!loopContext.shouldBreak(result)) {
-            _context.next = 14;
+            _context.next = 15;
             break;
           }
 
           return _context.abrupt("return", loopContext.abrupt(result, priorResult));
 
-        case 14:
-          _context.next = 16;
+        case 15:
+          _context.t2 = _native.toBoolean;
+          _context.next = 18;
           return next(node.test, loopContext);
 
-        case 16:
-          _context.t1 = _context.sent.result.getValue();
-          passed = (0, _native.toBoolean)(_context.t1);
+        case 18:
+          _context.t3 = _context.sent.result.getValue();
+          passed = (0, _context.t2)(_context.t3);
 
           priorResult = result;
-          _context.next = 8;
+          _context.next = 9;
           break;
 
-        case 21:
+        case 23:
           return _context.abrupt("return", result || loopContext.empty());
 
-        case 22:
+        case 24:
         case "end":
           return _context.stop();
       }
@@ -23763,7 +24120,7 @@ function DoWhileStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],388:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],403:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23772,7 +24129,7 @@ function EmptyStatement(node, context) {
   return context.empty();
 }
 
-},{}],389:[function(require,module,exports){
+},{}],404:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23790,9 +24147,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var _marked = [getSource, ExportDeclaration].map(_regenerator2.default.mark);
 
 function exportSpecified(target, key, env, source) {
-  var alias = arguments.length <= 4 || arguments[4] === undefined ? key : arguments[4];
+  var alias = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : key;
 
-  var ref = undefined;
+  var ref = void 0;
   if (source) {
     // todo: add 'getReference' function to objects to make this simpler
     ref = new _propertyReference.PropertyReference(key, source, env);
@@ -23844,25 +24201,23 @@ function getSource(env, name) {
 }
 
 function ExportDeclaration(node, context, next) {
-  var _this = this;
-
-  var target, decl;
-  return _regenerator2.default.wrap(function ExportDeclaration$(_context4) {
+  var target, decl, source;
+  return _regenerator2.default.wrap(function ExportDeclaration$(_context3) {
     while (1) {
-      switch (_context4.prev = _context4.next) {
+      switch (_context3.prev = _context3.next) {
         case 0:
           target = context.env.exports;
 
           if (!node.declaration) {
-            _context4.next = 8;
+            _context3.next = 8;
             break;
           }
 
-          _context4.next = 4;
+          _context3.next = 4;
           return next(node.declaration, context);
 
         case 4:
-          decl = _context4.sent;
+          decl = _context3.sent;
 
 
           if (node.isExportDefaultDeclaration()) {
@@ -23874,62 +24229,48 @@ function ExportDeclaration(node, context, next) {
               exportSpecified(target, n.id.name, context.env);
             });
           }
-          _context4.next = 9;
+          _context3.next = 14;
           break;
 
         case 8:
-          return _context4.delegateYield(_regenerator2.default.mark(function _callee2() {
-            var source;
-            return _regenerator2.default.wrap(function _callee2$(_context3) {
-              while (1) {
-                switch (_context3.prev = _context3.next) {
-                  case 0:
-                    source = null;
+          source = null;
 
-                    if (!node.source) {
-                      _context3.next = 5;
-                      break;
-                    }
+          if (!node.source) {
+            _context3.next = 13;
+            break;
+          }
 
-                    _context3.next = 4;
-                    return getSource(context.env, node.source.value);
+          _context3.next = 12;
+          return getSource(context.env, node.source.value);
 
-                  case 4:
-                    source = _context3.sent;
+        case 12:
+          source = _context3.sent;
 
-                  case 5:
+        case 13:
 
-                    if (node.isExportAllDeclaration()) {
-                      // if using a wildcard export, just copy all the properties to the current export object
-                      source.getOwnPropertyKeys().forEach(function (key) {
-                        return exportSpecified(target, key, context.env, source);
-                      });
-                    } else {
-                      node.specifiers.forEach(function (spec) {
-                        return exportSpecified(target, spec.local.name, context.env, source, spec.exported.name);
-                      });
-                    }
+          if (node.isExportAllDeclaration()) {
+            // if using a wildcard export, just copy all the properties to the current export object
+            source.getOwnPropertyKeys().forEach(function (key) {
+              return exportSpecified(target, key, context.env, source);
+            });
+          } else {
+            node.specifiers.forEach(function (spec) {
+              return exportSpecified(target, spec.local.name, context.env, source, spec.exported.name);
+            });
+          }
 
-                  case 6:
-                  case "end":
-                    return _context3.stop();
-                }
-              }
-            }, _callee2, _this);
-          })(), "t0", 9);
+        case 14:
+          return _context3.abrupt("return", context.empty());
 
-        case 9:
-          return _context4.abrupt("return", context.empty());
-
-        case 10:
+        case 15:
         case "end":
-          return _context4.stop();
+          return _context3.stop();
       }
     }
   }, _marked[1], this);
 }
 
-},{"../env/property-reference":179,"babel-runtime/regenerator":37}],390:[function(require,module,exports){
+},{"../env/property-reference":194,"babel-runtime/regenerator":34}],405:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -23968,7 +24309,7 @@ function ExpressionStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../types/primitive-type":368,"babel-runtime/regenerator":37}],391:[function(require,module,exports){
+},{"../types/primitive-type":383,"babel-runtime/regenerator":34}],406:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24013,7 +24354,7 @@ function ForInStatement(node, context, next) {
           it = obj.getIterator(context.env);
           advance = it.getValue("next");
           done = false;
-          result = undefined, priorResult = undefined;
+          result = void 0, priorResult = void 0;
 
         case 10:
           if (done) {
@@ -24071,7 +24412,7 @@ function ForInStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/assign":374,"../utils/checks":376,"../utils/native":379,"babel-runtime/regenerator":37}],392:[function(require,module,exports){
+},{"../utils/assign":389,"../utils/checks":391,"../utils/native":394,"babel-runtime/regenerator":34}],407:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24120,7 +24461,7 @@ function ForOfStatement(node, context, next) {
           // let advance = it.getValue("next");
 
           done = false;
-          result = undefined, priorResult = undefined;
+          result = void 0, priorResult = void 0;
 
         case 9:
           if (done) {
@@ -24129,7 +24470,7 @@ function ForOfStatement(node, context, next) {
           }
 
           scope = loopContext.env.createBlockScope(node);
-          current = undefined;
+          current = void 0;
           _it$next = it.next();
           done = _it$next.done;
           current = _it$next.value;
@@ -24176,7 +24517,7 @@ function ForOfStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../iterators/":352,"../utils/assign":374,"../utils/checks":376,"babel-runtime/regenerator":37}],393:[function(require,module,exports){
+},{"../iterators/":367,"../utils/assign":389,"../utils/checks":391,"babel-runtime/regenerator":34}],408:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24206,14 +24547,15 @@ function shouldContinue(node, context, next) {
           return _context.abrupt("return", true);
 
         case 2:
-          _context.next = 4;
+          _context.t0 = _native.toBoolean;
+          _context.next = 5;
           return next(node, context);
 
-        case 4:
-          _context.t0 = _context.sent.result.getValue();
-          return _context.abrupt("return", (0, _native.toBoolean)(_context.t0));
+        case 5:
+          _context.t1 = _context.sent.result.getValue();
+          return _context.abrupt("return", (0, _context.t0)(_context.t1));
 
-        case 6:
+        case 7:
         case "end":
           return _context.stop();
       }
@@ -24239,7 +24581,7 @@ function ForStatement(node, context, next) {
           return next(node.init, loopContext);
 
         case 5:
-          result = undefined, priorResult = undefined;
+          result = void 0, priorResult = void 0;
 
         case 6:
           _context2.next = 8;
@@ -24298,7 +24640,7 @@ function ForStatement(node, context, next) {
   }, _marked[1], this);
 }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],394:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],409:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24312,7 +24654,7 @@ function FunctionDeclaration(node, context) {
   return context.result(func);
 }
 
-},{}],395:[function(require,module,exports){
+},{}],410:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24385,7 +24727,7 @@ function getName(node, context, next) {
             break;
           }
 
-          key = undefined;
+          key = void 0;
 
           if (!parent.computed) {
             _context.next = 23;
@@ -24534,7 +24876,7 @@ function findOrCreate(arr, key, isStatic) {
 }
 
 function ClassDeclaration(node, context, next) {
-  var objectFactory, props, ctor, proto, parent, parentProto, _iterator, _isArray, _i, _ref, method, kind, _key, homeObject, _computedKey, _name, entry, fn, name, def;
+  var objectFactory, props, ctor, proto, parent, parentProto, _iterator, _isArray, _i, _ref, method, kind, key, homeObject, computedKey, _name, entry, fn, name, def;
 
   return _regenerator2.default.wrap(function ClassDeclaration$(_context6) {
     while (1) {
@@ -24542,7 +24884,7 @@ function ClassDeclaration(node, context, next) {
         case 0:
           objectFactory = context.env.objectFactory;
           props = [];
-          ctor = undefined, proto = undefined, parent = undefined, parentProto = undefined;
+          ctor = void 0, proto = void 0, parent = void 0, parentProto = void 0;
 
           if (!node.superClass) {
             _context6.next = 9;
@@ -24599,7 +24941,7 @@ function ClassDeclaration(node, context, next) {
         case 21:
           method = _ref;
           kind = method.kind;
-          _key = method.key.name;
+          key = method.key.name;
           homeObject = method.static ? parent : parentProto;
 
           if (!(method.computed || method.key.isLiteral())) {
@@ -24611,16 +24953,16 @@ function ClassDeclaration(node, context, next) {
           return next(method.key, context);
 
         case 28:
-          _computedKey = _context6.sent;
+          computedKey = _context6.sent;
           _context6.next = 31;
-          return (0, _native.toPropertyKey)(_computedKey.result.getValue());
+          return (0, _native.toPropertyKey)(computedKey.result.getValue());
 
         case 31:
-          _key = _context6.sent;
+          key = _context6.sent;
 
         case 32:
-          _name = typeof _key !== "string" && _key.isSymbol ? _key.toSymbolString() : _key;
-          entry = undefined;
+          _name = typeof key !== "string" && key.isSymbol ? key.toSymbolString() : key;
+          entry = void 0;
           _context6.t0 = kind;
           _context6.next = _context6.t0 === "constructor" ? 37 : _context6.t0 === "get" ? 39 : _context6.t0 === "set" ? 39 : 42;
           break;
@@ -24630,7 +24972,7 @@ function ClassDeclaration(node, context, next) {
           return _context6.abrupt("break", 49);
 
         case 39:
-          entry = findOrCreate(props, _key, method.static);
+          entry = findOrCreate(props, key, method.static);
           entry[kind] = objectFactory.createFunction(method.value, null, { strict: true, name: kind + " " + _name, homeObject: homeObject });
           return _context6.abrupt("break", 49);
 
@@ -24640,14 +24982,14 @@ function ClassDeclaration(node, context, next) {
             break;
           }
 
-          entry = findOrCreate(props, _key, true);
+          entry = findOrCreate(props, key, true);
           entry.value = objectFactory.createFunction(method.value, null, { strict: true, name: _name, homeObject: homeObject });
           return _context6.abrupt("break", 49);
 
         case 46:
           fn = objectFactory.createFunction(method.value, null, { strict: true, name: _name, homeObject: homeObject });
 
-          proto.define(_key, fn);
+          proto.define(key, fn);
           return _context6.abrupt("break", 49);
 
         case 49:
@@ -24728,7 +25070,7 @@ function ClassDeclaration(node, context, next) {
   }, _marked[2], this);
 }
 
-},{"../types/primitive-type":368,"../utils/native":379,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],396:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/native":394,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],411:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24737,7 +25079,7 @@ function Identifier(node, context) {
   return context.result(context.env.getReference(node.name));
 }
 
-},{}],397:[function(require,module,exports){
+},{}],412:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24800,7 +25142,7 @@ function IfStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],398:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],413:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -24873,7 +25215,7 @@ function ImportDeclaration(node, context, next) {
             break;
           }
 
-          return _context2.abrupt("break", 29);
+          return _context2.abrupt("break", 28);
 
         case 13:
           _ref = _iterator[_i++];
@@ -24888,15 +25230,14 @@ function ImportDeclaration(node, context, next) {
             break;
           }
 
-          return _context2.abrupt("break", 29);
+          return _context2.abrupt("break", 28);
 
         case 19:
           _ref = _i.value;
 
         case 20:
           specifier = _ref;
-          imported = specifier.imported;
-          local = specifier.local;
+          imported = specifier.imported, local = specifier.local;
           value = source;
 
 
@@ -24907,17 +25248,17 @@ function ImportDeclaration(node, context, next) {
             value = source.getValue(key);
           }
 
-          _context2.next = 27;
+          _context2.next = 26;
           return (0, _assign.declare)(context.env, local, value);
 
-        case 27:
+        case 26:
           _context2.next = 10;
           break;
 
-        case 29:
+        case 28:
           return _context2.abrupt("return", context.empty());
 
-        case 30:
+        case 29:
         case "end":
           return _context2.stop();
       }
@@ -24925,7 +25266,7 @@ function ImportDeclaration(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/assign":374,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],399:[function(require,module,exports){
+},{"../utils/assign":389,"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],414:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25145,13 +25486,13 @@ var visitors = exports.visitors = {
   WhileStatement: _doWhileStatement2.default
 };
 
-},{"./array-expression":381,"./assignment-expression":382,"./binary-expression":383,"./block-statement":384,"./call-expression":385,"./debugger-statement":386,"./do-while-statement.js":387,"./empty-statement":388,"./export-declaration":389,"./expression-statement":390,"./for-in-statement":391,"./for-of-statement":392,"./for-statement":393,"./function-declaration":394,"./function-expression":395,"./identifier":396,"./if-statement":397,"./import-declaration":398,"./interrupt-statement":400,"./labeled-statement":401,"./literal":402,"./logical-expression":403,"./member-expression":404,"./meta-property":405,"./object-expression":406,"./return-statement":407,"./sequence-expression":408,"./spread-element":409,"./super":410,"./switch-statement":411,"./tagged-template-expression":412,"./template-literal":413,"./this-expression":414,"./throw-statement":415,"./try-statement":416,"./unary-expression":417,"./update-expression":418,"./variable-declaration":419,"./variable-declarator":420,"./with-statement":421}],400:[function(require,module,exports){
+},{"./array-expression":396,"./assignment-expression":397,"./binary-expression":398,"./block-statement":399,"./call-expression":400,"./debugger-statement":401,"./do-while-statement.js":402,"./empty-statement":403,"./export-declaration":404,"./expression-statement":405,"./for-in-statement":406,"./for-of-statement":407,"./for-statement":408,"./function-declaration":409,"./function-expression":410,"./identifier":411,"./if-statement":412,"./import-declaration":413,"./interrupt-statement":415,"./labeled-statement":416,"./literal":417,"./logical-expression":418,"./member-expression":419,"./meta-property":420,"./object-expression":421,"./return-statement":422,"./sequence-expression":423,"./spread-element":424,"./super":425,"./switch-statement":426,"./tagged-template-expression":427,"./template-literal":428,"./this-expression":429,"./throw-statement":430,"./try-statement":431,"./unary-expression":432,"./update-expression":433,"./variable-declaration":434,"./variable-declarator":435,"./with-statement":436}],415:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
 exports.default = InterruptStatement;
 function InterruptStatement(node, context) {
-  var label = undefined;
+  var label = void 0;
 
   if (node.label) {
     label = node.label.name;
@@ -25164,7 +25505,7 @@ function InterruptStatement(node, context) {
   return context.skip(label);
 }
 
-},{}],401:[function(require,module,exports){
+},{}],416:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25200,7 +25541,7 @@ function LabeledStatement(node, context, next) {
   }, _marked[0], this);
 };
 
-},{"babel-runtime/regenerator":37}],402:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],417:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25209,7 +25550,7 @@ function Literal(node, context) {
   return context.result(context.env.objectFactory.createPrimitive(node.value));
 }
 
-},{}],403:[function(require,module,exports){
+},{}],418:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25269,7 +25610,7 @@ function LogicalExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/native":379,"babel-runtime/regenerator":37}],404:[function(require,module,exports){
+},{"../utils/native":394,"babel-runtime/regenerator":34}],419:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25299,7 +25640,7 @@ function MemberExpression(node, context, next) {
 
         case 2:
           obj = _context.sent.result.getValue();
-          key = undefined, value = undefined;
+          key = void 0, value = void 0;
 
           if (!node.computed) {
             _context.next = 17;
@@ -25349,7 +25690,7 @@ function MemberExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../env/property-reference":179,"../utils/native":379,"babel-runtime/regenerator":37}],405:[function(require,module,exports){
+},{"../env/property-reference":194,"../utils/native":394,"babel-runtime/regenerator":34}],420:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25365,7 +25706,7 @@ function MetaProperty(node, context) {
   throw SyntaxError("Unknown MetaProperty: " + node.meta.name + "." + node.property.name);
 }
 
-},{"../types/primitive-type":368}],406:[function(require,module,exports){
+},{"../types/primitive-type":383}],421:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25466,7 +25807,7 @@ function ObjectExpression(node, context, next) {
 
         case 7:
           value = _context3.sent.result.getValue();
-          key = undefined;
+          key = void 0;
 
           if (!property.computed) {
             _context3.next = 18;
@@ -25550,7 +25891,7 @@ function ObjectExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],407:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],422:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25597,7 +25938,7 @@ function ReturnStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../types/primitive-type":368,"babel-runtime/regenerator":37}],408:[function(require,module,exports){
+},{"../types/primitive-type":383,"babel-runtime/regenerator":34}],423:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25618,7 +25959,7 @@ function SequenceExpression(node, context, next) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          value = undefined;
+          value = void 0;
           i = 0, ln = node.expressions.length;
 
         case 2:
@@ -25649,7 +25990,7 @@ function SequenceExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"babel-runtime/regenerator":37}],409:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],424:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25683,23 +26024,24 @@ function SpreadElement(node, context, next) {
           iterable = args.result.getValue();
 
           if (iterable.has(iteratorKey)) {
-            _context.next = 12;
+            _context.next = 13;
             break;
           }
 
-          _context.next = 8;
+          _context.t0 = TypeError;
+          _context.next = 9;
           return (0, _native.toString)(iterable);
 
-        case 8:
-          _context.t0 = _context.sent;
-          _context.t1 = "Object " + _context.t0;
-          _context.t2 = _context.t1 + " cannot be spread because it is not iterable";
-          throw TypeError(_context.t2);
-
-        case 12:
-          return _context.abrupt("return", context.result(iterable));
+        case 9:
+          _context.t1 = _context.sent;
+          _context.t2 = "Object " + _context.t1;
+          _context.t3 = _context.t2 + " cannot be spread because it is not iterable";
+          throw (0, _context.t0)(_context.t3);
 
         case 13:
+          return _context.abrupt("return", context.result(iterable));
+
+        case 14:
         case "end":
           return _context.stop();
       }
@@ -25707,7 +26049,7 @@ function SpreadElement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../types/symbol-type":373,"../utils/native":379,"babel-runtime/regenerator":37}],410:[function(require,module,exports){
+},{"../types/symbol-type":388,"../utils/native":394,"babel-runtime/regenerator":34}],425:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25718,7 +26060,7 @@ function Super(node, context) {
   var newTarget = context.env.current.getMeta("newTarget");
 
   if (homeObject && newTarget && !node.getParent().isCallExpression()) {
-    // accessing `super` in a constructor without calling as function refers to prototype
+    // accessing `super` in a constructor without calling as function refers to prototype 
     // todo: confirm this
     homeObject = homeObject.getValue("prototype");
   }
@@ -25726,7 +26068,7 @@ function Super(node, context) {
   return context.result(homeObject || context.env.getThisBinding());
 }
 
-},{}],411:[function(require,module,exports){
+},{}],426:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -25751,7 +26093,7 @@ function executeStatements(context, statements, next) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          result = undefined;
+          result = void 0;
           i = 0, ln = statements.length;
 
         case 2:
@@ -25802,7 +26144,7 @@ function SwitchStatement(node, context, next) {
         case 2:
           testValue = _context2.sent.result.getValue();
           passed = false;
-          value = undefined, defaultCase = undefined;
+          value = void 0, defaultCase = void 0;
           _iterator = node.cases, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : (0, _getIterator3.default)(_iterator);
 
         case 6:
@@ -25918,7 +26260,7 @@ function SwitchStatement(node, context, next) {
   }, _marked[1], this);
 }
 
-},{"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":37}],412:[function(require,module,exports){
+},{"babel-runtime/core-js/get-iterator":2,"babel-runtime/regenerator":34}],427:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26023,7 +26365,7 @@ function TaggedTemplateExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/async":375,"babel-runtime/core-js/json/stringify":3,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":37}],413:[function(require,module,exports){
+},{"../utils/async":390,"babel-runtime/core-js/json/stringify":3,"babel-runtime/core-js/object/create":26,"babel-runtime/regenerator":34}],428:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26098,7 +26440,7 @@ function TemplateLiteral(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/async":375,"../utils/native":379,"babel-runtime/regenerator":37}],414:[function(require,module,exports){
+},{"../utils/async":390,"../utils/native":394,"babel-runtime/regenerator":34}],429:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26115,7 +26457,7 @@ function ThisExpression(node, context) {
   return context.result(thisArg);
 }
 
-},{"../utils/checks":376}],415:[function(require,module,exports){
+},{"../utils/checks":391}],430:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26151,7 +26493,7 @@ function ThrowStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"babel-runtime/regenerator":37}],416:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],431:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26200,7 +26542,7 @@ function executeBlock(context, body, swallow, next) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          result = undefined;
+          result = void 0;
           i = 0, ln = body.length;
 
         case 2:
@@ -26265,7 +26607,7 @@ function TryStatement(node, context, next) {
 
         case 2:
           result = _context4.sent;
-          finalizerResult = undefined;
+          finalizerResult = void 0;
 
           if (!(result && result.raised)) {
             _context4.next = 12;
@@ -26335,7 +26677,7 @@ function TryStatement(node, context, next) {
   }, _marked[2], this);
 }
 
-},{"../utils/assign":374,"babel-runtime/regenerator":37}],417:[function(require,module,exports){
+},{"../utils/assign":389,"babel-runtime/regenerator":34}],432:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26368,13 +26710,13 @@ function UnaryExpression(node, context, next) {
 
         case 3:
           result = _context.sent.result;
-          value = undefined, newValue = undefined;
+          value = void 0, newValue = void 0;
           _context.t0 = node.operator;
           _context.next = _context.t0 === "typeof" ? 8 : _context.t0 === "-" ? 12 : _context.t0 === "+" ? 19 : _context.t0 === "!" ? 26 : _context.t0 === "~" ? 29 : _context.t0 === "delete" ? 36 : _context.t0 === "void" ? 49 : 52;
           break;
 
         case 8:
-          type = undefined;
+          type = void 0;
 
           if (result instanceof _reference.Reference && result.isUnresolved()) {
             type = "undefined";
@@ -26487,7 +26829,7 @@ function UnaryExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../env/property-reference":179,"../env/reference":180,"../utils/native":379,"babel-runtime/regenerator":37}],418:[function(require,module,exports){
+},{"../env/property-reference":194,"../env/reference":195,"../utils/native":394,"babel-runtime/regenerator":34}],433:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26553,7 +26895,7 @@ function UpdateExpression(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/contracts":377,"../utils/native":379,"babel-runtime/regenerator":37}],419:[function(require,module,exports){
+},{"../utils/contracts":392,"../utils/native":394,"babel-runtime/regenerator":34}],434:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26603,7 +26945,7 @@ function VariableDeclaration(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"babel-runtime/regenerator":37}],420:[function(require,module,exports){
+},{"babel-runtime/regenerator":34}],435:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26628,7 +26970,7 @@ function VariableDeclarator(node, context, next) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          rightValue = undefined;
+          rightValue = void 0;
 
           if (!node.init) {
             _context.next = 5;
@@ -26671,7 +27013,7 @@ function VariableDeclarator(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../types/primitive-type":368,"../utils/assign":374,"babel-runtime/regenerator":37}],421:[function(require,module,exports){
+},{"../types/primitive-type":383,"../utils/assign":389,"babel-runtime/regenerator":34}],436:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -26751,5 +27093,5 @@ function WithStatement(node, context, next) {
   }, _marked[0], this);
 }
 
-},{"../utils/checks":376,"babel-runtime/regenerator":37}]},{},[1])(1)
+},{"../utils/checks":391,"babel-runtime/regenerator":34}]},{},[1])(1)
 });
