@@ -34,7 +34,7 @@ export default function ($target, env, factory) {
           let elementValue = yield reviver(arr, String(i), yield deserialize(element, reviver));
 
           if (!isUndefined(elementValue)) {
-            arr.setIndex(i, yield deserialize(element));
+            arr.setIndex(i, yield deserialize(element, reviver));
           }
         }
 

@@ -84,6 +84,10 @@ describe("JSON", () => {
       runner.confirmBlock("JSON.parse('[1,2,3]').length===3;");
     });
 
+    it("should parse array of objects correctly", () => {
+      runner.confirmBlock("JSON.parse(\'[{\"a\":1},{\"b\":2}]')[1].b===2");
+    });
+    
     it("should parse object correctly", () => {
       runner.confirmBlock("JSON.parse('{\"foo\":true}').foo===true;");
     });
